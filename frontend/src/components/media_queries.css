@@ -1,0 +1,290 @@
+@media screen and (max-width: 650px) {
+  #terms_paper {
+    margin-top: 20px;
+    width: 90%;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .ui.small.basic.scrolling.modal.transition.visible.active {
+    right: 0 !important;
+    top: 20% !important;
+    width: 100%;
+  }
+
+  .page_header {
+    display: inline-block;
+  }
+
+  .breadcrumb {
+    width: 90%;
+  }
+
+  #under_construction_page > h1 {
+    font-size: 20px !important;
+    margin: 10px;
+  }
+
+  .modal-backdrop {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .modal-content {
+    width: 90% !important;
+  }
+
+  small {
+    margin: 0 auto !important;
+    width: 90%;
+    padding: 10px;
+  }
+
+  div.modal-footer > button.ui.red.button {
+    width: 40% !important;
+    margin: 0 auto;
+  }
+
+  div.modal-footer > button.ui.green.button {
+    width: 40% !important;
+    margin: 0 auto;
+  }
+
+  .pagination {
+    max-width: 50% !important;
+  }
+
+  .modal-body {
+    margin-left: 0 !important;
+  }
+
+  .rdrDateRangeWrapper,
+  .rdrMonth {
+    max-width: 100% !important;
+  }
+
+  #modal_serv_descr > label {
+    width: 100%;
+    text-align: center;
+  }
+
+  #modal_serv_descr > label {
+    width: 100%;
+    text-align: center;
+  }
+
+  #modal_serv_descr > textarea {
+    width: 100% !important;
+    margin: 0 auto;
+  }
+
+  .PhoneInput {
+    width: 80% !important;
+  }
+
+  .MuiAutocomplete-root {
+    width: 90% !important;
+  }
+
+  .tel_panel {
+    margin-left: 0px !important;
+    margin-bottom: 20px;
+  }
+
+  .tel_span {
+    width: 100% !important;
+    display: inline-block !important;
+  }
+
+  .lat_lng_span {
+    width: 100% !important;
+    display: inline-block !important;
+    margin: 10px !important;
+  }
+
+  #hotel_amenities_ul,
+  #room_amenities_ul {
+    columns: 1 !important;
+  }
+
+  #save_amenities_button {
+    position: relative !important;
+    margin-top: 120px;
+    width: 50%;
+  }
+
+  .alert-primary {
+    margin: 0 auto !important;
+    width: 90% !important;
+  }
+
+  .user_info_descr {
+    position: relative !important;
+  }
+  .user_info_span {
+    margin-left: 10px !important;
+    width: 100%;
+  }
+
+  .MuiAutocomplete-hasPopupIcon {
+    margin: 0 auto;
+    width: 90%;
+  }
+}
+
+@media (max-width: 1665px) {
+  #helper {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 660px) {
+  .social_icons_ul > li {
+    display: block;
+  }
+
+  #follow_us_on_social {
+    border: 0px solid #e1e4e8;
+    font-size: 20px;
+    margin-bottom: 150px;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .dox_responsive_img {
+    width: 100%;
+  }
+
+  #dm_dox_menu {
+    display: inline;
+    position: relative;
+  }
+}
+
+@media screen and (max-width: 660px) {
+  body {
+    position: absolute;
+    max-width: 100%;
+  }
+
+  #three_dee_frame {
+    max-width: 90%;
+    max-height: 50%;
+    margin-top: 50px;
+  }
+}
+
+@media screen and (max-width: 820px) {
+  body {
+    position: absolute;
+    max-width: 100%;
+  }
+
+  #three_dee_frame {
+    max-width: 90%;
+    max-height: 50%;
+    margin-top: 50px;
+  }
+}
+
+@media screen and (max-width: 1400px) {
+  body {
+    position: absolute;
+    max-width: 100%;
+  }
+
+  #three_dee_frame {
+    max-width: 90%;
+    max-height: 50%;
+    margin-top: 50px;
+  }
+}
+@media screen and (max-width: 900px) {
+  #offer_modal_step_1 {
+    max-height: 80%;
+  }
+
+  #offer_per_person {
+    max-height: 100% !important;
+  }
+
+  #offer_by_scale {
+    max-height: 90% !important;
+  }
+
+  #add_per_person_modal_content,
+  .left_div,
+  #offer_by_scale {
+    max-width: 90% !important;
+    margin-bottom: 30px;
+  }
+
+  .offer_type_box {
+    max-height: 195px;
+    max-width: 70%;
+    list-style: none;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  #daily_status_map > div {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .rdrDateRangePickerWrapper,
+  .rdrDefinedRangesWrapper {
+    width: 60% !important;
+  }
+
+  #group_stats_chart {
+    visibility: hidden;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .root_menu {
+    width: 90%;
+  }
+}
+
+@media screen and (max-width: 1000px) {
+  body {
+    position: relative;
+    max-width: 100%;
+  }
+}
+
+@keyframes bigger {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(2);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .user_details_ul {
+    width: 100% !important;
+  }
+}

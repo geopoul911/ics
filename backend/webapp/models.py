@@ -1,0 +1,923 @@
+from django.db.models.base import Model
+from django.utils import timezone
+# from django.contrib import admin
+from django.db.models import PROTECT, CASCADE, SET_NULL
+from django.db.models.fields import (
+    TextField,
+    CharField,
+    # IntegerField,
+    DateField,
+    # BooleanField,
+    # FloatField,
+    DateTimeField,
+    # EmailField,
+)
+# from tinymce.models import HTMLField
+from django.db.models.fields.related import (
+    # ManyToManyField,
+    ForeignKey
+)
+# from django.core.validators import MaxValueValidator, MinValueValidator
+from django.contrib.auth.models import User
+import django.db.models as models
+from django.db.models.fields.files import ImageField
+
+from django.core.files.base import ContentFile
+import os.path
+from django.conf import settings
+
+
+MODEL_NAMES_LOGGING = (
+    ('GT', 'GroupTransfer'),
+)
+
+
+# Used for custom object based permission system
+ACTION_NAMES = (
+    ('VIE', 'View'),
+    ('CRE', 'Create'),
+    ('UPD', 'Update'),
+    ('DEL', 'Delete'),
+)
+
+# Group's status codes, currently we only use 4 and 5
+STATUS_CODES = (
+    ('0', 'N/A'),
+    ('1', 'Pending Confirmation'),
+    ('2', 'Pending VISA\'s'),
+    ('3', 'Pending Payment'),
+    ('4', 'Cancelled'),
+    ('5', 'Confirmed'),
+)
+
+# Document options are used in groups, drivers and coaches to categorize their documents.
+DOC_OPTIONS = (
+    ('CNT', 'Contract')
+)
+
+# We store documents in the file system as well as DB.
+class Document(Model):
+    name = CharField(max_length=255, blank=True, null=True)
+    type = CharField(max_length=4, choices=DOC_OPTIONS, null=False, blank=False)
+    description = CharField(max_length=255, blank=True, null=True)
+    uploader = ForeignKey(User, on_delete=models.CASCADE)
+    updated_at = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(max_length=255, blank=True)
+    size = CharField(max_length=255, blank=True, null=True)
+    expiry_date = DateField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Document"
+        verbose_name_plural = "Documents"
+
+    def __str__(self):
+        return str(self.name)
+
+
+class Photo(Model):
+    date_created = models.DateTimeField(auto_now_add=True)
+    title = CharField(max_length=255, blank=True, null=True)
+    photo = ImageField(max_length=255, blank=True, null=True)
+    photo_comment = CharField(max_length=700, default='')
+    order = models.IntegerField(default=0)  # Field to track photo ordering
+
+    class Meta:
+        ordering = ['order']  # Default ordering by the order field
+
+    def save_from_filename(self, *args, **kwargs):
+        filename = args[0]
+        self.photo = filename
+        self.photo.save(filename, ContentFile(open(filename, 'rb').read()), save=False)
+        self.title = args[1]
+        super(Photo, self).save()
+
+    def __str__(self):
+        return str(self.title)
+
+    def delete(self):
+        path = os.path.join(settings.BASE_DIR, 'static', self.photo.name)
+        if os.path.isfile(path):
+            os.remove(path)
+        super(Photo, self).delete()
+
+
+class Note(Model):
+    date = DateField(null=True, blank=True, default=timezone.now)
+    text = TextField(max_length=255, blank=True, null=True)
+    user = ForeignKey(User, blank=True, null=True, on_delete=PROTECT)
+
+    def get_human_date(self):
+        return self.date.strftime("%d %b %Y")
+
+    class Meta:
+        verbose_name = "Note"
+        verbose_name_plural = "Notes"
+
+    def __str__(self):
+        return str(self.text[:10])
+
+
+# Logging system, every action made in group plan is stored here
+class History(Model):
+    user = ForeignKey(User, blank=True, null=True, on_delete=PROTECT)
+    model_name = CharField(max_length=3, choices=MODEL_NAMES_LOGGING, null=False, blank=False)
+    action = CharField(max_length=3, choices=ACTION_NAMES, null=False, blank=False)
+    description = CharField(max_length=40000, null=False, blank=False)
+    timestamp = DateTimeField(auto_now_add=True)
+    ip_address = CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.description)
+
+
+from django.db import models
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+import re
+
+# Create your models here.
+
+class Country(models.Model):
+    country_id = models.CharField(max_length=3, primary_key=True)
+    orderindex = models.SmallIntegerField()
+    currency = models.CharField(max_length=10, blank=True, null=True)
+    title = models.CharField(max_length=40)
+
+    def __str__(self):
+        return self.title
+
+class Province(models.Model):
+    province_id = models.CharField(max_length=10, primary_key=True)
+    orderindex = models.SmallIntegerField()
+    country = models.ForeignKey(Country, on_delete=models.CASCADE)
+    title = models.CharField(max_length=40)
+
+    def __str__(self):
+        return self.title
+
+class City(models.Model):
+    city_id = models.CharField(max_length=10, primary_key=True)
+    orderindex = models.SmallIntegerField()
+    country = models.ForeignKey(Country, on_delete=models.CASCADE)
+    province = models.ForeignKey(Province, on_delete=models.CASCADE)
+    title = models.CharField(max_length=40)
+
+    def __str__(self):
+        return self.title
+
+class InsuranceCarrier(models.Model):
+    insucarrier_id = models.CharField(max_length=10, primary_key=True)
+    orderindex = models.SmallIntegerField()
+    title = models.CharField(max_length=40)
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title
+
+class Bank(models.Model):
+    bank_id = models.CharField(max_length=10, primary_key=True)
+    country = models.ForeignKey(Country, on_delete=models.CASCADE)
+    orderindex = models.SmallIntegerField()
+    bankname = models.CharField(max_length=40)
+    institutionnumber = models.CharField(max_length=3)
+    swiftcode = models.CharField(max_length=11)
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.bankname
+
+class Client(models.Model):
+    client_id = models.CharField(max_length=10, primary_key=True)
+    registrationdate = models.DateField()
+    registrationuser = models.CharField(max_length=10)  # Χρήστης που δημιούργησε την καρτέλα του πελάτη
+    name = models.CharField(max_length=40)
+    surname = models.CharField(max_length=40)
+    onoma = models.CharField(max_length=40)
+    eponymo = models.CharField(max_length=40)
+    address = models.CharField(max_length=120)
+    postalcode = models.CharField(max_length=10)
+    country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name='clients_country')
+    province = models.ForeignKey(Province, on_delete=models.CASCADE, related_name='clients_province')
+    city = models.ForeignKey(City, on_delete=models.CASCADE, related_name='clients_city')
+    phone1 = models.CharField(max_length=15, blank=True, null=True)
+    phone2 = models.CharField(max_length=15, blank=True, null=True)
+    mobile1 = models.CharField(max_length=15, blank=True, null=True)
+    mobile2 = models.CharField(max_length=15, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    birthdate = models.DateField(blank=True, null=True)
+    birthplace = models.CharField(max_length=60, blank=True, null=True)
+    fathername = models.CharField(max_length=80, blank=True, null=True)
+    mothername = models.CharField(max_length=80, blank=True, null=True)
+    maritalstatus = models.CharField(max_length=20, blank=True, null=True, choices=[
+        ('Single', 'Single'),
+        ('Married', 'Married'),
+        ('Common law', 'Common law'),
+        ('Divorced', 'Divorced'),
+        ('Widowed', 'Widowed'),
+    ])
+    deceased = models.BooleanField(default=False)
+    deceasedate = models.DateField(blank=True, null=True)
+    afm = models.CharField(max_length=10, blank=True, null=True)
+    sin = models.CharField(max_length=10, blank=True, null=True)
+    amka = models.CharField(max_length=11, blank=True, null=True)
+    passportcountry = models.ForeignKey(Country, on_delete=models.SET_NULL, blank=True, null=True, related_name='clients_passportcountry')
+    passportnumber = models.CharField(max_length=15, blank=True, null=True)
+    passportexpiredate = models.DateField(blank=True, null=True)
+    policeid = models.CharField(max_length=15, blank=True, null=True)
+    profession = models.CharField(max_length=40, blank=True, null=True)
+    taxmanagement = models.BooleanField(default=False)
+    taxrepresentation = models.BooleanField(default=False)
+    taxrepresentative = models.CharField(max_length=200, blank=True, null=True)
+    retired = models.BooleanField(default=False)
+    pensioncountry1 = models.ForeignKey(Country, on_delete=models.SET_NULL, blank=True, null=True, related_name='clients_pensioncountry1')
+    insucarrier1 = models.ForeignKey(InsuranceCarrier, on_delete=models.SET_NULL, blank=True, null=True, related_name='clients_insucarrier1')
+    pensioninfo1 = models.CharField(max_length=80, blank=True, null=True)
+    pensioncountry2 = models.ForeignKey(Country, on_delete=models.SET_NULL, blank=True, null=True, related_name='clients_pensioncountry2')
+    insucarrier2 = models.ForeignKey(InsuranceCarrier, on_delete=models.SET_NULL, blank=True, null=True, related_name='clients_insucarrier2')
+    pensioninfo2 = models.CharField(max_length=80, blank=True, null=True)
+    active = models.BooleanField(default=True)
+    notes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.surname} {self.name}"  # or eponymo/onoma for Greek
+
+class BankClientAccount(models.Model):
+    bankclientacco_id = models.CharField(max_length=10, primary_key=True)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    bank = models.ForeignKey(Bank, on_delete=models.CASCADE)
+    transitnumber = models.CharField(max_length=5, blank=True, null=True)
+    accountnumber = models.CharField(max_length=20)
+    iban = models.CharField(max_length=34, blank=True, null=True)
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.bank.bankname} - {self.accountnumber}"
+
+class Consultant(models.Model):
+    ROLE_CHOICES = [
+        ('A', 'Admin'),
+        ('S', 'Supervisor'),
+        ('U', 'Superuser'),
+        ('C', 'User'),
+    ]
+
+    consultant_id = models.CharField(max_length=10, primary_key=True)
+    orderindex = models.SmallIntegerField()
+    fullname = models.CharField(max_length=40)
+    email = models.EmailField(blank=True, null=True)
+    phone = models.CharField(max_length=15, blank=True, null=True)
+    mobile = models.CharField(max_length=15, blank=True, null=True)
+    photo = models.ImageField(upload_to='consultant_photos/', blank=True, null=True)
+    role = models.CharField(max_length=1, choices=ROLE_CHOICES)
+    username = models.CharField(max_length=15, unique=True)
+    password = models.CharField(max_length=128)  # Using Django's auth system for secure password storage
+    canassigntask = models.BooleanField(default=False)
+    cashpassport = models.CharField(max_length=120, blank=True, null=True, 
+        help_text="Comma-separated list of country codes (e.g., 'GRE,CAN' or 'GRE,USA,CAN')")
+    active = models.BooleanField(default=True)
+
+    def get_cashpassport_countries(self):
+        """Returns a list of country codes from cashpassport field"""
+        if not self.cashpassport:
+            return []
+        return [code.strip() for code in self.cashpassport.split(',')]
+
+    def set_cashpassport_countries(self, country_codes):
+        """Sets the cashpassport field from a list of country codes"""
+        self.cashpassport = ','.join(code.strip() for code in country_codes)
+
+    def has_cashpassport_access(self, country_code):
+        """Checks if consultant has access to a specific country's cash passport"""
+        if not self.cashpassport:
+            return False
+        return country_code.strip() in self.get_cashpassport_countries()
+
+    def __str__(self):
+        return self.fullname
+
+    class Meta:
+        verbose_name = "Consultant"
+        verbose_name_plural = "Consultants"
+        ordering = ['orderindex', 'fullname']
+
+class ProjectCategory(models.Model):
+    projcate_id = models.CharField(max_length=1, primary_key=True)
+    orderindex = models.SmallIntegerField()
+    active = models.BooleanField(default=True)
+    title = models.CharField(max_length=40)
+
+    def __str__(self):
+        return self.title
+
+class Project(models.Model):
+    STATUS_CHOICES = [
+        ('Created', 'Created'),
+        ('Assigned', 'Assigned'),
+        ('Inprogress', 'In Progress'),
+        ('Completed', 'Completed'),
+        ('Settled', 'Settled'),
+        ('Abandoned', 'Abandoned'),
+    ]
+
+    project_id = models.CharField(max_length=10, primary_key=True)
+    registrationdate = models.DateField()
+    registrationuser = models.CharField(max_length=10)
+    consultant = models.ForeignKey(Consultant, on_delete=models.SET_NULL, blank=True, null=True)
+    filecode = models.CharField(max_length=20, 
+        help_text="Format: 3 chars for office city/UniqueNumber(6)/Month(2)-Year(4) e.g., TOR/000256/05-2019")
+    taxation = models.BooleanField(default=False)
+    deadline = models.DateField(blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Created')
+    assigned = models.BooleanField(default=False)
+    assignedate = models.DateField(blank=True, null=True)
+    inprogress = models.BooleanField(default=False)
+    inprogressdate = models.DateField(blank=True, null=True)
+    completed = models.BooleanField(default=False)
+    completiondate = models.DateField(blank=True, null=True)
+    settled = models.BooleanField(default=False)
+    settlementdate = models.DateField(blank=True, null=True)
+    abandoned = models.BooleanField(default=False)
+    abandondate = models.DateField(blank=True, null=True)
+    title = models.CharField(max_length=120)
+    categories = models.ManyToManyField(ProjectCategory, related_name='projects', blank=True)
+    details = models.TextField(blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+
+    def clean(self):
+        # Validate filecode format
+        if self.filecode:
+            pattern = r'^[A-Z]{3}/\d{6}/\d{2}-\d{4}$'
+            if not re.match(pattern, self.filecode):
+                raise ValidationError({
+                    'filecode': 'Invalid format. Must be: 3 uppercase letters/6 digits/2 digits-4 digits (e.g., TOR/000256/05-2019)'
+                })
+
+        # Update status based on boolean fields
+        if self.assigned and not self.assignedate:
+            self.assignedate = timezone.now().date()
+            self.status = 'Assigned'
+        if self.inprogress and not self.inprogressdate:
+            self.inprogressdate = timezone.now().date()
+            self.status = 'Inprogress'
+        if self.completed and not self.completiondate:
+            self.completiondate = timezone.now().date()
+            self.status = 'Completed'
+        if self.settled and not self.settlementdate:
+            self.settlementdate = timezone.now().date()
+            self.status = 'Settled'
+        if self.abandoned and not self.abandondate:
+            self.abandondate = timezone.now().date()
+            self.status = 'Abandoned'
+
+        # Validate taxation field
+        if self.taxation and self.categories.exists():
+            raise ValidationError({
+                'taxation': 'Taxation projects cannot have categories'
+            })
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = "Project"
+        verbose_name_plural = "Projects"
+        ordering = ['-registrationdate']
+
+class AssociatedClient(models.Model):
+    assoclient_id = models.CharField(max_length=10, primary_key=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='associated_clients')
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='associated_projects')
+    orderindex = models.SmallIntegerField(default=0, 
+        help_text="Order of appearance in list, with emphasis on the first client")
+    notes = models.TextField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Associated Client"
+        verbose_name_plural = "Associated Clients"
+        ordering = ['orderindex', 'client__surname', 'client__name']
+        unique_together = ('project', 'client')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['project', 'client'],
+                name='unique_project_client'
+            )
+        ]
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+
+        # Ensure at least one client per project
+        if not self.project.associated_clients.exists() and self.orderindex != 0:
+            raise ValidationError({
+                'orderindex': 'First client must have orderindex 0'
+            })
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.project.title} - {self.client}"
+
+    @classmethod
+    def get_primary_client(cls, project):
+        """Returns the primary client (orderindex=0) for a project"""
+        return cls.objects.filter(project=project, orderindex=0).first()
+
+    @classmethod
+    def get_secondary_clients(cls, project):
+        """Returns all secondary clients (orderindex>0) for a project"""
+        return cls.objects.filter(project=project, orderindex__gt=0).order_by('orderindex')
+
+class Document(models.Model):
+    STATUS_CHOICES = [
+        ('SENT_TO_ATHENS', 'Αποστολή προς την Αθήνα'),
+        ('RECEIVED_IN_ATHENS', 'Παραλήφθηκε από την Αθήνα'),
+        ('SENT_TO_TORONTO', 'Αποστολή προς το Τορόντο'),
+        ('RECEIVED_IN_TORONTO', 'Παραλήφθηκε από το Τορόντο'),
+        ('SENT_TO_MONTREAL', 'Αποστολή προς το Μόντρεαλ'),
+        ('RECEIVED_IN_MONTREAL', 'Παραλήφθηκε από το Μόντρεαλ'),
+        ('SENT_TO_CLIENT', 'Αποστολή προς τον Πελάτη'),
+        ('RECEIVED_FROM_CLIENT', 'Παραλήφθηκε από τον Πελάτη'),
+    ]
+
+    document_id = models.CharField(max_length=10, primary_key=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True, related_name='documents')
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, blank=True, null=True, related_name='documents')
+    created = models.DateField()
+    title = models.CharField(max_length=40)
+    validuntil = models.DateField()
+    filepath = models.CharField(max_length=120)
+    original = models.BooleanField(default=False)
+    trafficable = models.BooleanField(default=False)
+    status = models.CharField(max_length=40, blank=True, null=True, choices=STATUS_CHOICES)
+    statusdate = models.DateField(blank=True, null=True)
+    logstatus = models.TextField(blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Document"
+        verbose_name_plural = "Documents"
+        ordering = ['-created']
+        constraints = [
+            models.CheckConstraint(
+                check=~models.Q(project__isnull=True, client__isnull=True),
+                name='document_must_have_project_or_client'
+            )
+        ]
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+
+        # Validate that at least one of project or client is set
+        if not self.project and not self.client:
+            raise ValidationError('Document must be associated with either a project or a client')
+
+        # Validate status changes
+        if self.status and not self.statusdate:
+            self.statusdate = timezone.now().date()
+
+        # Update log when status changes
+        if self.status and self.statusdate:
+            log_entry = f"{self.statusdate}: {self.status}\n"
+            if self.logstatus:
+                self.logstatus = log_entry + self.logstatus
+            else:
+                self.logstatus = log_entry
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
+
+    def update_status(self, new_status, date=None):
+        """Updates document status and logs the change"""
+        if new_status not in dict(self.STATUS_CHOICES):
+            raise ValidationError('Invalid status')
+        
+        self.status = new_status
+        self.statusdate = date or timezone.now().date()
+        self.save()
+
+    @property
+    def is_expired(self):
+        """Checks if document is expired"""
+        return self.validuntil < timezone.now().date()
+
+    @property
+    def current_location(self):
+        """Returns the current location of the document based on status"""
+        if not self.status:
+            return "Unknown"
+        return dict(self.STATUS_CHOICES).get(self.status, "Unknown")
+
+class Profession(models.Model):
+    profession_id = models.CharField(max_length=10, primary_key=True)
+    title = models.CharField(max_length=40)
+
+    def __str__(self):
+        return self.title
+
+class Professional(models.Model):
+    professional_id = models.CharField(max_length=10, primary_key=True)
+    profession = models.ForeignKey(Profession, on_delete=models.CASCADE)
+    fullname = models.CharField(max_length=40)
+    address = models.CharField(max_length=80)
+    email = models.EmailField(blank=True, null=True)
+    phone = models.CharField(max_length=15, blank=True, null=True)
+    mobile = models.CharField(max_length=15, blank=True, null=True)
+    city = models.ForeignKey(City, on_delete=models.CASCADE)
+    reliability = models.CharField(max_length=10, blank=True, null=True, choices=[
+        ('High', 'Μεγάλη'),
+        ('Medium', 'Μέτρια'),
+        ('Low', 'Μικρή'),
+    ])
+    active = models.BooleanField(default=True)
+    notes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.fullname
+
+class ClientContact(models.Model):
+    RELIABILITY_CHOICES = [
+        ('High', 'Μεγάλη'),
+        ('Medium', 'Μέτρια'),
+        ('Low', 'Μικρή'),
+    ]
+
+    clientcont_id = models.CharField(max_length=10, primary_key=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='contacts')
+    professional = models.ForeignKey(Professional, on_delete=models.SET_NULL, blank=True, null=True, 
+        related_name='project_contacts')
+    fullname = models.CharField(max_length=40)
+    fathername = models.CharField(max_length=80, blank=True, null=True)
+    mothername = models.CharField(max_length=80, blank=True, null=True)
+    connection = models.CharField(max_length=40, blank=True, null=True)
+    address = models.CharField(max_length=80)
+    email = models.EmailField()
+    phone = models.CharField(max_length=15)
+    mobile = models.CharField(max_length=15)
+    profession = models.CharField(max_length=40)
+    reliability = models.CharField(max_length=10, choices=RELIABILITY_CHOICES)
+    city = models.CharField(max_length=40)
+    active = models.BooleanField(default=True)
+    notes = models.TextField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Client Contact"
+        verbose_name_plural = "Client Contacts"
+        ordering = ['fullname']
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+
+        # If professional is selected, copy their information
+        if self.professional:
+            self.fullname = self.professional.fullname
+            self.address = self.professional.address
+            self.email = self.professional.email
+            self.phone = self.professional.phone
+            self.mobile = self.professional.mobile
+            self.profession = self.professional.profession.title
+            self.reliability = self.professional.reliability
+            self.city = self.professional.city.title
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.fullname} - {self.connection or 'Contact'}"
+
+    @property
+    def is_professional(self):
+        """Returns True if this contact is a professional"""
+        return bool(self.professional)
+
+    @property
+    def contact_type(self):
+        """Returns the type of contact (Professional or Manual)"""
+        return "Professional" if self.is_professional else "Manual Contact"
+
+    def get_contact_info(self):
+        """Returns a dictionary with all contact information"""
+        return {
+            'fullname': self.fullname,
+            'address': self.address,
+            'email': self.email,
+            'phone': self.phone,
+            'mobile': self.mobile,
+            'profession': self.profession,
+            'reliability': self.reliability,
+            'city': self.city,
+            'is_professional': self.is_professional,
+            'professional_id': self.professional.professional_id if self.professional else None
+        }
+
+class Property(models.Model):
+    property_id = models.CharField(max_length=10, primary_key=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    country = models.ForeignKey(Country, on_delete=models.CASCADE)
+    province = models.ForeignKey(Province, on_delete=models.CASCADE)
+    city = models.ForeignKey(City, on_delete=models.CASCADE)
+    description = models.CharField(max_length=80)
+    location = models.CharField(max_length=80)
+    type = models.CharField(max_length=40, choices=[
+        ('Plot', 'Αγροτεμάχιο'),
+        ('Land', 'Οικόπεδο'),
+        ('House', 'Μονοκατοικία'),
+        ('Apartment', 'Διαμέρισμα'),
+        ('Store', 'Κατάστημα'),
+        ('Other', 'Άλλο'),
+    ])
+    constructyear = models.CharField(max_length=4, blank=True, null=True)
+    status = models.CharField(max_length=40, blank=True, null=True, choices=[
+        ('Empty', 'Άδειο'),
+        ('Rented', 'Ενοικιασμένο'),
+        ('Unfinished', 'Ημιτελές'),
+    ])
+    market = models.CharField(max_length=40, blank=True, null=True, choices=[
+        ('ShortTerm', 'Βραχυπρόθεσμη Ενοικίαση'),
+        ('LongTerm', 'Μακροπρόθεσμη Ενοικίαση'),
+        ('Sale', 'Πώληση'),
+        ('Wait', 'Αναμονή'),
+        ('Own', 'Ιδιοκατοίκηση'),
+    ])
+    broker = models.CharField(max_length=120, blank=True, null=True)
+    active = models.BooleanField(default=True)
+    notes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.description
+
+class BankProjectAccount(models.Model):
+    bankprojacco_id = models.CharField(max_length=10, primary_key=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    bankclientacco = models.ForeignKey(BankClientAccount, on_delete=models.CASCADE)
+    notes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.project.title} - {self.bankclientacco}"
+
+class TaskCategory(models.Model):
+    taskcate_id = models.CharField(max_length=10, primary_key=True)
+    title = models.CharField(max_length=40)
+    orderindex = models.SmallIntegerField()
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Task Category"
+        verbose_name_plural = "Task Categories"
+        ordering = ['orderindex', 'title']
+
+    def __str__(self):
+        return self.title
+
+    @classmethod
+    def get_informal_category(cls):
+        """Returns or creates the informal category"""
+        informal, created = cls.objects.get_or_create(
+            taskcate_id='INFORMAL',
+            defaults={
+                'title': 'Άτυπη',
+                'orderindex': 0,
+                'active': True
+            }
+        )
+        return informal
+
+    def save(self, *args, **kwargs):
+        # Ensure informal category is always active
+        if self.taskcate_id == 'INFORMAL':
+            self.active = True
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        # Prevent deletion of informal category
+        if self.taskcate_id == 'INFORMAL':
+            raise ValidationError("Cannot delete the informal category")
+        super().delete(*args, **kwargs)
+
+    @classmethod
+    def get_active_categories(cls):
+        """Returns all active categories ordered by orderindex"""
+        return cls.objects.filter(active=True).order_by('orderindex')
+
+    @classmethod
+    def get_category_groups(cls):
+        """Returns categories grouped by their orderindex"""
+        return cls.objects.filter(active=True).order_by('orderindex').values_list('title', flat=True)
+
+class ProjectTask(models.Model):
+    STATUS_CHOICES = [
+        ('Created', 'Created'),
+        ('Assigned', 'Assigned'),
+        ('Inprogress', 'In Progress'),
+        ('Completed', 'Completed'),
+    ]
+
+    PRIORITY_CHOICES = [
+        ('A', 'High'),
+        ('B', 'Medium'),
+        ('C', 'Low'),
+    ]
+
+    projtask_id = models.CharField(max_length=10, primary_key=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tasks')
+    title = models.CharField(max_length=120)
+    details = models.TextField(blank=True, null=True)
+    taskcate = models.ForeignKey(TaskCategory, on_delete=models.SET_NULL, blank=True, null=True, 
+        related_name='tasks')
+    priority = models.CharField(max_length=1, choices=PRIORITY_CHOICES, default='B')
+    weight = models.PositiveSmallIntegerField(default=1, 
+        help_text="Task weight for project completion percentage calculation")
+    assigner = models.ForeignKey(Consultant, on_delete=models.SET_NULL, blank=True, null=True, 
+        related_name='assigned_tasks')
+    assignee = models.ForeignKey(Consultant, on_delete=models.SET_NULL, blank=True, null=True, 
+        related_name='tasks')
+    assigndate = models.DateField(blank=True, null=True)
+    deadline = models.DateField(blank=True, null=True)
+    completiondate = models.DateField(blank=True, null=True)
+    efforttime = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True,
+        help_text="Time spent on task in hours (0.5 step)")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Created')
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Project Task"
+        verbose_name_plural = "Project Tasks"
+        ordering = ['-assigndate', 'priority', 'deadline']
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+
+        # Validate effort time step
+        if self.efforttime and self.efforttime % 0.5 != 0:
+            raise ValidationError({
+                'efforttime': 'Effort time must be in 0.5 hour steps'
+            })
+
+        # Update status based on dates
+        if self.completiondate and not self.status == 'Completed':
+            self.status = 'Completed'
+        elif self.assigndate and not self.status in ['Assigned', 'Inprogress', 'Completed']:
+            self.status = 'Assigned'
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.title} - {self.get_status_display()}"
+
+    @property
+    def is_overdue(self):
+        """Checks if task is overdue"""
+        if self.deadline and self.status != 'Completed':
+            return self.deadline < timezone.now().date()
+        return False
+
+    @property
+    def completion_percentage(self):
+        """Calculates task completion percentage based on status"""
+        if self.status == 'Completed':
+            return 100
+        elif self.status == 'Inprogress':
+            return 50
+        elif self.status == 'Assigned':
+            return 25
+        return 0
+
+    @classmethod
+    def get_project_completion(cls, project):
+        """Calculates project completion percentage based on task weights"""
+        tasks = cls.objects.filter(project=project, active=True)
+        if not tasks:
+            return 0
+
+        total_weight = sum(task.weight for task in tasks)
+        completed_weight = sum(
+            task.weight for task in tasks 
+            if task.status == 'Completed'
+        )
+        
+        return (completed_weight / total_weight) * 100 if total_weight > 0 else 0
+
+    def update_status(self, new_status, completion_date=None):
+        """Updates task status and related dates"""
+        if new_status not in dict(self.STATUS_CHOICES):
+            raise ValidationError('Invalid status')
+        
+        self.status = new_status
+        if new_status == 'Completed':
+            self.completiondate = completion_date or timezone.now().date()
+        elif new_status == 'Assigned' and not self.assigndate:
+            self.assigndate = timezone.now().date()
+        
+        self.save()
+
+class TaskComment(models.Model):
+    taskcomm_id = models.CharField(max_length=10, primary_key=True)
+    projtask = models.ForeignKey(ProjectTask, on_delete=models.CASCADE, related_name='comments')
+    commentregistration = models.DateTimeField(auto_now_add=True)
+    consultant = models.ForeignKey(Consultant, on_delete=models.CASCADE, related_name='task_comments')
+    comment = models.TextField()
+
+    class Meta:
+        verbose_name = "Task Comment"
+        verbose_name_plural = "Task Comments"
+        ordering = ['-commentregistration']
+        indexes = [
+            models.Index(fields=['-commentregistration']),
+        ]
+
+    def __str__(self):
+        return f"Comment by {self.consultant} on {self.commentregistration}"
+
+    def save(self, *args, **kwargs):
+        # Ensure commentregistration is set
+        if not self.commentregistration:
+            self.commentregistration = timezone.now()
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def create_comment(cls, projtask, consultant, comment):
+        """Creates a new comment with automatic field population"""
+        return cls.objects.create(
+            projtask=projtask,
+            consultant=consultant,
+            comment=comment
+        )
+
+    @property
+    def formatted_registration(self):
+        """Returns formatted registration date and time"""
+        return self.commentregistration.strftime('%Y-%m-%d %H:%M:%S')
+
+    @classmethod
+    def get_task_comments(cls, projtask):
+        """Returns all comments for a task ordered by registration date"""
+        return cls.objects.filter(projtask=projtask).order_by('-commentregistration')
+
+    @classmethod
+    def get_consultant_comments(cls, consultant):
+        """Returns all comments by a consultant"""
+        return cls.objects.filter(consultant=consultant).order_by('-commentregistration')
+
+class Cash(models.Model):
+    cash_id = models.CharField(max_length=10, primary_key=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    country = models.ForeignKey(Country, on_delete=models.CASCADE)
+    trandate = models.DateField()
+    consultant = models.ForeignKey(Consultant, on_delete=models.CASCADE)
+    kind = models.CharField(max_length=1, choices=[('E', 'Expense'), ('P', 'Payment')])
+    amountexp = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    amountpay = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    reason = models.CharField(max_length=120, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.project.title} - {self.trandate}"
+
+class TaxationProject(models.Model):
+    taxproj_id = models.CharField(max_length=10, primary_key=True)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    consultant = models.ForeignKey(Consultant, on_delete=models.CASCADE)
+    taxuse = models.SmallIntegerField()
+    deadline = models.DateField(blank=True, null=True)
+    declaredone = models.BooleanField(default=False)
+    declarationdate = models.DateField(blank=True, null=True)
+    comment = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.client} - {self.taxuse}"
+
+class Notification(models.Model):
+    NOTIFICATION_TYPES = [
+        ('task_assigned', 'Task Assigned'),
+        ('task_updated', 'Task Updated'),
+        ('task_completed', 'Task Completed'),
+        ('task_deleted', 'Task Deleted'),
+        ('deadline_approaching', 'Deadline Approaching'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    type = models.CharField(max_length=50, choices=NOTIFICATION_TYPES)
+    message = models.TextField()
+    read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    related_task = models.ForeignKey('ProjectTask', on_delete=models.SET_NULL, null=True, blank=True)
+    related_project = models.ForeignKey('Project', on_delete=models.SET_NULL, null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.type} - {self.message[:50]}"

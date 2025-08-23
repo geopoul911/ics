@@ -1,0 +1,97 @@
+#drag_drop_div {
+  width: 100%;
+  margin: 20px;
+}
+
+#drag_drop_div > label {
+  width: 100%;
+  border: dashed 2px #f3702d !important;
+}
+
+#drag_drop_div > h3 {
+  width: 100%;
+  color: #f3702d;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  font-family: "Helvetica";
+  margin-bottom: 20px;
+}
+
+.file-types {
+  display: none;
+}
+
+#drag_drop_download {
+  font-size: 72px;
+  font-weight: bold;
+  text-align: center;
+  width: 100%;
+  margin-top: 50px;
+  position: absolute;
+  color: #f3702d;
+}
+
+#drag_drop_div > label > svg {
+  display: none;
+}
+
+#drag_drop_div > label > div > span {
+  color: #f3702d !important;
+  font-size: 20px;
+  font-weight: 500;
+  font-family: "Helvetica";
+}
+
+#drag_drop_div > label > div > span > span {
+  text-decoration: none !important;
+}
+
+#drag_drop_div > label > div {
+  margin-bottom: -120px !important;
+}
+
+#drag_drop_div > label > div > span {
+  text-align: center !important;
+  margin: 0 auto !important;
+  width: 100% !important;
+}
+
+#drag_drop_div > label {
+  margin: 0 auto !important;
+  width: 100%;
+  max-width: 70% !important;
+  height: 250px !important;
+}
+
+/* Coach And Drivers Information Table */
+#coach_and_driver_info_table > thead > tr > th:nth-child(1) {
+  width: 12% !important;
+}
+
+#coach_and_driver_info_table > thead > tr > th:nth-child(2) {
+  width: 12% !important;
+}
+
+#coach_and_driver_info_table > thead > tr > th:nth-child(3) {
+  width: 12% !important;
+}
+
+#coach_and_driver_info_table > thead > tr > th:nth-child(4) {
+  width: 8% !important;
+}
+
+#coach_and_driver_info_table > thead > tr > th:nth-child(5) {
+  width: 8% !important;
+}
+
+#coach_and_driver_info_table > thead > tr > th:nth-child(6) {
+  width: 4% !important;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}

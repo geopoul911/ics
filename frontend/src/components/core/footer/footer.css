@@ -1,0 +1,13 @@
+/* Styles for the 'footer' element */
+footer {
+  background-color: rgb(16, 16, 16); /* Set background color */
+  padding: 10px; /* Add padding */
+  color: rgb(255, 255, 255); /* Set text color */
+  text-align: center; /* Center-align text */
+  min-height: 7vh !important; /* Set a minimum height */
+}
+
+/* Styles for 'p' elements within the 'footer' */
+footer > p {
+  color: white !important; /* Set text color for paragraphs */
+}

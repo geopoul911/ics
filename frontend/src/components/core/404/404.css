@@ -1,0 +1,24 @@
+/* CSS rules for '.imageContainer' class */
+.imageContainer {
+  /* Set height to 83% of viewport height */
+  height: 86vh !important;
+  background-image: url(../../../images/core/404/four_o_four.png);
+  background-position: center;
+  background-size: cover;
+}
+
+/* CSS rules for 'button' class within '.imageContainer' */
+.imageContainer .button {
+  position: absolute;
+  top: 80%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Media query for screens with max-width of 768px */
+@media screen and (max-width: 768px) {
+  .imageContainer {
+    width: 80%;
+    margin: 0 auto; /* Center the container horizontally */
+  }
+}

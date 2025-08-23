@@ -1,0 +1,15 @@
+/* Styles for '.termsPaper' */
+.termsPaper {
+  width: 80%;
+  margin: 0 auto;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+/* Media query for screens with a max-width of 900px */
+@media screen and (max-width: 900px) {
+  /* Adjust width for smaller screens */
+  .termsPaper {
+    width: 80%;
+  }
+}

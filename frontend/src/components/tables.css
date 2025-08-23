@@ -1,0 +1,1064 @@
+table {
+  max-width: 98%;
+  margin: 0 auto;
+  table-layout: auto;
+}
+
+table > thead > tr > th:nth-child(1) {
+  width: 6%;
+}
+
+.react-bootstrap-table-pagination {
+  padding: 20px;
+}
+
+/* ALL GROUPS */
+#all_groups_table > thead > tr > th:nth-child(1) {
+  width: 4% !important;
+}
+
+#all_groups_table > thead > tr > th:nth-child(2) {
+  width: 6% !important;
+}
+
+#all_groups_table > thead > tr > th:nth-child(3) {
+  width: 15% !important;
+}
+
+#all_groups_table > thead > tr > th:nth-child(4) {
+  width: 4% !important;
+}
+
+#all_groups_table > thead > tr > th:nth-child(5) {
+  width: 4% !important;
+}
+
+#all_groups_table > thead > tr > th:nth-child(6) {
+  width: 4% !important;
+}
+
+#all_groups_table > thead > tr > th:nth-child(7) {
+  width: 4% !important;
+}
+
+#all_groups_table > thead > tr > th:nth-child(8) {
+  width: 4% !important;
+}
+
+#all_groups_table > thead > tr > th:nth-child(9) {
+  width: 3% !important;
+}
+
+#all_groups_table > thead > tr > th:nth-child(10) {
+  width: 3% !important;
+}
+
+/* 1) ID */
+#logs_table > thead > tr > th:nth-child(1) {
+  width: 4% !important;
+}
+
+/* 2) MODEL */
+#logs_table > thead > tr > th:nth-child(2) {
+  width: 6% !important;
+}
+
+/* 3) ACTION */
+#logs_table > thead > tr > th:nth-child(3) {
+  width: 5% !important;
+}
+
+/* 4) DESCRIPTION */
+#logs_table > thead > tr > th:nth-child(4) {
+  width: 35% !important;
+}
+
+/* 5) TIMESTAMP */
+#logs_table > thead > tr > th:nth-child(5) {
+  width: 8% !important;
+}
+
+/* 6) USER */
+#logs_table > thead > tr > th:nth-child(6) {
+  width: 5% !important;
+}
+
+/* 6) USER */
+#logs_table > thead > tr > th:nth-child(6) {
+  width: 5% !important;
+}
+
+/* 1) ID */
+#all_agents_table > thead > tr > th:nth-child(1) {
+  width: 3% !important;
+}
+
+/* 2) NAME */
+#all_agents_table > thead > tr > th:nth-child(2) {
+  width: 13% !important;
+}
+
+/* 3) ADDRESS */
+#all_agents_table > thead > tr > th:nth-child(3) {
+  width: 3% !important;
+}
+
+/* 4) TEL DETAILS */
+#all_agents_table > thead > tr > th:nth-child(4) {
+  width: 9% !important;
+}
+
+/* 5) EMAIL */
+#all_agents_table > thead > tr > th:nth-child(5) {
+  width: 8% !important;
+}
+
+/* 6) NOTES */
+#all_agents_table > thead > tr > th:nth-child(6) {
+  width: 4% !important;
+}
+
+/* 7) ABBREVIATION */
+#all_agents_table > thead > tr > th:nth-child(7) {
+  width: 4% !important;
+}
+
+/* 8) NATIONALITY */
+#all_agents_table > thead > tr > th:nth-child(8) {
+  width: 4% !important;
+}
+
+/* 9) ICON */
+#all_agents_table > thead > tr > th:nth-child(9) {
+  width: 3% !important;
+}
+
+/* 10) REGION */
+#all_agents_table > thead > tr > th:nth-child(10) {
+  width: 8% !important;
+}
+
+/* 11) ENABLED */
+#all_agents_table > thead > tr > th:nth-child(11) {
+  width: 4% !important;
+}
+
+/* 1) ID */
+#all_airlines_table > thead > tr > th:nth-child(1) {
+  width: 4% !important;
+}
+
+/* 2) NAME */
+#all_airlines_table > thead > tr > th:nth-child(2) {
+  width: 16% !important;
+}
+
+/* 3) ABBREVIATION */
+#all_airlines_table > thead > tr > th:nth-child(3) {
+  width: 8% !important;
+}
+
+/* 4) ENABLED */
+#all_airlines_table > thead > tr > th:nth-child(4) {
+  width: 8% !important;
+}
+
+/* 1) NAME */
+#all_airports_table > thead > tr > th:nth-child(1) {
+  width: 6% !important;
+}
+
+/* 2) LOCATION */
+#all_airports_table > thead > tr > th:nth-child(2) {
+  width: 10% !important;
+}
+
+/* 3) LAT/LNG */
+#all_airports_table > thead > tr > th:nth-child(3) {
+  width: 10% !important;
+}
+
+/* 4) ENABLED */
+#all_airports_table > thead > tr > th:nth-child(4) {
+  width: 10% !important;
+}
+
+/* 4) ENABLED */
+#all_airports_table > thead > tr > th:nth-child(5) {
+  width: 6% !important;
+}
+
+/* 1) ID */
+#all_clients_table > thead > tr > th:nth-child(1) {
+  width: 4% !important;
+}
+
+/* 2) NAME */
+#all_clients_table > thead > tr > th:nth-child(2) {
+  width: 12% !important;
+}
+
+/* 3) ADDRESS */
+#all_clients_table > thead > tr > th:nth-child(3) {
+  width: 12% !important;
+}
+
+/* 4) TEL DETAILS */
+#all_clients_table > thead > tr > th:nth-child(4) {
+  width: 12% !important;
+}
+
+/* 5) EMAIL */
+#all_clients_table > thead > tr > th:nth-child(5) {
+  width: 8% !important;
+}
+
+/* 6) NOTES */
+#all_clients_table > thead > tr > th:nth-child(6) {
+  width: 6% !important;
+}
+
+/* 7) ABBREVIATION */
+#all_clients_table > thead > tr > th:nth-child(7) {
+  width: 6% !important;
+}
+
+/* 8) NATIONALITY */
+#all_clients_table > thead > tr > th:nth-child(8) {
+  width: 8% !important;
+}
+
+/* 9) REGION */
+#all_clients_table > thead > tr > th:nth-child(9) {
+  width: 9% !important;
+}
+
+/* 10) ENABLED */
+#all_clients_table > thead > tr > th:nth-child(10) {
+  width: 4% !important;
+}
+
+/* 1) ID */
+#all_drivers_table > thead > tr > th:nth-child(1) {
+  width: 4% !important;
+}
+
+/* 2) NAME */
+#all_drivers_table > thead > tr > th:nth-child(2) {
+  width: 10% !important;
+}
+/* 3) TEL */
+#all_drivers_table > thead > tr > th:nth-child(3) {
+  width: 10% !important;
+}
+
+/* 4) ADDRESS */
+#all_drivers_table > thead > tr > th:nth-child(4) {
+  width: 10% !important;
+}
+
+/* 5) EMAIL */
+#all_drivers_table > thead > tr > th:nth-child(5) {
+  width: 10% !important;
+}
+
+/* 6)  NOTES*/
+#all_drivers_table > thead > tr > th:nth-child(6) {
+  width: 4% !important;
+}
+/* 7) COACH OPERATOR */
+#all_drivers_table > thead > tr > th:nth-child(7) {
+  width: 10% !important;
+}
+
+/* 8) REGION */
+#all_drivers_table > thead > tr > th:nth-child(8) {
+  width: 10% !important;
+}
+
+/* 9) ENABLED */
+#all_drivers_table > thead > tr > th:nth-child(9) {
+  width: 4% !important;
+}
+
+/* 1) ID */
+#all_coach_operators_table > thead > tr > th:nth-child(1) {
+  width: 3% !important;
+}
+
+/* 2) NAME */
+#all_coach_operators_table > thead > tr > th:nth-child(2) {
+  width: 10% !important;
+}
+
+/* 3) NAME */
+#all_coach_operators_table > thead > tr > th:nth-child(3) {
+  width: 10% !important;
+}
+
+/* 4) ADDRESS */
+#all_coach_operators_table > thead > tr > th:nth-child(4) {
+  width: 10% !important;
+}
+
+/* 5) EMAIL */
+#all_coach_operators_table > thead > tr > th:nth-child(5) {
+  width: 10% !important;
+}
+
+/* 6) WEBSITE */
+#all_coach_operators_table > thead > tr > th:nth-child(6) {
+  width: 10% !important;
+}
+
+/* 7) PLACE */
+#all_coach_operators_table > thead > tr > th:nth-child(7) {
+  width: 8% !important;
+}
+
+/* 8) NOTES */
+#all_coach_operators_table > thead > tr > th:nth-child(8) {
+  width: 5% !important;
+}
+
+/* 9) LAT/LNG */
+#all_coach_operators_table > thead > tr > th:nth-child(9) {
+  width: 6% !important;
+}
+
+/* 10) LOCAL */
+#all_coach_operators_table > thead > tr > th:nth-child(10) {
+  width: 4% !important;
+}
+/* 10) LOCAL */
+#all_coach_operators_table > thead > tr > th:nth-child(11) {
+  width: 4% !important;
+}
+
+
+/* 1) ID */
+#all_group_leaders_table > thead > tr > th:nth-child(1) {
+  width: 4% !important;
+}
+
+/* 2) NAME */
+#all_group_leaders_table > thead > tr > th:nth-child(2) {
+  width: 10% !important;
+}
+
+/* 3) TEL DETAILS */
+#all_group_leaders_table > thead > tr > th:nth-child(3) {
+  width: 8% !important;
+}
+
+/* 4) ADDRESS */
+#all_group_leaders_table > thead > tr > th:nth-child(4) {
+  width: 10% !important;
+}
+
+/* 5) EMAIL */
+#all_group_leaders_table > thead > tr > th:nth-child(5) {
+  width: 6% !important;
+}
+
+/* 6) NOTES */
+#all_group_leaders_table > thead > tr > th:nth-child(6) {
+  width: 4% !important;
+}
+
+/* 7) RATING */
+#all_group_leaders_table > thead > tr > th:nth-child(7) {
+  width: 4% !important;
+}
+
+/* 8) LANGUAGES */
+#all_group_leaders_table > thead > tr > th:nth-child(8) {
+  width: 5% !important;
+}
+
+/* 9) ENABLED */
+#all_group_leaders_table > thead > tr > th:nth-child(9) {
+  width: 8% !important;
+}
+
+/* 10) ENABLED */
+#all_group_leaders_table > thead > tr > th:nth-child(10) {
+  width: 3% !important;
+}
+
+/* 1) ID */
+#all_hotels_table > thead > tr > th:nth-child(1) {
+  width: 2% !important;
+}
+
+/* 2) NAME */
+#all_hotels_table > thead > tr > th:nth-child(2) {
+  width: 8% !important;
+}
+
+/* 3) REGION */
+#all_hotels_table > thead > tr > th:nth-child(3) {
+  width: 6% !important;
+}
+
+/* 4) RATING */
+#all_hotels_table > thead > tr > th:nth-child(4) {
+  width: 4% !important;
+}
+
+/* 5) ADDRESS */
+#all_hotels_table > thead > tr > th:nth-child(5) {
+  width: 8% !important;
+}
+
+/* 6) TEL */
+#all_hotels_table > thead > tr > th:nth-child(6) {
+  width: 4% !important;
+}
+
+/* 7) EMAIL */
+#all_hotels_table > thead > tr > th:nth-child(7) {
+  width: 5% !important;
+}
+
+/* 8) ENABLED */
+#all_hotels_table > thead > tr > th:nth-child(8) {
+  width: 2% !important;
+}
+
+/* 1) ID */
+#all_repair_shops_table > thead > tr > th:nth-child(1) {
+  width: 3% !important;
+}
+
+/* 2) NAME */
+#all_repair_shops_table > thead > tr > th:nth-child(2) {
+  width: 8% !important;
+}
+
+/* 3) PLACE */
+#all_repair_shops_table > thead > tr > th:nth-child(3) {
+  width: 6% !important;
+}
+
+/* 4) ADDRESS */
+#all_repair_shops_table > thead > tr > th:nth-child(4) {
+  width: 10% !important;
+}
+
+/* 5) TEL DETAILS */
+#all_repair_shops_table > thead > tr > th:nth-child(5) {
+  width: 6% !important;
+}
+
+/* 6) EMAIL */
+#all_repair_shops_table > thead > tr > th:nth-child(6) {
+  width: 7% !important;
+}
+
+/* 7) TYPES */
+#all_repair_shops_table > thead > tr > th:nth-child(7) {
+  width: 10% !important;
+}
+
+/* 8) ENABLED */
+#all_repair_shops_table > thead > tr > th:nth-child(8) {
+  width: 3% !important;
+}
+
+#offer_services_table > thead > tr > th:nth-child(1) {
+  width: 30% !important;
+}
+
+/* 7) NATIONALITY */
+#all_railway_stations_table > tbody > tr > td:nth-child(5) {
+  text-align: left !important;
+}
+
+#daily_status_table {
+  max-width: 99% !important;
+}
+
+#daily_status_table > thead > tr > th:nth-child(1) {
+  width: 2% !important;
+}
+
+#daily_status_table > thead > tr > th:nth-child(2) {
+  width: 6% !important;
+}
+
+#daily_status_table > thead > tr > th:nth-child(3) {
+  width: 4% !important;
+}
+
+#daily_status_table > thead > tr > th:nth-child(4) {
+  width: 10% !important;
+}
+
+#daily_status_table > thead > tr > th:nth-child(5) {
+  width: 13% !important;
+}
+
+#daily_status_table > thead > tr > th:nth-child(6) {
+  width: 13% !important;
+}
+
+#daily_status_table > thead > tr > th:nth-child(7) {
+  width: 7% !important;
+}
+
+#daily_status_table > thead > tr > th:nth-child(8) {
+  width: 7% !important;
+}
+
+#daily_status_table > thead > tr > th:nth-child(9) {
+  width: 7% !important;
+}
+
+#pending_groups_table > thead > tr > th:nth-child(1) {
+  width: 3% !important;
+}
+
+#pending_groups_table > thead > tr > th:nth-child(2) {
+  width: 7% !important;
+}
+
+#pending_groups_table > thead > tr > th:nth-child(3) {
+  width: 4% !important;
+}
+
+#pending_groups_table > thead > tr > th:nth-child(4) {
+  width: 4% !important;
+}
+
+#pending_groups_table > thead > tr > th:nth-child(5) {
+  width: 4% !important;
+}
+
+#pending_groups_table > thead > tr > th:nth-child(6) {
+  width: 4% !important;
+}
+
+#pending_groups_table > thead > tr > th:nth-child(7) {
+  width: 4% !important;
+}
+
+#pending_groups_table > thead > tr > th:nth-child(8) {
+  width: 4% !important;
+}
+
+#pending_groups_table > thead > tr > th:nth-child(9) {
+  width: 4% !important;
+}
+
+#table_calendar {
+  width: 100% !important;
+  margin: 0 auto;
+}
+
+#table_calendar > thead > tr > th {
+  padding: 10px;
+  border: 1px solid black;
+}
+
+#table_calendar > tbody > tr > td {
+  border: 1px solid black;
+  color: white;
+  font-size: 16px;
+  padding: 10px;
+  font-family: Helvetica;
+}
+
+#table_calendar > thead > tr > th {
+  width: 10% !important;
+}
+
+.other-month {
+  background-color: rgb(158, 158, 158) !important;
+  color: white;
+}
+
+@media screen and (max-width: 768px) {
+  #restaurant_menu_table > thead > tr > th:nth-child(4),
+  #restaurant_menu_table > thead > tr > th:nth-child(5),
+  #restaurant_menu_table > thead > tr > th:nth-child(6),
+  #restaurant_menu_table > thead > tr > th:nth-child(7),
+  #restaurant_menu_table > thead > tr > th:nth-child(9) {
+    display: none;
+  }
+
+  #restaurant_menu_table > tbody > tr > td:nth-child(4),
+  #restaurant_menu_table > tbody > tr > td:nth-child(5),
+  #restaurant_menu_table > tbody > tr > td:nth-child(6),
+  #restaurant_menu_table > tbody > tr > td:nth-child(7),
+  #restaurant_menu_table > tbody > tr > td:nth-child(9) {
+    display: none;
+  }
+
+  #daily_status_table > thead > tr > th:nth-child(3),
+  #daily_status_table > thead > tr > th:nth-child(5),
+  #daily_status_table > thead > tr > th:nth-child(7),
+  #daily_status_table > thead > tr > th:nth-child(8),
+  #daily_status_table > thead > tr > th:nth-child(9) {
+    display: none;
+  }
+
+  #daily_status_table > tbody > tr > td:nth-child(3),
+  #daily_status_table > tbody > tr > td:nth-child(5),
+  #daily_status_table > tbody > tr > td:nth-child(7),
+  #daily_status_table > tbody > tr > td:nth-child(8),
+  #daily_status_table > tbody > tr > td:nth-child(9) {
+    display: none;
+  }
+
+  #g_dox_table > thead > tr > th:nth-child(4),
+  #g_dox_table > thead > tr > th:nth-child(5),
+  #g_dox_table > thead > tr > th:nth-child(6),
+  #g_dox_table > thead > tr > th:nth-child(8) {
+    display: none;
+  }
+
+  #g_dox_table > tbody > tr > td:nth-child(4),
+  #g_dox_table > tbody > tr > td:nth-child(5),
+  #g_dox_table > tbody > tr > td:nth-child(6),
+  #g_dox_table > tbody > tr > td:nth-child(8) {
+    display: none;
+  }
+
+  #g_rlists_table > thead > tr > th:nth-child(4),
+  #g_rlists_table > thead > tr > th:nth-child(5),
+  #g_rlists_table > thead > tr > th:nth-child(6),
+  #g_rlists_table > thead > tr > th:nth-child(7) {
+    display: none;
+  }
+
+  #g_rlists_table > tbody > tr > td:nth-child(4),
+  #g_rlists_table > tbody > tr > td:nth-child(5),
+  #g_rlists_table > tbody > tr > td:nth-child(6),
+  #g_rlists_table > tbody > tr > td:nth-child(7) {
+    display: none;
+  }
+
+  #pending_groups_table > thead > tr > th:nth-child(3),
+  #pending_groups_table > thead > tr > th:nth-child(4),
+  #pending_groups_table > thead > tr > th:nth-child(5),
+  #pending_groups_table > thead > tr > th:nth-child(6),
+  #pending_groups_table > thead > tr > th:nth-child(7),
+  #pending_groups_table > thead > tr > th:nth-child(8),
+  #pending_groups_table > thead > tr > th:nth-child(9) {
+    display: none;
+  }
+
+  #pending_groups_table > tbody > tr > td:nth-child(3),
+  #pending_groups_table > tbody > tr > td:nth-child(4),
+  #pending_groups_table > tbody > tr > td:nth-child(5),
+  #pending_groups_table > tbody > tr > td:nth-child(6),
+  #pending_groups_table > tbody > tr > td:nth-child(7),
+  #pending_groups_table > tbody > tr > td:nth-child(8),
+  #pending_groups_table > tbody > tr > td:nth-child(9) {
+    display: none;
+  }
+
+  #sent_emails_table > thead > tr > th:nth-child(2),
+  #sent_emails_table > thead > tr > th:nth-child(6),
+  #sent_emails_table > thead > tr > th:nth-child(7),
+  #sent_emails_table > thead > tr > th:nth-child(8) {
+    display: none;
+  }
+
+  #sent_emails_table > tbody > tr > td:nth-child(2),
+  #sent_emails_table > tbody > tr > td:nth-child(6),
+  #sent_emails_table > tbody > tr > td:nth-child(7),
+  #sent_emails_table > tbody > tr > td:nth-child(8) {
+    display: none;
+  }
+
+  #locked_table > thead > tr > th:nth-child(1) {
+    display: none;
+  }
+
+  #locked_table > tbody > tr > td:nth-child(1) {
+    display: none;
+  }
+
+  #login_logout_table > thead > tr > th:nth-child(1) {
+    display: none;
+  }
+
+  #login_logout_table > tbody > tr > td:nth-child(1) {
+    display: none;
+  }
+
+  #reports_cop_table > thead > tr > th:nth-child(1) {
+    width: 7% !important;
+  }
+  #reports_cop_table > thead > tr > th:nth-child(2) {
+    width: 4% !important;
+  }
+  #reports_cop_table > thead > tr > th:nth-child(3) {
+    width: 8% !important;
+  }
+  #reports_cop_table > thead > tr > th:nth-child(4) {
+    width: 8% !important;
+  }
+  #reports_cop_table > thead > tr > th:nth-child(5) {
+    width: 3% !important;
+  }
+  #reports_cop_table > thead > tr > th:nth-child(6) {
+    width: 3% !important;
+  }
+  #reports_cop_table > thead > tr > th:nth-child(7) {
+    width: 3% !important;
+  }
+
+  #all_users_table > thead > tr > th:nth-child(1),
+  #all_users_table > thead > tr > th:nth-child(3),
+  #all_users_table > thead > tr > th:nth-child(4),
+  #all_users_table > thead > tr > th:nth-child(5),
+  #all_users_table > thead > tr > th:nth-child(9),
+  #all_users_table > thead > tr > th:nth-child(10) {
+    display: none;
+  }
+
+  #all_users_table > tbody > tr > td:nth-child(1),
+  #all_users_table > tbody > tr > td:nth-child(3),
+  #all_users_table > tbody > tr > td:nth-child(4),
+  #all_users_table > tbody > tr > td:nth-child(5),
+  #all_users_table > tbody > tr > td:nth-child(9),
+  #all_users_table > tbody > tr > td:nth-child(10) {
+    display: none;
+  }
+
+  #logs_table > thead > tr > th:nth-child(1),
+  #logs_table > thead > tr > th:nth-child(4) {
+    display: none;
+  }
+
+  #logs_table > tbody > tr > td:nth-child(1),
+  #logs_table > tbody > tr > td:nth-child(4) {
+    display: none;
+  }
+
+  #incomplete_data_table > thead > tr > th:nth-child(3),
+  #incomplete_data_table > thead > tr > th:nth-child(4),
+  #incomplete_data_table > thead > tr > th:nth-child(5),
+  #incomplete_data_table > thead > tr > th:nth-child(6),
+  #incomplete_data_table > thead > tr > th:nth-child(7),
+  #incomplete_data_table > thead > tr > th:nth-child(8),
+  #incomplete_data_table > thead > tr > th:nth-child(9),
+  #incomplete_data_table > thead > tr > th:nth-child(10),
+  #incomplete_data_table > thead > tr > th:nth-child(11) {
+    display: none;
+  }
+
+  #incomplete_data_table > tbody > tr > td:nth-child(3),
+  #incomplete_data_table > tbody > tr > td:nth-child(4),
+  #incomplete_data_table > tbody > tr > td:nth-child(5),
+  #incomplete_data_table > tbody > tr > td:nth-child(6),
+  #incomplete_data_table > tbody > tr > td:nth-child(7),
+  #incomplete_data_table > tbody > tr > td:nth-child(8),
+  #incomplete_data_table > tbody > tr > td:nth-child(9),
+  #incomplete_data_table > tbody > tr > td:nth-child(10),
+  #incomplete_data_table > tbody > tr > td:nth-child(11) {
+    display: none;
+  }
+}
+
+#reports_leader_table > thead > tr > th:nth-child(1) {
+  width: 3% !important;
+}
+#reports_leader_table > thead > tr > th:nth-child(2) {
+  width: 12% !important;
+}
+#reports_leader_table > thead > tr > th:nth-child(3) {
+  width: 10% !important;
+}
+#reports_leader_table > thead > tr > th:nth-child(4) {
+  width: 3% !important;
+}
+
+#payment_order_modal_table > thead > tr > th:nth-child(1) {
+  width: 6% !important;
+}
+#payment_order_modal_table > thead > tr > th:nth-child(2) {
+  width: 20% !important;
+}
+#payment_order_modal_table > thead > tr > th:nth-child(3) {
+  width: 4% !important;
+}
+#payment_order_modal_table > thead > tr > th:nth-child(4) {
+  width: 4% !important;
+}
+#payment_order_modal_table > thead > tr > th:nth-child(5) {
+  width: 4% !important;
+}
+
+#selected_payments_table {
+  width: 100%;
+}
+
+#selected_payments_table > thead > tr > th:nth-child(1) {
+  width: 10% !important;
+}
+#selected_payments_table > thead > tr > th:nth-child(2) {
+  width: 6% !important;
+}
+#selected_payments_table > thead > tr > th:nth-child(3) {
+  width: 20% !important;
+}
+#selected_payments_table > thead > tr > th:nth-child(4) {
+  width: 5% !important;
+}
+#selected_payments_table > thead > tr > th:nth-child(5) {
+  width: 5% !important;
+}
+#selected_payments_table > thead > tr > th:nth-child(6) {
+  width: 7% !important;
+}
+
+#selected_payments_table > thead > tr > th {
+  font-weight: 500;
+}
+
+#selected_payments_table > tbody > tr > td {
+  font-size: 12px !important;
+}
+
+#payment_order_modal_table_date > thead > tr > th:nth-child(1) {
+  width: 16% !important;
+}
+#payment_order_modal_table_date > thead > tr > th:nth-child(2) {
+  width: 8% !important;
+}
+#payment_order_modal_table_date > thead > tr > th:nth-child(3) {
+  width: 20% !important;
+}
+#payment_order_modal_table_date > thead > tr > th:nth-child(4) {
+  width: 4% !important;
+}
+#payment_order_modal_table_date > thead > tr > th:nth-child(5) {
+  width: 4% !important;
+}
+#payment_order_modal_table_date > thead > tr > th:nth-child(6) {
+  width: 7% !important;
+}
+
+#payment_order_table > thead > tr > th:nth-child(1) {
+  width: 3% !important;
+}
+#payment_order_table > thead > tr > th:nth-child(2) {
+  width: 7% !important;
+}
+#payment_order_table > thead > tr > th:nth-child(3) {
+  width: 4% !important;
+}
+#payment_order_table > thead > tr > th:nth-child(4) {
+  width: 12% !important;
+}
+#payment_order_table > thead > tr > th:nth-child(5) {
+  width: 5% !important;
+}
+#payment_order_table > thead > tr > th:nth-child(6) {
+  width: 5% !important;
+}
+#payment_order_table > thead > tr > th:nth-child(7) {
+  width: 7% !important;
+}
+#payment_order_table > thead > tr > th:nth-child(8) {
+  width: 4% !important;
+}
+#payment_order_table > thead > tr > th:nth-child(9) {
+  width: 4% !important;
+}
+#payment_order_table > thead > tr > th:nth-child(10) {
+  width: 4% !important;
+}
+#payment_order_table > thead > tr > th:nth-child(11) {
+  width: 8% !important;
+}
+
+#hotel_reports_table > thead > tr > th {
+  width: 16% !important;
+}
+
+#hotel_reports_table {
+  width: 100% !important;
+}
+
+#agent_reports_table > thead > tr > th:nth-child(1) {
+  width: 5% !important;
+}
+#agent_reports_table > thead > tr > th:nth-child(2) {
+  width: 5% !important;
+}
+#agent_reports_table > thead > tr > th:nth-child(3) {
+  width: 15% !important;
+}
+#agent_reports_table > thead > tr > th:nth-child(4) {
+  width: 15% !important;
+}
+#agent_reports_table > thead > tr > th:nth-child(5) {
+  width: 3% !important;
+}
+
+#all_services_table > thead > tr > th:nth-child(1) {
+  width: 2% !important;
+}
+#all_services_table > thead > tr > th:nth-child(2) {
+  width: 4% !important;
+}
+#all_services_table > thead > tr > th:nth-child(3) {
+  width: 8% !important;
+}
+#all_services_table > thead > tr > th:nth-child(4) {
+  width: 4% !important;
+}
+#all_services_table > thead > tr > th:nth-child(5) {
+  width: 4% !important;
+}
+#all_services_table > thead > tr > th:nth-child(6) {
+  width: 12% !important;
+}
+#all_services_table > thead > tr > th:nth-child(7) {
+  width: 3% !important;
+}
+
+#group_pending_payments_table > thead > tr > th:nth-child(1) {
+  width: 3% !important;
+}
+#group_pending_payments_table > thead > tr > th:nth-child(2) {
+  width: 12% !important;
+}
+#group_pending_payments_table > thead > tr > th:nth-child(3) {
+  width: 5% !important;
+}
+#group_pending_payments_table > thead > tr > th:nth-child(4) {
+  width: 8% !important;
+}
+#group_pending_payments_table > thead > tr > th:nth-child(5) {
+  width: 5% !important;
+}
+#group_pending_payments_table > thead > tr > th:nth-child(6) {
+  width: 5% !important;
+}
+#group_pending_payments_table > thead > tr > th:nth-child(7) {
+  width: 3% !important;
+}
+
+#pending_payments_table {
+  width: 98% !important;
+}
+
+#peding_payments_table > thead > tr > th:nth-child(1) {
+  width: 4% !important;
+}
+
+#peding_payments_table > thead > tr > th:nth-child(2) {
+  width: 12% !important;
+}
+
+#peding_payments_table > thead > tr > th:nth-child(3) {
+  width: 6% !important;
+}
+
+#peding_payments_table > thead > tr > th:nth-child(4) {
+  width: 9% !important;
+}
+
+#peding_payments_table > thead > tr > th:nth-child(5) {
+  width: 4% !important;
+}
+
+#peding_payments_table > thead > tr > th:nth-child(6) {
+  width: 4% !important;
+}
+
+#peding_payments_table > thead > tr > th:nth-child(7) {
+  width: 3% !important;
+}
+
+#add_from_all_pending_payments {
+  width: 100%;
+}
+
+#add_from_all_pending_payments > thead > tr > th:nth-child(1) {
+  width: 7% !important;
+}
+
+#add_from_all_pending_payments > thead > tr > th:nth-child(2) {
+  width: 4% !important;
+}
+
+#add_from_all_pending_payments > thead > tr > th:nth-child(3) {
+  width: 12% !important;
+}
+
+#add_from_all_pending_payments > thead > tr > th:nth-child(4) {
+  width: 4% !important;
+}
+
+#add_from_all_pending_payments > thead > tr > th:nth-child(5) {
+  width: 8% !important;
+}
+
+#add_from_all_pending_payments > thead > tr > th:nth-child(6) {
+  width: 4% !important;
+}
+
+#add_from_all_pending_payments > thead > tr > th:nth-child(7) {
+  width: 3% !important;
+}
+
+#add_from_all_pending_payments > thead > tr > th:nth-child(8) {
+  width: 3% !important;
+}
+
+#agent_groups_table > thead > tr > th:nth-child(1) {
+  width: 3% !important;
+}
+#agent_groups_table > thead > tr > th:nth-child(2) {
+  width: 9% !important;
+}
+#agent_groups_table > thead > tr > th:nth-child(3) {
+  width: 6% !important;
+}
+#agent_groups_table > thead > tr > th:nth-child(4) {
+  width: 4% !important;
+}
+
+#all_payments_table > thead > tr > th:nth-child(1) {
+  width: 3% !important;
+}
+#all_payments_table > thead > tr > th:nth-child(2) {
+  width: 8% !important;
+}
+#all_payments_table > thead > tr > th:nth-child(3) {
+  width: 16% !important;
+}
+#all_payments_table > thead > tr > th:nth-child(4) {
+  width: 4% !important;
+}
+#all_payments_table > thead > tr > th:nth-child(5) {
+  width: 4% !important;
+}
+#all_payments_table > thead > tr > th:nth-child(6) {
+  width: 4% !important;
+}
+#all_payments_table > thead > tr > th:nth-child(7) {
+  width: 7% !important;
+}
+#all_payments_table > thead > tr > th:nth-child(8) {
+  width: 4% !important;
+}
+
+#nas_folders_table > thead > tr > th:nth-child(1) {
+  width: 25% !important;
+}
+
+#nas_folders_table > thead > tr > th:nth-child(2) {
+  width: 10% !important;
+}
+
+#nas_folders_table > thead > tr > th:nth-child(3) {
+  width: 20% !important;
+}

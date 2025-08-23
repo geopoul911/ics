@@ -1,0 +1,15 @@
+/* Styles for the under construction container */
+.underConstructionContainer {
+  height: 86vh !important; /* Set height to 86% of viewport height */
+  background-image: url(../../../images/core/under_construction/under_construction.jpg);
+  background-position: center; /* Center the background image */
+  background-size: cover; /* Scale the background image to cover the entire container */
+}
+
+/* Styles for the button within '.underConstructionContainer' */
+.underConstructionContainer .button {
+  position: absolute; /* Position the button relative to its nearest ancestor */
+  top: 30%; /* Position the button 30% from the top of its container */
+  left: 50%; /* Position the button 50% from the left of its container */
+  transform: translate(-50%, -50%); /* Shift the button to its true center */
+}

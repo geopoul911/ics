@@ -1,0 +1,11 @@
+venv/
+.vscode/
+*.pyc
+backend/accounts/migrations/
+backend/webapp/migrations/
+backend/core/migrations/
+
+backend/accounts/__pycache__/
+backend/webapp/__pycache__/
+backend/core/__pycache__/
+node_modules
