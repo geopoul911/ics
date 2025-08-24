@@ -26,14 +26,14 @@ urlpatterns = [
     re_path(r'change_is_enabled', site_admin_xhr.ChangeIsEnabled.as_view()),
     re_path(r'change_is_staff', site_admin_xhr.ChangeIsStaff.as_view()),
     re_path(r'change_is_spr_usr', site_admin_xhr.ChangeIsSuperuser.as_view()),
-    re_path(r'change_phone_number', site_admin_xhr.ChangePhoneNumber.as_view()),
-    re_path(r'change_user_nationality', site_admin_xhr.ChangeUserNationality.as_view()),
-    re_path(r'change_address', site_admin_xhr.ChangeAddress.as_view()),
-    re_path(r'change_zip_code', site_admin_xhr.ChangeZipCode.as_view()),
     re_path(r'change_password', site_admin_xhr.ChangePassword.as_view()),
     re_path(r'del_usr', site_admin_xhr.DeleteUser.as_view()),
 
     # Access History
     path('remove_lock/', site_admin_xhr.UnlockUser.as_view()),
+
+    # Regions
+    path('all_regions/', site_admin_views.AllRegions.as_view()),
+    re_path(r'region/(?P<rtype>continent|country|state|city|area)/(?P<region_id>.+)$', site_admin_views.RegionView.as_view()),
 
 ]

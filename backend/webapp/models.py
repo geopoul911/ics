@@ -18,17 +18,19 @@ from django.db.models.fields.related import (
     ForeignKey
 )
 # from django.core.validators import MaxValueValidator, MinValueValidator
-from django.contrib.auth.models import User
 import django.db.models as models
 from django.db.models.fields.files import ImageField
 
 from django.core.files.base import ContentFile
 import os.path
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 import re
+from django.contrib.auth import get_user_model
+
+
+User = get_user_model()
 
 
 MODEL_NAMES_LOGGING = (

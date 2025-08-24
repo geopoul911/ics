@@ -24,6 +24,7 @@ import {
 import { RiAdminLine } from "react-icons/ri";
 import { CgProfile } from "react-icons/cg";
 import { FaArrowRight } from "react-icons/fa";
+import { GiConvergenceTarget } from "react-icons/gi";
 
 // Global Variables
 import { headers } from "../../global_vars";
@@ -55,6 +56,8 @@ class NavigationBar extends Component {
     this.meClose = this.meClose.bind(this);
     this.reportOpen = this.reportOpen.bind(this);
     this.reportClose = this.reportClose.bind(this);
+    this.regionOpen = this.regionOpen.bind(this);
+    this.regionClose = this.regionClose.bind(this);
   }
 
   // Logout
@@ -124,6 +127,29 @@ class NavigationBar extends Component {
     });
   };
 
+
+    // Open Region Dropdown
+  regionOpen = () => {
+    this.setState({
+      regionIsOpen: true,
+    });
+  };
+
+  // Close Region Dropdown
+  regionClose = () => {
+    this.setState({
+      regionIsOpen: false,
+    });
+  };
+
+  // Close Me Dropdown
+  meClose = () => {
+    this.setState({
+      meIsOpen: false,
+    });
+  };
+
+
   render() {
     /* Ternary operator to determine if user is logged in or not */
     let isLoggedIn = localStorage.getItem("userToken") ? true : false;
@@ -148,12 +174,12 @@ class NavigationBar extends Component {
                 <Dropdown onMouseLeave={this.dataClose} onMouseOver={this.dataOpen}>
                   <Dropdown.Menu show={this.state.dataIsOpen} id="nav_admin_dropdown">
                     <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Associated Clients</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>BankClientAccounts</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>BankProjectAccounts</Dropdown.Item>
+                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Bank Client Accounts</Dropdown.Item>
+                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Bank Project Accounts</Dropdown.Item>
                     <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Banks</Dropdown.Item>
                     <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Cash</Dropdown.Item>
                     <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Cities</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>ClientContacts</Dropdown.Item>
+                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Client Contacts</Dropdown.Item>
                     <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Clients</Dropdown.Item>
                     <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Consultants</Dropdown.Item>
                     <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Countries</Dropdown.Item>
@@ -167,7 +193,8 @@ class NavigationBar extends Component {
                     <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Properties</Dropdown.Item>
                     <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Provinces</Dropdown.Item>
                     <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Task Categories</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>TaskComments</Dropdown.Item>
+                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Task Comments</Dropdown.Item>
+                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Taxation Projects</Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
               </Nav.Link>
@@ -186,6 +213,9 @@ class NavigationBar extends Component {
                     </Dropdown.Item>
                     <Dropdown.Item href="/site_administration/all_users">
                       <FaArrowRight style={iconStyle}/> Users
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/site_administration/all_regions">
+                      <GiConvergenceTarget style={iconStyle}/> Regions
                     </Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
@@ -222,6 +252,20 @@ class NavigationBar extends Component {
                   <Dropdown.Item href="/reports/all_users">
                     <FaArrowRight style={iconStyle}/> Statistics
                       </Dropdown.Item>
+                    </Dropdown.Menu>
+                </Dropdown>
+              </Nav.Link>
+
+              {/* Regions */}
+              <Nav.Link href="/regions/root/" onMouseLeave={this.regionClose} onMouseOver={this.regionOpen}>
+                <GiConvergenceTarget style={iconStyle} />
+                Regions
+                <Dropdown onMouseLeave={this.regionClose} onMouseOver={this.regionOpen}>
+                  <Dropdown.Menu show={this.state.regionIsOpen} id="nav_admin_dropdown">
+                    <Dropdown.Item href="/regions/all_countries"> <FaArrowRight style={iconStyle}/> Countries </Dropdown.Item>
+                    <Dropdown.Item href="/regions/all_provinces"> <FaArrowRight style={iconStyle}/> Provinces </Dropdown.Item>
+                    <Dropdown.Item href="/regions/all_cities"> <FaArrowRight style={iconStyle}/> Cities </Dropdown.Item>
+                    
                     </Dropdown.Menu>
                 </Dropdown>
               </Nav.Link>

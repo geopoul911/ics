@@ -26,8 +26,6 @@ class DataManagementRoot extends React.Component {
               <Grid divided stackable columns={3}>
                 <Grid.Column>
                   <Menu vertical className="dmRootMenu">
-                    <Menu.Item as={Link} to="/site_administration/access_history"><FaArrowRight style={iconStyle} />Associated Clients</Menu.Item>
-                    <Menu.Item as={Link} to="/site_administration/access_history"><FaArrowRight style={iconStyle} />Bank Client Accounts</Menu.Item>
                     <Menu.Item as={Link} to="/site_administration/access_history"><FaArrowRight style={iconStyle} />Bank Project Accounts</Menu.Item>
                     <Menu.Item as={Link} to="/site_administration/access_history"><FaArrowRight style={iconStyle} />Banks</Menu.Item>
                     <Menu.Item as={Link} to="/site_administration/access_history"><FaArrowRight style={iconStyle} />Cash</Menu.Item>
@@ -58,6 +56,7 @@ class DataManagementRoot extends React.Component {
                     <Menu.Item as={Link} to="/site_administration/access_history"><FaArrowRight style={iconStyle} />Provinces</Menu.Item>
                     <Menu.Item as={Link} to="/site_administration/access_history"><FaArrowRight style={iconStyle} />Task Categories</Menu.Item>
                     <Menu.Item as={Link} to="/site_administration/access_history"><FaArrowRight style={iconStyle} />Task Comments</Menu.Item>
+                    <Menu.Item as={Link} to="/site_administration/access_history"><FaArrowRight style={iconStyle} />Taxation Projects</Menu.Item>
                   </Menu>
                 </Grid.Column>
               </Grid>

@@ -1,152 +1,186 @@
-from accounts.serializers import (
-    LoginSerializer,
-    UserSerializer,
-)
+from django.conf import settings
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework import generics, status
+
 from axes.models import AccessAttempt
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework import generics
-from webapp.models import History
+from axes.utils import reset as axes_reset
 
 from ipware.ip import get_client_ip
 
-
-# get user object from token
-def get_user(token):
-    user = Token.objects.get(key=token).user
-    return user
+from accounts.serializers import LoginSerializer, UserSerializer
+from webapp.models import History
 
 
-# Get Client's IP from request.
-def get_ip(request):
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
-    else:
-        ip = get_client_ip(request)[0]
-    return ip
+# ----- Helpers -----
+
+def get_request_ip(request):
+    """
+    Returns best-guess client IP as a plain string.
+    """
+    # ipware already looks at X-Forwarded-For & friends
+    ip, _ = get_client_ip(request)
+    return ip or request.META.get("REMOTE_ADDR") or ""
+
+WHITELISTED_IPS = {"localhost", "127.0.0.1", "::1"}
+
+def get_user_from_token(token_str):
+    try:
+        return Token.objects.get(key=token_str).user
+    except Token.DoesNotExist:
+        return None
+
+def _attempts_for_ip(ip: str) -> int:
+    """
+    Current consecutive failure count for this IP in axes.
+    Returns 0 if no record exists.
+    """
+    try:
+        # failures_since_start is cumulative for a given identity tuple; use latest row for this IP
+        attempt = AccessAttempt.objects.filter(ip_address=ip).latest("id")
+        return attempt.failures_since_start or 0
+    except AccessAttempt.DoesNotExist:
+        return 0
 
 
-whitelisted_ips = ['localhost']
+# ----- Views -----
 
-# On successful login attempt, token is returned to user
+@method_decorator(csrf_exempt, name="dispatch")
 class LoginView(ObtainAuthToken):
+    """
+    Authenticates via username/password (DRF ObtainAuthToken style) and returns:
+      - user (serialized)
+      - token
+      - logged_in = True
+
+    On failed login:
+      - Writes to History
+      - If IP is whitelisted, resets Axes counters for that IP (prevents lockout)
+      - Otherwise returns 400 with `failed_wl=True`
+    """
     serializer_class = LoginSerializer
+    # If you’re only using token login, you can keep auth/permission classes empty here:
+    authentication_classes = []
+    permission_classes = []
 
-    # Cross-Site Request Forgery
-    @csrf_exempt
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data, context={'request': request})
+    def post(self, request, *args, **kwargs):
+        ip = get_request_ip(request)
 
-        # If validation fails, raise error and write attempt to database.
+        serializer = self.serializer_class(data=request.data, context={"request": request})
         if not serializer.is_valid():
+            # safer: pull username from incoming data, not serializer.data (which is empty on invalid)
+            username = (request.data.get("username") or "").strip() or "(unknown)"
+
             History.objects.create(
                 user=None,
-                model_name='AUT',
-                action='VIE',
-                description=f'User {serializer.data["username"]} has failed to log in',
-                ip_address=str(get_ip(request)),
+                model_name="AUT",
+                action="VIE",
+                description=f"User {username} has failed to log in",
+                ip_address=str(ip),
             )
 
-            # if ip is whitelisted, update axes_access_attempt
-            if get_ip(request) in whitelisted_ips:
-                from django.db import connection
-                cursor = connection.cursor()
-
-                # By setting failures_since_start to 0, We prevent the user to be blocked
-                cursor.execute(
-                    "update axes_accessattempt set failures_since_start = 0 where ip_address = '" +
-                    str(get_ip(request)) + "'"
+            # If IP is whitelisted, clear Axes counters and allow more attempts
+            if ip in WHITELISTED_IPS:
+                axes_reset(ip=ip)  # official, no raw SQL
+                # still return a 400 invalid credentials (frontend can show message & allow retry)
+                return Response(
+                    {"detail": "Invalid credentials", "failed_wl": False},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
             else:
-                return Response(status=400, data={'failed_wl': True})
+                # tell frontend it's a non-whitelisted failure; they can show the lockout countdown UI
+                return Response(
+                    {"detail": "Invalid credentials", "failed_wl": True},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
-        # Get user
-        try:
-            user = serializer.validated_data['user']
-            # If user does not have a token, create one.
-            token, created = Token.objects.get_or_create(user=user)
-        except KeyError:
-            return Response(status=400)
-
-        # Write successful attempt to db
-        History.objects.create(
-            user=user,
-            model_name='AUT',
-            action='VIE',
-            description=f'User {user.username} has logged in',
-            ip_address=str(get_ip(request)),
-        )
-
-        return Response({
-            'user': UserSerializer(user).data,
-            'token': token.key,
-            'logged_in': True
-        })
-
-
-# This class is only used to store the time of logout on db
-class LogoutView(generics.ListAPIView):
-
-    # Cross-Site Request Forgery
-    @csrf_exempt
-    def post(self, request):
-        token_str = request.headers['User-Token']
-        user = get_user(token_str)
+        # Valid credentials -> get user and token
+        user = serializer.validated_data["user"]
+        token, _ = Token.objects.get_or_create(user=user)
 
         History.objects.create(
             user=user,
-            model_name='AUT',
-            action='VIE',
-            description=f'User {user.username} has logged out'
+            model_name="AUT",
+            action="VIE",
+            description=f"User {user.username} has logged in",
+            ip_address=str(ip),
         )
 
-        return Response(status=200)
+        return Response(
+            {
+                "user": UserSerializer(user).data,
+                "token": token.key,
+                "logged_in": True,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
-class CheckAccessStatus(generics.ListAPIView):
+@method_decorator(csrf_exempt, name="dispatch")
+class LogoutView(generics.GenericAPIView):
     """
-    Loads when login component is mounted.
-    This class lets front end know if the IP is allowed to make login attempts
-    And how many attempts this IP is allowed to make.
+    Only logs the logout event. (You could also delete the token here if you like.)
     """
-    # Cross-Site Request Forgery
-    @csrf_exempt
-    def get(self, request):
-        is_blocked = False
 
-        # Get the ip
-        if 'HTTP_X_FORWARDED_FOR' in request.META:
-            x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-            ip = x_forwarded_for.split(',')[0]
-        else:
-            ip = get_client_ip(request)[0]
+    authentication_classes = []  # if you want to require auth, plug TokenAuthentication here
+    permission_classes = []
 
-        # Get all attempts
-        all_access_attempts = AccessAttempt.objects.all()
+    def post(self, request, *args, **kwargs):
+        # Prefer Authorization: Token <key> if present; fall back to your custom header
+        auth_header = request.headers.get("Authorization", "")
+        token_str = None
+        if auth_header.lower().startswith("token "):
+            token_str = auth_header.split(" ", 1)[1].strip()
+        if not token_str:
+            token_str = request.headers.get("User-Token", "")
 
-        # Get blocked ips
-        blocked_ips = [i.ip_address for i in set(all_access_attempts.filter(failures_since_start__gt=2))]
+        user = get_user_from_token(token_str)
+        if not user:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
-        # Validation
-        # if IP is in blacklist and also not in whitelist, we block it.
-        if ip in blocked_ips and ip not in whitelisted_ips:
-            is_blocked = True
+        History.objects.create(
+            user=user,
+            model_name="AUT",
+            action="VIE",
+            description=f"User {user.username} has logged out",
+            ip_address=str(get_request_ip(request)),
+        )
 
-        # We need this error handling in case IP does not exist in DB
-        try:
-            if ip not in whitelisted_ips:
-                attempts_remaining = 5 - AccessAttempt.objects.filter(
-                    ip_address=ip
-                ).latest('failures_since_start').failures_since_start
-            else:
-                attempts_remaining = 5
-        except AccessAttempt.DoesNotExist:
-            attempts_remaining = 5
+        # Optional: actually invalidate the token
+        # Token.objects.filter(key=token_str).delete()
 
-        return Response({
-            'is_blocked': is_blocked,
-            'attempts_remaining': attempts_remaining,
-        })
+        return Response(status=status.HTTP_200_OK)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class CheckAccessStatus(generics.GenericAPIView):
+    """
+    Called when the login component mounts.
+    Reports whether the requesting IP is blocked and the attempts remaining.
+    """
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, *args, **kwargs):
+        ip = get_request_ip(request)
+        limit = getattr(settings, "AXES_FAILURE_LIMIT", 5)
+
+        # If whitelisted, never blocked and full attempts remaining
+        if ip in WHITELISTED_IPS:
+            return Response(
+                {"is_blocked": False, "attempts_remaining": limit},
+                status=status.HTTP_200_OK,
+            )
+
+        failures = _attempts_for_ip(ip)
+        is_blocked = failures >= limit
+        attempts_remaining = max(limit - failures, 0)
+
+        return Response(
+            {"is_blocked": is_blocked, "attempts_remaining": attempts_remaining},
+            status=status.HTTP_200_OK,
+        )

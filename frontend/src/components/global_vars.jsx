@@ -55,6 +55,7 @@ import {
   FaPiggyBank,
   FaCar,
   FaIdeal,
+  FaArrowRight ,
 } from "react-icons/fa";
 import { BsFillKeyFill, BsFillPinMapFill } from "react-icons/bs";
 import { RiGalleryFill, RiGuideLine, RiAdminLine, RiBusLine, RiAdvertisementFill } from "react-icons/ri";
@@ -1410,6 +1411,42 @@ export function pageHeader(value, objName) {
         <hr />
       </>
     );
+  } else if (value === "country_overview") {
+    return (
+      <>
+        <div className="page_header">
+          <h2>
+            <FaArrowRight style={iconStyle} /> Country Overview
+          </h2>
+          <Breadcrumb>
+            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href="/regions/root">
+              Regions
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
+        <hr />
+      </>
+    );
+  }  else if (value === "city_overview") {
+    return (
+      <>
+        <div className="page_header">
+          <h2>
+            <FaArrowRight style={iconStyle} /> City Overview
+          </h2>
+          <Breadcrumb>
+            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href="/regions/root">
+              Regions
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
+        <hr />
+      </>
+    );
   } else if (value === "agent_gallery") {
     return (
       <>
@@ -1896,73 +1933,109 @@ export function pageHeader(value, objName) {
         <hr />
       </>
     );
-  } else if (value === "all_ports") {
+  } else if (value === "all_countries") {
     return (
       <>
         <div className="page_header">
           <h2>
-            <BiAnchor style={iconStyle} /> All Ports
+            <FaArrowRight style={iconStyle} /> All Countries
           </h2>
           <Breadcrumb>
             <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-            <Breadcrumb.Item href="/data_management/root">
-              Data Management
+            <Breadcrumb.Item href="/regions/root">
+              Regions
             </Breadcrumb.Item>
-            <Breadcrumb.Item active>All Ports</Breadcrumb.Item>
+            <Breadcrumb.Item active>All Countries</Breadcrumb.Item>
           </Breadcrumb>
         </div>
         <hr />
       </>
     );
-  } else if (value === "all_railway_stations") {
+  }  else if (value === "all_cities") {
     return (
       <>
         <div className="page_header">
           <h2>
-            <GiRailway style={iconStyle} /> All Railway Stations
+            <FaArrowRight style={iconStyle} /> All Cities
           </h2>
           <Breadcrumb>
             <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-            <Breadcrumb.Item href="/data_management/root">
-              Data Management
+            <Breadcrumb.Item href="/regions/root">
+              Regions
             </Breadcrumb.Item>
-            <Breadcrumb.Item active>All Railway Stations</Breadcrumb.Item>
+            <Breadcrumb.Item active>All Cities</Breadcrumb.Item>
           </Breadcrumb>
         </div>
         <hr />
       </>
     );
-  } else if (value === "all_repair_shops") {
+  }  else if (value === "city_overview") {
     return (
       <>
         <div className="page_header">
           <h2>
-            <FaScrewdriver style={iconStyle} /> All Repair Shops
+            <FaArrowRight style={iconStyle} /> City Overview
           </h2>
           <Breadcrumb>
             <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-            <Breadcrumb.Item href="/data_management/root">
-              Data Management
+            <Breadcrumb.Item href="/regions/root">
+              Regions
             </Breadcrumb.Item>
-            <Breadcrumb.Item active>All Repair Shops</Breadcrumb.Item>
+            <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
           </Breadcrumb>
         </div>
         <hr />
       </>
     );
-  } else if (value === "all_restaurants") {
+  }   else if (value === "city_overview") {
     return (
       <>
         <div className="page_header">
           <h2>
-            <BiRestaurant style={iconStyle} /> All Restaurants
+            <FaArrowRight style={iconStyle} /> City Overview
           </h2>
           <Breadcrumb>
             <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-            <Breadcrumb.Item href="/data_management/root">
-              Data Management
+            <Breadcrumb.Item href="/regions/root">
+              Regions
             </Breadcrumb.Item>
-            <Breadcrumb.Item active>All Restaurants</Breadcrumb.Item>
+            <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
+        <hr />
+      </>
+    );
+  } else if (value === "all_provinces") {
+    return (
+      <>
+        <div className="page_header">
+          <h2>
+            <FaArrowRight style={iconStyle} /> All Provinces
+          </h2>
+          <Breadcrumb>
+            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href="/regions/root">
+              Regions
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>All Provinces</Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
+        <hr />
+      </>
+    );
+  } else if (value === "province_overview") {
+    return (
+      <>
+        <div className="page_header">
+          <h2>
+            <FaArrowRight style={iconStyle} /> Province Overview
+          </h2>
+          <Breadcrumb>
+            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href="/regions/root">
+              Regions
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
           </Breadcrumb>
         </div>
         <hr />
@@ -2451,6 +2524,21 @@ export function pageHeader(value, objName) {
           <Breadcrumb>
             <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
             <Breadcrumb.Item active> Data Management </Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
+        <hr />
+      </>
+    );
+  } else if (value === "region_root") {
+    return (
+      <>
+        <div className="page_header">
+          <h2>
+            <GiConvergenceTarget style={iconStyle} /> Regions
+          </h2>
+          <Breadcrumb>
+            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item active> Regions </Breadcrumb.Item>
           </Breadcrumb>
         </div>
         <hr />

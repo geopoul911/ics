@@ -10,6 +10,8 @@ import { RiAdminLine } from "react-icons/ri";
 import { AiOutlineFileSearch } from "react-icons/ai";
 import { MdAccessTime } from "react-icons/md";
 import { BiUser } from "react-icons/bi";
+import { GiConvergenceTarget } from "react-icons/gi";
+
 
 // Modules / Functions
 import { Menu } from "semantic-ui-react";
@@ -39,6 +41,11 @@ class SiteAdministrationRoot extends React.Component {
             <Menu.Item as={Link} to="/site_administration/user_permissions">
               <RiAdminLine style={icon_style} /> User permissions
             </Menu.Item>
+
+            <Menu.Item as={Link} to="/site_administration/all_regions">
+              <GiConvergenceTarget style={icon_style} /> Regions
+            </Menu.Item>
+
           </Menu>
         </div>
         <Footer />

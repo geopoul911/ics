@@ -67,6 +67,8 @@ def get_user(token):
     - AccessHistory
     - Logs
     - UserPermissions
+    - AllRegions
+    - RegionView
 """
 
 
@@ -82,11 +84,6 @@ class AccessHistory(generics.ListAPIView):
         context = {"request": request, "errormsg": ''}
         token_str = request.headers['User-Token']
         user = get_user(token_str)
-
-        # Permission
-        if not can_view(user.id, 'HSR') or not is_superuser(user.id):
-            context = {"errormsg": "You do not have permission to view Access history."}
-            return Response(status=401, data=context)
 
         # Use raw SQL to get django-axes entries
         from django.db import connection
@@ -281,3 +278,35 @@ class UserView(generics.ListAPIView):
         return Response({
             'user': self.get_serializer(user, context={'request': self.request}).data,
         })
+
+
+
+class AllRegions(generics.RetrieveAPIView):
+    """
+    URL: all_regions/
+    Descr: Returns array of all regions
+    """
+
+    @csrf_exempt
+    def get(self, request):
+        context = {"request": request, "errormsg": ''}
+        token_str = request.headers.get('User-Token', None)
+        user = get_user(token_str)
+
+        regions_list = []
+        return Response({'all_regions': regions_list})
+
+
+class RegionView(generics.ListAPIView):
+
+    # Cross site request forgery
+    @csrf_exempt
+    def get(self, request, rtype, region_id):
+        context = {"request": request, "errormsg": ''}
+        token_str = request.headers['User-Token']
+        user = get_user(token_str)
+
+        return Response({
+            'region': '',
+        })
+

@@ -1,85 +1,30 @@
-# from .models import (
-#     CoachOperator,
-#     GroupTransfer,
-#     Country,
-#     Continent,
-#     Agent,
-#     FerryTicketAgency,
-#     TravelDay,
-#     Note,
-#     Offer,
-#     Client,
-#     Airport,
-#     Restaurant,
-#     Terminal,
-#     Contact,
-#     Hotel,
-#     Coach,
-#     Document,
-#     DocRoomingList,
-#     Amenity,
-#     Photo,
-#     RepairShop,
-#     RepairType,
-#     Airline,
-#     Attraction,
-#     AttractionEntries,
-#     Guide,
-#     Port,
-#     Theater,
-#     SportEventSupplier,
-#     CruisingCompany,
-#     TeleferikCompany,
-#     DMC,
-#     TrainTicketAgency,
-#     Service,
-#     TextTemplate,
-#     RestaurantType,
-#     Room,
-#     RailwayStation,
-#     RestaurantMenu,
-#     Contract,
-#     Night,
-#     ParkingLot,
-#     Payment,
-#     TextTemplateCountry,
-#     PaymentDetails,
-#     HotelCategory,
-#     CoachOperatorCategory,
-#     Deposit,
-#     PaymentOrder,
-#     State,
-#     City,
-#     Area,
-#     Proforma,
-#     FerryRoute,
-#     EntertainmentSupplier,
-#     EntertainmentProduct,
-#     CarHireCompany,
-#     AdvertisementCompany,
-#     CharterBroker,
-#     Aircraft,
-# )
+from .models import (
+    Country, City, Province
+)
+from rest_framework import serializers
 
-# from rest_framework import serializers
-# from accounts.serializers import UserSerializer
+class CountrySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        many = False
+        model = Country
+        fields = '__all__'
 
 
-# class ContinentSerializer(serializers.ModelSerializer):
+class CitySerializer(serializers.ModelSerializer):
 
-#     class Meta:
-#         many = False
-#         model = Continent
-#         fields = '__all__'
+    class Meta:
+        many = False
+        model = City
+        fields = '__all__'
 
 
-# class CountrySerializer(serializers.ModelSerializer):
-#     continent = ContinentSerializer()
+class ProvinceSerializer(serializers.ModelSerializer):
 
-#     class Meta:
-#         many = False
-#         model = Country
-#         fields = '__all__'
+    class Meta:
+        many = False
+        model = Province
+        fields = '__all__'
 
 
 # class StateSerializer(serializers.ModelSerializer):

@@ -114,8 +114,9 @@ USE_TZ = False
 STATIC_URL = '/dj_static/'
 # STATICFILES_DIRS = [os.path.join(BASE_DIR, 'web/static'), ]
 # STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-# MEDIA_URL = 'https://groupplan.gr/dj_static/'
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# Media (needed for photo uploads)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # CORS is a mechanism to allow interaction with resources hosted on different domains.
 # For instance, one of the most common scenarios to apply it is with Ajax requests.
@@ -142,10 +143,7 @@ REST_FRAMEWORK = {
 }
 
 AUTHENTICATION_BACKENDS = [
-    # AxesBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
     'axes.backends.AxesBackend',
-
-    # Django ModelBackend is the default authentication backend.
     'django.contrib.auth.backends.ModelBackend',
 ]
 
@@ -165,7 +163,7 @@ AXES_META_PRECEDENCE_ORDER = [
 ]
 
 # Whitelisted IPs
-# AXES_IP_WHITELIST = ['84.254.8.173', 'localhost', '127.0.0.1', 'www.groupplan.gr', 'groupplan.gr']
+# AXES_IP_WHITELIST = ['127.0.0.1',]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -181,8 +179,10 @@ SESSION_COOKIE_AGE = 1209600
 
 # Django email settings.
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'mail.cosmoplan.gr'
+# EMAIL_HOST = 'mail.yourdomain.com'
 # EMAIL_PORT = 587
 # EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'g.poulakis@cosmoplan.gr'
-# EMAIL_HOST_PASSWORD = '$$g.poulakis!!'
+# EMAIL_HOST_USER = ''
+# EMAIL_HOST_PASSWORD = ''
+
+AUTH_USER_MODEL = "accounts.Consultant"

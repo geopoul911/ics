@@ -1,6 +1,6 @@
-# from django.urls import path, re_path
+from django.urls import path
 # from webapp import xhr
-# from webapp import create
+from webapp import create
 
 
 urlpatterns = [
@@ -54,43 +54,8 @@ urlpatterns = [
     # path('get_payment_details/', xhr.GetPaymentDetails.as_view()),
 
     # # # # Create
-    # path('add_agent/', create.AddAgent.as_view()),
-    # path('add_airline/', create.AddAirline.as_view()),
-    # path('add_airport/', create.AddAirport.as_view()),
-    # path('add_attraction/', create.AddAttraction.as_view()),
-    # path('add_client/', create.AddClient.as_view()),
-    # path('add_coach_operator/', create.AddCoachOperator.as_view()),
-    # path('add_coach/', create.AddCoach.as_view()),
-    # path('add_aircraft/', create.AddAircraft.as_view()),
-    # path('add_cruising_company/', create.AddCruisingCompany.as_view()),
-    # path('add_driver/', create.AddDriver.as_view()),
-    # path('add_ferry_ticket_agency/', create.AddFerryTicketAgency.as_view()),
-    # path('add_dmc/', create.AddDMC.as_view()),
-    # path('add_group_leader/', create.AddGroupLeader.as_view()),
-    # path('add_guide/', create.AddGuide.as_view()),
-    # path('add_hotel/', create.AddHotel.as_view()),
-    # path('add_port/', create.AddPort.as_view()),
-    # path('add_railway_station/', create.AddRailwayStation.as_view()),
-    # path('add_repair_shop/', create.AddRepairShop.as_view()),
-    # path('add_restaurant/', create.AddRestaurant.as_view()),
-    # path('add_sport_event_supplier/', create.AddSportEventSupplier.as_view()),
-    # path('add_teleferik_company/', create.AddTeleferikCompany.as_view()),
-    # path('add_car_hire_company/', create.AddCarHireCompany.as_view()),
-    # path('add_theater/', create.AddTheater.as_view()),
-    # path('add_train_ticket_agency/', create.AddTrainTicketAgency.as_view()),
-    # path('add_text_template/', create.AddTextTemplate.as_view()),
-    # path('add_contract/', create.AddContract.as_view()),
-    # path('add_parking_lot/', create.AddParkingLot.as_view()),
-    # path('add_payment/', create.AddPayment.as_view()),
-    # path('add_htl_category/', create.AddHotelCategory.as_view()),
-    # path('build_payment_order/', create.BuildPaymentOrder.as_view()),
-    # path('add_region/', create.addRegion.as_view()),
-    # path('add_entertainment_supplier/', create.AddEntertainmentSupplier.as_view()),
-    # path('add_product/', create.AddEntertainmentProduct.as_view()),
-    # path('add_advertisement_company/', create.AddAdvertisementCompany.as_view()),
-    # path('add_charter_broker/', create.AddCharterBroker.as_view()),
-
-    # # Duplicates Check
-    # path('check_for_hotel_duplicates/', create.CheckForHotelDuplicates.as_view()),
+    path('add_country/', create.AddCountry.as_view()),
+    path('add_city/', create.AddCity.as_view()),
+    path('add_province/', create.AddProvince.as_view()),
 
 ]

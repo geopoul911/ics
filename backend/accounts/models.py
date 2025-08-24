@@ -1,58 +1,86 @@
-# Import necessary modules and classes from Django
-from django.db.models.base import Model
-from django.db.models import PROTECT, CASCADE
-from django.db.models.fields.related import ForeignKey
-from django.contrib.auth.models import User
-import django.db.models as models
-from django.contrib import admin
-from django.db.models.fields import (CharField, BooleanField)
-from django.dispatch import receiver
-from django.db.models.signals import post_save
-from webapp.models import Country
+from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+
+class ConsultantManager(BaseUserManager):
+    use_in_migrations = True
+
+    def create_user(self, username, password=None, **extra_fields):
+        if not username:
+            raise ValueError("Users must have a username")
+        username = username.strip()
+        user = self.model(username=username, **extra_fields)
+        if password:
+            user.set_password(password)
+        else:
+            user.set_unusable_password()
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("role", "A")  # or 'U' if you prefer
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("Superuser must have is_staff=True.")
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("Superuser must have is_superuser=True.")
+        return self.create_user(username, password, **extra_fields)
 
 
-# Constants for user permissions
-ACTION_CHOICES = (
-    ('VIE', 'View'),
-    ('CRE', 'Create'),
-    ('UPD', 'Update'),
-    ('DEL', 'Delete'),
-)
+class Consultant(AbstractBaseUser, PermissionsMixin):
+    ROLE_CHOICES = [
+        ('A', 'Admin'),
+        ('S', 'Supervisor'),
+        ('U', 'Superuser'),
+        ('C', 'User'),
+    ]
 
-# Model representing user profiles with additional information
-class UserProfile(Model):
-    """
-    One on One Relationship with User Model
-    Stores phone number, nationality, address, zip code, signature
-    Signature is used on mail sending.
-    None of these fields is required
-    Once a User is created, a profile is also created for him with null values
-    """
-    user = ForeignKey(User, CASCADE, related_name='user_profile', blank=False, null=False,)
-    phone_number = CharField(max_length=100, blank=True, null=True)
-    nationality = ForeignKey(Country, PROTECT, blank=True, null=True)
-    address = CharField(max_length=500, blank=True, null=True)
-    zip_code = CharField(max_length=10, blank=True, null=True)
-    secondary_email = models.EmailField(blank=True, null=True)
-    signature = CharField(max_length=4000000, blank=True, null=True)
-    secondary_signature = CharField(max_length=4000000, blank=True, null=True)
+    consultant_id = models.CharField(max_length=10, primary_key=True)
+    orderindex = models.SmallIntegerField()
+    fullname = models.CharField(max_length=40)
+    email = models.EmailField(blank=True, null=True)
+    phone = models.CharField(max_length=15, blank=True, null=True)
+    mobile = models.CharField(max_length=15, blank=True, null=True)
+    photo = models.ImageField(upload_to='consultant_photos/', blank=True, null=True)
+    role = models.CharField(max_length=1, choices=ROLE_CHOICES)
 
-    # On User creation, create user's profile
-    @receiver(post_save, sender=User)
-    def create_user_profile(sender, instance, created, **kwargs):
-        if created:
-            UserProfile.objects.create(user=instance)
+    username = models.CharField(max_length=15, unique=True)
 
-    class Meta:
-        ordering = ['-user__date_joined']
-        verbose_name = 'User Profile'
-        verbose_name_plural = 'User Profiles'
+    # Django auth flags
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)  # admin access
+
+    # your extra flags
+    canassigntask = models.BooleanField(default=False)
+    cashpassport = models.CharField(
+        max_length=120, blank=True, null=True,
+        help_text="Comma-separated list of country codes (e.g., 'GRE,CAN' or 'GRE,USA,CAN')"
+    )
+    active = models.BooleanField(default=True)  # optional; redundant with is_active
+
+    objects = ConsultantManager()
+
+    USERNAME_FIELD = "username"
+    REQUIRED_FIELDS = ["fullname", "orderindex"]  # add anything you want required on createsuperuser
 
     def __str__(self):
-        return 'User profile for %s' % self.user.username
+        return self.fullname
 
+    # helpers you had
+    def get_cashpassport_countries(self):
+        if not self.cashpassport:
+            return []
+        return [code.strip() for code in self.cashpassport.split(',')]
 
-# These decorators allow models to be viewed in django's admin page
-@admin.register(UserProfile)
-class UserProfileAdmin(admin.ModelAdmin):
-    pass
+    def set_cashpassport_countries(self, country_codes):
+        self.cashpassport = ','.join(code.strip() for code in country_codes)
+
+    def has_cashpassport_access(self, country_code):
+        if not self.cashpassport:
+            return False
+        return country_code.strip() in self.get_cashpassport_countries()
+
+    class Meta:
+        verbose_name = "Consultant"
+        verbose_name_plural = "Consultants"
+        ordering = ['orderindex', 'fullname']

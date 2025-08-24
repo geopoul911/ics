@@ -15,6 +15,8 @@ import UnderConstruction from "./components/core/under_construction/under_constr
 import Login from "./components/core/login/login";
 import SiteAdministrationRoot from "./components/site_administration/site_administration_root/site_administration_root";
 import DataManagementRoot from "./components/data_management/data_management_root/data_management_root";
+import RegionRoot from "./components/regions/region_root/region_root";
+
 import ProtectedRoute from "./components/core/router/protected_route";
 
 // Site Administration
@@ -22,6 +24,14 @@ import AccessHistory from "./components/site_administration/access_history/acces
 import Logs from "./components/site_administration/logs/logs";
 import AllUsers from "./components/site_administration/all_users/all_users";
 import User from "./components/site_administration/user/user";
+
+// Regions
+import AllCountries from "./components/regions/all_countries/all_countries";
+import Country from "./components/regions/country/country";
+import AllProvinces from "./components/regions/all_provinces/all_provinces";
+import Province from "./components/regions/province/province";
+import AllCities from "./components/regions/all_cities/all_cities";
+import City from "./components/regions/city/city";
 
 // CSS
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -104,6 +114,12 @@ function App() {
             <AllUsers {...props} setUserToken={setUserToken} />
           )}
         />
+
+
+
+
+
+
         <ProtectedRoute
           isLoggedIn={!!userToken}
           exact={true}
@@ -126,6 +142,16 @@ function App() {
             <DataManagementRoot {...props} setUserToken={setUserToken} />
           )}
         />
+
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/regions/root"
+          render={(props) => (
+            <RegionRoot {...props} setUserToken={setUserToken} />
+          )}
+        />
+        
         <ProtectedRoute
           isLoggedIn={!!userToken}
           exact={true}
@@ -140,6 +166,57 @@ function App() {
           path="/site_administration/logs"
           render={(props) => <Logs {...props} setUserToken={setUserToken} />}
         />
+
+
+
+        {/* Regions */}
+         <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/regions/all_countries"
+          render={(props) => (
+            <AllCountries {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/regions/country/:id"
+          component={Country}
+        />
+        
+        
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/regions/all_provinces"
+          render={(props) => (
+            <AllProvinces {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/regions/province/:id"
+          component={Province}
+        />
+
+
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/regions/all_cities"
+          render={(props) => (
+            <AllCities {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/regions/city/:id"
+          component={City}
+        />
+
 
         {/* 404 ( Has to be last ) */}
         <Route path="" component={FourOFour} />
