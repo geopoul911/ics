@@ -3,7 +3,6 @@ import React from "react";
 
 // Icons-images
 import { BsInfoSquare } from "react-icons/bs";
-import { ImProfile } from "react-icons/im";
 import { TiTick } from "react-icons/ti";
 import { ImCross } from "react-icons/im";
 
@@ -12,11 +11,7 @@ import { MdTextFields } from "react-icons/md"; // first / last name
 import { MdAlternateEmail } from "react-icons/md"; // email
 import { RiAdminLine } from "react-icons/ri"; // Super user
 import { MdOutlineUpdate } from "react-icons/md"; // Date joined
-import { BsFillTelephoneFill } from "react-icons/bs"; // Phone number
-import { FaFlag } from "react-icons/fa"; // Country
-import { FaAddressCard } from "react-icons/fa"; // Address
-import { FaShippingFast } from "react-icons/fa";
-import { FaSignature, FaCheck } from "react-icons/fa"; // Signature
+import { FaCheck } from "react-icons/fa"; // Signature
 import { IoIosMan } from "react-icons/io";
 
 // Functions / modules
@@ -24,7 +19,6 @@ import moment from "moment";
 import axios from "axios";
 import { Card } from "react-bootstrap";
 import { Grid } from "semantic-ui-react";
-import ReactCountryFlag from "react-country-flag";
 import Swal from "sweetalert2";
 
 // Custom Made Components
@@ -36,13 +30,6 @@ import ChangeIsEnabled from "./modals/change_is_enabled";
 import ChangeIsStaff from "./modals/change_is_staff";
 import ChangeIsSuperuser from "./modals/change_is_superuser";
 import ChangePassword from "./modals/change_password";
-import ChangePhoneNumber from "./modals/change_phone_number";
-import ChangeNationality from "./modals/change_nationality";
-import ChangeAddress from "./modals/change_address";
-import ChangeZipCode from "./modals/change_zip_code";
-import ChangeSignature from "./modals/change_signature";
-import ChangeSecondaryEmail from "./modals/change_secondary_email";
-import ChangeSecondarySignature from "./modals/change_secondary_signature";
 import DeleteUser from "./modals/delete_user";
 
 // Global Variables
@@ -74,7 +61,6 @@ class UserOverView extends React.Component {
     super(props);
     this.state = {
       user: {},
-      notes: {},
       is_loaded: false,
     };
   }
@@ -102,33 +88,6 @@ class UserOverView extends React.Component {
 
   update_state = (update_state) => {
     this.setState({ user: update_state });
-  };
-
-  add_note = (note) => {
-    var user = { ...this.state.user };
-    user.notes = note;
-    this.setState({
-      user: user,
-      notes: note,
-    });
-  };
-
-  edit_note = (note) => {
-    var user = { ...this.state.user };
-    user.notes = note;
-    this.setState({
-      user: user,
-      notes: note,
-    });
-  };
-
-  delete_note = (note) => {
-    var user = { ...this.state.user };
-    user.notes = note;
-    this.setState({
-      user: user,
-      notes: note,
-    });
   };
 
   render() {
@@ -292,178 +251,6 @@ class UserOverView extends React.Component {
                         user_id={this.state.user.id}
                         update_state={this.update_state}
                       />
-                    </Card.Footer>
-                  </Card>
-                </Grid.Column>
-                <Grid.Column>
-                  <Card>
-                    <Card.Header>
-                      <ImProfile
-                        style={{
-                          color: "#F3702D",
-                          fontSize: "1.5em",
-                          marginRight: "0.5em",
-                        }}
-                      />
-                      User Profile
-                    </Card.Header>
-                    <Card.Body>
-                      <div className={"info_descr"}>
-                        <BsFillTelephoneFill style={overviewIconStyle} /> Tel
-                      </div>
-                      <div className={"info_span"}>
-                        {this.state.user.user_profile[0].phone_number
-                          ? this.state.user.user_profile[0].phone_number
-                          : "N/A"}
-                      </div>
-                      <ChangePhoneNumber
-                        user_id={this.state.user.id}
-                        username={this.state.user.username}
-                        update_state={this.update_state}
-                        telephone={
-                          this.state.user.user_profile[0].phone_number
-                            ? this.state.user.user_profile[0].phone_number
-                            : "N/A"
-                        }
-                      />
-
-                      <div className={"info_descr"}>
-                        <MdAlternateEmail style={overviewIconStyle} /> Secondary Email :
-                      </div>
-                      <div className={"info_span"}>
-                        {this.state.user.user_profile[0].secondary_email
-                          ? this.state.user.user_profile[0].secondary_email
-                          : "N/A"}
-                      </div>
-                      <ChangeSecondaryEmail
-                        user_id={this.state.user.id}
-                        username={this.state.user.username}
-                        update_state={this.update_state}
-                        secondary_email={
-                          this.state.user.user_profile[0].secondary_email
-                            ? this.state.user.user_profile[0].secondary_email
-                            : "N/A"
-                        }
-                      />
-
-                      <div className={"info_descr"}>
-                        <FaFlag style={overviewIconStyle} /> Nationality
-                      </div>
-                      <div className={"info_span"}>
-                        {this.state.user.user_profile[0].nationality ? (
-                          <ReactCountryFlag
-                            countryCode={
-                              this.state.user.user_profile[0].nationality.code
-                            }
-                            svg
-                            style={{
-                              width: "1.5em",
-                              height: "1.5em",
-                              marginRight: 10,
-                            }}
-                            title={
-                              this.state.user.user_profile[0].nationality.code
-                            }
-                          />
-                        ) : null}
-                        {this.state.user.user_profile[0].nationality
-                          ? this.state.user.user_profile[0].nationality.name
-                          : "N/A"}
-                      </div>
-                      <ChangeNationality
-                        user_id={this.state.user.id}
-                        username={this.state.user.username}
-                        update_state={this.update_state}
-                        country={this.state.user.user_profile[0].nationality}
-                      />
-                      <div className={"info_descr"}>
-                        <FaAddressCard style={overviewIconStyle} /> Address
-                      </div>
-                      <div className={"info_span"}>
-                        {this.state.user.user_profile[0].address
-                          ? this.state.user.user_profile[0].address
-                          : "N/A"}
-                      </div>
-                      <ChangeAddress
-                        user_id={this.state.user.id}
-                        username={this.state.user.username}
-                        update_state={this.update_state}
-                        address={
-                          this.state.user.user_profile[0].address
-                            ? this.state.user.user_profile[0].address
-                            : "N/A"
-                        }
-                      />
-                      <div className={"info_descr"}>
-                        <FaShippingFast style={overviewIconStyle} /> Zip code :
-                      </div>
-                      <div className={"info_span"}>
-                        {this.state.user.user_profile[0].zip_code
-                          ? this.state.user.user_profile[0].zip_code
-                          : "N/A"}
-                      </div>
-                      <ChangeZipCode
-                        user_id={this.state.user.id}
-                        username={this.state.user.username}
-                        update_state={this.update_state}
-                        zip_code={
-                          this.state.user.user_profile[0].zip_code
-                            ? this.state.user.user_profile[0].zip_code
-                            : "N/A"
-                        }
-                      />
-                      <div className={"info_descr"}>
-                        <FaSignature style={overviewIconStyle} /> Signature :
-                      </div>
-                      {this.state.user.user_profile[0].signature ? (
-                        <div
-                          className={"info_span"}
-                          dangerouslySetInnerHTML={{
-                            __html: this.state.user.user_profile[0].signature,
-                          }}
-                        ></div>
-                      ) : (
-                        <div className={"info_span"}>N/A</div>
-                      )}
-                      <ChangeSignature
-                        signature={this.state.user.user_profile[0].signature}
-                        user_id={this.state.user.id}
-                        username={this.state.user.username}
-                        update_state={this.update_state}
-                      />
-
-                      <div className={"info_descr"}>
-                        <FaSignature style={overviewIconStyle} /> Secondary Signature :
-                      </div>
-                      {this.state.user.user_profile[0].secondary_signature ? (
-                        <div
-                          className={"info_span"}
-                          dangerouslySetInnerHTML={{
-                            __html: this.state.user.user_profile[0].secondary_signature,
-                          }}
-                        ></div>
-                      ) : (
-                        <div className={"info_span"}>N/A</div>
-                      )}
-                      <ChangeSecondarySignature
-                        signature={this.state.user.user_profile[0].secondary_signature}
-                        user_id={this.state.user.id}
-                        username={this.state.user.username}
-                        update_state={this.update_state}
-                      />
-
-                    </Card.Body>
-                    <Card.Footer>
-                      <small className="mr-auto">
-                        <BsInfoSquare
-                          style={{
-                            color: "#F3702D",
-                            fontSize: "1.2em",
-                            marginRight: "0.5em",
-                          }}
-                        />
-                        None of user profile's fields are required.
-                      </small>
                     </Card.Footer>
                   </Card>
                 </Grid.Column>

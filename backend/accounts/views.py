@@ -29,9 +29,7 @@ def get_ip(request):
     return ip
 
 
-#  Whitelisted IPs will be the Cosmoplan's IPs on Athens and London offices
-whitelisted_ips = ['84.254.8.173', 'localhost', '127.0.0.1', '192.168.1.1', '217.138.89.162']
-
+whitelisted_ips = ['localhost']
 
 # On successful login attempt, token is returned to user
 class LoginView(ObtainAuthToken):

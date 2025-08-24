@@ -1,9 +1,0 @@
-/* Styles for '.social_ul' unordered list */
-.social_ul {
-  list-style-type: none; /* Remove default bullets from the list items */
-  display: flex; /* Set the list as a flex container */
-  justify-content: space-around; /* Distribute items evenly along the horizontal axis */
-  padding: 0; /* Remove default padding */
-  width: 20%; /* Set a fixed width for the list */
-  margin: 0 auto; /* Center the list horizontally within its container */
-}

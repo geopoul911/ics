@@ -65,11 +65,6 @@ class Login extends React.Component {
         localStorage.setItem("user_id", res.data.user.id);
         localStorage.setItem("user_email", res.data.user.email);
 
-        // Attempt to set the additional data, which might be null
-        if (res.data.user.user_profile[0].secondary_email) {
-          localStorage.setItem("user_secondary_email", res.data.user.user_profile[0].secondary_email);
-        }
-
         this.props.setUserToken(token);
         this.props.history.push("/");
       })
@@ -187,8 +182,7 @@ class Login extends React.Component {
                       disabled={this.state.isBlocked}
                     />
                     <Form.Text className="text-muted">
-                      If you don't have an account, contact Cosmoplan's IT
-                      Department.
+                      If you don't have an account, contact ICS's IT Department.
                     </Form.Text>
                   </Form.Group>
                   {/* Password field */}
@@ -220,7 +214,7 @@ class Login extends React.Component {
 
                   {this.state.isBlocked ? (
                     <p className="login-message">
-                      Please contact Cosmoplan's IT department
+                      Please contact ICS's IT department
                       <br />
                       in order to unblock your account
                     </p>
@@ -242,7 +236,7 @@ class Login extends React.Component {
                   <Button
                     className="loginButton"
                     style={{
-                      backgroundColor: this.state.isBlocked ? "red" : "#93ab3c",
+                      backgroundColor: this.state.isBlocked ? "red" : "#2a9fd9",
                       color: "white",
                     }}
                     type="submit"

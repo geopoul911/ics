@@ -21,21 +21,20 @@ class Home extends React.Component {
           <Grid columns={2} stackable>
             <Grid.Column>
               <h2>
-                Welcome to <br /> Group Plan V2
+                Welcome to <br /> Ultima CMS
               </h2>
               <label>
-                <i>Powered by Cosmoplan</i>
+                <i>Powered by ICS</i>
               </label>
               <p>
-                Thousands of tour operators manage their group related data in
-                Group Plan.
-              </p>
-              <p>The best tour operating software ever made. </p>
+                A powerful CMS designed to manage clients, projects, documents, tasks and teams <br/> All in one place.
+               </p>
+              
               <Button
                 color="orange"
                 onClick={() => (window.location = "/about")}
               >
-                About Cosmoplan
+                About ICS
               </Button>
             </Grid.Column>
             <Grid.Column>

@@ -45,7 +45,7 @@
 # from django.db.models import Q
 # import datetime
 # from django.views.decorators.csrf import csrf_exempt
-# from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.models import Token
 # from rest_framework import generics
 # from rest_framework.response import Response
 # from .serializers import (
@@ -129,9 +129,9 @@
 #     return date_list
 
 
-# def get_user(token):
-#     user = Token.objects.get(key=token).user
-#     return user
+def get_user(token):
+    user = Token.objects.get(key=token).user
+    return user
 
 
 # def get_incomplete_agents_num():

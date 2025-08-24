@@ -41,7 +41,7 @@ import RepairShopsCityMap from "../../../images/dox/repair_shops_city_map.png";
 import CoachOperatorsCityMap from "../../../images/dox/coach_operators_city_map.png";
 
 // Variables
-let icon_style = { color: "#93ab3c", fontSize: "1.7em", margin: 10 };
+let icon_style = { color: "#2a9fd9", fontSize: "1.7em", margin: 10 };
 
 const General = () => {
   return (

@@ -10,10 +10,7 @@ class Footer extends Component {
     return (
       <footer>
         <p>
-          All Rights reserved &copy; Cosmoplan Ltd. {new Date().getFullYear()}
-        </p>
-        <p>
-          Any use of this system is subject to the included
+          All Rights reserved &copy; ICS Ltd. {new Date().getFullYear()} /   Any use of this system is subject to the included
           <a href="/terms"> terms and conditions </a>
         </p>
       </footer>

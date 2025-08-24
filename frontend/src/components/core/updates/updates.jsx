@@ -22,7 +22,7 @@ import { pageHeader, forbidden, restrictedUsers } from "../../global_vars";
 window.Swal = Swal;
 
 const updateIconStyle = {
-  color: "#93ab3c",
+  color: "#2a9fd9",
   fontSize: "1.2em",
   marginRight: "0.5em",
 };
@@ -82,7 +82,7 @@ class Update extends React.Component {
                   <Icon name="dropdown" />
                   <MdUpdate
                     style={{
-                      color: "#93ab3c",
+                      color: "#2a9fd9",
                       fontSize: "1.2em",
                       marginRight: "0.5em",
                     }}

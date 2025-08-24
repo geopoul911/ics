@@ -81,7 +81,7 @@ import { ImCalendar } from "react-icons/im";
 import { HiDocumentSearch, HiOutlineDocumentReport } from "react-icons/hi";
 
 export const iconStyle = {
-  color: "#93ab3c",
+  color: "#2a9fd9",
   fontSize: "1.5em",
   marginRight: "0.5em",
 };
@@ -961,7 +961,7 @@ export const headers = {
 };
 
 export const rootIconStyle = {
-  color: "#93ab3c",
+  color: "#2a9fd9",
   fontSize: "1.5em",
   marginRight: 20,
 };

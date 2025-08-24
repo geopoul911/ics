@@ -25,6 +25,10 @@ from django.db.models.fields.files import ImageField
 from django.core.files.base import ContentFile
 import os.path
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+import re
 
 
 MODEL_NAMES_LOGGING = (
@@ -55,30 +59,12 @@ DOC_OPTIONS = (
     ('CNT', 'Contract')
 )
 
-# We store documents in the file system as well as DB.
-class Document(Model):
-    name = CharField(max_length=255, blank=True, null=True)
-    type = CharField(max_length=4, choices=DOC_OPTIONS, null=False, blank=False)
-    description = CharField(max_length=255, blank=True, null=True)
-    uploader = ForeignKey(User, on_delete=models.CASCADE)
-    updated_at = models.DateTimeField(auto_now_add=True)
-    file = models.FileField(max_length=255, blank=True)
-    size = CharField(max_length=255, blank=True, null=True)
-    expiry_date = DateField(null=True, blank=True)
 
-    class Meta:
-        verbose_name = "Document"
-        verbose_name_plural = "Documents"
-
-    def __str__(self):
-        return str(self.name)
-
-
-class Photo(Model):
+class Photo(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
-    title = CharField(max_length=255, blank=True, null=True)
-    photo = ImageField(max_length=255, blank=True, null=True)
-    photo_comment = CharField(max_length=700, default='')
+    title = models.CharField(max_length=255, blank=True, null=True)
+    photo = models.ImageField(max_length=255, blank=True, null=True)
+    photo_comment = models.CharField(max_length=700, default='')
     order = models.IntegerField(default=0)  # Field to track photo ordering
 
     class Meta:
@@ -101,10 +87,10 @@ class Photo(Model):
         super(Photo, self).delete()
 
 
-class Note(Model):
-    date = DateField(null=True, blank=True, default=timezone.now)
-    text = TextField(max_length=255, blank=True, null=True)
-    user = ForeignKey(User, blank=True, null=True, on_delete=PROTECT)
+class Note(models.Model):
+    date = models.DateField(null=True, blank=True, default=timezone.now)
+    text = models.TextField(max_length=255, blank=True, null=True)
+    user = models.ForeignKey(User, blank=True, null=True, on_delete=PROTECT)
 
     def get_human_date(self):
         return self.date.strftime("%d %b %Y")
@@ -118,26 +104,19 @@ class Note(Model):
 
 
 # Logging system, every action made in group plan is stored here
-class History(Model):
-    user = ForeignKey(User, blank=True, null=True, on_delete=PROTECT)
-    model_name = CharField(max_length=3, choices=MODEL_NAMES_LOGGING, null=False, blank=False)
-    action = CharField(max_length=3, choices=ACTION_NAMES, null=False, blank=False)
-    description = CharField(max_length=40000, null=False, blank=False)
-    timestamp = DateTimeField(auto_now_add=True)
-    ip_address = CharField(max_length=255, null=True, blank=True)
+class History(models.Model):
+    user = models.ForeignKey(User, blank=True, null=True, on_delete=PROTECT)
+    model_name = models.CharField(max_length=3, choices=MODEL_NAMES_LOGGING, null=False, blank=False)
+    action = models.CharField(max_length=3, choices=ACTION_NAMES, null=False, blank=False)
+    description = models.CharField(max_length=40000, null=False, blank=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    ip_address = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return str(self.description)
 
 
-from django.db import models
-from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
-from django.utils import timezone
-import re
-
 # Create your models here.
-
 class Country(models.Model):
     country_id = models.CharField(max_length=3, primary_key=True)
     orderindex = models.SmallIntegerField()
@@ -253,6 +232,15 @@ class BankClientAccount(models.Model):
 
     def __str__(self):
         return f"{self.bank.bankname} - {self.accountnumber}"
+
+
+
+"""
+1)	Administrator: (τεχνικός) πλήρης πρόσβαση, με πρόσβαση σε εργασίες συντήρησης της Βάσης Δεδομένων (DB).
+2)	Supervisor: (ανώτατο επίπεδο διοίκησης) πλήρης πρόσβαση, χωρίς πρόσβαση στην DB. Ορίζει υπεύθυνους (consultants in charge) και διεκπεραιωτές (consultants). Δικαιώματα για νέα εγγραφή, ανάγνωση, ενημέρωση και διαγραφή (create, read, update and delete – CRUD)
+3)	Superuser: (υπεύθυνοι-consultants in charge) πλήρης πρόσβαση, χωρίς πρόσβαση στην DB. Ορίζει διεκπεραιωτές (consultants). Δικαιώματα για νέα εγγραφή, ανάγνωση, ενημέρωση και διαγραφή (create, read, update and delete – CRUD)
+4)	User: (διεκπεραιωτές-consultants) περιορισμένη πρόσβαση. Δικαιώματα για νέα εγγραφή και ανάγνωση, όχι όμως ενημέρωση και διαγραφή (create, read - CR)
+"""
 
 class Consultant(models.Model):
     ROLE_CHOICES = [

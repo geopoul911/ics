@@ -13,7 +13,6 @@ import { Link } from "react-router-dom";
 import { BsFillKeyFill } from "react-icons/bs";
 import { MdUpdate } from "react-icons/md";
 import { FaCode } from "react-icons/fa";
-import { ImBooks } from "react-icons/im";
 import { FaInfo } from "react-icons/fa";
 import { GoLaw } from "react-icons/go";
 
@@ -35,9 +34,6 @@ class Help extends React.Component {
             </Menu.Item>
             <Menu.Item as={Link} to="/help/dev_dox">
               <FaCode style={rootIconStyle} /> Developer Documentation
-            </Menu.Item>
-            <Menu.Item as={Link} to="/help/useful_links">
-              <ImBooks style={rootIconStyle} /> Useful Links
             </Menu.Item>
             <Menu.Item as={Link} to="/help/updates">
               <MdUpdate style={rootIconStyle} /> Updates & Fixes

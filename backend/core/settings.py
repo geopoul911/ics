@@ -11,12 +11,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'f2h*8c#j3m@!q!z4&jv@1g4rb5o5-8ox-^d%o6=gi+e8&d=ofp'
 
 
-# colors = green : #93ab3c
+# colors = green : #2a9fd9;
 # black / white
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 

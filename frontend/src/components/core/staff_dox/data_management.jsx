@@ -65,7 +65,7 @@ import AllTheatersTableHeaders from "../../../images/dox/all_theaters_table_head
 import AllTrainTicketAgenciesCompaniesTableHeaders from "../../../images/dox/all_train_ticket_agencies_table_headers.png";
 
 // Variables
-let icon_style = { color: "#93ab3c", fontSize: "1.7em", margin: 10 };
+let icon_style = { color: "#2a9fd9", fontSize: "1.7em", margin: 10 };
 
 const General = () => {
   return (

@@ -4,7 +4,6 @@ footer {
   padding: 10px; /* Add padding */
   color: rgb(255, 255, 255); /* Set text color */
   text-align: center; /* Center-align text */
-  min-height: 7vh !important; /* Set a minimum height */
 }
 
 /* Styles for 'p' elements within the 'footer' */

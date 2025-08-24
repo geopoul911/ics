@@ -1,8 +1,8 @@
 .navLogo {
-  margin-right: 20px;
+  margin-right: 10px;
   margin-left: 10px;
-  width: 190px;
-  height: 50px;
+  width: 100px;
+  height: 81px;
 }
 
 .nav-link {
@@ -11,12 +11,11 @@
 }
 
 .nav-link:hover {
-  color: rgb(255, 123, 0) !important;
+  color: #2a9fd9 !important;
 }
 
 .navbar {
   font-weight: 500 !important;
-  min-height: 7vh !important;
   background-color: rgb(16, 16, 16);
 }
 
@@ -29,7 +28,6 @@
 
 #nav_group_dropdown > a {
   color: white;
-  text-align: center;
   font-size: 13px;
   font-weight: bold;
   margin-bottom: 10px;
@@ -37,7 +35,7 @@
 
 /* group dropdown's links on hover */
 #nav_group_dropdown > a:hover {
-  color: rgb(255, 123, 0);
+  color: #2a9fd9 !important;
   background-color: rgb(16, 16, 16) !important;
 }
 
@@ -53,7 +51,6 @@
 /* report dropdown's links */
 #nav_report_dropdown > a {
   color: white;
-  text-align: center;
   font-size: 13px;
   font-weight: 500;
   margin-bottom: 10px;
@@ -61,7 +58,7 @@
 
 /* report dropdown's links on hover */
 #nav_report_dropdown > a:hover {
-  color: rgb(255, 123, 0);
+  color: #2a9fd9 !important;
   background-color: rgb(16, 16, 16) !important;
 }
 
@@ -77,7 +74,6 @@
 /* data management dropdown's links */
 #nav_data_dropdown > a {
   color: white;
-  text-align: center;
   font-size: 13px;
   font-weight: 500;
   margin-bottom: 10px;
@@ -85,7 +81,7 @@
 
 /* data management dropdown's links on hover */
 #nav_data_dropdown > a:hover {
-  color: rgb(255, 123, 0);
+  color: #2a9fd9 !important;
   background-color: rgb(16, 16, 16) !important;
 }
 
@@ -99,7 +95,6 @@
 /* data management dropdown's links */
 #nav_map_dropdown > a {
   color: white;
-  text-align: center;
   font-size: 13px;
   font-weight: 500;
   margin-bottom: 10px;
@@ -107,7 +102,7 @@
 
 /* data management dropdown's links on hover */
 #nav_map_dropdown > a:hover {
-  color: rgb(255, 123, 0);
+  color: #2a9fd9 !important;
   background-color: rgb(16, 16, 16) !important;
 }
 
@@ -121,7 +116,6 @@
 /* admin dropdown's links */
 #nav_admin_dropdown > a {
   color: white;
-  text-align: center;
   font-size: 13px;
   font-weight: 500;
   margin-bottom: 10px;
@@ -129,7 +123,7 @@
 
 /* admin dropdown's links on hover */
 #nav_admin_dropdown > a:hover {
-  color: rgb(255, 123, 0);
+  color: #2a9fd9 !important;
   background-color: rgb(16, 16, 16) !important;
 }
 
@@ -145,7 +139,6 @@
 /* me dropdown links */
 #nav_me_dropdown > a {
   color: white;
-  text-align: center;
   font-size: 13px;
   font-weight: bold;
   margin-bottom: 10px;
@@ -153,17 +146,16 @@
 
 /* me dropdown's links on hover */
 #nav_me_dropdown > a:hover {
-  color: rgb(255, 123, 0);
+  color: #2a9fd9 !important;
   background-color: rgb(16, 16, 16) !important;
 }
 
 .auth_button {
   color: white;
-  text-align: center;
   font-size: 13px;
   font-weight: bold;
 }
 
 .auth_button:hover {
-  color: rgb(255, 123, 0);
+  color: #2a9fd9 !important;
 }
