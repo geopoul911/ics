@@ -24,6 +24,7 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
+    'django_filters',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -61,7 +62,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -139,7 +140,23 @@ CORS_ALLOW_HEADERS = [
 # Used for pagination
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 100
+    'PAGE_SIZE': 100,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
 }
 
 AUTHENTICATION_BACKENDS = [
@@ -150,29 +167,25 @@ AUTHENTICATION_BACKENDS = [
 # Django axes documentation : https://django-axes.readthedocs.io/en/latest/
 AXES_ENABLED = True
 
-# Blocks account based on username
-AXES_ONLY_USER_FAILURES = False
-
 # Accounts are blocked after 5th failed attempt
 AXES_FAILURE_LIMIT = 5
 
-# refer to the Django request and response objects documentation
-AXES_META_PRECEDENCE_ORDER = [
-    'HTTP_X_FORWARDED_FOR',
-    'REMOTE_ADDR',
-]
+# Lock out by combination of username and IP (default behavior)
 
-# Whitelisted IPs
-# AXES_IP_WHITELIST = ['127.0.0.1',]
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# When user logs in , delete failed attempts
+# When user logs in successfully, delete failed attempts
 AXES_RESET_ON_SUCCESS = True
 
-# If you use this approach then `CORS_ORIGIN_WHITELIST` will not have any effect
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDENTIALS = True
+# Lockout timeout (in seconds) - 0 means permanent lockout
+AXES_COOLOFF_TIME = 0
+
+# Custom lockout template
+AXES_LOCKOUT_TEMPLATE = 'axes/lockout.html'
+
+# Custom lockout URL
+AXES_LOCKOUT_URL = '/api/user/lockout/'
+
+# Use custom user model
+AUTH_USER_MODEL = "accounts.Consultant"
 
 # 2 weeks, in seconds
 SESSION_COOKIE_AGE = 1209600
@@ -184,5 +197,3 @@ SESSION_COOKIE_AGE = 1209600
 # EMAIL_USE_TLS = True
 # EMAIL_HOST_USER = ''
 # EMAIL_HOST_PASSWORD = ''
-
-AUTH_USER_MODEL = "accounts.Consultant"

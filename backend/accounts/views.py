@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import authenticate, get_user_model
 
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
@@ -9,12 +10,13 @@ from rest_framework import generics, status
 
 from axes.models import AccessAttempt
 from axes.utils import reset as axes_reset
-
-from ipware.ip import get_client_ip
+from axes.decorators import axes_dispatch
+from axes.utils import reset as axes_reset
 
 from accounts.serializers import LoginSerializer, UserSerializer
-from webapp.models import History
+# from webapp.models import History
 
+User = get_user_model()
 
 # ----- Helpers -----
 
@@ -22,9 +24,13 @@ def get_request_ip(request):
     """
     Returns best-guess client IP as a plain string.
     """
-    # ipware already looks at X-Forwarded-For & friends
-    ip, _ = get_client_ip(request)
-    return ip or request.META.get("REMOTE_ADDR") or ""
+    # Check for forwarded IP first
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0].strip()
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip or "unknown"
 
 WHITELISTED_IPS = {"localhost", "127.0.0.1", "::1"}
 
@@ -63,25 +69,26 @@ class LoginView(ObtainAuthToken):
       - Otherwise returns 400 with `failed_wl=True`
     """
     serializer_class = LoginSerializer
-    # If you’re only using token login, you can keep auth/permission classes empty here:
+    # If you're only using token login, you can keep auth/permission classes empty here:
     authentication_classes = []
     permission_classes = []
 
     def post(self, request, *args, **kwargs):
         ip = get_request_ip(request)
+        username = (request.data.get("username") or "").strip() or "(unknown)"
 
         serializer = self.serializer_class(data=request.data, context={"request": request})
         if not serializer.is_valid():
-            # safer: pull username from incoming data, not serializer.data (which is empty on invalid)
-            username = (request.data.get("username") or "").strip() or "(unknown)"
-
-            History.objects.create(
-                user=None,
-                model_name="AUT",
-                action="VIE",
-                description=f"User {username} has failed to log in",
-                ip_address=str(ip),
-            )
+            # Track failed attempt with Axes - let the middleware handle it
+            # The AxesMiddleware will automatically track failed attempts
+            
+            # History.objects.create(
+            #     user=None,
+            #     model_name="AUT",
+            #     action="VIE",
+            #     description=f"User {username} has failed to log in",
+            #     ip_address=str(ip),
+            # )
 
             # If IP is whitelisted, clear Axes counters and allow more attempts
             if ip in WHITELISTED_IPS:
@@ -102,17 +109,20 @@ class LoginView(ObtainAuthToken):
         user = serializer.validated_data["user"]
         token, _ = Token.objects.get_or_create(user=user)
 
-        History.objects.create(
-            user=user,
-            model_name="AUT",
-            action="VIE",
-            description=f"User {user.username} has logged in",
-            ip_address=str(ip),
-        )
+        # Reset failed attempts on successful login
+        axes_reset(ip=ip)
+
+        # History.objects.create(
+        #     user=user,
+        #     model_name="AUT",
+        #     action="VIE",
+        #     description=f"User {user.username} has logged in",
+        #     ip_address=str(ip),
+        # )
 
         return Response(
             {
-                "user": UserSerializer(user).data,
+                "user": UserSerializer(user, context={"request": request}).data,
                 "token": token.key,
                 "logged_in": True,
             },
@@ -142,13 +152,13 @@ class LogoutView(generics.GenericAPIView):
         if not user:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
-        History.objects.create(
-            user=user,
-            model_name="AUT",
-            action="VIE",
-            description=f"User {user.username} has logged out",
-            ip_address=str(get_request_ip(request)),
-        )
+        # History.objects.create(
+        #     user=user,
+        #     model_name="AUT",
+        #     action="VIE",
+        #     description=f"User {user.username} has logged out",
+        #     ip_address=str(get_request_ip(request)),
+        # )
 
         # Optional: actually invalidate the token
         # Token.objects.filter(key=token_str).delete()
@@ -172,7 +182,7 @@ class CheckAccessStatus(generics.GenericAPIView):
         # If whitelisted, never blocked and full attempts remaining
         if ip in WHITELISTED_IPS:
             return Response(
-                {"is_blocked": False, "attempts_remaining": limit},
+                {"isBlocked": False, "attempts_remaining": limit},
                 status=status.HTTP_200_OK,
             )
 
@@ -181,6 +191,6 @@ class CheckAccessStatus(generics.GenericAPIView):
         attempts_remaining = max(limit - failures, 0)
 
         return Response(
-            {"is_blocked": is_blocked, "attempts_remaining": attempts_remaining},
+            {"isBlocked": is_blocked, "attempts_remaining": attempts_remaining},
             status=status.HTTP_200_OK,
         )

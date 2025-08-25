@@ -1,19 +1,45 @@
+// API Configuration for Django Backend
+const API_BASE_URL = 'http://localhost:8000/api';
+
+// Get authentication token from localStorage
+const getAuthToken = () => {
+  return localStorage.getItem('user-token') || localStorage.getItem('authToken');
+};
+
+// Get CSRF token if needed
+const getCSRFToken = () => {
+  return document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+};
+
 export const apiRequest = async (method, endpoint, data = null, isBlob = false) => {
   const headers = {
-    'User-Token': localStorage.getItem('user-token'),
+    'Content-Type': 'application/json',
     'Cache-Control': 'no-cache, no-store, must-revalidate',
     'Pragma': 'no-cache',
     'Expires': '0'
   };
 
-  if (!isBlob) {
-    headers['Content-Type'] = 'application/json';
+  // Add authentication headers
+  const authToken = getAuthToken();
+  if (authToken) {
+    headers['Authorization'] = `Token ${authToken}`;
+    headers['User-Token'] = authToken;
+  }
+
+  // Add CSRF token for POST/PUT/DELETE requests
+  const csrfToken = getCSRFToken();
+  if (csrfToken && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method.toUpperCase())) {
+    headers['X-CSRFToken'] = csrfToken;
+  }
+
+  if (isBlob) {
+    delete headers['Content-Type'];
   }
 
   const options = {
     method,
     headers,
-    credentials: 'same-origin',
+    credentials: 'include',
     cache: 'no-store'
   };
 
@@ -23,16 +49,146 @@ export const apiRequest = async (method, endpoint, data = null, isBlob = false) 
     options.body = data;
   }
 
-  const response = await fetch(endpoint, options);
+  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+  
+  try {
+    const response = await fetch(url, options);
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'An error occurred' }));
-    throw new Error(error.error || 'Request failed');
+    if (!response.ok) {
+      if (response.status === 401) {
+        // Unauthorized - redirect to login
+        localStorage.removeItem('user-token');
+        localStorage.removeItem('authToken');
+        window.location.href = '/login';
+        throw new Error('Authentication required');
+      }
+      
+      const error = await response.json().catch(() => ({ error: 'An error occurred' }));
+      throw new Error(error.error || error.detail || `HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    if (isBlob) {
+      return response.blob();
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('API Request Error:', error);
+    throw error;
   }
+};
 
-  if (isBlob) {
-    return response.blob();
+// Convenience methods for common HTTP operations
+export const apiGet = (endpoint) => apiRequest('GET', endpoint);
+export const apiPost = (endpoint, data) => apiRequest('POST', endpoint, data);
+export const apiPut = (endpoint, data) => apiRequest('PUT', endpoint, data);
+export const apiDelete = (endpoint) => apiRequest('DELETE', endpoint);
+export const apiPatch = (endpoint, data) => apiRequest('PATCH', endpoint, data);
+
+// Data Management API endpoints
+export const API_ENDPOINTS = {
+  // Reference Data
+  COUNTRIES: '/data_management/countries/',
+  PROVINCES: '/data_management/provinces/',
+  CITIES: '/data_management/cities/',
+  BANKS: '/data_management/banks/',
+  INSURANCE_CARRIERS: '/data_management/insurance-carriers/',
+  
+  // Reference Data for dropdowns
+  REFERENCE_COUNTRIES: '/data_management/reference/countries/',
+  REFERENCE_PROVINCES: '/data_management/reference/provinces/',
+  REFERENCE_CITIES: '/data_management/reference/cities/',
+  REFERENCE_BANKS: '/data_management/reference/banks/',
+  REFERENCE_CONSULTANTS: '/data_management/reference/consultants/',
+  REFERENCE_PROJECT_CATEGORIES: '/data_management/reference/project-categories/',
+  REFERENCE_TASK_CATEGORIES: '/data_management/reference/task-categories/',
+  REFERENCE_PROFESSIONS: '/data_management/reference/professions/',
+  REFERENCE_PROFESSIONALS: '/data_management/reference/professionals/',
+  REFERENCE_INSURANCE_CARRIERS: '/data_management/reference/insurance-carriers/',
+  
+  // Client Management
+  CLIENTS: '/data_management/clients/',
+  BANK_CLIENT_ACCOUNTS: '/data_management/bank-client-accounts/',
+  
+  // Consultant Management
+  CONSULTANTS: '/data_management/consultants/',
+  
+  // Project Management
+  PROJECT_CATEGORIES: '/data_management/project-categories/',
+  PROJECTS: '/data_management/projects/',
+  ASSOCIATED_CLIENTS: '/data_management/associated-clients/',
+  
+  // Document Management
+  DOCUMENTS: '/data_management/documents/',
+  
+  // Professional Management
+  PROFESSIONS: '/data_management/professions/',
+  PROFESSIONALS: '/data_management/professionals/',
+  CLIENT_CONTACTS: '/data_management/client-contacts/',
+  
+  // Property Management
+  PROPERTIES: '/data_management/properties/',
+  BANK_PROJECT_ACCOUNTS: '/data_management/bank-project-accounts/',
+  
+  // Task Management
+  TASK_CATEGORIES: '/data_management/task-categories/',
+  PROJECT_TASKS: '/data_management/project-tasks/',
+  TASK_COMMENTS: '/data_management/task-comments/',
+  
+  // Cash and Taxation Management
+  CASH: '/data_management/cash/',
+  TAXATION_PROJECTS: '/data_management/taxation-projects/',
+  
+  // Notification Management
+  NOTIFICATIONS: '/data_management/notifications/',
+  
+  // Special endpoints
+  CITIES_BY_PROVINCE: '/data_management/cities/by-province/',
+  CLIENTS_SEARCH: '/data_management/clients/search/',
+  CLIENTS_STATISTICS: '/data_management/clients/statistics/',
+  PROJECTS_SEARCH: '/data_management/projects/search/',
+  PROJECTS_STATISTICS: '/data_management/projects/statistics/',
+  DOCUMENTS_EXPIRED: '/data_management/documents/expired/',
+  DOCUMENTS_EXPIRING_SOON: '/data_management/documents/expiring-soon/',
+  PROJECT_TASKS_OVERDUE: '/data_management/project-tasks/overdue/',
+  PROJECT_TASKS_MY_TASKS: '/data_management/project-tasks/my-tasks/',
+  PROJECT_TASKS_STATISTICS: '/data_management/project-tasks/statistics/',
+  CASH_STATISTICS: '/data_management/cash/statistics/',
+  TAXATION_PROJECTS_OVERDUE: '/data_management/taxation-projects/overdue/',
+  NOTIFICATIONS_UNREAD: '/data_management/notifications/unread/',
+};
+
+// Helper function to handle pagination
+export const handlePagination = (response) => {
+  if (response.results) {
+    return {
+      data: response.results,
+      total: response.count,
+      next: response.next,
+      previous: response.previous
+    };
   }
+  return {
+    data: response,
+    total: response.length,
+    next: null,
+    previous: null
+  };
+};
 
-  return response.json();
+// Helper function to build query parameters
+export const buildQueryParams = (params) => {
+  const queryParams = new URLSearchParams();
+  
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== null && value !== undefined && value !== '') {
+      if (Array.isArray(value)) {
+        value.forEach(v => queryParams.append(key, v));
+      } else {
+        queryParams.append(key, value);
+      }
+    }
+  });
+  
+  return queryParams.toString();
 }; 

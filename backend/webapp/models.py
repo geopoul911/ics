@@ -33,32 +33,12 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-MODEL_NAMES_LOGGING = (
-    ('GT', 'GroupTransfer'),
-)
-
-
 # Used for custom object based permission system
 ACTION_NAMES = (
     ('VIE', 'View'),
     ('CRE', 'Create'),
     ('UPD', 'Update'),
     ('DEL', 'Delete'),
-)
-
-# Group's status codes, currently we only use 4 and 5
-STATUS_CODES = (
-    ('0', 'N/A'),
-    ('1', 'Pending Confirmation'),
-    ('2', 'Pending VISA\'s'),
-    ('3', 'Pending Payment'),
-    ('4', 'Cancelled'),
-    ('5', 'Confirmed'),
-)
-
-# Document options are used in groups, drivers and coaches to categorize their documents.
-DOC_OPTIONS = (
-    ('CNT', 'Contract')
 )
 
 
@@ -105,17 +85,17 @@ class Note(models.Model):
         return str(self.text[:10])
 
 
-# Logging system, every action made in group plan is stored here
-class History(models.Model):
-    user = models.ForeignKey(User, blank=True, null=True, on_delete=PROTECT)
-    model_name = models.CharField(max_length=3, choices=MODEL_NAMES_LOGGING, null=False, blank=False)
-    action = models.CharField(max_length=3, choices=ACTION_NAMES, null=False, blank=False)
-    description = models.CharField(max_length=40000, null=False, blank=False)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    ip_address = models.CharField(max_length=255, null=True, blank=True)
+# # Logging system, every action made in group plan is stored here
+# class History(models.Model):
+#     user = models.ForeignKey(User, blank=True, null=True, on_delete=PROTECT)
+#     model_name = models.CharField(max_length=3, choices=MODEL_NAMES_LOGGING, null=False, blank=False)
+#     action = models.CharField(max_length=3, choices=ACTION_NAMES, null=False, blank=False)
+#     description = models.CharField(max_length=40000, null=False, blank=False)
+#     timestamp = models.DateTimeField(auto_now_add=True)
+#     ip_address = models.CharField(max_length=255, null=True, blank=True)
 
-    def __str__(self):
-        return str(self.description)
+#     def __str__(self):
+#         return str(self.description)
 
 
 # Create your models here.

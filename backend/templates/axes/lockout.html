@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Account Locked</title>
+</head>
+<body>
+    <h1>Account Locked</h1>
+    <p>Your account has been locked due to multiple failed login attempts.</p>
+    <p>Please contact the administrator to unlock your account.</p>
+    
+    <script>
+        // Return JSON response for API calls
+        if (window.location.pathname.includes('/api/')) {
+            document.body.innerHTML = JSON.stringify({
+                "detail": "Account locked due to multiple failed login attempts",
+                "locked": true,
+                "message": "Please contact the administrator to unlock your account"
+            });
+        }
+    </script>
+</body>
+</html>

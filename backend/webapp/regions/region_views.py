@@ -1,7 +1,6 @@
 # from django.shortcuts import render
 from webapp.models import (
     User,
-    History,
     Country,
     City,
     Province,
@@ -54,16 +53,6 @@ permissions_full_text_reverse = {
     'Create': 'CRE',
     'Update': 'UPD',
     'Delete': 'DEL',
-}
-
-# All models
-models_full_text = {
-    'GT': 'GroupTransfer',
-}
-
-# All models reversed
-models_full_text_reverse = {
-    'GroupTransfer': 'GT',
 }
 
 

@@ -3,7 +3,6 @@ from webapp.models import (
     Country,
     City,
     Province,
-    History,
 )
 from webapp.serializers import (
     CountrySerializer,
@@ -39,13 +38,6 @@ class AddCountry(generics.UpdateAPIView):
                 title=request.data["title"],
             )
 
-            # History.objects.create(
-            #     user=user,
-            #     model_name="CNT",
-            #     action="CRE",
-            #     description=f"User: {user.username} created Country {country.country_id} - {country.title}",
-            # )
-
             context["model"] = CountrySerializer(country, context={"request": request}).data
             return Response(data=context, status=status.HTTP_200_OK)
         except Exception as exc:
@@ -79,13 +71,6 @@ class AddProvince(generics.UpdateAPIView):
                 country=country,
                 title=request.data["title"],
             )
-
-            # History.objects.create(
-            #     user=user,
-            #     model_name="PRO",
-            #     action="CRE",
-            #     description=f"User: {user.username} created Province {province.province_id} - {province.title} (Country: {country.country_id})",
-            # )
 
             context["model"] = ProvinceSerializer(province, context={"request": request}).data
             return Response(data=context, status=status.HTTP_200_OK)
@@ -123,13 +108,6 @@ class AddCity(generics.UpdateAPIView):
                 province=province,
                 title=request.data["title"],
             )
-
-            # History.objects.create(
-            #     user=user,
-            #     model_name="CTY",
-            #     action="CRE",
-            #     description=f"User: {user.username} created City {city.city_id} - {city.title} (Province: {province.province_id}, Country: {country.country_id})",
-            # )
 
             context["model"] = CitySerializer(city, context={"request": request}).data
             return Response(data=context, status=status.HTTP_200_OK)

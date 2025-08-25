@@ -1,0 +1,84 @@
+Phase 0 — Repo + tooling
+“Init monorepo with backend/ (Django 5, DRF, django-filter, django-environ, django-cors-headers) and frontend/ (Vite + React + TS, React Router, React Query, React Hook Form + Zod, TanStack Table). Add Docker, .env, pre-commit (black/isort/ruff), CI workflow.”
+
+Phase 1 — Django project/apps
+“Create Django project ics and apps: accounts (Consultants/User/RBAC), geo (Countries/Provinces/Cities), catalog (static lookups: InsuranceCarriers, ProjectCategories, TaskCategories, Professions, Banks), clients, projects, documents, finance, directory (Professionals), notifications, reports.”
+“Install and configure DRF, CORS, django-filter, AUTH_USER_MODEL=accounts.Consultant, Postgres, timezone Europe/Athens.”
+
+Phase 2 — Data model (from blueprint)
+“Model entities exactly as in the blueprint: Countries, Provinces, Cities; InsuranceCarriers; Banks; Clients; BankClientAccounts; Consultants (as custom user); ProjectCategories; Projects; AssociatedClients (unique_together project+client); Documents; Professions; Professionals; ClientContacts; Properties; BankProjectAccounts; TaskCategories; ProjectTasks; TaskComments; Cash; TaxationProjects. Add FK/constraints per spec.”
+“Prefer M2M for Projects ↔ ProjectCategories with a through table (instead of char(26) codes) to keep 3NF.”
+“Add choices/enums for statuses (project + task), priorities, property types/market/status; boolean flags as specified; auto-set date fields on status transitions.”
+“Add indexes: common filters (city_id, country_id, consultant_id, status, deadline, trandate, created).”
+(These come straight from your “Πίνακας οντοτήτων/σχεδιασμός πινάκων/κλειδιών” and the relationships diagram. )
+
+Phase 3 — Accounts & RBAC
+“Implement accounts.Consultant extending AbstractUser with fields: fullname, phone, mobile, photo, can_assign_task, cashpassport (list of country codes), active. Migrate.”
+“Create Django Groups: Administrator, Supervisor, Superuser, User, and map CRUD permissions as per roles table.”
+“Seed a superuser and demo users in each role.”
+
+Phase 4 — Admin & seed data
+“Register all models in Django admin with list filters and search fields matching ‘Basic Search Lists’ section (surname/name/mobile/email for Clients, etc.). Add inlines (e.g., BankClientAccounts under Clients).”
+“Management commands to seed: Countries/Provinces/Cities (GR & CA), Banks, ProjectCategories, TaskCategories, Professions, InsuranceCarriers.”
+
+Phase 5 — Validation rules
+“Implement validators for postal codes (GR/CA), phone formats, AFM/AMKA/SIN, passport formats, IBAN/SWIFT/transit/account numbers, filecode pattern AAA/######/MM-YYYY. Add model + serializer validators and clean methods.”
+“Add range validation helpers (date ranges, deadline ≥ today for tasks where applicable).”
+(Your ‘Έλεγχος Εγκυρότητας Δεδομένων’ section lists all fields to validate.)
+
+Phase 6 — Business logic
+“Projects: derived status from boolean flags; auto-set dates when flags tick; restrict transitions; compute % complete from ProjectTasks (weight or count).”
+“Tasks: status lifecycle (Created → Assigned → InProgress → Completed), auto assigndate, completiondate, optional efforttime.”
+“Documents: status flow + logstatus append‑only trail; validuntil required; allow client-level or project-level docs.”
+“Cash: split amountexp/amountpay; store currency based on country; sum per project & per client.”
+
+Phase 7 — DRF API
+“Create serializers/viewsets for all entities. Enable filtering, ordering, search according to ‘Βασικές Λίστες Αναζήτησης’ and ‘Φίλτρα πινάκων’. Paginate.”
+“Endpoints:
+/clients/, /clients/{id}/bank-accounts/, /clients/{id}/documents/aggregate/ (personal + across projects)
+/projects/ with nested: /projects/{id}/associated-clients/, /tasks/, /documents/, /properties/, /cash/, /bank-accounts/
+/tasks/{id}/comments/
+/catalog/... for lookups
+/reports/... for report queries.”
+“Permissions: per-role CRUD, plus object-level rules (e.g., task assign/complete).”
+“File uploads: documents.filepath as FileField (S3 or local dev), virus check stub, max sizes, PDF/IMG whitelisting.”
+
+Phase 8 — Notifications
+“Create signal handlers for new/updated Project, Task, TaskComment to notify: task assigner, project consultant, optionally Supervisors; store in notifications and send email (Celery later).”
+“Email templates: project created/assigned/progress/completed; document expiring; periodic status digest.”
+
+Phase 9 — Reports & stats
+“Implement report endpoints from ‘Αναφορές’ section: Clients, Projects, Tasks, Properties, Documents (status/expiry), Cash (date range), Professionals. Each accepts filters exactly as listed and returns tabular JSON plus totals.”
+“Stats endpoints: counts by category, completion times, workload by consultant, tasks per category for completed projects.”
+
+Phase 10 — React app scaffolding
+“Create routes and layout: /login, /dashboard, /clients, /projects, /tasks, /documents, /properties, /cash, /directory, /catalog, /reports, /settings.”
+“Add auth context + protected routes; read RBAC/permissions to gate actions.”
+“Global UI kit: shadcn/ui; tables with TanStack Table; filters panel components; modals/drawers for CRUD.”
+
+Phase 11 — Screens (brief per entity)
+“Clients: searchable grid (Surname, Name, City, Phone1, Mobile1, SIN, AFM, Email) + detail with tabs: Overview, Projects, Documents (personal or all), Bank Accounts, Properties (via projects), Cash (via projects).”
+“Projects: grid (Title, Created, Consultant, Filecode, Status, Deadline, %). Detail tabs: Overview, Associated Clients, Tasks (kanban + table), Documents, Properties, Bank Accounts, Cash timeline.”
+“Tasks: global list with filters (status, deadline, category, assigner/assignee) + inline transitions + comments thread.”
+“Documents: list with filters (client, status, validuntil range, created) + upload, status trail viewer.”
+“Properties: filters (country/province/city/type/status/market).”
+“Cash: filters (trandate range, country) + running totals.”
+“Directory (Professionals/ClientContacts): search by city/profession/reliability.”
+“Catalog: CRUD simple forms for static lists.”
+“Reports: build queries UI mirroring each report’s criteria; render table + export CSV.”
+
+Phase 12 — Forms & validation (frontend)
+“Implement Zod schemas mirroring backend validators (postal codes, AFM/AMKA/SIN, IBAN, filecode, dates). Show bilingual labels (EN/GR) as per labels tables; store i18n keys to allow EN/GR toggle.”
+
+Phase 13 — Quality & tests
+“Django tests: models (constraints/validators), API (permissions/filters), business rules (status transitions), reports.
+React tests: critical forms and table filtering.”
+“Add demo fixture loader to create a few clients, a multi-client project, tasks with comments, documents w/ expiry, cash entries.”
+
+Phase 14 — Deployment
+“Docker images for backend/frontend, Nginx, Postgres.
+Env: DJANGO_SECRET_KEY, DB, CORS, S3 creds.
+Static/media to S3; collectstatic; run migrations & createsuperuser on first boot.”
+
+Phase 15 — Nice-to-haves (time-permitting)
+“Task Kanban, Gantt-ish timeline per project; calendar view by deadlines; CSV importers (banks, geo); Celery for scheduled document-expiry emails; advanced auditing (django-simple-history).”

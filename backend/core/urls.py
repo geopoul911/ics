@@ -22,7 +22,7 @@ urlpatterns = [
     # Regions
     path('api/regions/', include('webapp.regions.region_urls')),
 
-        # Data Management
-    # path('api/data_management/', include('webapp.data_management.data_management_urls')),
+    # Data Management
+    path('api/data_management/', include('webapp.data_management_urls')),
 
 ]
