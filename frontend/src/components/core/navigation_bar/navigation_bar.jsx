@@ -6,9 +6,12 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import "bootstrap-css-only/css/bootstrap.min.css";
 import "./navigation_bar.css";
 
+import axios from "axios";
+import { apiPost, API_ENDPOINTS } from "../../../utils/api";
+
 // Modules / Functions
 import { Navbar, Nav, Dropdown } from "react-bootstrap";
-import axios from "axios";
+
 import { Link } from "react-router-dom";
 
 // Icons / Images
@@ -62,11 +65,7 @@ class NavigationBar extends Component {
 
   // Logout
   handleLogout = ({ setUserToken }) => {
-    axios({
-      method: "post",
-      url: LOGOUT,
-      headers: headers,
-    });
+    apiPost(API_ENDPOINTS.LOGOUT);
     localStorage.removeItem("userToken");
     setUserToken(null);
   };
@@ -127,7 +126,6 @@ class NavigationBar extends Component {
     });
   };
 
-
     // Open Region Dropdown
   regionOpen = () => {
     this.setState({
@@ -148,7 +146,6 @@ class NavigationBar extends Component {
       meIsOpen: false,
     });
   };
-
 
   render() {
     /* Ternary operator to determine if user is logged in or not */
@@ -220,7 +217,6 @@ class NavigationBar extends Component {
                   </Dropdown.Menu>
                 </Dropdown>
               </Nav.Link>
-
 
               {/* Reports */}
               <Nav.Link href="/reports/root/" onMouseLeave={this.reportClose} onMouseOver={this.reportOpen}>

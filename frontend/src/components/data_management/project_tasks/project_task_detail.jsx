@@ -10,7 +10,7 @@ import {
   ProgressBar,
   // Alert
 } from 'react-bootstrap';
-import axios from 'axios';
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 import Swal from 'sweetalert2';
 
 const ProjectTaskDetail = () => {
@@ -42,9 +42,9 @@ const ProjectTaskDetail = () => {
   const loadReferenceData = useCallback(async () => {
     try {
       const [projectsRes, consultantsRes, categoriesRes] = await Promise.all([
-        axios.get('http://localhost:8000/api/projects/'),
-        axios.get('http://localhost:8000/api/consultants/'),
-        axios.get('http://localhost:8000/api/task_categories/')
+        apiGet(API_ENDPOINTS.PROJECTS),
+        apiGet(API_ENDPOINTS.CONSULTANTS),
+        apiGet(API_ENDPOINTS.TASK_CATEGORIES)
       ]);
       setProjects(projectsRes.data);
       setConsultants(consultantsRes.data);
@@ -58,7 +58,7 @@ const ProjectTaskDetail = () => {
   const loadProjectTask = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8000/api/project_tasks/${id}/`);
+      const response = await apiGet(`${API_ENDPOINTS.PROJECT_TASKS}${id}/`);
       const task = response.data;
       setFormData({
         title: task.title || '',
@@ -159,10 +159,10 @@ const ProjectTaskDetail = () => {
       };
 
       if (isCreating) {
-        await axios.post('http://localhost:8000/api/project_tasks/', submitData);
+        await apiPost(API_ENDPOINTS.PROJECT_TASKS, submitData);
         Swal.fire('Success', 'Project task created successfully', 'success');
       } else {
-        await axios.put(`http://localhost:8000/api/project_tasks/${id}/`, submitData);
+        await apiPut(`${API_ENDPOINTS.PROJECT_TASKS}${id}/`, submitData);
         Swal.fire('Success', 'Project task updated successfully', 'success');
       }
       history.push('/data_management/project_tasks');
@@ -188,7 +188,7 @@ const ProjectTaskDetail = () => {
     if (result.isConfirmed) {
       setIsLoading(true);
       try {
-        await axios.delete(`http://localhost:8000/api/project_tasks/${id}/`);
+        await apiDelete(`${API_ENDPOINTS.PROJECT_TASKS}${id}/`);
         Swal.fire('Deleted!', 'Project task has been deleted.', 'success');
         history.push('/data_management/project_tasks');
       } catch (error) {

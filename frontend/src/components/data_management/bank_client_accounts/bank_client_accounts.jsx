@@ -1,3 +1,4 @@
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 // Built-ins
 import React from "react";
 
@@ -6,7 +7,6 @@ import NavigationBar from "../../core/navigation_bar/navigation_bar";
 import Footer from "../../core/footer/footer";
 
 // Modules / Functions
-import axios from "axios";
 import filterFactory, { textFilter } from "react-bootstrap-table2-filter";
 import ToolkitProvider from "react-bootstrap-table2-toolkit";
 import Swal from "sweetalert2";
@@ -28,8 +28,6 @@ import {
 
 // Variables
 window.Swal = Swal;
-
-const GET_BANK_CLIENT_ACCOUNTS = "http://localhost:8000/api/bank_client_accounts/";
 
 const columns = [
   {
@@ -121,34 +119,36 @@ class BankClientAccounts extends React.Component {
     };
   }
 
-  fetchBankClientAccounts() {
+  async fetchBankClientAccounts() {
     this.setState({ is_loaded: false });
-    axios
-      .get(GET_BANK_CLIENT_ACCOUNTS, {
-        headers: headers,
-      })
-      .then((res) => {
-        const accounts = res.data;
+    try {
+      const response = await apiGet(API_ENDPOINTS.BANK_CLIENT_ACCOUNTS);
+      if (response.success) {
         this.setState({
-          bank_client_accounts: accounts,
+          bank_client_accounts: response.data,
           is_loaded: true,
         });
-      })
-      .catch((e) => {
-        console.log(e);
-        if (e.response?.status === 401) {
-          this.setState({
-            forbidden: true,
-          });
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Failed to load bank client accounts.",
-          });
-        }
-        this.setState({ is_loaded: true });
-      });
+      } else {
+        this.setState({
+          bank_client_accounts: [],
+          is_loaded: true,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching bank client accounts:', error);
+      if (error.message === 'Authentication required') {
+        this.setState({
+          forbidden: true,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to load bank client accounts.",
+        });
+      }
+      this.setState({ is_loaded: true });
+    }
   }
 
   handlePageChange = (selectedPage) => {

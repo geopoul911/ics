@@ -8,7 +8,7 @@ import {
   Col,
   Badge
 } from 'react-bootstrap';
-import axios from 'axios';
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 import Swal from 'sweetalert2';
 
 const CashDetail = () => {
@@ -36,9 +36,9 @@ const CashDetail = () => {
   const loadReferenceData = useCallback(async () => {
     try {
       const [clientsRes, projectsRes, categoriesRes] = await Promise.all([
-        axios.get('http://localhost:8000/api/clients/'),
-        axios.get('http://localhost:8000/api/projects/'),
-        axios.get('http://localhost:8000/api/cash_categories/')
+        apiGet(API_ENDPOINTS.CLIENTS),
+        apiGet(API_ENDPOINTS.PROJECTS),
+        apiGet(API_ENDPOINTS.CASH_CATEGORIES)
       ]);
       setClients(clientsRes.data);
       setProjects(projectsRes.data);
@@ -52,7 +52,7 @@ const CashDetail = () => {
   const loadCash = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8000/api/cash/${id}/`);
+      const response = await apiGet(`${API_ENDPOINTS.CASH}${id}/`);
       const cash = response.data;
       setFormData({
         client: cash.client || '',
@@ -129,10 +129,10 @@ const CashDetail = () => {
       };
 
       if (isCreating) {
-        await axios.post('http://localhost:8000/api/cash/', submitData);
+        await apiPost(API_ENDPOINTS.CASH, submitData);
         Swal.fire('Success', 'Cash transaction created successfully', 'success');
       } else {
-        await axios.put(`http://localhost:8000/api/cash/${id}/`, submitData);
+        await apiPut(`${API_ENDPOINTS.CASH}${id}/`, submitData);
         Swal.fire('Success', 'Cash transaction updated successfully', 'success');
       }
       history.push('/data_management/cash');
@@ -158,7 +158,7 @@ const CashDetail = () => {
     if (result.isConfirmed) {
       setIsLoading(true);
       try {
-        await axios.delete(`http://localhost:8000/api/cash/${id}/`);
+        await apiDelete(`${API_ENDPOINTS.CASH}${id}/`);
         Swal.fire('Deleted!', 'Cash transaction has been deleted.', 'success');
         history.push('/data_management/cash');
       } catch (error) {

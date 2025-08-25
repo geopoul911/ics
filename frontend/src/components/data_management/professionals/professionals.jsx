@@ -1,3 +1,4 @@
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 // Built-ins
 import React from "react";
 
@@ -6,7 +7,7 @@ import NavigationBar from "../../core/navigation_bar/navigation_bar";
 import Footer from "../../core/footer/footer";
 
 // Modules / Functions
-import axios from "axios";
+
 import filterFactory, { textFilter } from "react-bootstrap-table2-filter";
 import ToolkitProvider from "react-bootstrap-table2-toolkit";
 import Swal from "sweetalert2";
@@ -28,8 +29,6 @@ import {
 
 // Variables
 window.Swal = Swal;
-
-const GET_PROFESSIONALS = "http://localhost:8000/api/professionals/";
 
 // Helper function to format professional name
 const formatProfessionalName = (professional) => {
@@ -212,8 +211,7 @@ class Professionals extends React.Component {
 
   fetchProfessionals() {
     this.setState({ is_loaded: false });
-    axios
-      .get(GET_PROFESSIONALS, {
+    apiGet(API_ENDPOINTS.PROFESSIONALS, {
         headers: headers,
       })
       .then((res) => {

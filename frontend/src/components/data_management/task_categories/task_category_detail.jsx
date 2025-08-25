@@ -7,7 +7,7 @@ import {
   Row,
   Col,
 } from 'react-bootstrap';
-import axios from 'axios';
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 import Swal from 'sweetalert2';
 
 const TaskCategoryDetail = () => {
@@ -27,7 +27,7 @@ const TaskCategoryDetail = () => {
   const loadTaskCategory = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8000/api/task_categories/${id}/`);
+      const response = await apiGet(`${API_ENDPOINTS.TASK_CATEGORIES}${id}/`);
       const category = response.data;
       setFormData({
         title: category.title || '',
@@ -77,10 +77,10 @@ const TaskCategoryDetail = () => {
     setIsLoading(true);
     try {
       if (isCreating) {
-        await axios.post('http://localhost:8000/api/task_categories/', formData);
+        await apiPost(API_ENDPOINTS.TASK_CATEGORIES, formData);
         Swal.fire('Success', 'Task category created successfully', 'success');
       } else {
-        await axios.put(`http://localhost:8000/api/task_categories/${id}/`, formData);
+        await apiPut(`${API_ENDPOINTS.TASK_CATEGORIES}${id}/`, formData);
         Swal.fire('Success', 'Task category updated successfully', 'success');
       }
       history.push('/data_management/task_categories');
@@ -106,7 +106,7 @@ const TaskCategoryDetail = () => {
     if (result.isConfirmed) {
       setIsLoading(true);
       try {
-        await axios.delete(`http://localhost:8000/api/task_categories/${id}/`);
+        await apiDelete(`${API_ENDPOINTS.TASK_CATEGORIES}${id}/`);
         Swal.fire('Deleted!', 'Task category has been deleted.', 'success');
         history.push('/data_management/task_categories');
       } catch (error) {

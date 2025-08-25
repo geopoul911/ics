@@ -7,7 +7,7 @@ import {
   Row,
   Col
 } from 'react-bootstrap';
-import axios from 'axios';
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 import Swal from 'sweetalert2';
 
 const ProfessionalDetail = () => {
@@ -42,8 +42,8 @@ const ProfessionalDetail = () => {
   const loadReferenceData = useCallback(async () => {
     try {
       const [professionsRes, countriesRes] = await Promise.all([
-        axios.get('http://localhost:8000/api/professions/'),
-        axios.get('http://localhost:8000/api/countries/')
+        apiGet(API_ENDPOINTS.PROFESSIONS),
+        apiGet(API_ENDPOINTS.COUNTRIES)
       ]);
       setProfessions(professionsRes.data);
       setCountries(countriesRes.data);
@@ -60,7 +60,7 @@ const ProfessionalDetail = () => {
       return;
     }
     try {
-      const response = await axios.get(`http://localhost:8000/api/provinces/?country=${countryId}`);
+      const response = await apiGet(`${API_ENDPOINTS.PROVINCES}?country=${countryId}`);
       setProvinces(response.data);
       setCities([]);
     } catch (error) {
@@ -74,7 +74,7 @@ const ProfessionalDetail = () => {
       return;
     }
     try {
-      const response = await axios.get(`http://localhost:8000/api/cities/?province=${provinceId}`);
+      const response = await apiGet(`${API_ENDPOINTS.cities}?province=${provinceId}`);
       setCities(response.data);
     } catch (error) {
       console.error('Error loading cities:', error);
@@ -84,7 +84,7 @@ const ProfessionalDetail = () => {
   const loadProfessional = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8000/api/professionals/${id}/`);
+      const response = await apiGet(`${API_ENDPOINTS.PROFESSIONALS}${id}/`);
       const professional = response.data;
       setFormData({
         firstname: professional.firstname || '',
@@ -181,10 +181,10 @@ const ProfessionalDetail = () => {
       };
 
       if (isCreating) {
-        await axios.post('http://localhost:8000/api/professionals/', submitData);
+        await apiPost(API_ENDPOINTS.PROFESSIONALS, submitData);
         Swal.fire('Success', 'Professional created successfully', 'success');
       } else {
-        await axios.put(`http://localhost:8000/api/professionals/${id}/`, submitData);
+        await apiPut(`${API_ENDPOINTS.PROFESSIONALS}${id}/`, submitData);
         Swal.fire('Success', 'Professional updated successfully', 'success');
       }
       history.push('/data_management/professionals');
@@ -210,7 +210,7 @@ const ProfessionalDetail = () => {
     if (result.isConfirmed) {
       setIsLoading(true);
       try {
-        await axios.delete(`http://localhost:8000/api/professionals/${id}/`);
+        await apiDelete(`${API_ENDPOINTS.PROFESSIONALS}${id}/`);
         Swal.fire('Deleted!', 'Professional has been deleted.', 'success');
         history.push('/data_management/professionals');
       } catch (error) {

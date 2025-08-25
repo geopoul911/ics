@@ -6,7 +6,7 @@ import NavigationBar from "../../core/navigation_bar/navigation_bar";
 import Footer from "../../core/footer/footer";
 
 // Modules / Functions
-import axios from "axios";
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 import filterFactory, { textFilter } from "react-bootstrap-table2-filter";
 import ToolkitProvider from "react-bootstrap-table2-toolkit";
 import Swal from "sweetalert2";
@@ -29,8 +29,6 @@ import {
 
 // Variables
 window.Swal = Swal;
-
-const GET_PROFESSIONS = "http://localhost:8000/api/professions/";
 
 const ProfessionsComponent = () => {
   const history = useHistory();
@@ -69,30 +67,25 @@ const ProfessionsComponent = () => {
   const [professions, setProfessions] = React.useState([]);
   const [is_loaded, setIsLoaded] = React.useState(false);
 
-  const fetchProfessions = () => {
+  const fetchProfessions = async () => {
     setIsLoaded(false);
-    axios
-      .get(GET_PROFESSIONS, {
-        headers: headers,
-      })
-      .then((res) => {
-        const professions = res.data;
-        setProfessions(professions);
-        setIsLoaded(true);
-      })
-      .catch((e) => {
-        console.log(e);
-        if (e.response?.status === 401) {
-          // Handle forbidden
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Failed to load professions.",
-          });
-        }
-        setIsLoaded(true);
-      });
+    try {
+      const professions = await apiGet(API_ENDPOINTS.PROFESSIONS);
+      setProfessions(professions);
+      setIsLoaded(true);
+    } catch (error) {
+      console.log(error);
+      if (error.message === 'Authentication required') {
+        // Handle forbidden
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to load professions.",
+        });
+      }
+      setIsLoaded(true);
+    }
   };
 
 

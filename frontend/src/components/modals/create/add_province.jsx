@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 // Icons / Images
 import { BiPlus } from "react-icons/bi";
 import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
-
-// Modules / Functions
 import axios from "axios";
+import { apiGet, apiPut, apiPost, apiDelete, API_ENDPOINTS } from "../../../utils/api";
+// Modules / Functions
+
 import Swal from "sweetalert2";
 import { Modal, Col, Form, Row } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
@@ -62,7 +63,7 @@ function AddProvinceModal() {
   // Fetch countries for dropdown
   useEffect(() => {
     if (show) {
-      axios.get(GET_COUNTRIES, { headers })
+      apiGet(GET_COUNTRIES)
         .then((res) => {
           setCountries(res.data.all_countries || []);
         })

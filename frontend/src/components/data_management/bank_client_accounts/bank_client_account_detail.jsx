@@ -8,8 +8,8 @@ import {
   Col,
   Badge,
 } from 'react-bootstrap';
-import axios from 'axios';
 import Swal from 'sweetalert2';
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 
 const BankClientAccountDetail = () => {
   const { id } = useParams();
@@ -34,8 +34,8 @@ const BankClientAccountDetail = () => {
   const loadReferenceData = useCallback(async () => {
     try {
       const [banksRes, clientsRes] = await Promise.all([
-        axios.get('http://localhost:8000/api/banks/'),
-        axios.get('http://localhost:8000/api/clients/')
+        apiGet(API_ENDPOINTS.BANKS),
+        apiGet(API_ENDPOINTS.CLIENTS)
       ]);
       setBanks(banksRes.data);
       setClients(clientsRes.data);
@@ -48,7 +48,7 @@ const BankClientAccountDetail = () => {
   const loadBankClientAccount = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8000/api/bank_client_accounts/${id}/`);
+      const response = await apiGet(`${API_ENDPOINTS.BANK_CLIENT_ACCOUNTS}${id}/`);
       const account = response.data;
       setFormData({
         bank: account.bank || '',
@@ -124,10 +124,10 @@ const BankClientAccountDetail = () => {
       };
 
       if (isCreating) {
-        await axios.post('http://localhost:8000/api/bank_client_accounts/', submitData);
+        await apiPost(API_ENDPOINTS.BANK_CLIENT_ACCOUNTS, submitData);
         Swal.fire('Success', 'Bank client account created successfully', 'success');
       } else {
-        await axios.put(`http://localhost:8000/api/bank_client_accounts/${id}/`, submitData);
+        await apiPut(`${API_ENDPOINTS.BANK_CLIENT_ACCOUNTS}${id}/`, submitData);
         Swal.fire('Success', 'Bank client account updated successfully', 'success');
       }
       history.push('/data_management/bank_client_accounts');
@@ -153,7 +153,7 @@ const BankClientAccountDetail = () => {
     if (result.isConfirmed) {
       setIsLoading(true);
       try {
-        await axios.delete(`http://localhost:8000/api/bank_client_accounts/${id}/`);
+        await apiDelete(`${API_ENDPOINTS.BANK_CLIENT_ACCOUNTS}${id}/`);
         Swal.fire('Deleted!', 'Bank client account has been deleted.', 'success');
         history.push('/data_management/bank_client_accounts');
       } catch (error) {

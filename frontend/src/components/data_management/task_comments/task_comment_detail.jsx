@@ -8,8 +8,9 @@ import {
   Col,
   Badge,
 } from 'react-bootstrap';
-import axios from 'axios';
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 import Swal from 'sweetalert2';
+
 
 const TaskCommentDetail = () => {
   const { id } = useParams();
@@ -37,8 +38,8 @@ const TaskCommentDetail = () => {
   const loadReferenceData = useCallback(async () => {
     try {
       const [tasksRes, consultantsRes] = await Promise.all([
-        axios.get('http://localhost:8000/api/project_tasks/'),
-        axios.get('http://localhost:8000/api/consultants/')
+        apiGet(API_ENDPOINTS.PROJECT_TASKS),
+        apiGet(API_ENDPOINTS.CONSULTANTS)
       ]);
       setProjectTasks(tasksRes.data);
       setConsultants(consultantsRes.data);
@@ -51,7 +52,7 @@ const TaskCommentDetail = () => {
   const loadTaskComment = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8000/api/task_comments/${id}/`);
+      const response = await apiGet(`${API_ENDPOINTS.TASK_COMMENTS}${id}/`);
       const comment = response.data;
       setFormData({
         project_task: comment.project_task || '',
@@ -130,10 +131,10 @@ const TaskCommentDetail = () => {
     setIsLoading(true);
     try {
       if (isCreating) {
-        await axios.post('http://localhost:8000/api/task_comments/', formData);
+        await apiPost(API_ENDPOINTS.TASK_COMMENTS, formData);
         Swal.fire('Success', 'Task comment created successfully', 'success');
       } else {
-        await axios.put(`http://localhost:8000/api/task_comments/${id}/`, formData);
+        await apiPut(`${API_ENDPOINTS.TASK_COMMENTS}${id}/`, formData);
         Swal.fire('Success', 'Task comment updated successfully', 'success');
       }
       history.push('/data_management/task_comments');
@@ -159,7 +160,7 @@ const TaskCommentDetail = () => {
     if (result.isConfirmed) {
       setIsLoading(true);
       try {
-        await axios.delete(`http://localhost:8000/api/task_comments/${id}/`);
+        await apiDelete(`${API_ENDPOINTS.TASK_COMMENTS}${id}/`);
         Swal.fire('Deleted!', 'Task comment has been deleted.', 'success');
         history.push('/data_management/task_comments');
       } catch (error) {

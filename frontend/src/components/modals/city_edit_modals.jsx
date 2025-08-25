@@ -1,12 +1,14 @@
 // Built-ins
 import { useState, useEffect } from "react";
 
+import { apiGet, apiPut, apiPost, apiDelete, API_ENDPOINTS } from "../../utils/api";
+
 // Icons
 import { FiEdit } from "react-icons/fi";
 import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
 
 // Libs
-import axios from "axios";
+
 import Swal from "sweetalert2";
 import { Modal, Form } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
@@ -31,7 +33,7 @@ const toSmallInt = (value) => {
 
 const patchCity = async (id, payload) => {
   const url = `${CITY_DETAIL}${encodeURIComponent(id)}`;
-  return axios({ method: "patch", url, headers, data: payload });
+  return apiPut(url, data);
 };
 
 /* ===========================
@@ -214,7 +216,7 @@ export function EditCityCountryModal({ city, update_state }) {
   // Fetch countries for dropdown
   useEffect(() => {
     if (show) {
-      axios.get(GET_COUNTRIES, { headers })
+      apiGet(GET_COUNTRIES)
         .then((res) => {
           setCountries(res.data.all_countries || []);
         })
@@ -313,7 +315,7 @@ export function EditCityProvinceModal({ city, update_state }) {
   // Fetch provinces for dropdown
   useEffect(() => {
     if (show) {
-      axios.get(GET_PROVINCES, { headers })
+      apiGet(GET_PROVINCES)
         .then((res) => {
           const allProvinces = res.data.all_provinces || [];
           const filteredProvinces = allProvinces.filter(province => province.country === city?.country);

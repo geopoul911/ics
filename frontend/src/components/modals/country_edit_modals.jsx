@@ -4,9 +4,11 @@ import { useState } from "react";
 // Icons
 import { FiEdit } from "react-icons/fi";
 import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
+import axios from "axios";
+import { apiGet, apiPut, apiPost, apiDelete, API_ENDPOINTS } from "../../utils/api";
 
 // Libs
-import axios from "axios";
+
 import Swal from "sweetalert2";
 import { Modal, Form } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
@@ -29,7 +31,7 @@ const toSmallInt = (value) => {
 
 const patchCountry = async (id, payload) => {
   const url = `${COUNTRY_DETAIL}${encodeURIComponent(id)}`;
-  return axios({ method: "patch", url, headers, data: payload });
+  return apiPut(url, data);
 };
 
 /* ===========================

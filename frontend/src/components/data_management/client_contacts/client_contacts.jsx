@@ -1,3 +1,4 @@
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 // Built-ins
 import React from "react";
 
@@ -6,7 +7,7 @@ import NavigationBar from "../../core/navigation_bar/navigation_bar";
 import Footer from "../../core/footer/footer";
 
 // Modules / Functions
-import axios from "axios";
+
 import filterFactory, { textFilter } from "react-bootstrap-table2-filter";
 import ToolkitProvider from "react-bootstrap-table2-toolkit";
 import Swal from "sweetalert2";
@@ -28,8 +29,6 @@ import {
 
 // Variables
 window.Swal = Swal;
-
-const GET_CLIENT_CONTACTS = "http://localhost:8000/api/client_contacts/";
 
 // Helper function to get relationship color
 const getRelationshipColor = (relationship) => {
@@ -203,34 +202,29 @@ class ClientContacts extends React.Component {
     };
   }
 
-  fetchClientContacts() {
+  async fetchClientContacts() {
     this.setState({ is_loaded: false });
-    axios
-      .get(GET_CLIENT_CONTACTS, {
-        headers: headers,
-      })
-      .then((res) => {
-        const contacts = res.data;
-        this.setState({
-          client_contacts: contacts,
-          is_loaded: true,
-        });
-      })
-      .catch((e) => {
-        console.log(e);
-        if (e.response?.status === 401) {
-          this.setState({
-            forbidden: true,
-          });
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Failed to load client contacts.",
-          });
-        }
-        this.setState({ is_loaded: true });
+    try {
+      const contacts = await apiGet(API_ENDPOINTS.CLIENT_CONTACTS);
+      this.setState({
+        client_contacts: contacts,
+        is_loaded: true,
       });
+    } catch (error) {
+      console.log(error);
+      if (error.message === 'Authentication required') {
+        this.setState({
+          forbidden: true,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to load client contacts.",
+        });
+      }
+      this.setState({ is_loaded: true });
+    }
   }
 
   handlePageChange = (selectedPage) => {

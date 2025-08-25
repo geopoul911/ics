@@ -5,8 +5,9 @@ import React from "react";
 import NavigationBar from "../../core/navigation_bar/navigation_bar";
 import Footer from "../../core/footer/footer";
 
+import { apiGet, API_ENDPOINTS } from '../../../utils/api';
 // Modules / Functions
-import axios from "axios";
+
 import filterFactory, { textFilter } from "react-bootstrap-table2-filter";
 import ToolkitProvider from "react-bootstrap-table2-toolkit";
 import Swal from "sweetalert2";
@@ -29,7 +30,7 @@ import {
 // Variables
 window.Swal = Swal;
 
-const GET_CASH = "http://localhost:8000/api/cash/";
+const GET_CASH = API_ENDPOINTS.CASH;
 
 // Helper function to get transaction type color
 const getTransactionTypeColor = (type) => {
@@ -201,7 +202,7 @@ const defaultSorted = [
   },
 ];
 
-const NoDataToShow = () => {
+const NoDataToShow = async () => {
   return <img src={NoDataToShowImage} alt={""} className="fill" />;
 };
 
@@ -216,34 +217,29 @@ class Cash extends React.Component {
     };
   }
 
-  fetchCashTransactions() {
+  async fetchCashTransactions() {
     this.setState({ is_loaded: false });
-    axios
-      .get(GET_CASH, {
-        headers: headers,
-      })
-      .then((res) => {
-        const transactions = res.data;
-        this.setState({
-          cash_transactions: transactions,
-          is_loaded: true,
-        });
-      })
-      .catch((e) => {
-        console.log(e);
-        if (e.response?.status === 401) {
-          this.setState({
-            forbidden: true,
-          });
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Failed to load cash transactions.",
-          });
-        }
-        this.setState({ is_loaded: true });
+    try {
+      const transactions = await apiGet(GET_CASH);
+      this.setState({
+        cash_transactions: transactions,
+        is_loaded: true,
       });
+    } catch (error) {
+      console.log(error);
+      if (error.message === 'Authentication required') {
+        this.setState({
+          forbidden: true,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to load cash transactions.",
+        });
+      }
+      this.setState({ is_loaded: true });
+    }
   }
 
   handlePageChange = (selectedPage) => {
@@ -252,11 +248,11 @@ class Cash extends React.Component {
     });
   };
 
-  componentDidMount() {
+  async componentDidMount() {
     this.fetchCashTransactions();
   }
 
-  render() {
+  async render() {
     return (
       <>
         <NavigationBar />

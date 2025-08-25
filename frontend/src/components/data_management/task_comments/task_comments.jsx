@@ -6,7 +6,7 @@ import NavigationBar from "../../core/navigation_bar/navigation_bar";
 import Footer from "../../core/footer/footer";
 
 // Modules / Functions
-import axios from "axios";
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 import filterFactory, { textFilter } from "react-bootstrap-table2-filter";
 import ToolkitProvider from "react-bootstrap-table2-toolkit";
 import Swal from "sweetalert2";
@@ -31,8 +31,6 @@ import {
 
 // Variables
 window.Swal = Swal;
-
-const GET_TASK_COMMENTS = "http://localhost:8000/api/task_comments/";
 
 // Helper function to format comment text
 const formatCommentText = (text) => {
@@ -212,31 +210,26 @@ const TaskCommentsComponent = () => {
   const [showAdvancedSearch, setShowAdvancedSearch] = React.useState(false);
 
 
-  const fetchTaskComments = () => {
+  const fetchTaskComments = async () => {
     setIsLoaded(false);
-    axios
-      .get(GET_TASK_COMMENTS, {
-        headers: headers,
-      })
-      .then((res) => {
-        const comments = res.data;
-        setTaskComments(comments);
-        setFilteredComments(comments);
-        setIsLoaded(true);
-      })
-      .catch((e) => {
-        console.log(e);
-        if (e.response?.status === 401) {
-          // Handle forbidden
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Failed to load task comments.",
-          });
-        }
-        setIsLoaded(true);
-      });
+    try {
+      const comments = await apiGet(API_ENDPOINTS.TASK_COMMENTS);
+      setTaskComments(comments);
+      setFilteredComments(comments);
+      setIsLoaded(true);
+    } catch (error) {
+      console.log(error);
+      if (error.message === 'Authentication required') {
+        // Handle forbidden
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to load task comments.",
+        });
+      }
+      setIsLoaded(true);
+    }
   };
 
   const handleAdvancedSearch = (criteria) => {

@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 // Icons
 import { FiEdit } from "react-icons/fi";
 import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
-
+import { apiGet, apiPut, apiPost, apiDelete, API_ENDPOINTS } from "../../utils/api";
 // Libs
-import axios from "axios";
+
 import Swal from "sweetalert2";
 import { Modal, Form } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
@@ -30,7 +30,7 @@ const toSmallInt = (value) => {
 
 const patchProvince = async (id, payload) => {
   const url = `${PROVINCE_DETAIL}${encodeURIComponent(id)}`;
-  return axios({ method: "patch", url, headers, data: payload });
+  return apiPut(url, data);
 };
 
 /* ===========================
@@ -213,7 +213,7 @@ export function EditProvinceCountryModal({ province, update_state }) {
   // Fetch countries for dropdown
   useEffect(() => {
     if (show) {
-      axios.get(GET_COUNTRIES, { headers })
+      apiGet(GET_COUNTRIES)
         .then((res) => {
           setCountries(res.data.all_countries || []);
         })

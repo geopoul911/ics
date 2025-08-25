@@ -7,7 +7,7 @@ import {
   Row,
   Col,
 } from 'react-bootstrap';
-import axios from 'axios';
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 import Swal from 'sweetalert2';
 
 const ProjectCategoryDetail = () => {
@@ -27,7 +27,7 @@ const ProjectCategoryDetail = () => {
   const loadProjectCategory = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8000/api/project_categories/${id}/`);
+      const response = await apiGet(`${API_ENDPOINTS.PROJECT_CATEGORIES}${id}/`);
       const category = response.data;
       setFormData({
         title: category.title || '',
@@ -77,10 +77,10 @@ const ProjectCategoryDetail = () => {
     setIsLoading(true);
     try {
       if (isCreating) {
-        await axios.post('http://localhost:8000/api/project_categories/', formData);
+        await apiPost(API_ENDPOINTS.PROJECT_CATEGORIES, formData);
         Swal.fire('Success', 'Project category created successfully', 'success');
       } else {
-        await axios.put(`http://localhost:8000/api/project_categories/${id}/`, formData);
+        await apiPut(`${API_ENDPOINTS.PROJECT_CATEGORIES}${id}/`, formData);
         Swal.fire('Success', 'Project category updated successfully', 'success');
       }
       history.push('/data_management/project_categories');
@@ -106,7 +106,7 @@ const ProjectCategoryDetail = () => {
     if (result.isConfirmed) {
       setIsLoading(true);
       try {
-        await axios.delete(`http://localhost:8000/api/project_categories/${id}/`);
+        await apiDelete(`${API_ENDPOINTS.PROJECT_CATEGORIES}${id}/`);
         Swal.fire('Deleted!', 'Project category has been deleted.', 'success');
         history.push('/data_management/project_categories');
       } catch (error) {

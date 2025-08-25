@@ -7,10 +7,11 @@ import { FaHashtag } from "react-icons/fa";
 import { FiType } from "react-icons/fi";
 
 // Modules / Functions
-import axios from "axios";
+
 import { Card } from "react-bootstrap";
 import { Grid } from "semantic-ui-react";
 import Swal from "sweetalert2";
+import axios from "axios";
 
 // Custom Made Components
 import DeleteObjectModal from "../../../modals/delete_object";

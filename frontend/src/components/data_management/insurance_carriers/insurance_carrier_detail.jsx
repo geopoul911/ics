@@ -6,7 +6,7 @@ import NavigationBar from "../../core/navigation_bar/navigation_bar";
 import Footer from "../../core/footer/footer";
 
 // Modules / Functions
-import axios from "axios";
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 import Swal from "sweetalert2";
 import { Form, Button, Card, Row, Col, Badge } from "react-bootstrap";
 // import { useParams, useHistory } from "react-router-dom";
@@ -16,11 +16,6 @@ import { headers, pageHeader } from "../../global_vars";
 
 // Variables
 window.Swal = Swal;
-
-const GET_INSURANCE_CARRIER = "http://localhost:8000/api/insurance_carriers/";
-const CREATE_INSURANCE_CARRIER = "http://localhost:8000/api/insurance_carriers/";
-const UPDATE_INSURANCE_CARRIER = "http://localhost:8000/api/insurance_carriers/";
-const DELETE_INSURANCE_CARRIER = "http://localhost:8000/api/insurance_carriers/";
 
 class InsuranceCarrierDetail extends React.Component {
   constructor(props) {
@@ -47,38 +42,34 @@ class InsuranceCarrierDetail extends React.Component {
     }
   }
 
-  fetchInsuranceCarrier = (id) => {
+  fetchInsuranceCarrier = async (id) => {
     this.setState({ is_loaded: false });
-    axios
-      .get(GET_INSURANCE_CARRIER + id + "/", {
-        headers: headers,
-      })
-      .then((res) => {
-        this.setState({
-          insurance_carrier: res.data,
-          is_loaded: true,
-        });
-      })
-      .catch((e) => {
-        console.log(e);
-        if (e.response?.status === 401) {
-          this.setState({ forbidden: true });
-        } else if (e.response?.status === 404) {
-          Swal.fire({
-            icon: "error",
-            title: "Not Found",
-            text: "Insurance carrier not found.",
-          });
-          this.props.history.push("/data_management/insurance_carriers");
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Failed to load insurance carrier.",
-          });
-        }
-        this.setState({ is_loaded: true });
+    try {
+      const insurance_carrier = await apiGet(API_ENDPOINTS.INSURANCE_CARRIERS + id + "/");
+      this.setState({
+        insurance_carrier: insurance_carrier,
+        is_loaded: true,
       });
+    } catch (error) {
+      console.log(error);
+      if (error.message === 'Authentication required') {
+        this.setState({ forbidden: true });
+      } else if (error.message.includes('404')) {
+        Swal.fire({
+          icon: "error",
+          title: "Not Found",
+          text: "Insurance carrier not found.",
+        });
+        this.props.history.push("/data_management/insurance_carriers");
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to load insurance carrier.",
+        });
+      }
+      this.setState({ is_loaded: true });
+    }
   };
 
   handleInputChange = (e) => {
@@ -111,47 +102,50 @@ class InsuranceCarrierDetail extends React.Component {
     return Object.keys(errors).length === 0;
   };
 
-  handleSubmit = (e) => {
+  handleSubmit = async (e) => {
     e.preventDefault();
     if (!this.validateForm()) return;
 
     const { insurance_carrier, is_creating } = this.state;
     const { id } = this.props.match.params;
 
-    const url = is_creating ? CREATE_INSURANCE_CARRIER : UPDATE_INSURANCE_CARRIER + id + "/";
-    const method = is_creating ? "post" : "put";
-
-    axios[method](url, insurance_carrier, { headers })
-      .then((res) => {
+    try {
+      if (is_creating) {
+        await apiPost(API_ENDPOINTS.INSURANCE_CARRIERS, insurance_carrier);
         Swal.fire({
           icon: "success",
           title: "Success",
-          text: is_creating
-            ? "Insurance carrier created successfully!"
-            : "Insurance carrier updated successfully!",
+          text: "Insurance carrier created successfully!",
         });
-        this.props.history.push("/data_management/insurance_carriers");
-      })
-      .catch((e) => {
-        console.log(e);
-        if (e.response?.status === 400) {
-          this.setState({ errors: e.response.data });
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: is_creating
-              ? "Failed to create insurance carrier."
-              : "Failed to update insurance carrier.",
-          });
-        }
-      });
+      } else {
+        await apiPut(API_ENDPOINTS.INSURANCE_CARRIERS + id + "/", insurance_carrier);
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Insurance carrier updated successfully!",
+        });
+      }
+      this.props.history.push("/data_management/insurance_carriers");
+    } catch (error) {
+      console.log(error);
+      if (error.message === 'Authentication required') {
+        this.setState({ errors: error.response?.data || {} });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: is_creating
+            ? "Failed to create insurance carrier."
+            : "Failed to update insurance carrier.",
+        });
+      }
+    }
   };
 
-  handleDelete = () => {
+  handleDelete = async () => {
     const { id } = this.props.match.params;
     
-    Swal.fire({
+    const result = await Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
       icon: "warning",
@@ -159,20 +153,18 @@ class InsuranceCarrierDetail extends React.Component {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        axios
-          .delete(DELETE_INSURANCE_CARRIER + id + "/", { headers })
-          .then(() => {
-            Swal.fire("Deleted!", "Insurance carrier has been deleted.", "success");
-            this.props.history.push("/data_management/insurance_carriers");
-          })
-          .catch((e) => {
-            console.log(e);
-            Swal.fire("Error!", "Failed to delete insurance carrier.", "error");
-          });
-      }
     });
+
+    if (result.isConfirmed) {
+      try {
+        await apiDelete(API_ENDPOINTS.INSURANCE_CARRIERS + id + "/");
+        Swal.fire("Deleted!", "Insurance carrier has been deleted.", "success");
+        this.props.history.push("/data_management/insurance_carriers");
+      } catch (error) {
+        console.log(error);
+        Swal.fire("Error!", "Failed to delete insurance carrier.", "error");
+      }
+    }
   };
 
   render() {

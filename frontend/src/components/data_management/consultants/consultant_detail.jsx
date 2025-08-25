@@ -7,7 +7,7 @@ import {
   Row,
   Col
 } from 'react-bootstrap';
-import axios from 'axios';
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 import Swal from 'sweetalert2';
 
 const ConsultantDetail = () => {
@@ -42,8 +42,8 @@ const ConsultantDetail = () => {
   const loadReferenceData = useCallback(async () => {
     try {
       const [professionsRes, countriesRes] = await Promise.all([
-        axios.get('http://localhost:8000/api/professions/'),
-        axios.get('http://localhost:8000/api/countries/')
+        apiGet(API_ENDPOINTS.PROFESSIONS),
+        apiGet(API_ENDPOINTS.COUNTRIES)
       ]);
       setProfessions(professionsRes.data);
       setCountries(countriesRes.data);
@@ -60,7 +60,7 @@ const ConsultantDetail = () => {
       return;
     }
     try {
-      const response = await axios.get(`http://localhost:8000/api/provinces/?country=${countryId}`);
+      const response = await apiGet(`${API_ENDPOINTS.provinces}?country=${countryId}`);
       setProvinces(response.data);
       setCities([]);
     } catch (error) {
@@ -74,7 +74,7 @@ const ConsultantDetail = () => {
       return;
     }
     try {
-      const response = await axios.get(`http://localhost:8000/api/cities/?province=${provinceId}`);
+      const response = await apiGet(`${API_ENDPOINTS.cities}?province=${provinceId}`);
       setCities(response.data);
     } catch (error) {
       console.error('Error loading cities:', error);
@@ -84,7 +84,7 @@ const ConsultantDetail = () => {
   const loadConsultant = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8000/api/consultants/${id}/`);
+      const response = await apiGet(`${API_ENDPOINTS.CONSULTANTS}${id}/`);
       const consultant = response.data;
       setFormData({
         firstname: consultant.firstname || '',
@@ -181,10 +181,10 @@ const ConsultantDetail = () => {
       };
 
       if (isCreating) {
-        await axios.post('http://localhost:8000/api/consultants/', submitData);
+        await apiPost(API_ENDPOINTS.CONSULTANTS, submitData);
         Swal.fire('Success', 'Consultant created successfully', 'success');
       } else {
-        await axios.put(`http://localhost:8000/api/consultants/${id}/`, submitData);
+        await apiPut(`${API_ENDPOINTS.CONSULTANTS}${id}/`, submitData);
         Swal.fire('Success', 'Consultant updated successfully', 'success');
       }
       history.push('/data_management/consultants');
@@ -210,7 +210,7 @@ const ConsultantDetail = () => {
     if (result.isConfirmed) {
       setIsLoading(true);
       try {
-        await axios.delete(`http://localhost:8000/api/consultants/${id}/`);
+        await apiDelete(`${API_ENDPOINTS.CONSULTANTS}${id}/`);
         Swal.fire('Deleted!', 'Consultant has been deleted.', 'success');
         history.push('/data_management/consultants');
       } catch (error) {

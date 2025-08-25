@@ -8,7 +8,7 @@ import {
   Col,
   Badge
 } from 'react-bootstrap';
-import axios from 'axios';
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 import Swal from 'sweetalert2';
 
 const DocumentDetail = () => {
@@ -40,9 +40,9 @@ const DocumentDetail = () => {
   const loadReferenceData = useCallback(async () => {
     try {
       const [clientsRes, projectsRes, categoriesRes] = await Promise.all([
-        axios.get('http://localhost:8000/api/clients/'),
-        axios.get('http://localhost:8000/api/projects/'),
-        axios.get('http://localhost:8000/api/document_categories/')
+        apiGet(API_ENDPOINTS.CLIENTS),
+        apiGet(API_ENDPOINTS.PROJECTS),
+        apiGet(API_ENDPOINTS.DOCUMENT_CATEGORIES)
       ]);
       setClients(clientsRes.data);
       setProjects(projectsRes.data);
@@ -56,7 +56,7 @@ const DocumentDetail = () => {
   const loadDocument = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8000/api/documents/${id}/`);
+      const response = await apiGet(`${API_ENDPOINTS.DOCUMENTS}${id}/`);
       const document = response.data;
       setFormData({
         title: document.title || '',
@@ -135,10 +135,10 @@ const DocumentDetail = () => {
       };
 
       if (isCreating) {
-        await axios.post('http://localhost:8000/api/documents/', submitData);
+        await apiPost(API_ENDPOINTS.DOCUMENTS, submitData);
         Swal.fire('Success', 'Document created successfully', 'success');
       } else {
-        await axios.put(`http://localhost:8000/api/documents/${id}/`, submitData);
+        await apiPut(`${API_ENDPOINTS.DOCUMENTS}${id}/`, submitData);
         Swal.fire('Success', 'Document updated successfully', 'success');
       }
       history.push('/data_management/documents');
@@ -164,7 +164,7 @@ const DocumentDetail = () => {
     if (result.isConfirmed) {
       setIsLoading(true);
       try {
-        await axios.delete(`http://localhost:8000/api/documents/${id}/`);
+        await apiDelete(`${API_ENDPOINTS.DOCUMENTS}${id}/`);
         Swal.fire('Deleted!', 'Document has been deleted.', 'success');
         history.push('/data_management/documents');
       } catch (error) {

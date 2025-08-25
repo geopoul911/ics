@@ -25,4 +25,7 @@ urlpatterns = [
     # Data Management
     path('api/data_management/', include('webapp.data_management_urls')),
 
+    # Dashboard
+    path('', include('webapp.dashboard_urls')),
+
 ]

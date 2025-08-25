@@ -8,7 +8,7 @@ import {
   Col,
   Badge,
 } from 'react-bootstrap';
-import axios from 'axios';
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 import Swal from 'sweetalert2';
 
 const TaxationProjectDetail = () => {
@@ -39,8 +39,8 @@ const TaxationProjectDetail = () => {
   const loadReferenceData = useCallback(async () => {
     try {
       const [clientsRes, consultantsRes] = await Promise.all([
-        axios.get('http://localhost:8000/api/clients/'),
-        axios.get('http://localhost:8000/api/consultants/')
+        apiGet(API_ENDPOINTS.CLIENTS),
+        apiGet(API_ENDPOINTS.CONSULTANTS)
       ]);
       setClients(clientsRes.data);
       setConsultants(consultantsRes.data);
@@ -53,7 +53,7 @@ const TaxationProjectDetail = () => {
   const loadTaxationProject = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8000/api/taxation_projects/${id}/`);
+      const response = await apiGet(`${API_ENDPOINTS.TAXATION_PROJECTS}${id}/`);
       const project = response.data;
       setFormData({
         title: project.title || '',
@@ -137,10 +137,10 @@ const TaxationProjectDetail = () => {
     setIsLoading(true);
     try {
       if (isCreating) {
-        await axios.post('http://localhost:8000/api/taxation_projects/', formData);
+        await apiPost(API_ENDPOINTS.TAXATION_PROJECTS, formData);
         Swal.fire('Success', 'Taxation project created successfully', 'success');
       } else {
-        await axios.put(`http://localhost:8000/api/taxation_projects/${id}/`, formData);
+        await apiPut(`${API_ENDPOINTS.TAXATION_PROJECTS}${id}/`, formData);
         Swal.fire('Success', 'Taxation project updated successfully', 'success');
       }
       history.push('/data_management/taxation_projects');
@@ -166,7 +166,7 @@ const TaxationProjectDetail = () => {
     if (result.isConfirmed) {
       setIsLoading(true);
       try {
-        await axios.delete(`http://localhost:8000/api/taxation_projects/${id}/`);
+        await apiDelete(`${API_ENDPOINTS.TAXATION_PROJECTS}${id}/`);
         Swal.fire('Deleted!', 'Taxation project has been deleted.', 'success');
         history.push('/data_management/taxation_projects');
       } catch (error) {

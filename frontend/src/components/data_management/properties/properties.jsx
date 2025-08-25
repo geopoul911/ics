@@ -6,7 +6,7 @@ import NavigationBar from "../../core/navigation_bar/navigation_bar";
 import Footer from "../../core/footer/footer";
 
 // Modules / Functions
-import axios from "axios";
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 import filterFactory, { textFilter } from "react-bootstrap-table2-filter";
 import ToolkitProvider from "react-bootstrap-table2-toolkit";
 import Swal from "sweetalert2";
@@ -29,8 +29,6 @@ import {
 
 // Variables
 window.Swal = Swal;
-
-const GET_PROPERTIES = "http://localhost:8000/api/properties/";
 
 // Helper function to format address
 const formatAddress = (property) => {
@@ -206,34 +204,29 @@ class Properties extends React.Component {
     };
   }
 
-  fetchProperties() {
+  async fetchProperties() {
     this.setState({ is_loaded: false });
-    axios
-      .get(GET_PROPERTIES, {
-        headers: headers,
-      })
-      .then((res) => {
-        const properties = res.data;
-        this.setState({
-          properties: properties,
-          is_loaded: true,
-        });
-      })
-      .catch((e) => {
-        console.log(e);
-        if (e.response?.status === 401) {
-          this.setState({
-            forbidden: true,
-          });
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Failed to load properties.",
-          });
-        }
-        this.setState({ is_loaded: true });
+    try {
+      const properties = await apiGet(API_ENDPOINTS.PROPERTIES);
+      this.setState({
+        properties: properties,
+        is_loaded: true,
       });
+    } catch (error) {
+      console.log(error);
+      if (error.message === 'Authentication required') {
+        this.setState({
+          forbidden: true,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to load properties.",
+        });
+      }
+      this.setState({ is_loaded: true });
+    }
   }
 
   handlePageChange = (selectedPage) => {

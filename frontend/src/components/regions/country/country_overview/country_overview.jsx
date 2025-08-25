@@ -11,10 +11,10 @@ import {
   EditCountryCurrencyModal,
   EditCountryOrderIndexModal,
 } from "../../../modals/country_edit_modals";
-
+import axios from "axios";
 
 // Modules / Functions
-import axios from "axios";
+
 import { Card } from "react-bootstrap";
 import { Grid } from "semantic-ui-react";
 import Swal from "sweetalert2";

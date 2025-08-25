@@ -6,14 +6,10 @@ import { useState } from "react";
 import Home from "./components/core/home/home";
 import About from "./components/core/about/about";
 import Terms from "./components/core/terms/terms";
-import Updates from "./components/core/updates/updates";
 import Help from "./components/core/help/help";
-import StaffDox from "./components/core/staff_dox/staff_dox";
-import DevDox from "./components/core/dev_dox/dev_dox";
 import FourOFour from "./components/core/404/404";
 import UnderConstruction from "./components/core/under_construction/under_construction";
 import Login from "./components/core/login/login";
-import SiteAdministrationRoot from "./components/site_administration/site_administration_root/site_administration_root";
 import DataManagementRoot from "./components/data_management/data_management_root/data_management_root";
 import Clients from "./components/data_management/clients/clients";
 import ClientDetail from "./components/data_management/clients/client_detail";
@@ -50,14 +46,10 @@ import TaskCommentDetail from "./components/data_management/task_comments/task_c
 import TaxationProjects from "./components/data_management/taxation_projects/taxation_projects";
 import TaxationProjectDetail from "./components/data_management/taxation_projects/taxation_project_detail";
 import RegionRoot from "./components/regions/region_root/region_root";
+import Dashboard from "./components/dashboard/Dashboard";
 
 import ProtectedRoute from "./components/core/router/protected_route";
 
-// Site Administration
-import AccessHistory from "./components/site_administration/access_history/access_history";
-import Logs from "./components/site_administration/logs/logs";
-import AllUsers from "./components/site_administration/all_users/all_users";
-import User from "./components/site_administration/user/user";
 
 // Regions
 import AllCountries from "./components/regions/all_countries/all_countries";
@@ -85,6 +77,12 @@ function App() {
           isLoggedIn={!!userToken}
           exact={true}
           path="/"
+          render={(props) => <Dashboard {...props} setUserToken={setUserToken} />}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/home"
           render={(props) => <Home {...props} setUserToken={setUserToken} />}
         />
         <Route
@@ -104,68 +102,20 @@ function App() {
           path="/terms"
           render={(props) => <Terms {...props} setUserToken={setUserToken} />}
         />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/help/updates"
-          render={(props) => <Updates {...props} setUserToken={setUserToken} />}
-        />
+
         <ProtectedRoute
           isLoggedIn={!!userToken}
           exact={true}
           path="/help"
           render={(props) => <Help {...props} setUserToken={setUserToken} />}
         />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/help/staff_dox"
-          render={(props) => (
-            <StaffDox {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/help/dev_dox"
-          render={(props) => <DevDox {...props} setUserToken={setUserToken} />}
-        />
+
         <ProtectedRoute
           isLoggedIn={!!userToken}
           exact={true}
           path="/under_construction"
           render={(props) => (
             <UnderConstruction {...props} setUserToken={setUserToken} />
-          )}
-        />
-
-        {/* Site Administration */}
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/site_administration/all_users"
-          render={(props) => (
-            <AllUsers {...props} setUserToken={setUserToken} />
-          )}
-        />
-
-
-
-
-
-
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/site_administration/user/:id"
-          component={User}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/site_administration/root"
-          render={(props) => (
-            <SiteAdministrationRoot {...props} setUserToken={setUserToken} />
           )}
         />
         <ProtectedRoute
@@ -457,23 +407,6 @@ function App() {
             <RegionRoot {...props} setUserToken={setUserToken} />
           )}
         />
-        
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/site_administration/access_history"
-          render={(props) => (
-            <AccessHistory {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/site_administration/logs"
-          render={(props) => <Logs {...props} setUserToken={setUserToken} />}
-        />
-
-
 
         {/* Regions */}
          <ProtectedRoute

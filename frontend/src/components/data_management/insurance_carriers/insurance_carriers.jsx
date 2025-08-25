@@ -6,7 +6,7 @@ import NavigationBar from "../../core/navigation_bar/navigation_bar";
 import Footer from "../../core/footer/footer";
 
 // Modules / Functions
-import axios from "axios";
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 import filterFactory, { textFilter } from "react-bootstrap-table2-filter";
 import ToolkitProvider from "react-bootstrap-table2-toolkit";
 import Swal from "sweetalert2";
@@ -29,8 +29,6 @@ import {
 
 // Variables
 window.Swal = Swal;
-
-const GET_INSURANCE_CARRIERS = "http://localhost:8000/api/insurance_carriers/";
 
 const columns = [
   {
@@ -93,34 +91,29 @@ class InsuranceCarriers extends React.Component {
     };
   }
 
-  fetchInsuranceCarriers() {
+  async fetchInsuranceCarriers() {
     this.setState({ is_loaded: false });
-    axios
-      .get(GET_INSURANCE_CARRIERS, {
-        headers: headers,
-      })
-      .then((res) => {
-        const carriers = res.data;
-        this.setState({
-          insurance_carriers: carriers,
-          is_loaded: true,
-        });
-      })
-      .catch((e) => {
-        console.log(e);
-        if (e.response?.status === 401) {
-          this.setState({
-            forbidden: true,
-          });
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Failed to load insurance carriers.",
-          });
-        }
-        this.setState({ is_loaded: true });
+    try {
+      const carriers = await apiGet(API_ENDPOINTS.INSURANCE_CARRIERS);
+      this.setState({
+        insurance_carriers: carriers,
+        is_loaded: true,
       });
+    } catch (error) {
+      console.log(error);
+      if (error.message === 'Authentication required') {
+        this.setState({
+          forbidden: true,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to load insurance carriers.",
+        });
+      }
+      this.setState({ is_loaded: true });
+    }
   }
 
   handlePageChange = (selectedPage) => {

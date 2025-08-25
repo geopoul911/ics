@@ -7,7 +7,7 @@ import {
   Row,
   Col,
 } from 'react-bootstrap';
-import axios from 'axios';
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';  
 import Swal from 'sweetalert2';
 
 const ClientContactDetail = () => {
@@ -37,7 +37,7 @@ const ClientContactDetail = () => {
 
   const loadReferenceData = useCallback(async () => {
     try {
-      const clientsRes = await axios.get('http://localhost:8000/api/clients/');
+      const clientsRes = await apiGet(API_ENDPOINTS.CLIENTS);
       setClients(clientsRes.data);
     } catch (error) {
       console.error('Error loading reference data:', error);
@@ -48,7 +48,7 @@ const ClientContactDetail = () => {
   const loadClientContact = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8000/api/client_contacts/${id}/`);
+      const response = await apiGet(`${API_ENDPOINTS.CLIENT_CONTACTS}${id}/`);
       const contact = response.data;
       setFormData({
         client: contact.client || '',
@@ -130,10 +130,10 @@ const ClientContactDetail = () => {
     setIsLoading(true);
     try {
       if (isCreating) {
-        await axios.post('http://localhost:8000/api/client_contacts/', formData);
+        await apiPost(API_ENDPOINTS.CLIENT_CONTACTS, formData);
         Swal.fire('Success', 'Client contact created successfully', 'success');
       } else {
-        await axios.put(`http://localhost:8000/api/client_contacts/${id}/`, formData);
+        await apiPut(`${API_ENDPOINTS.CLIENT_CONTACTS}${id}/`, formData);
         Swal.fire('Success', 'Client contact updated successfully', 'success');
       }
       history.push('/data_management/client_contacts');
@@ -159,7 +159,7 @@ const ClientContactDetail = () => {
     if (result.isConfirmed) {
       setIsLoading(true);
       try {
-        await axios.delete(`http://localhost:8000/api/client_contacts/${id}/`);
+        await apiDelete(`${API_ENDPOINTS.CLIENT_CONTACTS}${id}/`);
         Swal.fire('Deleted!', 'Client contact has been deleted.', 'success');
         history.push('/data_management/client_contacts');
       } catch (error) {

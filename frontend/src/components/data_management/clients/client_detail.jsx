@@ -6,7 +6,7 @@ import NavigationBar from "../../core/navigation_bar/navigation_bar";
 import Footer from "../../core/footer/footer";
 
 // Modules / Functions
-import axios from "axios";
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 import Swal from "sweetalert2";
 import { Form, Button, Card, Row, Col, Badge, Tabs, Tab } from "react-bootstrap";
 
@@ -15,14 +15,6 @@ import { headers, pageHeader } from "../../global_vars";
 
 // Variables
 window.Swal = Swal;
-
-const GET_CLIENT = "http://localhost:8000/api/clients/";
-const CREATE_CLIENT = "http://localhost:8000/api/clients/";
-const UPDATE_CLIENT = "http://localhost:8000/api/clients/";
-const DELETE_CLIENT = "http://localhost:8000/api/clients/";
-const GET_COUNTRIES = "http://localhost:8000/api/countries/";
-const GET_PROVINCES = "http://localhost:8000/api/provinces/";
-const GET_CITIES = "http://localhost:8000/api/cities/";
 
 class ClientDetail extends React.Component {
   constructor(props) {
@@ -63,72 +55,56 @@ class ClientDetail extends React.Component {
     }
   }
 
-  fetchReferenceData = () => {
-    // Fetch countries
-    axios.get(GET_COUNTRIES, { headers })
-      .then((res) => {
-        this.setState({ countries: res.data });
-      })
-      .catch((e) => {
-        console.log("Failed to load countries:", e);
-      });
+  fetchReferenceData = async () => {
+    try {
+      // Fetch countries
+      const countries = await apiGet(API_ENDPOINTS.COUNTRIES);
+      this.setState({ countries: countries });
 
-    // Fetch provinces
-    axios.get(GET_PROVINCES, { headers })
-      .then((res) => {
-        this.setState({ provinces: res.data });
-      })
-      .catch((e) => {
-        console.log("Failed to load provinces:", e);
-      });
+      // Fetch provinces
+      const provinces = await apiGet(API_ENDPOINTS.PROVINCES);
+      this.setState({ provinces: provinces });
 
-    // Fetch cities
-    axios.get(GET_CITIES, { headers })
-      .then((res) => {
-        this.setState({ cities: res.data });
-      })
-      .catch((e) => {
-        console.log("Failed to load cities:", e);
-      });
+      // Fetch cities
+      const cities = await apiGet(API_ENDPOINTS.CITIES);
+      this.setState({ cities: cities });
+    } catch (error) {
+      console.log("Failed to load reference data:", error);
+    }
   };
 
-  fetchClient = (id) => {
+  fetchClient = async (id) => {
     this.setState({ is_loaded: false });
-    axios
-      .get(GET_CLIENT + id + "/", {
-        headers: headers,
-      })
-      .then((res) => {
-        const client = res.data;
-        // Format dates for form inputs
-        if (client.birthdate) {
-          client.birthdate = client.birthdate.split('T')[0];
-        }
-        this.setState({
-          client: client,
-          is_loaded: true,
-        });
-      })
-      .catch((e) => {
-        console.log(e);
-        if (e.response?.status === 401) {
-          this.setState({ forbidden: true });
-        } else if (e.response?.status === 404) {
-          Swal.fire({
-            icon: "error",
-            title: "Not Found",
-            text: "Client not found.",
-          });
-          this.props.history.push("/data_management/clients");
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Failed to load client.",
-          });
-        }
-        this.setState({ is_loaded: true });
+    try {
+      const client = await apiGet(API_ENDPOINTS.CLIENTS + id + "/");
+      // Format dates for form inputs
+      if (client.birthdate) {
+        client.birthdate = client.birthdate.split('T')[0];
+      }
+      this.setState({
+        client: client,
+        is_loaded: true,
       });
+    } catch (error) {
+      console.log(error);
+      if (error.message === 'Authentication required') {
+        this.setState({ forbidden: true });
+      } else if (error.message.includes('404')) {
+        Swal.fire({
+          icon: "error",
+          title: "Not Found",
+          text: "Client not found.",
+        });
+        this.props.history.push("/data_management/clients");
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to load client.",
+        });
+      }
+      this.setState({ is_loaded: true });
+    }
   };
 
   handleInputChange = (e) => {
@@ -194,47 +170,48 @@ class ClientDetail extends React.Component {
     return sinRegex.test(sin.replace(/[\s-]/g, ''));
   };
 
-  handleSubmit = (e) => {
+  handleSubmit = async (e) => {
     e.preventDefault();
     if (!this.validateForm()) return;
 
     const { client, is_creating } = this.state;
     const { id } = this.props.match.params;
 
-    const url = is_creating ? CREATE_CLIENT : UPDATE_CLIENT + id + "/";
-    const method = is_creating ? "post" : "put";
-
-    axios[method](url, client, { headers })
-      .then((res) => {
-        Swal.fire({
-          icon: "success",
-          title: "Success",
-          text: is_creating
-            ? "Client created successfully!"
-            : "Client updated successfully!",
-        });
-        this.props.history.push("/data_management/clients");
-      })
-      .catch((e) => {
-        console.log(e);
-        if (e.response?.status === 400) {
-          this.setState({ errors: e.response.data });
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: is_creating
-              ? "Failed to create client."
-              : "Failed to update client.",
-          });
-        }
+    try {
+      if (is_creating) {
+        await apiPost(API_ENDPOINTS.CLIENTS, client);
+      } else {
+        await apiPut(API_ENDPOINTS.CLIENTS + id + "/", client);
+      }
+      
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: is_creating
+          ? "Client created successfully!"
+          : "Client updated successfully!",
       });
+      this.props.history.push("/data_management/clients");
+    } catch (error) {
+      console.log(error);
+      if (error.message.includes('400')) {
+        this.setState({ errors: error.data });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: is_creating
+            ? "Failed to create client."
+            : "Failed to update client.",
+        });
+      }
+    }
   };
 
-  handleDelete = () => {
+  handleDelete = async () => {
     const { id } = this.props.match.params;
     
-    Swal.fire({
+    const result = await Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
       icon: "warning",
@@ -242,20 +219,18 @@ class ClientDetail extends React.Component {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        axios
-          .delete(DELETE_CLIENT + id + "/", { headers })
-          .then(() => {
-            Swal.fire("Deleted!", "Client has been deleted.", "success");
-            this.props.history.push("/data_management/clients");
-          })
-          .catch((e) => {
-            console.log(e);
-            Swal.fire("Error!", "Failed to delete client.", "error");
-          });
-      }
     });
+    
+    if (result.isConfirmed) {
+      try {
+        await apiDelete(API_ENDPOINTS.CLIENTS + id + "/");
+        Swal.fire("Deleted!", "Client has been deleted.", "success");
+        this.props.history.push("/data_management/clients");
+      } catch (error) {
+        console.log(error);
+        Swal.fire("Error!", "Failed to delete client.", "error");
+      }
+    }
   };
 
   render() {

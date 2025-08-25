@@ -7,8 +7,8 @@ import {
   Row,
   Col
 } from 'react-bootstrap';
-import axios from 'axios';
 import Swal from 'sweetalert2';
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 
 const BankDetail = () => {
   const { id } = useParams();
@@ -33,7 +33,7 @@ const BankDetail = () => {
   const loadBank = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8000/api/banks/${id}/`);
+      const response = await apiGet(`${API_ENDPOINTS.BANKS}${id}/`);
       const bank = response.data;
       setFormData({
         name: bank.name || '',
@@ -97,10 +97,10 @@ const BankDetail = () => {
     setIsLoading(true);
     try {
       if (isCreating) {
-        await axios.post('http://localhost:8000/api/banks/', formData);
+        await apiPost(API_ENDPOINTS.BANKS, formData);
         Swal.fire('Success', 'Bank created successfully', 'success');
       } else {
-        await axios.put(`http://localhost:8000/api/banks/${id}/`, formData);
+        await apiPut(`${API_ENDPOINTS.BANKS}${id}/`, formData);
         Swal.fire('Success', 'Bank updated successfully', 'success');
       }
       history.push('/data_management/banks');
@@ -126,7 +126,7 @@ const BankDetail = () => {
     if (result.isConfirmed) {
       setIsLoading(true);
       try {
-        await axios.delete(`http://localhost:8000/api/banks/${id}/`);
+        await apiDelete(`${API_ENDPOINTS.BANKS}${id}/`);
         Swal.fire('Deleted!', 'Bank has been deleted.', 'success');
         history.push('/data_management/banks');
       } catch (error) {

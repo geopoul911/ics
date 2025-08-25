@@ -7,7 +7,7 @@ import {
   Row,
   Col
 } from 'react-bootstrap';
-import axios from 'axios';
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 import Swal from 'sweetalert2';
 
 const ProfessionDetail = () => {
@@ -27,7 +27,7 @@ const ProfessionDetail = () => {
   const loadProfession = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8000/api/professions/${id}/`);
+      const response = await apiGet(`${API_ENDPOINTS.PROFESSIONS}${id}/`);
       const profession = response.data;
       setFormData({
         title: profession.title || '',
@@ -77,10 +77,10 @@ const ProfessionDetail = () => {
     setIsLoading(true);
     try {
       if (isCreating) {
-        await axios.post('http://localhost:8000/api/professions/', formData);
+        await apiPost(API_ENDPOINTS.PROFESSIONS, formData);
         Swal.fire('Success', 'Profession created successfully', 'success');
       } else {
-        await axios.put(`http://localhost:8000/api/professions/${id}/`, formData);
+        await apiPut(`${API_ENDPOINTS.PROFESSIONS}${id}/`, formData);
         Swal.fire('Success', 'Profession updated successfully', 'success');
       }
       history.push('/data_management/professions');
@@ -106,7 +106,7 @@ const ProfessionDetail = () => {
     if (result.isConfirmed) {
       setIsLoading(true);
       try {
-        await axios.delete(`http://localhost:8000/api/professions/${id}/`);
+        await apiDelete(`${API_ENDPOINTS.PROFESSIONS}${id}/`);
         Swal.fire('Deleted!', 'Profession has been deleted.', 'success');
         history.push('/data_management/professions');
       } catch (error) {

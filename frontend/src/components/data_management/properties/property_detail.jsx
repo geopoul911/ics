@@ -8,7 +8,7 @@ import {
   Col,
   Badge,
 } from 'react-bootstrap';
-import axios from 'axios';
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 import Swal from 'sweetalert2';
 
 const PropertyDetail = () => {
@@ -44,8 +44,8 @@ const PropertyDetail = () => {
   const loadReferenceData = useCallback(async () => {
     try {
       const [clientsRes, countriesRes] = await Promise.all([
-        axios.get('http://localhost:8000/api/clients/'),
-        axios.get('http://localhost:8000/api/countries/')
+        apiGet(API_ENDPOINTS.CLIENTS),
+        apiGet(API_ENDPOINTS.COUNTRIES)
       ]);
       setClients(clientsRes.data);
       setCountries(countriesRes.data);
@@ -62,7 +62,7 @@ const PropertyDetail = () => {
       return;
     }
     try {
-      const response = await axios.get(`http://localhost:8000/api/provinces/?country=${countryId}`);
+      const response = await apiGet(`${API_ENDPOINTS.provinces}?country=${countryId}`);
       setProvinces(response.data);
       setCities([]);
     } catch (error) {
@@ -76,7 +76,7 @@ const PropertyDetail = () => {
       return;
     }
     try {
-      const response = await axios.get(`http://localhost:8000/api/cities/?province=${provinceId}`);
+      const response = await apiGet(`${API_ENDPOINTS.cities}?province=${provinceId}`);
       setCities(response.data);
     } catch (error) {
       console.error('Error loading cities:', error);
@@ -86,7 +86,7 @@ const PropertyDetail = () => {
   const loadProperty = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8000/api/properties/${id}/`);
+      const response = await apiGet(`${API_ENDPOINTS.PROPERTIES}${id}/`);
       const property = response.data;
       setFormData({
         title: property.title || '',
@@ -199,10 +199,10 @@ const PropertyDetail = () => {
       };
 
       if (isCreating) {
-        await axios.post('http://localhost:8000/api/properties/', submitData);
+        await apiPost(API_ENDPOINTS.PROPERTIES, submitData);
         Swal.fire('Success', 'Property created successfully', 'success');
       } else {
-        await axios.put(`http://localhost:8000/api/properties/${id}/`, submitData);
+        await apiPut(`${API_ENDPOINTS.PROPERTIES}${id}/`, submitData);
         Swal.fire('Success', 'Property updated successfully', 'success');
       }
       history.push('/data_management/properties');
@@ -228,7 +228,7 @@ const PropertyDetail = () => {
     if (result.isConfirmed) {
       setIsLoading(true);
       try {
-        await axios.delete(`http://localhost:8000/api/properties/${id}/`);
+        await apiDelete(`${API_ENDPOINTS.PROPERTIES}${id}/`);
         Swal.fire('Deleted!', 'Property has been deleted.', 'success');
         history.push('/data_management/properties');
       } catch (error) {

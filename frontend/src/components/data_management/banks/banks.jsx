@@ -6,7 +6,6 @@ import NavigationBar from "../../core/navigation_bar/navigation_bar";
 import Footer from "../../core/footer/footer";
 
 // Modules / Functions
-import axios from "axios";
 import filterFactory, { textFilter } from "react-bootstrap-table2-filter";
 import ToolkitProvider from "react-bootstrap-table2-toolkit";
 import Swal from "sweetalert2";
@@ -14,6 +13,7 @@ import BootstrapTable from "react-bootstrap-table-next";
 import paginationFactory from "react-bootstrap-table2-paginator";
 import { Button } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
+import { apiGet, API_ENDPOINTS } from "../../../utils/api";
 
 // CSS
 import "react-bootstrap-table-next/dist/react-bootstrap-table2.min.css";
@@ -25,13 +25,10 @@ import NoDataToShowImage from "../../../images/generic/no_results_found.png";
 import {
   paginationOptions,
   headers,
-  // pageHeader,
 } from "../../global_vars";
 
 // Variables
 window.Swal = Swal;
-
-const GET_BANKS = "http://localhost:8000/api/banks/";
 
 const BanksComponent = () => {
   const history = useHistory();
@@ -106,33 +103,26 @@ const BanksComponent = () => {
   const [banks, setBanks] = React.useState([]);
   const [is_loaded, setIsLoaded] = React.useState(false);
 
-  const fetchBanks = () => {
+  const fetchBanks = async () => {
     setIsLoaded(false);
-    axios
-      .get(GET_BANKS, {
-        headers: headers,
-      })
-      .then((res) => {
-        const banks = res.data;
-        setBanks(banks);
-        setIsLoaded(true);
-      })
-      .catch((e) => {
-        console.log(e);
-        if (e.response?.status === 401) {
-          // Handle forbidden
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Failed to load banks.",
-          });
-        }
-        setIsLoaded(true);
+    try {
+      const response = await apiGet(API_ENDPOINTS.BANKS);
+      if (response.success) {
+        setBanks(response.data);
+      } else {
+        setBanks([]);
+      }
+      setIsLoaded(true);
+    } catch (error) {
+      console.error('Error fetching banks:', error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to load banks.",
       });
+      setIsLoaded(true);
+    }
   };
-
-
 
   React.useEffect(() => {
     fetchBanks();

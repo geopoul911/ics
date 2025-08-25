@@ -7,7 +7,7 @@ import { FaHashtag } from "react-icons/fa";
 import { FiType } from "react-icons/fi";
 
 // Modules / Functions
-import axios from "axios";
+
 import { Card } from "react-bootstrap";
 import { Grid } from "semantic-ui-react";
 import Swal from "sweetalert2";
@@ -20,7 +20,7 @@ import {
   EditProvinceCountryModal,
   EditProvinceOrderIndexModal,
 } from "../../../modals/province_edit_modals";
-
+import axios from "axios";
 // Global Variables
 import {
   headers,

@@ -1,3 +1,4 @@
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
 // Built-ins
 import React from "react";
 
@@ -6,7 +7,7 @@ import NavigationBar from "../../core/navigation_bar/navigation_bar";
 import Footer from "../../core/footer/footer";
 
 // Modules / Functions
-import axios from "axios";
+
 import filterFactory, { textFilter } from "react-bootstrap-table2-filter";
 import ToolkitProvider from "react-bootstrap-table2-toolkit";
 import Swal from "sweetalert2";
@@ -28,8 +29,6 @@ import {
 
 // Variables
 window.Swal = Swal;
-
-const GET_CONSULTANTS = "http://localhost:8000/api/consultants/";
 
 const columns = [
   {
@@ -136,34 +135,29 @@ class Consultants extends React.Component {
     };
   }
 
-  fetchConsultants() {
+  async fetchConsultants() {
     this.setState({ is_loaded: false });
-    axios
-      .get(GET_CONSULTANTS, {
-        headers: headers,
-      })
-      .then((res) => {
-        const consultants = res.data;
-        this.setState({
-          consultants: consultants,
-          is_loaded: true,
-        });
-      })
-      .catch((e) => {
-        console.log(e);
-        if (e.response?.status === 401) {
-          this.setState({
-            forbidden: true,
-          });
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Failed to load consultants.",
-          });
-        }
-        this.setState({ is_loaded: true });
+    try {
+      const consultants = await apiGet(API_ENDPOINTS.CONSULTANTS);
+      this.setState({
+        consultants: consultants,
+        is_loaded: true,
       });
+    } catch (error) {
+      console.log(error);
+      if (error.message === 'Authentication required') {
+        this.setState({
+          forbidden: true,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to load consultants.",
+        });
+      }
+      this.setState({ is_loaded: true });
+    }
   }
 
   handlePageChange = (selectedPage) => {
