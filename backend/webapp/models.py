@@ -28,6 +28,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 import re
 from django.contrib.auth import get_user_model
+from accounts.models import Consultant
 
 
 User = get_user_model()
@@ -224,52 +225,7 @@ class BankClientAccount(models.Model):
 4)	User: (διεκπεραιωτές-consultants) περιορισμένη πρόσβαση. Δικαιώματα για νέα εγγραφή και ανάγνωση, όχι όμως ενημέρωση και διαγραφή (create, read - CR)
 """
 
-class Consultant(models.Model):
-    ROLE_CHOICES = [
-        ('A', 'Admin'),
-        ('S', 'Supervisor'),
-        ('U', 'Superuser'),
-        ('C', 'User'),
-    ]
 
-    consultant_id = models.CharField(max_length=10, primary_key=True)
-    orderindex = models.SmallIntegerField()
-    fullname = models.CharField(max_length=40)
-    email = models.EmailField(blank=True, null=True)
-    phone = models.CharField(max_length=15, blank=True, null=True)
-    mobile = models.CharField(max_length=15, blank=True, null=True)
-    photo = models.ImageField(upload_to='consultant_photos/', blank=True, null=True)
-    role = models.CharField(max_length=1, choices=ROLE_CHOICES)
-    username = models.CharField(max_length=15, unique=True)
-    password = models.CharField(max_length=128)  # Using Django's auth system for secure password storage
-    canassigntask = models.BooleanField(default=False)
-    cashpassport = models.CharField(max_length=120, blank=True, null=True, 
-        help_text="Comma-separated list of country codes (e.g., 'GRE,CAN' or 'GRE,USA,CAN')")
-    active = models.BooleanField(default=True)
-
-    def get_cashpassport_countries(self):
-        """Returns a list of country codes from cashpassport field"""
-        if not self.cashpassport:
-            return []
-        return [code.strip() for code in self.cashpassport.split(',')]
-
-    def set_cashpassport_countries(self, country_codes):
-        """Sets the cashpassport field from a list of country codes"""
-        self.cashpassport = ','.join(code.strip() for code in country_codes)
-
-    def has_cashpassport_access(self, country_code):
-        """Checks if consultant has access to a specific country's cash passport"""
-        if not self.cashpassport:
-            return False
-        return country_code.strip() in self.get_cashpassport_countries()
-
-    def __str__(self):
-        return self.fullname
-
-    class Meta:
-        verbose_name = "Consultant"
-        verbose_name_plural = "Consultants"
-        ordering = ['orderindex', 'fullname']
 
 class ProjectCategory(models.Model):
     projcate_id = models.CharField(max_length=1, primary_key=True)

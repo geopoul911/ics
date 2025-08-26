@@ -44,7 +44,7 @@ class AdministrationRoot extends React.Component {
                 }}>User Management</h3>
               </div>
               <Menu vertical className="dmRootMenu">
-                <Menu.Item as={Link} to="/administration/consultants">
+                <Menu.Item as={Link} to="/administration/all_consultants">
                   <FaArrowRight style={iconStyle} /> Consultants
                 </Menu.Item>
               </Menu>

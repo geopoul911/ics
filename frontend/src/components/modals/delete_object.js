@@ -18,6 +18,7 @@ const DELETE_ENDPOINTS = {
   'Province': 'http://localhost:8000/api/regions/province/',
   'City': 'http://localhost:8000/api/regions/city/',
   'User': 'http://localhost:8000/api/site_admin/del_usr/',
+  'Consultant': 'http://localhost:8000/api/administration/consultant/',
   // Add more object types as needed
 };
 
@@ -27,6 +28,7 @@ const REDIRECT_URLS = {
   'Province': '/regions/all_provinces', 
   'City': '/regions/all_cities',
   'User': '/site_administration/all_users',
+  'Consultant': '/administration/all_consultants',
   // Add more redirect URLs as needed
 };
 

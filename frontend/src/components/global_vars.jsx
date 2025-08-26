@@ -1,5 +1,6 @@
 // Modules / Functions
 import { Breadcrumb } from "react-bootstrap";
+import { apiPut } from "../utils/api";
 
 // Icons / Images
 import {
@@ -377,6 +378,45 @@ export function pageHeader(value, objName) {
           <hr />
         </>
       );
-  }
+  } else if (value === "all_consultants") {
+    return (
+      <>
+        <div className="page_header">
+          <h2>
+            <FaArrowRight style={iconStyle} /> All Consultants
+          </h2>
+          <Breadcrumb>
+            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href="/administration/root">
+              Administration
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>All Consultants</Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
+        <hr />
+      </>
+    );
+  }  else if (value === "consultant_overview") {
+    return (
+      <>
+        <div className="page_header">
+          <h2>
+            <FaArrowRight style={iconStyle} /> Consultant Overview
+          </h2>
+          <Breadcrumb>
+            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href="/administration/root">
+              Administration
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
+        <hr />
+      </>
+    );
+  } 
   return <></>;
 }
+
+// Export apiPut for use in other components
+export { apiPut };

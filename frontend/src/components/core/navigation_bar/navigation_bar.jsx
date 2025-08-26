@@ -297,7 +297,7 @@ class NavigationBar extends Component {
                   <Dropdown.Menu show={this.state.adminIsOpen} id="nav_admin_dropdown">
                     {/* User Management */}
                     <Dropdown.Header>User Management</Dropdown.Header>
-                    <Dropdown.Item href="/administration/consultants">
+                    <Dropdown.Item href="/administration/all_consultants">
                       <FaArrowRight style={iconStyle}/> Consultants
                     </Dropdown.Item>
                     

@@ -15,8 +15,8 @@ urlpatterns = [
     # Core
     path('api/view/', include('webapp.urls')),
 
-    # Site Administration
-    path('api/site_admin/', include('webapp.administration.urls')),
+    # Administration
+    path('api/administration/', include('webapp.administration.urls')),
 
 
     # Regions

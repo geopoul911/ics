@@ -50,6 +50,10 @@ import AdministrationRoot from "./components/administration/administration_root/
 import ReportsRoot from "./components/reports/reports_root/reports_root";
 import Dashboard from "./components/dashboard/Dashboard";
 
+// Administration
+import AllConsultants from "./components/administration/all_consultants/all_consultants";
+import Consultant from "./components/administration/consultant/consultant";
+
 import ProtectedRoute from "./components/core/router/protected_route";
 
 
@@ -477,6 +481,21 @@ function App() {
           component={City}
         />
 
+        {/* Administration */}
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/administration/all_consultants"
+          render={(props) => (
+            <AllConsultants {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/administration/consultant/:id"
+          component={Consultant}
+        />
 
         {/* 404 ( Has to be last ) */}
         <Route path="" component={FourOFour} />

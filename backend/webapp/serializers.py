@@ -1,11 +1,13 @@
 from .models import (
-    Country, City, Province, Bank, Client, BankClientAccount, Consultant, 
+    Country, City, Province, Bank, Client, BankClientAccount, 
     ProjectCategory, Project, AssociatedClient, Document, Profession, 
     Professional, ClientContact, Property, BankProjectAccount, TaskCategory, 
     ProjectTask, TaskComment, Cash, TaxationProject, Notification, InsuranceCarrier
 )
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
+from accounts.models import Consultant
 
 User = get_user_model()
 
@@ -284,20 +286,109 @@ class BankClientAccountSerializer(serializers.ModelSerializer):
 
 # Consultant serializers
 class ConsultantSerializer(serializers.ModelSerializer):
+    active = serializers.BooleanField(source='is_active', required=False)
+    
     class Meta:
         model = Consultant
-        fields = '__all__'
+        fields = [
+            'consultant_id', 'orderindex', 'fullname', 'email', 'phone', 'mobile', 
+            'photo', 'role', 'username', 'password', 'is_active', 'is_staff', 
+            'canassigntask', 'cashpassport', 'active'
+        ]
         extra_kwargs = {
-            'password': {'write_only': True}
+            'password': {'write_only': True},
+            'is_active': {'write_only': True}  # Hide is_active from output, use active instead
         }
+
+    def validate_consultant_id(self, value):
+        """Validate consultant_id uniqueness"""
+        # Get the current instance (for updates) or None (for creates)
+        instance = getattr(self, 'instance', None)
+        
+        # Check if this consultant_id is already taken by another consultant
+        try:
+            existing_consultant = Consultant.objects.get(consultant_id=value)
+            # If this is an update and the existing consultant is the same as the current instance, it's OK
+            if instance and existing_consultant.consultant_id == instance.consultant_id:
+                return value
+            # Otherwise, it's a conflict
+            raise serializers.ValidationError(
+                f"Consultant ID '{value}' is already taken by Consultant: {existing_consultant.fullname}"
+            )
+        except Consultant.DoesNotExist:
+            # No conflict, value is OK
+            return value
+
+    def validate_orderindex(self, value):
+        """Validate orderindex uniqueness"""
+        # Get the current instance (for updates) or None (for creates)
+        instance = getattr(self, 'instance', None)
+        
+        # Check if this orderindex is already taken by another consultant
+        try:
+            existing_consultant = Consultant.objects.get(orderindex=value)
+            # If this is an update and the existing consultant is the same as the current instance, it's OK
+            if instance and existing_consultant.consultant_id == instance.consultant_id:
+                return value
+            # Otherwise, it's a conflict
+            raise serializers.ValidationError(
+                f"Order index {value} is already taken by Consultant: {existing_consultant.fullname} (ID: {existing_consultant.consultant_id})"
+            )
+        except Consultant.DoesNotExist:
+            # No conflict, value is OK
+            return value
+
+    def validate_username(self, value):
+        """Validate username uniqueness"""
+        # Get the current instance (for updates) or None (for creates)
+        instance = getattr(self, 'instance', None)
+        
+        # Check if this username is already taken by another consultant
+        try:
+            existing_consultant = Consultant.objects.get(username=value)
+            # If this is an update and the existing consultant is the same as the current instance, it's OK
+            if instance and existing_consultant.consultant_id == instance.consultant_id:
+                return value
+            # Otherwise, it's a conflict
+            raise serializers.ValidationError(
+                f"Username '{value}' is already taken by Consultant: {existing_consultant.fullname}"
+            )
+        except Consultant.DoesNotExist:
+            # No conflict, value is OK
+            return value
 
     def create(self, validated_data):
         password = validated_data.pop('password', None)
-        consultant = Consultant(**validated_data)
-        if password:
-            consultant.set_password(password)
-        consultant.save()
+        
+        # Handle the active field mapping
+        if 'active' in validated_data:
+            validated_data['is_active'] = validated_data.pop('active')
+        
+        # Use the Manager's create_user method
+        username = validated_data.pop('username')
+        consultant = Consultant.objects.create_user(
+            username=username,
+            password=password,
+            **validated_data
+        )
         return consultant
+
+    def update(self, instance, validated_data):
+        # Handle password update
+        password = validated_data.pop('password', None)
+        if password:
+            instance.set_password(password)
+
+        # Handle the active field mapping
+        if 'active' in validated_data:
+            validated_data['is_active'] = validated_data.pop('active')
+
+        # Update other fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        instance.save()
+        return instance
 
 # Project related serializers
 class ProjectCategorySerializer(serializers.ModelSerializer):
