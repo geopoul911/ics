@@ -90,11 +90,13 @@ class ProvinceOverview extends React.Component {
 
   // When modals return a fresh object, replace state.province
   update_state = (updated) => {
+    console.log('Updating province state with:', updated);
     this.setState({ province: updated });
   };
 
   render() {
     const { province } = this.state;
+    console.log('Rendering province overview with province:', province);
     
     return (
       <>

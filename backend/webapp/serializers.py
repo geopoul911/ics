@@ -14,6 +14,50 @@ class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
         fields = '__all__'
+    
+    def validate_orderindex(self, value):
+        """
+        Custom validation for orderindex to provide better error messages
+        """
+        # Get the current instance (for updates) or None (for creates)
+        instance = getattr(self, 'instance', None)
+        
+        # Check if this orderindex is already taken by another country
+        try:
+            existing_country = Country.objects.get(orderindex=value)
+            # If this is an update and the existing country is the same as the current instance, it's OK
+            if instance and existing_country.country_id == instance.country_id:
+                return value
+            # Otherwise, it's a conflict
+            raise serializers.ValidationError(
+                f"Order index {value} is already taken by Country: {existing_country.title} (ID: {existing_country.country_id})"
+            )
+        except Country.DoesNotExist:
+            # No conflict, value is OK
+            return value
+    
+
+    
+    def validate_country_id(self, value):
+        """
+        Custom validation for country_id to provide better error messages
+        """
+        # Get the current instance (for updates) or None (for creates)
+        instance = getattr(self, 'instance', None)
+        
+        # Check if this country_id is already taken by another country
+        try:
+            existing_country = Country.objects.get(country_id=value)
+            # If this is an update and the existing country is the same as the current instance, it's OK
+            if instance and existing_country.country_id == instance.country_id:
+                return value
+            # Otherwise, it's a conflict
+            raise serializers.ValidationError(
+                f"Country ID '{value}' is already taken by Country: {existing_country.title}"
+            )
+        except Country.DoesNotExist:
+            # No conflict, value is OK
+            return value
 
 class ProvinceSerializer(serializers.ModelSerializer):
     country = CountrySerializer(read_only=True)
@@ -22,6 +66,50 @@ class ProvinceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Province
         fields = '__all__'
+    
+    def validate_orderindex(self, value):
+        """
+        Custom validation for orderindex to provide better error messages
+        """
+        # Get the current instance (for updates) or None (for creates)
+        instance = getattr(self, 'instance', None)
+        
+        # Check if this orderindex is already taken by another province
+        try:
+            existing_province = Province.objects.get(orderindex=value)
+            # If this is an update and the existing province is the same as the current instance, it's OK
+            if instance and existing_province.province_id == instance.province_id:
+                return value
+            # Otherwise, it's a conflict
+            raise serializers.ValidationError(
+                f"Order index {value} is already taken by Province: {existing_province.title} (ID: {existing_province.province_id})"
+            )
+        except Province.DoesNotExist:
+            # No conflict, value is OK
+            return value
+    
+    def validate_province_id(self, value):
+        """
+        Custom validation for province_id to provide better error messages
+        """
+        # Get the current instance (for updates) or None (for creates)
+        instance = getattr(self, 'instance', None)
+        
+        # Check if this province_id is already taken by another province
+        try:
+            existing_province = Province.objects.get(province_id=value)
+            # If this is an update and the existing province is the same as the current instance, it's OK
+            if instance and existing_province.province_id == instance.province_id:
+                return value
+            # Otherwise, it's a conflict
+            raise serializers.ValidationError(
+                f"Province ID '{value}' is already taken by Province: {existing_province.title}"
+            )
+        except Province.DoesNotExist:
+            # No conflict, value is OK
+            return value
+    
+
     
     def create(self, validated_data):
         country_id = validated_data.pop('country_id', None)
@@ -54,6 +142,50 @@ class CitySerializer(serializers.ModelSerializer):
         model = City
         fields = '__all__'
     
+    def validate_orderindex(self, value):
+        """
+        Custom validation for orderindex to provide better error messages
+        """
+        # Get the current instance (for updates) or None (for creates)
+        instance = getattr(self, 'instance', None)
+        
+        # Check if this orderindex is already taken by another city
+        try:
+            existing_city = City.objects.get(orderindex=value)
+            # If this is an update and the existing city is the same as the current instance, it's OK
+            if instance and existing_city.city_id == instance.city_id:
+                return value
+            # Otherwise, it's a conflict
+            raise serializers.ValidationError(
+                f"Order index {value} is already taken by City: {existing_city.title} (ID: {existing_city.city_id})"
+            )
+        except City.DoesNotExist:
+            # No conflict, value is OK
+            return value
+    
+    def validate_city_id(self, value):
+        """
+        Custom validation for city_id to provide better error messages
+        """
+        # Get the current instance (for updates) or None (for creates)
+        instance = getattr(self, 'instance', None)
+        
+        # Check if this city_id is already taken by another city
+        try:
+            existing_city = City.objects.get(city_id=value)
+            # If this is an update and the existing city is the same as the current instance, it's OK
+            if instance and existing_city.city_id == instance.city_id:
+                return value
+            # Otherwise, it's a conflict
+            raise serializers.ValidationError(
+                f"City ID '{value}' is already taken by City: {existing_city.title}"
+            )
+        except City.DoesNotExist:
+            # No conflict, value is OK
+            return value
+    
+
+    
     def create(self, validated_data):
         country_id = validated_data.pop('country_id', None)
         province_id = validated_data.pop('province_id', None)
@@ -83,12 +215,23 @@ class CitySerializer(serializers.ModelSerializer):
         country_id = validated_data.pop('country_id', None)
         province_id = validated_data.pop('province_id', None)
         
+        # Check if country is being changed
+        country_changed = False
         if country_id:
             try:
                 country = Country.objects.get(country_id=country_id)
+                # Check if the country is actually changing
+                if instance.country != country:
+                    country_changed = True
                 validated_data['country'] = country
             except Country.DoesNotExist:
                 raise serializers.ValidationError(f"Country with ID '{country_id}' does not exist.")
+        
+        # If country is being changed, automatically clear the province
+        if country_changed:
+            validated_data['province'] = None
+            # Also clear province_id from the data since we're setting province to None
+            province_id = None
         
         # Handle province_id - can be None to clear the province
         if province_id is not None:  # Explicitly check for None to allow clearing

@@ -304,15 +304,6 @@ class NavigationBar extends Component {
                     {/* Master Data */}
                     <Dropdown.Divider />
                     <Dropdown.Header>Master Data</Dropdown.Header>
-                    <Dropdown.Item href="/administration/countries">
-                      <FaArrowRight style={iconStyle}/> Countries
-                    </Dropdown.Item>
-                    <Dropdown.Item href="/administration/provinces">
-                      <FaArrowRight style={iconStyle}/> Provinces
-                    </Dropdown.Item>
-                    <Dropdown.Item href="/administration/cities">
-                      <FaArrowRight style={iconStyle}/> Cities
-                    </Dropdown.Item>
                     <Dropdown.Item href="/administration/banks">
                       <FaArrowRight style={iconStyle}/> Banks
                     </Dropdown.Item>

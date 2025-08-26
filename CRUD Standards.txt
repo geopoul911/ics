@@ -1,0 +1,10 @@
+Unique fields Error Handling = Inform user which model has for example the order index.
+both in update/create
+
+Validations = Front end
+Logging
+UI / UX
+CSRF back end
+Authenticated
+CRUD Test
+Consistent API Usage

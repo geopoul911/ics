@@ -66,13 +66,30 @@ export function EditCountryTitleModal({ country, update_state }) {
     try {
       setBusy(true);
       const res = await patchCountry(country.country_id, { title: trimmed.toUpperCase() });
-      const updated = res?.data?.country || res?.data || { ...country, title: trimmed.toUpperCase() };
+      const updated = res || { ...country, title: trimmed.toUpperCase() };
       update_state?.(updated);
     } catch (e) {
-      const apiMsg =
-        e?.response?.data?.errormsg ||
-        e?.response?.data?.detail ||
-        "Failed to update Title.";
+      console.log('Error updating country title:', e);
+      console.log('Error response data:', e?.response?.data);
+      
+      // Handle different error response formats
+      let apiMsg = "Failed to update Title.";
+      
+      if (e?.response?.data?.error) {
+        // Custom error format from our enhanced error handling
+        apiMsg = e.response.data.error;
+      } else if (e?.response?.data?.orderindex) {
+        // Serializer validation error for orderindex
+        apiMsg = e.response.data.orderindex[0];
+      } else if (e?.response?.data?.country_id) {
+        // Serializer validation error for country_id
+        apiMsg = e.response.data.country_id[0];
+      } else if (e?.response?.data?.errormsg) {
+        apiMsg = e.response.data.errormsg;
+      } else if (e?.response?.data?.detail) {
+        apiMsg = e.response.data.detail;
+      }
+      
       Swal.fire({ icon: "error", title: "Error", text: apiMsg });
     } finally {
       setBusy(false);
@@ -146,7 +163,7 @@ export function EditCountryCurrencyModal({ country, update_state }) {
       setBusy(true);
       const payload = { currency: upper || null }; // allow clearing to null
       const res = await patchCountry(country.country_id, payload);
-      const updated = res?.data?.country || res?.data || { ...country, currency: upper || null };
+      const updated = res || { ...country, currency: upper || null };
       update_state?.(updated);
     } catch (e) {
       const apiMsg =
@@ -234,14 +251,31 @@ export function EditCountryOrderIndexModal({ country, update_state }) {
     try {
       setBusy(true);
       const res = await patchCountry(country.country_id, { orderindex: Number(value) });
-      const updated =
-        res?.data?.country || res?.data || { ...country, orderindex: Number(value) };
+      const updated = res || { ...country, orderindex: Number(value) };
       update_state?.(updated);
     } catch (e) {
-      const apiMsg =
-        e?.response?.data?.errormsg ||
-        e?.response?.data?.detail ||
-        "Failed to update Order Index.";
+      console.log('Error updating country order index:', e);
+      console.log('Error response data:', e?.response?.data);
+      
+      // Handle different error response formats
+      let apiMsg = "Failed to update Order Index.";
+      
+      // Priority order for error messages
+      if (e?.response?.data?.orderindex && Array.isArray(e.response.data.orderindex)) {
+        // Serializer validation error for orderindex (highest priority)
+        apiMsg = e.response.data.orderindex[0];
+      } else if (e?.response?.data?.error) {
+        // Custom error format from our enhanced error handling
+        apiMsg = e.response.data.error;
+      } else if (e?.response?.data?.country_id && Array.isArray(e.response.data.country_id)) {
+        // Serializer validation error for country_id
+        apiMsg = e.response.data.country_id[0];
+      } else if (e?.response?.data?.errormsg) {
+        apiMsg = e.response.data.errormsg;
+      } else if (e?.response?.data?.detail) {
+        apiMsg = e.response.data.detail;
+      }
+      
       Swal.fire({ icon: "error", title: "Error", text: apiMsg });
     } finally {
       setBusy(false);

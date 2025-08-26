@@ -18,7 +18,7 @@ import { headers } from "../../global_vars";
 window.Swal = Swal;
 
 // API endpoints - Using regions API
-const ADD_PROVINCE = "http://localhost:8000/api/view/add_province/";
+const ADD_PROVINCE = "http://localhost:8000/api/regions/all_provinces/";
 const GET_COUNTRIES = "http://localhost:8000/api/regions/all_countries/";
 
 // Helpers
@@ -114,10 +114,27 @@ function AddProvinceModal() {
       const newId = res?.data?.province_id || res?.data?.id || provinceId;
       window.location.href = "/regions/province/" + newId;
     } catch (e) {
-      const apiMsg =
-        e?.response?.data?.errormsg ||
-        e?.response?.data?.detail ||
-        "Something went wrong while creating the province.";
+      console.log('Error creating province:', e);
+      console.log('Error response data:', e?.response?.data);
+      
+      // Handle different error response formats
+      let apiMsg = "Something went wrong while creating the province.";
+      
+      if (e?.response?.data?.error) {
+        // Custom error format from our enhanced error handling
+        apiMsg = e.response.data.error;
+      } else if (e?.response?.data?.orderindex) {
+        // Serializer validation error for orderindex
+        apiMsg = e.response.data.orderindex[0];
+      } else if (e?.response?.data?.province_id) {
+        // Serializer validation error for province_id
+        apiMsg = e.response.data.province_id[0];
+      } else if (e?.response?.data?.errormsg) {
+        apiMsg = e.response.data.errormsg;
+      } else if (e?.response?.data?.detail) {
+        apiMsg = e.response.data.detail;
+      }
+      
       Swal.fire({
         icon: "error",
         title: "Error",

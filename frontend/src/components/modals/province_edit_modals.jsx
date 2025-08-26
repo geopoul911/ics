@@ -29,6 +29,7 @@ const toSmallInt = (value) => {
 
 const patchProvince = async (id, payload) => {
   const url = `${PROVINCE_DETAIL}${encodeURIComponent(id)}/`;
+  console.log('Patching province at URL:', url, 'with payload:', payload);
   return apiPut(url, payload);
 };
 
@@ -66,13 +67,30 @@ export function EditProvinceTitleModal({ province, update_state }) {
     try {
       setBusy(true);
       const res = await patchProvince(province.province_id, { title: trimmed.toUpperCase() });
-      const updated = res?.data || { ...province, title: trimmed.toUpperCase() };
+      const updated = res || { ...province, title: trimmed.toUpperCase() };
       update_state?.(updated);
     } catch (e) {
-      const apiMsg =
-        e?.response?.data?.errormsg ||
-        e?.response?.data?.detail ||
-        "Failed to update Title.";
+      console.log('Error updating province title:', e);
+      console.log('Error response data:', e?.response?.data);
+      
+      // Handle different error response formats
+      let apiMsg = "Failed to update Title.";
+      
+      if (e?.response?.data?.error) {
+        // Custom error format from our enhanced error handling
+        apiMsg = e.response.data.error;
+      } else if (e?.response?.data?.orderindex) {
+        // Serializer validation error for orderindex
+        apiMsg = e.response.data.orderindex[0];
+      } else if (e?.response?.data?.province_id) {
+        // Serializer validation error for province_id
+        apiMsg = e.response.data.province_id[0];
+      } else if (e?.response?.data?.errormsg) {
+        apiMsg = e.response.data.errormsg;
+      } else if (e?.response?.data?.detail) {
+        apiMsg = e.response.data.detail;
+      }
+      
       Swal.fire({ icon: "error", title: "Error", text: apiMsg });
     } finally {
       setBusy(false);
@@ -175,10 +193,14 @@ export function EditProvinceCountryModal({ province, update_state }) {
     if (!isValid || !isChanged) return;
     try {
       setBusy(true);
+      console.log('Updating province country:', { province_id: province.province_id, country_id: value });
       const res = await patchProvince(province.province_id, { country_id: value });
-      const updated = res?.data || { ...province, country_id: value };
+      console.log('API response:', res);
+      const updated = res || { ...province, country_id: value };
+      console.log('Updated province data:', updated);
       update_state?.(updated);
     } catch (e) {
+      console.error('Error updating province country:', e);
       const apiMsg =
         e?.response?.data?.errormsg ||
         e?.response?.data?.detail ||
@@ -261,13 +283,31 @@ export function EditProvinceOrderIndexModal({ province, update_state }) {
     try {
       setBusy(true);
       const res = await patchProvince(province.province_id, { orderindex: Number(value) });
-      const updated = res?.data || { ...province, orderindex: Number(value) };
+      const updated = res || { ...province, orderindex: Number(value) };
       update_state?.(updated);
     } catch (e) {
-      const apiMsg =
-        e?.response?.data?.errormsg ||
-        e?.response?.data?.detail ||
-        "Failed to update Order Index.";
+      console.log('Error updating province order index:', e);
+      console.log('Error response data:', e?.response?.data);
+      
+      // Handle different error response formats
+      let apiMsg = "Failed to update Order Index.";
+      
+      // Priority order for error messages
+      if (e?.response?.data?.orderindex && Array.isArray(e.response.data.orderindex)) {
+        // Serializer validation error for orderindex (highest priority)
+        apiMsg = e.response.data.orderindex[0];
+      } else if (e?.response?.data?.error) {
+        // Custom error format from our enhanced error handling
+        apiMsg = e.response.data.error;
+      } else if (e?.response?.data?.province_id && Array.isArray(e.response.data.province_id)) {
+        // Serializer validation error for province_id
+        apiMsg = e.response.data.province_id[0];
+      } else if (e?.response?.data?.errormsg) {
+        apiMsg = e.response.data.errormsg;
+      } else if (e?.response?.data?.detail) {
+        apiMsg = e.response.data.detail;
+      }
+      
       Swal.fire({ icon: "error", title: "Error", text: apiMsg });
     } finally {
       setBusy(false);

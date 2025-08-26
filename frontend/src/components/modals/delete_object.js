@@ -79,23 +79,44 @@ function DeleteObjectModal(props) {
       console.error('Delete error:', error);
       
       // Check if this is a ProtectedError from the backend
-      if (error.response?.data?.error === 'ProtectedError') {
-        const protectedObjects = error.response.data.protected_objects || [];
+      if (error.response?.data?.related_objects || error.response?.data?.errormsg?.includes('Cannot delete')) {
+        const relatedObjects = error.response.data.related_objects || [];
+        const errorMessage = error.response.data.errormsg || '';
         
         // Create a detailed error message with HTML formatting
-        let htmlContent = `<div style="text-align: left;">
-          <p><strong>Cannot delete this ${props.object_type.toLowerCase()} because it is referenced by the following objects:</strong></p>
-          <ul style="margin: 10px 0; padding-left: 20px;">`;
+        let htmlContent = `<div style="text-align: left;">`;
         
-        protectedObjects.forEach(obj => {
-          htmlContent += `<li>${obj}</li>`;
-        });
+        if (errorMessage) {
+          // Split the error message by newlines and format it
+          const lines = errorMessage.split('\n');
+          lines.forEach(line => {
+            if (line.trim()) {
+              if (line.startsWith('•')) {
+                htmlContent += `<li style="margin: 5px 0;">${line.substring(1).trim()}</li>`;
+              } else if (line.includes('Cannot delete')) {
+                htmlContent += `<p style="font-weight: bold; color: #d33; margin-bottom: 15px;">${line}</p>`;
+              } else if (line.includes('Please remove')) {
+                htmlContent += `<p style="color: #666; font-size: 0.9em; margin-top: 15px; font-weight: bold;">${line}</p>`;
+              } else {
+                htmlContent += `<p>${line}</p>`;
+              }
+            }
+          });
+        } else if (relatedObjects.length > 0) {
+          htmlContent += `<p><strong>Cannot delete this ${props.object_type.toLowerCase()} because it is referenced by the following objects:</strong></p>
+            <ul style="margin: 10px 0; padding-left: 20px;">`;
+          
+          relatedObjects.forEach(obj => {
+            htmlContent += `<li>${obj}</li>`;
+          });
+          
+          htmlContent += `</ul>
+            <p style="color: #666; font-size: 0.9em; margin-top: 15px;">
+              <strong>Solution:</strong> Delete or reassign these related objects first, then try deleting this ${props.object_type.toLowerCase()} again.
+            </p>`;
+        }
         
-        htmlContent += `</ul>
-          <p style="color: #666; font-size: 0.9em; margin-top: 15px;">
-            <strong>Solution:</strong> Delete or reassign these related objects first, then try deleting this ${props.object_type.toLowerCase()} again.
-          </p>
-        </div>`;
+        htmlContent += `</div>`;
         
         Swal.fire({
           icon: "warning",
@@ -107,6 +128,7 @@ function DeleteObjectModal(props) {
       } else {
         // Handle other types of errors
         const errorMessage = error.response?.data?.errormsg || 
+                            error.response?.data?.error || 
                             error.response?.data?.detail || 
                             error.message || 
                             `Failed to delete ${props.object_type}`;

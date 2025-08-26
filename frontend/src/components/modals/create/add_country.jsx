@@ -19,7 +19,7 @@ import { headers } from "../../global_vars";
 window.Swal = Swal;
 
 // API endpoint - Using regions API
-const ADD_COUNTRY = "http://localhost:8000/api/view/add_country/";
+const ADD_COUNTRY = "http://localhost:8000/api/regions/all_countries/";
 
 // Helpers
 const onlyUpperLetters = (value) => value.replace(/[^a-zA-Z]/g, "").toUpperCase();
@@ -84,10 +84,27 @@ function AddCountryModal() {
 
       window.location.href = "/regions/country/" + newId;
     } catch (e) {
-      const apiMsg =
-        e?.response?.data?.errormsg ||
-        e?.response?.data?.detail ||
-        "Something went wrong while creating the country.";
+      console.log('Error creating country:', e);
+      console.log('Error response data:', e?.response?.data);
+      
+      // Handle different error response formats
+      let apiMsg = "Something went wrong while creating the country.";
+      
+      if (e?.response?.data?.error) {
+        // Custom error format from our enhanced error handling
+        apiMsg = e.response.data.error;
+      } else if (e?.response?.data?.orderindex) {
+        // Serializer validation error for orderindex
+        apiMsg = e.response.data.orderindex[0];
+      } else if (e?.response?.data?.country_id) {
+        // Serializer validation error for country_id
+        apiMsg = e.response.data.country_id[0];
+      } else if (e?.response?.data?.errormsg) {
+        apiMsg = e.response.data.errormsg;
+      } else if (e?.response?.data?.detail) {
+        apiMsg = e.response.data.detail;
+      }
+      
       Swal.fire({
         icon: "error",
         title: "Error",

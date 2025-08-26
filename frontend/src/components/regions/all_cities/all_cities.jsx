@@ -76,8 +76,19 @@ const columns = [
     filter: textFilter(),
     formatter: (cell, row) => {
       const provinceData = row.province;
+      
+      // Handle null/undefined province data
+      if (!provinceData) {
+        return (
+          <span style={{ color: '#999', fontStyle: 'italic' }}>
+            No Province
+          </span>
+        );
+      }
+      
       const provinceId = typeof provinceData === 'object' ? provinceData.province_id : provinceData;
       const provinceTitle = typeof provinceData === 'object' ? provinceData.title : provinceId;
+      
       return (
         <Button>
           <a href={"/regions/province/" + provinceId} basic id="cell_link">

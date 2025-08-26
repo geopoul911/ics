@@ -4,6 +4,10 @@ from webapp.models import (
     Country,
     Province,
     City,
+    Bank,
+    Client,
+    Property,
+    Cash,
 )
 from django.db.models import ProtectedError
 from django.views.decorators.csrf import csrf_exempt
@@ -103,7 +107,45 @@ class DeleteCountry(APIView):
             return Response(data=context, status=400)
             
         except ProtectedError:
-            context['errormsg'] = 'This Country is protected. Remove Country\'s related objects (provinces, cities, clients, banks) to be able to delete it.'
+            # Get detailed information about related objects
+            related_objects = []
+            
+            # Check provinces
+            provinces = Province.objects.filter(country=country_to_delete)
+            if provinces.exists():
+                related_objects.append(f"{provinces.count()} province(s): {', '.join([p.title for p in provinces[:5]])}{'...' if provinces.count() > 5 else ''}")
+            
+            # Check cities
+            cities = City.objects.filter(country=country_to_delete)
+            if cities.exists():
+                related_objects.append(f"{cities.count()} city(ies): {', '.join([c.title for c in cities[:5]])}{'...' if cities.count() > 5 else ''}")
+            
+            # Check banks
+            banks = Bank.objects.filter(country=country_to_delete)
+            if banks.exists():
+                related_objects.append(f"{banks.count()} bank(s): {', '.join([b.bankname for b in banks[:5]])}{'...' if banks.count() > 5 else ''}")
+            
+            # Check clients (main country reference)
+            clients = Client.objects.filter(country=country_to_delete)
+            if clients.exists():
+                related_objects.append(f"{clients.count()} client(s): {', '.join([f'{c.surname} {c.name}' for c in clients[:5]])}{'...' if clients.count() > 5 else ''}")
+            
+            # Check properties
+            properties = Property.objects.filter(country=country_to_delete)
+            if properties.exists():
+                related_objects.append(f"{properties.count()} propert(ies): {', '.join([p.description for p in properties[:5]])}{'...' if properties.count() > 5 else ''}")
+            
+            # Check cash transactions
+            cash_transactions = Cash.objects.filter(country=country_to_delete)
+            if cash_transactions.exists():
+                related_objects.append(f"{cash_transactions.count()} cash transaction(s)")
+            
+            error_message = f"Cannot delete country '{country_to_delete.title}' because it is referenced by:\n\n"
+            error_message += "\n".join([f"• {obj}" for obj in related_objects])
+            error_message += "\n\nPlease remove or reassign these related objects before deleting the country."
+            
+            context['errormsg'] = error_message
+            context['related_objects'] = related_objects
             return Response(data=context, status=400)
 
         except Exception as e:
@@ -151,7 +193,30 @@ class DeleteProvince(APIView):
             return Response(data=context, status=400)
             
         except ProtectedError:
-            context['errormsg'] = 'This Province is protected. Remove Province\'s related objects (cities, clients) to be able to delete it.'
+            # Get detailed information about related objects
+            related_objects = []
+            
+            # Check cities
+            cities = City.objects.filter(province=province_to_delete)
+            if cities.exists():
+                related_objects.append(f"{cities.count()} city(ies): {', '.join([c.title for c in cities[:5]])}{'...' if cities.count() > 5 else ''}")
+            
+            # Check clients
+            clients = Client.objects.filter(province=province_to_delete)
+            if clients.exists():
+                related_objects.append(f"{clients.count()} client(s): {', '.join([f'{c.surname} {c.name}' for c in clients[:5]])}{'...' if clients.count() > 5 else ''}")
+            
+            # Check properties
+            properties = Property.objects.filter(province=province_to_delete)
+            if properties.exists():
+                related_objects.append(f"{properties.count()} propert(ies): {', '.join([p.description for p in properties[:5]])}{'...' if properties.count() > 5 else ''}")
+            
+            error_message = f"Cannot delete province '{province_to_delete.title}' because it is referenced by:\n\n"
+            error_message += "\n".join([f"• {obj}" for obj in related_objects])
+            error_message += "\n\nPlease remove or reassign these related objects before deleting the province."
+            
+            context['errormsg'] = error_message
+            context['related_objects'] = related_objects
             return Response(data=context, status=400)
 
         except Exception as e:
@@ -199,7 +264,25 @@ class DeleteCity(APIView):
             return Response(data=context, status=400)
             
         except ProtectedError:
-            context['errormsg'] = 'This City is protected. Remove City\'s related objects (clients) to be able to delete it.'
+            # Get detailed information about related objects
+            related_objects = []
+            
+            # Check clients
+            clients = Client.objects.filter(city=city_to_delete)
+            if clients.exists():
+                related_objects.append(f"{clients.count()} client(s): {', '.join([f'{c.surname} {c.name}' for c in clients[:5]])}{'...' if clients.count() > 5 else ''}")
+            
+            # Check properties
+            properties = Property.objects.filter(city=city_to_delete)
+            if properties.exists():
+                related_objects.append(f"{properties.count()} propert(ies): {', '.join([p.description for p in properties[:5]])}{'...' if properties.count() > 5 else ''}")
+            
+            error_message = f"Cannot delete city '{city_to_delete.title}' because it is referenced by:\n\n"
+            error_message += "\n".join([f"• {obj}" for obj in related_objects])
+            error_message += "\n\nPlease remove or reassign these related objects before deleting the city."
+            
+            context['errormsg'] = error_message
+            context['related_objects'] = related_objects
             return Response(data=context, status=400)
 
         except Exception as e:
