@@ -18,9 +18,6 @@ import { Button } from "semantic-ui-react";
 // CSS
 import "react-bootstrap-table-next/dist/react-bootstrap-table2.min.css";
 
-// Icons / Images
-import NoDataToShowImage from "../../../images/generic/no_results_found.png";
-
 // Global Variables
 import {
   paginationOptions,
@@ -31,8 +28,8 @@ import {
 // Variables
 window.Swal = Swal;
 
-// Updated to use new data_management API
-const GET_CITIES = "http://localhost:8000/api/data_management/cities/";
+// Using regions API
+const GET_CITIES = "http://localhost:8000/api/regions/all_cities/";
 
 const columns = [
   {
@@ -104,10 +101,6 @@ const defaultSorted = [
     order: "asc",
   },
 ];
-
-const NoDataToShow = () => {
-  return <img src={NoDataToShowImage} alt={""} className="fill" />;
-};
 
 class AllCities extends React.Component {
   constructor(props) {
@@ -197,30 +190,35 @@ class AllCities extends React.Component {
         <div className="mainContainer">
           {pageHeader("all_cities", "All Cities")}
           <div className="contentContainer">
-            <div className="contentHeader">
-              <AddCityModal />
-            </div>
             <div className="contentBody">
               {this.state.is_loaded ? (
-                <ToolkitProvider
-                  bootstrap4
-                  keyField="city_id"
-                  data={tableData}
-                  columns={columns}
-                  search
-                >
-                  {(props) => (
-                    <div>
-                      <BootstrapTable
-                        {...props.baseProps}
-                        pagination={paginationFactory(paginationOptions)}
-                        filter={filterFactory()}
-                        defaultSorted={defaultSorted}
-                        noDataIndication={() => <NoDataToShow />}
-                      />
-                    </div>
-                  )}
-                </ToolkitProvider>
+                <>
+                  <ToolkitProvider
+                    bootstrap4
+                    keyField="city_id"
+                    data={tableData}
+                    columns={columns}
+                    search
+                    condensed
+                  >
+                    {(props) => (
+                      <div>
+                        <BootstrapTable
+                          {...props.baseProps}
+                          pagination={paginationFactory(paginationOptions)}
+                          filter={filterFactory()}
+                          defaultSorted={defaultSorted}
+                          hover
+                          bordered={false}
+                          striped
+                        />
+                      </div>
+                    )}
+                  </ToolkitProvider>
+                  <div className="contentHeader">
+                    <AddCityModal />
+                  </div>
+                </>
               ) : (
                 <div>Loading...</div>
               )}

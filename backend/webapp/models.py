@@ -101,7 +101,7 @@ class Note(models.Model):
 # Create your models here.
 class Country(models.Model):
     country_id = models.CharField(max_length=3, primary_key=True)
-    orderindex = models.SmallIntegerField()
+    orderindex = models.SmallIntegerField(unique=True)
     currency = models.CharField(max_length=10, blank=True, null=True)
     title = models.CharField(max_length=40)
 
@@ -110,8 +110,8 @@ class Country(models.Model):
 
 class Province(models.Model):
     province_id = models.CharField(max_length=10, primary_key=True)
-    orderindex = models.SmallIntegerField()
-    country = models.ForeignKey(Country, on_delete=models.CASCADE)
+    orderindex = models.SmallIntegerField(unique=True)
+    country = models.ForeignKey(Country, on_delete=models.PROTECT)
     title = models.CharField(max_length=40)
 
     def __str__(self):
@@ -119,9 +119,9 @@ class Province(models.Model):
 
 class City(models.Model):
     city_id = models.CharField(max_length=10, primary_key=True)
-    orderindex = models.SmallIntegerField()
-    country = models.ForeignKey(Country, on_delete=models.CASCADE)
-    province = models.ForeignKey(Province, on_delete=models.CASCADE)
+    orderindex = models.SmallIntegerField(unique=True)
+    country = models.ForeignKey(Country, on_delete=models.PROTECT)
+    province = models.ForeignKey(Province, on_delete=models.PROTECT, null=True, blank=True)
     title = models.CharField(max_length=40)
 
     def __str__(self):
@@ -129,7 +129,7 @@ class City(models.Model):
 
 class InsuranceCarrier(models.Model):
     insucarrier_id = models.CharField(max_length=10, primary_key=True)
-    orderindex = models.SmallIntegerField()
+    orderindex = models.SmallIntegerField(unique=True)
     title = models.CharField(max_length=40)
     active = models.BooleanField(default=True)
 
@@ -138,8 +138,8 @@ class InsuranceCarrier(models.Model):
 
 class Bank(models.Model):
     bank_id = models.CharField(max_length=10, primary_key=True)
-    country = models.ForeignKey(Country, on_delete=models.CASCADE)
-    orderindex = models.SmallIntegerField()
+    country = models.ForeignKey(Country, on_delete=models.PROTECT)
+    orderindex = models.SmallIntegerField(unique=True)
     bankname = models.CharField(max_length=40)
     institutionnumber = models.CharField(max_length=3)
     swiftcode = models.CharField(max_length=11)
@@ -158,9 +158,9 @@ class Client(models.Model):
     eponymo = models.CharField(max_length=40)
     address = models.CharField(max_length=120)
     postalcode = models.CharField(max_length=10)
-    country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name='clients_country')
-    province = models.ForeignKey(Province, on_delete=models.CASCADE, related_name='clients_province')
-    city = models.ForeignKey(City, on_delete=models.CASCADE, related_name='clients_city')
+    country = models.ForeignKey(Country, on_delete=models.PROTECT, related_name='clients_country')
+    province = models.ForeignKey(Province, on_delete=models.PROTECT, related_name='clients_province')
+    city = models.ForeignKey(City, on_delete=models.PROTECT, related_name='clients_city')
     phone1 = models.CharField(max_length=15, blank=True, null=True)
     phone2 = models.CharField(max_length=15, blank=True, null=True)
     mobile1 = models.CharField(max_length=15, blank=True, null=True)
@@ -205,8 +205,8 @@ class Client(models.Model):
 
 class BankClientAccount(models.Model):
     bankclientacco_id = models.CharField(max_length=10, primary_key=True)
-    client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    bank = models.ForeignKey(Bank, on_delete=models.CASCADE)
+    client = models.ForeignKey(Client, on_delete=models.PROTECT)
+    bank = models.ForeignKey(Bank, on_delete=models.PROTECT)
     transitnumber = models.CharField(max_length=5, blank=True, null=True)
     accountnumber = models.CharField(max_length=20)
     iban = models.CharField(max_length=34, blank=True, null=True)
@@ -360,8 +360,8 @@ class Project(models.Model):
 
 class AssociatedClient(models.Model):
     assoclient_id = models.CharField(max_length=10, primary_key=True)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='associated_clients')
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='associated_projects')
+    project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name='associated_clients')
+    client = models.ForeignKey(Client, on_delete=models.PROTECT, related_name='associated_projects')
     orderindex = models.SmallIntegerField(default=0, 
         help_text="Order of appearance in list, with emphasis on the first client")
     notes = models.TextField(blank=True, null=True)
@@ -417,8 +417,8 @@ class Document(models.Model):
     ]
 
     document_id = models.CharField(max_length=10, primary_key=True)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True, related_name='documents')
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, blank=True, null=True, related_name='documents')
+    project = models.ForeignKey(Project, on_delete=models.PROTECT, blank=True, null=True, related_name='documents')
+    client = models.ForeignKey(Client, on_delete=models.PROTECT, blank=True, null=True, related_name='documents')
     created = models.DateField()
     title = models.CharField(max_length=40)
     validuntil = models.DateField()
@@ -497,13 +497,13 @@ class Profession(models.Model):
 
 class Professional(models.Model):
     professional_id = models.CharField(max_length=10, primary_key=True)
-    profession = models.ForeignKey(Profession, on_delete=models.CASCADE)
+    profession = models.ForeignKey(Profession, on_delete=models.PROTECT)
     fullname = models.CharField(max_length=40)
     address = models.CharField(max_length=80)
     email = models.EmailField(blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True, null=True)
     mobile = models.CharField(max_length=15, blank=True, null=True)
-    city = models.ForeignKey(City, on_delete=models.CASCADE)
+    city = models.ForeignKey(City, on_delete=models.PROTECT)
     reliability = models.CharField(max_length=10, blank=True, null=True, choices=[
         ('High', 'Μεγάλη'),
         ('Medium', 'Μέτρια'),
@@ -523,7 +523,7 @@ class ClientContact(models.Model):
     ]
 
     clientcont_id = models.CharField(max_length=10, primary_key=True)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='contacts')
+    project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name='contacts')
     professional = models.ForeignKey(Professional, on_delete=models.SET_NULL, blank=True, null=True, 
         related_name='project_contacts')
     fullname = models.CharField(max_length=40)
@@ -593,10 +593,10 @@ class ClientContact(models.Model):
 
 class Property(models.Model):
     property_id = models.CharField(max_length=10, primary_key=True)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    country = models.ForeignKey(Country, on_delete=models.CASCADE)
-    province = models.ForeignKey(Province, on_delete=models.CASCADE)
-    city = models.ForeignKey(City, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.PROTECT)
+    country = models.ForeignKey(Country, on_delete=models.PROTECT)
+    province = models.ForeignKey(Province, on_delete=models.PROTECT)
+    city = models.ForeignKey(City, on_delete=models.PROTECT)
     description = models.CharField(max_length=80)
     location = models.CharField(max_length=80)
     type = models.CharField(max_length=40, choices=[
@@ -629,9 +629,9 @@ class Property(models.Model):
 
 class BankProjectAccount(models.Model):
     bankprojacco_id = models.CharField(max_length=10, primary_key=True)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    bankclientacco = models.ForeignKey(BankClientAccount, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.PROTECT)
+    client = models.ForeignKey(Client, on_delete=models.PROTECT)
+    bankclientacco = models.ForeignKey(BankClientAccount, on_delete=models.PROTECT)
     notes = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -701,7 +701,7 @@ class ProjectTask(models.Model):
     ]
 
     projtask_id = models.CharField(max_length=10, primary_key=True)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tasks')
+    project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name='tasks')
     title = models.CharField(max_length=120)
     details = models.TextField(blank=True, null=True)
     taskcate = models.ForeignKey(TaskCategory, on_delete=models.SET_NULL, blank=True, null=True, 
@@ -796,9 +796,9 @@ class ProjectTask(models.Model):
 
 class TaskComment(models.Model):
     taskcomm_id = models.CharField(max_length=10, primary_key=True)
-    projtask = models.ForeignKey(ProjectTask, on_delete=models.CASCADE, related_name='comments')
+    projtask = models.ForeignKey(ProjectTask, on_delete=models.PROTECT, related_name='comments')
     commentregistration = models.DateTimeField(auto_now_add=True)
-    consultant = models.ForeignKey(Consultant, on_delete=models.CASCADE, related_name='task_comments')
+    consultant = models.ForeignKey(Consultant, on_delete=models.PROTECT, related_name='task_comments')
     comment = models.TextField()
 
     class Meta:
@@ -844,10 +844,10 @@ class TaskComment(models.Model):
 
 class Cash(models.Model):
     cash_id = models.CharField(max_length=10, primary_key=True)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    country = models.ForeignKey(Country, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.PROTECT)
+    country = models.ForeignKey(Country, on_delete=models.PROTECT)
     trandate = models.DateField()
-    consultant = models.ForeignKey(Consultant, on_delete=models.CASCADE)
+    consultant = models.ForeignKey(Consultant, on_delete=models.PROTECT)
     kind = models.CharField(max_length=1, choices=[('E', 'Expense'), ('P', 'Payment')])
     amountexp = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     amountpay = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
@@ -858,8 +858,8 @@ class Cash(models.Model):
 
 class TaxationProject(models.Model):
     taxproj_id = models.CharField(max_length=10, primary_key=True)
-    client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    consultant = models.ForeignKey(Consultant, on_delete=models.CASCADE)
+    client = models.ForeignKey(Client, on_delete=models.PROTECT)
+    consultant = models.ForeignKey(Consultant, on_delete=models.PROTECT)
     taxuse = models.SmallIntegerField()
     deadline = models.DateField(blank=True, null=True)
     declaredone = models.BooleanField(default=False)
@@ -878,7 +878,7 @@ class Notification(models.Model):
         ('deadline_approaching', 'Deadline Approaching'),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='notifications')
     type = models.CharField(max_length=50, choices=NOTIFICATION_TYPES)
     message = models.TextField()
     read = models.BooleanField(default=False)

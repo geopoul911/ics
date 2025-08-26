@@ -12,11 +12,11 @@ import { headers } from "../global_vars";
 // Variables
 window.Swal = Swal;
 
-// API endpoints for different object types
+// API endpoints for different object types - Using regions API
 const DELETE_ENDPOINTS = {
-  'Country': 'http://localhost:8000/api/regions/delete_country/',
-  'Province': 'http://localhost:8000/api/regions/delete_province/',
-  'City': 'http://localhost:8000/api/regions/delete_city/',
+  'Country': 'http://localhost:8000/api/regions/country/',
+  'Province': 'http://localhost:8000/api/regions/province/',
+  'City': 'http://localhost:8000/api/regions/city/',
   'User': 'http://localhost:8000/api/site_admin/del_usr/',
   // Add more object types as needed
 };
@@ -28,15 +28,6 @@ const REDIRECT_URLS = {
   'City': '/regions/all_cities',
   'User': '/site_administration/all_users',
   // Add more redirect URLs as needed
-};
-
-// Object type to ID field mapping
-const ID_FIELD_MAPPING = {
-  'Country': 'country_id',
-  'Province': 'province_id',
-  'City': 'city_id',
-  'User': 'user_id',
-  // Add more mappings as needed
 };
 
 function DeleteObjectModal(props) {
@@ -52,28 +43,26 @@ function DeleteObjectModal(props) {
         throw new Error(`No delete endpoint configured for object type: ${props.object_type}`);
       }
 
-      // Get the correct ID field for this object type
-      const idField = ID_FIELD_MAPPING[props.object_type];
-      if (!idField) {
-        throw new Error(`No ID field mapping configured for object type: ${props.object_type}`);
-      }
-
-      const requestData = {
-        [idField]: props.object_id,
+      // Update headers with current token
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
+      // For the new data_management API, we use DELETE method with the ID in the URL
+      const deleteUrl = `${endpoint}${props.object_id}/`;
+
       const response = await axios({
-        method: "post",
-        url: endpoint,
-        headers: headers,
-        data: requestData,
+        method: "delete",
+        url: deleteUrl,
+        headers: currentHeaders,
       });
 
       // Show success message
       Swal.fire({
         icon: "success",
         title: "Success!",
-        text: response.data.message || `${props.object_type} deleted successfully`,
+        text: `${props.object_type} deleted successfully`,
       });
 
       // Redirect if callback is provided, otherwise use default redirect
@@ -89,16 +78,45 @@ function DeleteObjectModal(props) {
     } catch (error) {
       console.error('Delete error:', error);
       
-      const errorMessage = error.response?.data?.errormsg || 
-                          error.response?.data?.detail || 
-                          error.message || 
-                          `Failed to delete ${props.object_type}`;
-      
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: errorMessage,
-      });
+      // Check if this is a ProtectedError from the backend
+      if (error.response?.data?.error === 'ProtectedError') {
+        const protectedObjects = error.response.data.protected_objects || [];
+        
+        // Create a detailed error message with HTML formatting
+        let htmlContent = `<div style="text-align: left;">
+          <p><strong>Cannot delete this ${props.object_type.toLowerCase()} because it is referenced by the following objects:</strong></p>
+          <ul style="margin: 10px 0; padding-left: 20px;">`;
+        
+        protectedObjects.forEach(obj => {
+          htmlContent += `<li>${obj}</li>`;
+        });
+        
+        htmlContent += `</ul>
+          <p style="color: #666; font-size: 0.9em; margin-top: 15px;">
+            <strong>Solution:</strong> Delete or reassign these related objects first, then try deleting this ${props.object_type.toLowerCase()} again.
+          </p>
+        </div>`;
+        
+        Swal.fire({
+          icon: "warning",
+          title: "Protected Object",
+          html: htmlContent,
+          confirmButtonText: "OK",
+          width: '600px'
+        });
+      } else {
+        // Handle other types of errors
+        const errorMessage = error.response?.data?.errormsg || 
+                            error.response?.data?.detail || 
+                            error.message || 
+                            `Failed to delete ${props.object_type}`;
+        
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: errorMessage,
+        });
+      }
     } finally {
       setBusy(false);
       setOpen(false);

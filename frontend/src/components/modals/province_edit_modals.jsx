@@ -4,7 +4,10 @@ import { useState, useEffect } from "react";
 // Icons
 import { FiEdit } from "react-icons/fi";
 import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
-import { apiGet, apiPut } from "../../utils/api";
+import { FaStop } from "react-icons/fa";
+import { apiPut } from "../../utils/api";
+import axios from "axios";
+import { headers } from "../global_vars";
 // Libs
 
 import Swal from "sweetalert2";
@@ -16,7 +19,6 @@ const PROVINCE_DETAIL = "http://localhost:8000/api/regions/province/";
 const GET_COUNTRIES = "http://localhost:8000/api/regions/all_countries/";
 
 // Helpers
-const onlyUpperLetters = (v) => v.replace(/[^A-Z]/g, "");
 const clampLen = (v, max) => (v || "").slice(0, max);
 const toSmallInt = (value) => {
   if (value === "" || value === null || value === undefined) return "";
@@ -26,87 +28,19 @@ const toSmallInt = (value) => {
 };
 
 const patchProvince = async (id, payload) => {
-  const url = `${PROVINCE_DETAIL}${encodeURIComponent(id)}`;
+  const url = `${PROVINCE_DETAIL}${encodeURIComponent(id)}/`;
   return apiPut(url, payload);
 };
 
 /* ===========================
-   1) Edit Province ID (PK)
+   1) Province ID (PK) - Immutable
    =========================== */
 export function EditProvinceIdModal({ province, update_state }) {
-  const [show, setShow] = useState(false);
-  const [value, setValue] = useState(province?.province_id || "");
-  const [busy, setBusy] = useState(false);
-
-  const isValid = value.length >= 2 && value.length <= 10;
-
-  const onOpen = () => {
-    setValue(province?.province_id || "");
-    setShow(true);
-  };
-
-  const onSave = async () => {
-    if (!isValid) return;
-    try {
-      setBusy(true);
-      await patchProvince(province.province_id, { province_id: value });
-      // After PK change, URL should reflect the new key:
-      window.location.href = `/regions/province/${encodeURIComponent(value)}`;
-    } catch (e) {
-      const apiMsg =
-        e?.response?.data?.errormsg ||
-        e?.response?.data?.detail ||
-        "Failed to update Province ID.";
-      Swal.fire({ icon: "error", title: "Error", text: apiMsg });
-    } finally {
-      setBusy(false);
-      setShow(false);
-    }
-  };
-
   return (
-    <>
-      <Button size="tiny" basic onClick={onOpen} title="Edit ID">
-        <FiEdit style={{ marginRight: 6 }} />
-        ID
-      </Button>
-
-      <Modal show={show} onHide={() => setShow(false)} centered>
-        <Modal.Header closeButton><Modal.Title>Edit Province ID</Modal.Title></Modal.Header>
-        <Modal.Body>
-          <Form.Group>
-            <Form.Label>Province ID (2–10 uppercase letters)</Form.Label>
-            <Form.Control
-              maxLength={10}
-              value={value}
-              onChange={(e) =>
-                setValue(onlyUpperLetters(e.target.value.toUpperCase()).slice(0, 10))
-              }
-              placeholder="e.g., ATT"
-            />
-          </Form.Group>
-          <small style={{ color: isValid ? "green" : "red" }}>
-            {isValid ? (
-              <>
-                <AiOutlineCheckCircle style={{ marginRight: 6 }} />
-                Looks good
-              </>
-            ) : (
-              <>
-                <AiOutlineWarning style={{ marginRight: 6 }} />
-                ID must be 2–10 uppercase letters.
-              </>
-            )}
-          </small>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button color="red" onClick={() => setShow(false)} disabled={busy}>Close</Button>
-          <Button color="green" onClick={onSave} disabled={!isValid || busy}>
-            Save
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </>
+    <Button size="tiny" basic disabled title="Province ID is immutable">
+      <FaStop style={{ marginRight: 6, color: "red" }} />
+      ID
+    </Button>
   );
 }
 
@@ -132,7 +66,7 @@ export function EditProvinceTitleModal({ province, update_state }) {
     try {
       setBusy(true);
       const res = await patchProvince(province.province_id, { title: trimmed.toUpperCase() });
-      const updated = res?.data?.province || res?.data || { ...province, title: trimmed.toUpperCase() };
+      const updated = res?.data || { ...province, title: trimmed.toUpperCase() };
       update_state?.(updated);
     } catch (e) {
       const apiMsg =
@@ -195,27 +129,44 @@ export function EditProvinceTitleModal({ province, update_state }) {
    =========================== */
 export function EditProvinceCountryModal({ province, update_state }) {
   const [show, setShow] = useState(false);
-  const [value, setValue] = useState(province?.country || "");
+  const [value, setValue] = useState(province?.country?.country_id || "");
   const [countries, setCountries] = useState([]);
   const [busy, setBusy] = useState(false);
 
   const isValid = value.length > 0;
-  const isChanged = value !== (province?.country || "");
+  const isChanged = value !== (province?.country?.country_id || "");
 
   const onOpen = () => {
-    setValue(province?.country || "");
+    setValue(province?.country?.country_id || "");
     setShow(true);
   };
 
   // Fetch countries for dropdown
   useEffect(() => {
     if (show) {
-      apiGet(GET_COUNTRIES)
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      
+      console.log('Fetching countries from:', GET_COUNTRIES);
+      console.log('Using headers:', currentHeaders);
+      
+      axios.get(GET_COUNTRIES, { headers: currentHeaders })
         .then((res) => {
-          setCountries(res.data.all_countries || []);
+          console.log('Countries API response:', res.data);
+          // Handle different response structures
+          const countriesData = res.data?.all_countries || [];
+          console.log('Processed countries data:', countriesData);
+          console.log('Setting countries state with:', countriesData);
+          setCountries(countriesData);
         })
         .catch((e) => {
           console.error("Failed to fetch countries:", e);
+          console.error("Error response:", e.response?.data);
+          console.error("Error status:", e.response?.status);
+          console.error("Error message:", e.message);
+          setCountries([]);
         });
     }
   }, [show]);
@@ -224,8 +175,8 @@ export function EditProvinceCountryModal({ province, update_state }) {
     if (!isValid || !isChanged) return;
     try {
       setBusy(true);
-      const res = await patchProvince(province.province_id, { country: value });
-      const updated = res?.data?.province || res?.data || { ...province, country: value };
+      const res = await patchProvince(province.province_id, { country_id: value });
+      const updated = res?.data || { ...province, country_id: value };
       update_state?.(updated);
     } catch (e) {
       const apiMsg =
@@ -310,7 +261,7 @@ export function EditProvinceOrderIndexModal({ province, update_state }) {
     try {
       setBusy(true);
       const res = await patchProvince(province.province_id, { orderindex: Number(value) });
-      const updated = res?.data?.province || res?.data || { ...province, orderindex: Number(value) };
+      const updated = res?.data || { ...province, orderindex: Number(value) };
       update_state?.(updated);
     } catch (e) {
       const apiMsg =

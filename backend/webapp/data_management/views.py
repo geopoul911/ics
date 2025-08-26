@@ -5,9 +5,10 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q, Count, Sum
 from django.utils import timezone
 from datetime import datetime, timedelta
+from django.db.models.deletion import ProtectedError
 
 from webapp.models import (
-    Country, Province, City, Bank, Client, BankClientAccount, Consultant,
+    Bank, Client, BankClientAccount, Consultant,
     ProjectCategory, Project, AssociatedClient, Document, Profession,
     Professional, ClientContact, Property, BankProjectAccount, TaskCategory,
     ProjectTask, TaskComment, Cash, TaxationProject, Notification, InsuranceCarrier
@@ -15,8 +16,7 @@ from webapp.models import (
 
 from webapp.serializers import (
     # Basic serializers
-    CountrySerializer, ProvinceSerializer, CitySerializer, BankSerializer,
-    InsuranceCarrierSerializer,
+    BankSerializer, InsuranceCarrierSerializer,
     
     # Client serializers
     ClientSerializer, BankClientAccountSerializer, ClientDetailSerializer,
@@ -49,45 +49,12 @@ from webapp.serializers import (
     NotificationSerializer,
     
     # Reference serializers
-    CountryReferenceSerializer, ProvinceReferenceSerializer, CityReferenceSerializer,
     BankReferenceSerializer, ConsultantReferenceSerializer, ProjectCategoryReferenceSerializer,
     TaskCategoryReferenceSerializer, ProfessionReferenceSerializer, ProfessionalReferenceSerializer,
     InsuranceCarrierReferenceSerializer
 )
 
 # Reference Data Viewsets
-class CountryViewSet(viewsets.ModelViewSet):
-    queryset = Country.objects.all().order_by('orderindex', 'title')
-    serializer_class = CountrySerializer
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['title', 'country_id']
-    ordering_fields = ['title', 'orderindex']
-    filterset_fields = ['currency']
-
-class ProvinceViewSet(viewsets.ModelViewSet):
-    queryset = Province.objects.all().order_by('orderindex', 'title')
-    serializer_class = ProvinceSerializer
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['title', 'province_id']
-    ordering_fields = ['title', 'orderindex']
-    filterset_fields = ['country']
-
-class CityViewSet(viewsets.ModelViewSet):
-    queryset = City.objects.all().order_by('orderindex', 'title')
-    serializer_class = CitySerializer
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['title', 'city_id']
-    ordering_fields = ['title', 'orderindex']
-    filterset_fields = ['country', 'province']
-
-    @action(detail=False, methods=['get'])
-    def by_province(self, request):
-        province_id = request.query_params.get('province_id')
-        if province_id:
-            cities = self.queryset.filter(province_id=province_id)
-            serializer = self.get_serializer(cities, many=True)
-            return Response(serializer.data)
-        return Response({'error': 'province_id parameter required'}, status=400)
 
 class BankViewSet(viewsets.ModelViewSet):
     queryset = Bank.objects.filter(active=True).order_by('orderindex', 'bankname')
@@ -472,27 +439,6 @@ class NotificationViewSet(viewsets.ModelViewSet):
         return Response({'status': 'marked as read'})
 
 # Reference Data Viewsets for dropdowns
-class CountryReferenceViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Country.objects.all().order_by('orderindex', 'title')
-    serializer_class = CountryReferenceSerializer
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    search_fields = ['title']
-    filterset_fields = ['currency']
-
-class ProvinceReferenceViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Province.objects.all().order_by('orderindex', 'title')
-    serializer_class = ProvinceReferenceSerializer
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    search_fields = ['title']
-    filterset_fields = ['country']
-
-class CityReferenceViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = City.objects.all().order_by('orderindex', 'title')
-    serializer_class = CityReferenceSerializer
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    search_fields = ['title']
-    filterset_fields = ['country', 'province']
-
 class BankReferenceViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Bank.objects.filter(active=True).order_by('orderindex', 'bankname')
     serializer_class = BankReferenceSerializer

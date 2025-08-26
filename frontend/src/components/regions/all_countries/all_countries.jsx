@@ -18,9 +18,6 @@ import { Button } from "semantic-ui-react";
 // CSS
 import "react-bootstrap-table-next/dist/react-bootstrap-table2.min.css";
 
-// Icons / Images
-import NoDataToShowImage from "../../../images/generic/no_results_found.png";
-
 // Global Variables
 import {
   paginationOptions,
@@ -32,7 +29,7 @@ import {
 window.Swal = Swal;
 
 // Updated to use new data_management API
-const GET_COUNTRIES = "http://localhost:8000/api/data_management/countries/";
+const GET_COUNTRIES = "http://localhost:8000/api/regions/all_countries/";
 
 const columns = [
   {
@@ -75,9 +72,6 @@ const defaultSorted = [
   },
 ];
 
-const NoDataToShow = () => {
-  return <img src={NoDataToShowImage} alt={""} className="fill" />;
-};
 
 class AllCountries extends React.Component {
   constructor(props) {
@@ -102,10 +96,9 @@ class AllCountries extends React.Component {
         headers: currentHeaders,
       })
       .then((res) => {
-        console.log('API Response:', res.data); // Debug log
-        
         // Handle different response structures
         let allCountries = [];
+
         if (Array.isArray(res.data)) {
           allCountries = res.data;
         } else if (res.data && Array.isArray(res.data.results)) {
@@ -118,8 +111,6 @@ class AllCountries extends React.Component {
           console.warn('Unexpected API response structure:', res.data);
           allCountries = [];
         }
-        
-        console.log('Processed countries:', allCountries); // Debug log
         
         this.setState({
           all_countries: allCountries,
@@ -167,30 +158,35 @@ class AllCountries extends React.Component {
         <div className="mainContainer">
           {pageHeader("all_countries", "All Countries")}
           <div className="contentContainer">
-            <div className="contentHeader">
-              <AddCountryModal />
-            </div>
             <div className="contentBody">
               {this.state.is_loaded ? (
-                <ToolkitProvider
-                  bootstrap4
-                  keyField="country_id"
-                  data={tableData}
-                  columns={columns}
-                  search
-                >
-                  {(props) => (
-                    <div>
-                      <BootstrapTable
-                        {...props.baseProps}
-                        pagination={paginationFactory(paginationOptions)}
-                        filter={filterFactory()}
-                        defaultSorted={defaultSorted}
-                        noDataIndication={() => <NoDataToShow />}
-                      />
-                    </div>
-                  )}
-                </ToolkitProvider>
+                <>
+                  <ToolkitProvider
+                    bootstrap4
+                    keyField="country_id"
+                    data={tableData}
+                    columns={columns}
+                    search
+                    condensed
+                  >
+                    {(props) => (
+                      <div>
+                        <BootstrapTable
+                          {...props.baseProps}
+                          pagination={paginationFactory(paginationOptions)}
+                          filter={filterFactory()}
+                          defaultSorted={defaultSorted}
+                          hover
+                          bordered={false}
+                          striped
+                        />
+                      </div>
+                    )}
+                  </ToolkitProvider>
+                  <div className="contentHeader">
+                    <AddCountryModal />
+                  </div>
+                </>
               ) : (
                 <div>Loading...</div>
               )}

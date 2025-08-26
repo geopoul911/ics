@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { BiPlus } from "react-icons/bi";
 import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
 import axios from "axios";
-import { apiGet } from "../../../utils/api";
 
 // Modules / Functions
 import Swal from "sweetalert2";
@@ -18,13 +17,13 @@ import { headers } from "../../global_vars";
 // Variables
 window.Swal = Swal;
 
-// API endpoints - Updated to use new data_management API
-const ADD_CITY = "http://localhost:8000/api/data_management/cities/";
-const GET_COUNTRIES = "http://localhost:8000/api/data_management/countries/";
-const GET_PROVINCES = "http://localhost:8000/api/data_management/provinces/";
+// API endpoints - Using regions API
+const ADD_CITY = "http://localhost:8000/api/view/add_city/";
+const GET_COUNTRIES = "http://localhost:8000/api/regions/all_countries/";
+const GET_PROVINCES = "http://localhost:8000/api/regions/all_provinces/";
 
 // Helpers
-const onlyUpperLetters = (value) => value.replace(/[^A-Z]/g, "");
+const onlyUpperLetters = (value) => value.replace(/[^a-zA-Z]/g, "").toUpperCase();
 const clampLen = (value, max) => value.slice(0, max);
 const toSmallInt = (value) => {
   const n = Number.parseInt(value, 10);
@@ -68,39 +67,69 @@ function AddCityModal() {
   // Fetch countries for dropdown
   useEffect(() => {
     if (show) {
-      apiGet(GET_COUNTRIES)
+      // Try using axios directly with proper headers
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      
+      console.log('Fetching countries from:', GET_COUNTRIES);
+      console.log('Using headers:', currentHeaders);
+      
+      axios.get(GET_COUNTRIES, { headers: currentHeaders })
         .then((res) => {
+          console.log('Countries API response:', res.data);
           // Handle different response structures
-          const countriesData = Array.isArray(res) ? res : 
-                               Array.isArray(res.data) ? res.data : [];
+                     const countriesData = res.data?.all_countries || [];
+          console.log('Processed countries data:', countriesData);
+          console.log('Setting countries state with:', countriesData);
           setCountries(countriesData);
         })
         .catch((e) => {
           console.error("Failed to fetch countries:", e);
+          console.error("Error response:", e.response?.data);
           setCountries([]);
         });
     }
   }, [show]);
 
+  // Reset province when country changes
+  useEffect(() => {
+    setProvinceId("");
+  }, [countryId]);
+
   // Fetch provinces when country changes
   useEffect(() => {
     if (countryId && show) {
-      apiGet(`${GET_PROVINCES}?country=${countryId}`)
+      // Try using axios directly with proper headers
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      
+      console.log('Fetching provinces from:', GET_PROVINCES);
+      console.log('Fetching provinces for country:', countryId);
+      
+      axios.get(GET_PROVINCES, { headers: currentHeaders })
         .then((res) => {
+          console.log('Provinces API response:', res.data);
           // Handle different response structures
-          const provincesData = Array.isArray(res) ? res : 
-                               Array.isArray(res.data) ? res.data : [];
+                     const allProvinces = res.data?.all_provinces || [];
+          console.log('All provinces data:', allProvinces);
+          // Filter provinces by country
+          const provincesData = allProvinces.filter(province => province.country?.country_id === countryId);
+          console.log('Filtered provinces data:', provincesData);
+          console.log('Setting provinces state with:', provincesData);
           setProvinces(provincesData);
         })
         .catch((e) => {
           console.error("Failed to fetch provinces:", e);
+          console.error("Error response:", e.response?.data);
           setProvinces([]);
         });
     } else {
       setProvinces([]);
     }
-    // Reset province selection when country changes
-    setProvinceId("");
   }, [countryId, show]);
 
   const createNewCity = async () => {
@@ -118,8 +147,8 @@ function AddCityModal() {
         data: {
           title: title.trim(),
           city_id: cityId,
-          country: countryId, // Use country ID as foreign key
-          province: provinceId, // Use province ID as foreign key
+          country_id: countryId, // Use country_id instead of country
+          province_id: provinceId, // Use province_id instead of province
           orderindex: Number(orderindex),
         },
       });

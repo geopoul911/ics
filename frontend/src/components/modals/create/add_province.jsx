@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { BiPlus } from "react-icons/bi";
 import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
 import axios from "axios";
-import { apiGet } from "../../../utils/api";
 
 // Modules / Functions
 import Swal from "sweetalert2";
@@ -18,12 +17,12 @@ import { headers } from "../../global_vars";
 // Variables
 window.Swal = Swal;
 
-// API endpoints - Updated to use new data_management API
-const ADD_PROVINCE = "http://localhost:8000/api/data_management/provinces/";
-const GET_COUNTRIES = "http://localhost:8000/api/data_management/countries/";
+// API endpoints - Using regions API
+const ADD_PROVINCE = "http://localhost:8000/api/view/add_province/";
+const GET_COUNTRIES = "http://localhost:8000/api/regions/all_countries/";
 
 // Helpers
-const onlyUpperLetters = (value) => value.replace(/[^A-Z]/g, "");
+const onlyUpperLetters = (value) => value.replace(/[^a-zA-Z]/g, "").toUpperCase();
 const clampLen = (value, max) => value.slice(0, max);
 const toSmallInt = (value) => {
   const n = Number.parseInt(value, 10);
@@ -60,11 +59,9 @@ function AddProvinceModal() {
 
   const isFormValid = isTitleValid && isProvinceIdValid && isCountryIdValid && isOrderIndexValid;
 
-  // Fetch countries for dropdown
+    // Fetch countries for dropdown
   useEffect(() => {
     if (show) {
-      console.log('Loading countries for province modal...');
-      console.log('Current auth token:', localStorage.getItem('userToken'));
       
       // Try using axios directly with proper headers
       const currentHeaders = {
@@ -72,23 +69,25 @@ function AddProvinceModal() {
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
       
+      console.log('Fetching countries from:', GET_COUNTRIES);
       console.log('Using headers:', currentHeaders);
       
       axios.get(GET_COUNTRIES, { headers: currentHeaders })
         .then((res) => {
           console.log('Countries API response:', res.data);
           // Handle different response structures
-          const countriesData = Array.isArray(res.data) ? res.data : 
-                               Array.isArray(res.data.results) ? res.data.results : 
-                               Array.isArray(res.data.data) ? res.data.data : [];
+                     const countriesData = res.data?.all_countries || [];
           console.log('Processed countries data:', countriesData);
+          console.log('Setting countries state with:', countriesData);
           setCountries(countriesData);
         })
-        .catch((e) => {
-          console.error("Failed to fetch countries:", e);
-          console.error("Error response:", e.response?.data);
-          setCountries([]);
-        });
+                 .catch((e) => {
+           console.error("Failed to fetch countries:", e);
+           console.error("Error response:", e.response?.data);
+           console.error("Error status:", e.response?.status);
+           console.error("Error message:", e.message);
+           setCountries([]);
+         });
     }
   }, [show]);
 
@@ -107,7 +106,7 @@ function AddProvinceModal() {
         data: {
           title: title.trim(),
           province_id: provinceId,
-          country: countryId, // Use country ID as foreign key
+          country_id: countryId, // Use country_id instead of country
           orderindex: Number(orderindex),
         },
       });

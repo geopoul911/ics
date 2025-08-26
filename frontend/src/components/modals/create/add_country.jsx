@@ -18,11 +18,11 @@ import { headers } from "../../global_vars";
 // Variables
 window.Swal = Swal;
 
-// API endpoint - Updated to use new data_management API
-const ADD_COUNTRY = "http://localhost:8000/api/data_management/countries/";
+// API endpoint - Using regions API
+const ADD_COUNTRY = "http://localhost:8000/api/view/add_country/";
 
 // Helpers
-const onlyUpperLetters = (value) => value.replace(/[^A-Z]/g, "");
+const onlyUpperLetters = (value) => value.replace(/[^a-zA-Z]/g, "").toUpperCase();
 const clampLen = (value, max) => value.slice(0, max);
 const toSmallInt = (value) => {
   const n = Number.parseInt(value, 10);

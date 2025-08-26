@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     # Reference Data Viewsets
-    CountryViewSet, ProvinceViewSet, CityViewSet, BankViewSet, InsuranceCarrierViewSet,
+    BankViewSet, InsuranceCarrierViewSet,
     
     # Client Viewsets
     ClientViewSet, BankClientAccountViewSet,
@@ -32,7 +32,6 @@ from .views import (
     NotificationViewSet,
     
     # Reference Viewsets for dropdowns
-    CountryReferenceViewSet, ProvinceReferenceViewSet, CityReferenceViewSet,
     BankReferenceViewSet, ConsultantReferenceViewSet, ProjectCategoryReferenceViewSet,
     TaskCategoryReferenceViewSet, ProfessionReferenceViewSet, ProfessionalReferenceViewSet,
     InsuranceCarrierReferenceViewSet
@@ -42,9 +41,6 @@ from .views import (
 router = DefaultRouter()
 
 # Reference Data
-router.register(r'countries', CountryViewSet)
-router.register(r'provinces', ProvinceViewSet)
-router.register(r'cities', CityViewSet)
 router.register(r'banks', BankViewSet)
 router.register(r'insurance-carriers', InsuranceCarrierViewSet)
 
@@ -85,9 +81,6 @@ router.register(r'taxation-projects', TaxationProjectViewSet)
 router.register(r'notifications', NotificationViewSet)
 
 # Reference Data for dropdowns (read-only) - using different basenames to avoid conflicts
-router.register(r'reference/countries', CountryReferenceViewSet, basename='reference-countries')
-router.register(r'reference/provinces', ProvinceReferenceViewSet, basename='reference-provinces')
-router.register(r'reference/cities', CityReferenceViewSet, basename='reference-cities')
 router.register(r'reference/banks', BankReferenceViewSet, basename='reference-banks')
 router.register(r'reference/consultants', ConsultantReferenceViewSet, basename='reference-consultants')
 router.register(r'reference/project-categories', ProjectCategoryReferenceViewSet, basename='reference-project-categories')
@@ -102,7 +95,6 @@ urlpatterns = [
     path('', include(router.urls)),
     
     # Additional custom endpoints
-    path('cities/by-province/', CityViewSet.as_view({'get': 'by_province'}), name='cities-by-province'),
     path('clients/search/', ClientViewSet.as_view({'get': 'search'}), name='client-search'),
     path('clients/statistics/', ClientViewSet.as_view({'get': 'statistics'}), name='client-statistics'),
     path('projects/search/', ProjectViewSet.as_view({'get': 'search'}), name='project-search'),

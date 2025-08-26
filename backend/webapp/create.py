@@ -10,6 +10,8 @@ from webapp.serializers import (
     ProvinceSerializer,
 )
 from rest_framework import generics, status
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
 
@@ -24,11 +26,12 @@ class AddCountry(generics.UpdateAPIView):
       "title": "Greece"
     }
     """
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     @csrf_exempt
     def post(self, request):
         context = {"errormsg": "", "model": None}
-        token_str = request.headers.get("User-Token")
 
         try:
             country = Country.objects.create(
@@ -55,12 +58,12 @@ class AddProvince(generics.UpdateAPIView):
       "title": "Attica"
     }
     """
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     @csrf_exempt
     def post(self, request):
         context = {"errormsg": "", "model": None}
-        token_str = request.headers.get("User-Token")
-        # user = get_user(token_str)
 
         try:
             country = Country.objects.get(country_id=request.data["country_id"])
@@ -90,12 +93,12 @@ class AddCity(generics.UpdateAPIView):
       "title": "Athens"
     }
     """
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     @csrf_exempt
     def post(self, request):
         context = {"errormsg": "", "model": None}
-        token_str = request.headers.get("User-Token")
-        # user = get_user(token_str)
 
         try:
             country = Country.objects.get(country_id=request.data["country_id"])

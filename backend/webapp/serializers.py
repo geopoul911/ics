@@ -17,18 +17,92 @@ class CountrySerializer(serializers.ModelSerializer):
 
 class ProvinceSerializer(serializers.ModelSerializer):
     country = CountrySerializer(read_only=True)
+    country_id = serializers.CharField(write_only=True, required=False)
     
     class Meta:
         model = Province
         fields = '__all__'
+    
+    def create(self, validated_data):
+        country_id = validated_data.pop('country_id', None)
+        if country_id:
+            try:
+                country = Country.objects.get(country_id=country_id)
+                validated_data['country'] = country
+            except Country.DoesNotExist:
+                raise serializers.ValidationError(f"Country with ID '{country_id}' does not exist.")
+        return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        country_id = validated_data.pop('country_id', None)
+        if country_id:
+            try:
+                country = Country.objects.get(country_id=country_id)
+                validated_data['country'] = country
+            except Country.DoesNotExist:
+                raise serializers.ValidationError(f"Country with ID '{country_id}' does not exist.")
+        return super().update(instance, validated_data)
 
 class CitySerializer(serializers.ModelSerializer):
     country = CountrySerializer(read_only=True)
     province = ProvinceSerializer(read_only=True)
+
+    country_id = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
+    province_id = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
     
     class Meta:
         model = City
         fields = '__all__'
+    
+    def create(self, validated_data):
+        country_id = validated_data.pop('country_id', None)
+        province_id = validated_data.pop('province_id', None)
+        
+        if country_id:
+            try:
+                country = Country.objects.get(country_id=country_id)
+                validated_data['country'] = country
+            except Country.DoesNotExist:
+                raise serializers.ValidationError(f"Country with ID '{country_id}' does not exist.")
+        
+        # Handle province_id - can be None to clear the province
+        if province_id is not None:  # Explicitly check for None to allow clearing
+            if province_id:  # If not empty string
+                try:
+                    province = Province.objects.get(province_id=province_id)
+                    validated_data['province'] = province
+                except Province.DoesNotExist:
+                    raise serializers.ValidationError(f"Province with ID '{province_id}' does not exist.")
+            else:
+                # Clear the province
+                validated_data['province'] = None
+        
+        return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        country_id = validated_data.pop('country_id', None)
+        province_id = validated_data.pop('province_id', None)
+        
+        if country_id:
+            try:
+                country = Country.objects.get(country_id=country_id)
+                validated_data['country'] = country
+            except Country.DoesNotExist:
+                raise serializers.ValidationError(f"Country with ID '{country_id}' does not exist.")
+        
+        # Handle province_id - can be None to clear the province
+        if province_id is not None:  # Explicitly check for None to allow clearing
+            if province_id:  # If not empty string
+                try:
+                    province = Province.objects.get(province_id=province_id)
+                    validated_data['province'] = province
+                except Province.DoesNotExist:
+                    raise serializers.ValidationError(f"Province with ID '{province_id}' does not exist.")
+            else:
+                # Clear the province
+                validated_data['province'] = None
+        
+        return super().update(instance, validated_data)
 
 class InsuranceCarrierSerializer(serializers.ModelSerializer):
     class Meta:

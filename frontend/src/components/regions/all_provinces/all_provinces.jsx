@@ -18,9 +18,6 @@ import { Button } from "semantic-ui-react";
 // CSS
 import "react-bootstrap-table-next/dist/react-bootstrap-table2.min.css";
 
-// Icons / Images
-import NoDataToShowImage from "../../../images/generic/no_results_found.png";
-
 // Global Variables
 import {
   paginationOptions,
@@ -32,7 +29,7 @@ import {
 window.Swal = Swal;
 
 // Updated to use new data_management API
-const GET_PROVINCES = "http://localhost:8000/api/data_management/provinces/";
+const GET_PROVINCES = "http://localhost:8000/api/regions/all_provinces/";
 
 const columns = [
   {
@@ -86,10 +83,6 @@ const defaultSorted = [
     order: "asc",
   },
 ];
-
-const NoDataToShow = () => {
-  return <img src={NoDataToShowImage} alt={""} className="fill" />;
-};
 
 class AllProvinces extends React.Component {
   constructor(props) {
@@ -179,30 +172,35 @@ class AllProvinces extends React.Component {
         <div className="mainContainer">
           {pageHeader("all_provinces", "All Provinces")}
           <div className="contentContainer">
-            <div className="contentHeader">
-              <AddProvinceModal />
-            </div>
             <div className="contentBody">
               {this.state.is_loaded ? (
-                <ToolkitProvider
-                  bootstrap4
-                  keyField="province_id"
-                  data={tableData}
-                  columns={columns}
-                  search
-                >
-                  {(props) => (
-                    <div>
-                      <BootstrapTable
-                        {...props.baseProps}
-                        pagination={paginationFactory(paginationOptions)}
-                        filter={filterFactory()}
-                        defaultSorted={defaultSorted}
-                        noDataIndication={() => <NoDataToShow />}
-                      />
-                    </div>
-                  )}
-                </ToolkitProvider>
+                <>
+                  <ToolkitProvider
+                    bootstrap4
+                    keyField="province_id"
+                    data={tableData}
+                    columns={columns}
+                    search
+                    condensed
+                  >
+                    {(props) => (
+                      <div>
+                        <BootstrapTable
+                          {...props.baseProps}
+                          pagination={paginationFactory(paginationOptions)}
+                          filter={filterFactory()}
+                          defaultSorted={defaultSorted}
+                          hover
+                          bordered={false}
+                          striped
+                        />
+                      </div>
+                    )}
+                  </ToolkitProvider>
+                  <div className="contentHeader">
+                    <AddProvinceModal />
+                  </div>
+                </>
               ) : (
                 <div>Loading...</div>
               )}
