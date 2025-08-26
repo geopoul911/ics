@@ -6,14 +6,14 @@ from django.db.models import Q, Count, Sum
 from django.utils import timezone
 from datetime import datetime, timedelta
 
-from .models import (
+from webapp.models import (
     Country, Province, City, Bank, Client, BankClientAccount, Consultant,
     ProjectCategory, Project, AssociatedClient, Document, Profession,
     Professional, ClientContact, Property, BankProjectAccount, TaskCategory,
     ProjectTask, TaskComment, Cash, TaxationProject, Notification, InsuranceCarrier
 )
 
-from .serializers import (
+from webapp.serializers import (
     # Basic serializers
     CountrySerializer, ProvinceSerializer, CitySerializer, BankSerializer,
     InsuranceCarrierSerializer,

@@ -3,7 +3,21 @@ const API_BASE_URL = 'http://localhost:8000/api';
 
 // Get authentication token from localStorage
 const getAuthToken = () => {
-  return localStorage.getItem('user-token') || localStorage.getItem('authToken');
+  // Check multiple possible token storage keys
+  const token = localStorage.getItem('user-token') || 
+                localStorage.getItem('userToken') || 
+                localStorage.getItem('authToken');
+  
+  // Debug logging to help identify authentication issues
+  if (!token) {
+    console.warn('No authentication token found in localStorage. Available keys:', {
+      'user-token': localStorage.getItem('user-token'),
+      'userToken': localStorage.getItem('userToken'),
+      'authToken': localStorage.getItem('authToken')
+    });
+  }
+  
+  return token;
 };
 
 // Get CSRF token if needed
@@ -21,6 +35,8 @@ export const apiRequest = async (method, endpoint, data = null, isBlob = false) 
   if (authToken) {
     headers['Authorization'] = `Token ${authToken}`;
     headers['User-Token'] = authToken;
+  } else {
+    console.warn('No authentication token available for request to:', endpoint);
   }
 
   // Add CSRF token for POST/PUT/DELETE requests
@@ -54,6 +70,7 @@ export const apiRequest = async (method, endpoint, data = null, isBlob = false) 
       if (response.status === 401) {
         // Unauthorized - redirect to login
         localStorage.removeItem('user-token');
+        localStorage.removeItem('userToken');
         localStorage.removeItem('authToken');
         window.location.href = '/login';
         throw new Error('Authentication required');

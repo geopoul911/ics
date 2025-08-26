@@ -8,7 +8,6 @@ import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
 import axios from "axios";
 
 // Modules / Functions
-
 import Swal from "sweetalert2";
 import { Modal, Col, Form, Row } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
@@ -19,8 +18,8 @@ import { headers } from "../../global_vars";
 // Variables
 window.Swal = Swal;
 
-// API endpoint
-const ADD_COUNTRY = "http://localhost:8000/api/view/add_country/";
+// API endpoint - Updated to use new data_management API
+const ADD_COUNTRY = "http://localhost:8000/api/data_management/countries/";
 
 // Helpers
 const onlyUpperLetters = (value) => value.replace(/[^A-Z]/g, "");
@@ -60,10 +59,16 @@ function AddCountryModal() {
 
   const createNewCountry = async () => {
     try {
+      // Update headers with current token
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+
       const res = await axios({
         method: "post",
         url: ADD_COUNTRY,
-        headers,
+        headers: currentHeaders,
         data: {
           title: title.trim(),
           country_id: countryId,        // ✅ field name matches Django model
@@ -73,8 +78,8 @@ function AddCountryModal() {
       });
 
       const newId =
-        res?.data?.new_country_id ||
         res?.data?.country_id ||
+        res?.data?.id ||
         countryId;
 
       window.location.href = "/regions/country/" + newId;
@@ -128,42 +133,35 @@ function AddCountryModal() {
                 </Form.Group>
 
                 <Form.Group className="mb-3">
-                  <Form.Label>Country Code (2–3 letters):</Form.Label>
+                  <Form.Label>Country ID:</Form.Label>
                   <Form.Control
                     maxLength={3}
-                    placeholder="e.g., GR or GRC"
+                    placeholder="e.g., GRC"
                     onChange={(e) =>
-                      setCountryId(
-                        onlyUpperLetters(e.target.value.toUpperCase()).slice(
-                          0,
-                          3
-                        )
-                      )
+                      setCountryId(onlyUpperLetters(clampLen(e.target.value, 3)))
                     }
                     value={countryId}
                   />
                 </Form.Group>
 
                 <Form.Group className="mb-3">
-                  <Form.Label>Currency (optional):</Form.Label>
+                  <Form.Label>Currency:</Form.Label>
                   <Form.Control
-                    maxLength={10}
+                    maxLength={3}
                     placeholder="e.g., EUR"
                     onChange={(e) =>
-                      setCurrency(clampLen(e.target.value.toUpperCase(), 10))
+                      setCurrency(onlyUpperLetters(clampLen(e.target.value, 3)))
                     }
                     value={currency}
                   />
                 </Form.Group>
 
-                <Form.Group>
+                <Form.Group className="mb-3">
                   <Form.Label>Order Index:</Form.Label>
                   <Form.Control
                     type="number"
                     placeholder="e.g., 1"
-                    onChange={(e) =>
-                      setOrderindex(toSmallInt(e.target.value).toString())
-                    }
+                    onChange={(e) => setOrderindex(toSmallInt(e.target.value))}
                     value={orderindex}
                   />
                 </Form.Group>
@@ -188,13 +186,13 @@ function AddCountryModal() {
                 {!isCountryIdValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Country code must be 2 or 3 uppercase letters (A–Z).
+                    Country ID is required (2–3 chars).
                   </li>
                 )}
                 {!isOrderIndexValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Order index is required and must be an integer.
+                    Order Index is required (integer).
                   </li>
                 )}
               </ul>

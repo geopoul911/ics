@@ -16,16 +16,16 @@ urlpatterns = [
     path('api/view/', include('webapp.urls')),
 
     # Site Administration
-    path('api/site_admin/', include('webapp.site_administration.site_admin_urls')),
+    path('api/site_admin/', include('webapp.administration.urls')),
 
 
     # Regions
-    path('api/regions/', include('webapp.regions.region_urls')),
+    path('api/regions/', include('webapp.regions.urls')),
 
     # Data Management
-    path('api/data_management/', include('webapp.data_management_urls')),
+    path('api/data_management/', include('webapp.data_management.urls')),
 
     # Dashboard
-    path('', include('webapp.dashboard_urls')),
+    path('api/dashboard/', include('webapp.dashboard.urls')),
 
 ]

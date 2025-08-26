@@ -1,5 +1,5 @@
 // Built-ins
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Icons / Images
 import { BiPlus } from "react-icons/bi";
@@ -14,6 +14,7 @@ import { Button } from "semantic-ui-react";
 
 // Global Variables
 import { headers } from "../../global_vars";
+import { API_ENDPOINTS, apiGet } from "../../../utils/api";
 
 // Variables
 window.Swal = Swal;
@@ -32,6 +33,7 @@ const validateEmail = (email) => {
 function AddClientModal({ onClientCreated }) {
   const [show, setShow] = useState(false);
 
+  // Basic Information
   const [clientId, setClientId] = useState("");
   const [surname, setSurname] = useState("");
   const [name, setName] = useState("");
@@ -44,6 +46,13 @@ function AddClientModal({ onClientCreated }) {
   const [mobile2, setMobile2] = useState("");
   const [address, setAddress] = useState("");
   const [postalcode, setPostalcode] = useState("");
+  
+  // Location Information (Required Foreign Keys)
+  const [country, setCountry] = useState("");
+  const [province, setProvince] = useState("");
+  const [city, setCity] = useState("");
+  
+  // Personal Information
   const [birthdate, setBirthdate] = useState("");
   const [birthplace, setBirthplace] = useState("");
   const [fathername, setFathername] = useState("");
@@ -51,21 +60,40 @@ function AddClientModal({ onClientCreated }) {
   const [maritalstatus, setMaritalstatus] = useState("");
   const [deceased, setDeceased] = useState(false);
   const [deceasedate, setDeceasedate] = useState("");
+  const [profession, setProfession] = useState("");
+  
+  // Tax Information
   const [afm, setAfm] = useState("");
   const [sin, setSin] = useState("");
   const [amka, setAmka] = useState("");
-  const [passportnumber, setPassportnumber] = useState("");
-  const [passportexpiredate, setPassportexpiredate] = useState("");
-  const [policeid, setPoliceid] = useState("");
-  const [profession, setProfession] = useState("");
   const [taxmanagement, setTaxmanagement] = useState(false);
   const [taxrepresentation, setTaxrepresentation] = useState(false);
   const [taxrepresentative, setTaxrepresentative] = useState("");
   const [retired, setRetired] = useState(false);
+  
+  // Passport Information
+  const [passportcountry, setPassportcountry] = useState("");
+  const [passportnumber, setPassportnumber] = useState("");
+  const [passportexpiredate, setPassportexpiredate] = useState("");
+  const [policeid, setPoliceid] = useState("");
+  
+  // Pension Information
+  const [pensioncountry1, setPensioncountry1] = useState("");
+  const [insucarrier1, setInsucarrier1] = useState("");
   const [pensioninfo1, setPensioninfo1] = useState("");
+  const [pensioncountry2, setPensioncountry2] = useState("");
+  const [insucarrier2, setInsucarrier2] = useState("");
   const [pensioninfo2, setPensioninfo2] = useState("");
+  
+  // System Information
   const [active, setActive] = useState(true);
   const [notes, setNotes] = useState("");
+
+  // Dropdown Data
+  const [countries, setCountries] = useState([]);
+  const [provinces, setProvinces] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [insuranceCarriers, setInsuranceCarriers] = useState([]);
 
   const resetForm = () => {
     setClientId("");
@@ -80,6 +108,9 @@ function AddClientModal({ onClientCreated }) {
     setMobile2("");
     setAddress("");
     setPostalcode("");
+    setCountry("");
+    setProvince("");
+    setCity("");
     setBirthdate("");
     setBirthplace("");
     setFathername("");
@@ -90,6 +121,7 @@ function AddClientModal({ onClientCreated }) {
     setAfm("");
     setSin("");
     setAmka("");
+    setPassportcountry("");
     setPassportnumber("");
     setPassportexpiredate("");
     setPoliceid("");
@@ -98,7 +130,11 @@ function AddClientModal({ onClientCreated }) {
     setTaxrepresentation(false);
     setTaxrepresentative("");
     setRetired(false);
+    setPensioncountry1("");
+    setInsucarrier1("");
     setPensioninfo1("");
+    setPensioncountry2("");
+    setInsucarrier2("");
     setPensioninfo2("");
     setActive(true);
     setNotes("");
@@ -108,11 +144,84 @@ function AddClientModal({ onClientCreated }) {
   const handleShow = () => {
     resetForm();
     // Generate a default client ID based on current timestamp
-    const timestamp = Date.now().toString().slice(-6); // Last 6 digits
-    setClientId(`CL${timestamp}`);
     setShow(true);
   };
 
+  // Load dropdown data when modal opens
+  useEffect(() => {
+    if (show) {
+      loadDropdownData();
+    }
+  }, [show]);
+
+  // Load provinces when country changes
+  useEffect(() => {
+    if (country) {
+      loadProvinces(country);
+    } else {
+      setProvinces([]);
+      setCities([]);
+    }
+  }, [country]);
+
+  // Load cities when province changes
+  useEffect(() => {
+    if (province) {
+      loadCities(province);
+    } else {
+      setCities([]);
+    }
+  }, [province]);
+
+  const loadDropdownData = async () => {
+    try {
+                   // Load reference data for dropdowns using apiGet utility
+             const [countriesRes, insuranceCarriersRes] = await Promise.all([
+               apiGet(API_ENDPOINTS.COUNTRIES),
+               apiGet(API_ENDPOINTS.INSURANCE_CARRIERS)
+             ]);
+      
+      // Ensure we have arrays and handle potential response structures
+      const countriesData = Array.isArray(countriesRes) ? countriesRes : 
+                           Array.isArray(countriesRes.data) ? countriesRes.data : [];
+      const insuranceCarriersData = Array.isArray(insuranceCarriersRes) ? insuranceCarriersRes : 
+                                   Array.isArray(insuranceCarriersRes.data) ? insuranceCarriersRes.data : [];
+      
+      setCountries(countriesData);
+      setInsuranceCarriers(insuranceCarriersData);
+    } catch (error) {
+      console.error('Error loading dropdown data:', error);
+      // Set empty arrays to prevent map errors
+      setCountries([]);
+      setInsuranceCarriers([]);
+    }
+  };
+
+           const loadProvinces = async (countryId) => {
+           try {
+             const response = await apiGet(`${API_ENDPOINTS.PROVINCES}?country=${countryId}`);
+             const provincesData = Array.isArray(response) ? response :
+                                  Array.isArray(response.data) ? response.data : [];
+             setProvinces(provincesData);
+           } catch (error) {
+             console.error('Error loading provinces:', error);
+             setProvinces([]);
+           }
+         };
+
+         const loadCities = async (provinceId) => {
+           try {
+             const response = await apiGet(`${API_ENDPOINTS.CITIES}?province=${provinceId}`);
+             const citiesData = Array.isArray(response) ? response :
+                               Array.isArray(response.data) ? response.data : [];
+             setCities(citiesData);
+           } catch (error) {
+             console.error('Error loading cities:', error);
+             setCities([]);
+           }
+         };
+
+  // Validation
   const isClientIdValid = clientId.trim().length >= 2 && clientId.trim().length <= 10;
   const isSurnameValid = surname.trim().length >= 2 && surname.trim().length <= 40;
   const isNameValid = name.trim().length >= 2 && name.trim().length <= 40;
@@ -121,9 +230,14 @@ function AddClientModal({ onClientCreated }) {
   const isAddressValid = address.trim().length >= 2 && address.trim().length <= 120;
   const isPostalCodeValid = postalcode.trim().length >= 1 && postalcode.trim().length <= 10;
   const isEmailValid = validateEmail(email);
-  const isPhoneValid = !phone1 || phone1.length >= 7; // Optional but if provided, must be valid length
+  const isPhoneValid = !phone1 || phone1.length >= 7;
+  const isCountryValid = country.length > 0;
+  const isProvinceValid = province.length > 0;
+  const isCityValid = city.length > 0;
 
-  const isFormValid = isClientIdValid && isSurnameValid && isNameValid && isOnomaValid && isEponymoValid && isAddressValid && isPostalCodeValid && isEmailValid && isPhoneValid;
+  const isFormValid = isClientIdValid && isSurnameValid && isNameValid && isOnomaValid && 
+                     isEponymoValid && isAddressValid && isPostalCodeValid && isEmailValid && 
+                     isPhoneValid && isCountryValid && isProvinceValid && isCityValid;
 
   const createNewClient = async () => {
     try {
@@ -133,7 +247,7 @@ function AddClientModal({ onClientCreated }) {
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
-      const res = await axios({
+      await axios({
         method: "post",
         url: ADD_CLIENT,
         headers: currentHeaders,
@@ -146,11 +260,11 @@ function AddClientModal({ onClientCreated }) {
           eponymo: eponymo.trim(),
           address: address.trim(),
           postalcode: postalcode.trim(),
+          country: country,
+          province: province,
+          city: city,
           registrationdate: new Date().toISOString().split('T')[0], // Today's date
           registrationuser: localStorage.getItem('username') || 'testuser', // Current user
-          
-          // Note: country, province, city are required but not included in this form
-          // Backend should handle validation and provide appropriate error messages
           
           // Optional fields
           email: email.trim() || null,
@@ -168,6 +282,7 @@ function AddClientModal({ onClientCreated }) {
           afm: afm.trim() || null,
           sin: sin.trim() || null,
           amka: amka.trim() || null,
+          passportcountry: passportcountry || null,
           passportnumber: passportnumber.trim() || null,
           passportexpiredate: passportexpiredate || null,
           policeid: policeid.trim() || null,
@@ -176,7 +291,11 @@ function AddClientModal({ onClientCreated }) {
           taxrepresentation: taxrepresentation,
           taxrepresentative: taxrepresentative.trim() || null,
           retired: retired,
+          pensioncountry1: pensioncountry1 || null,
+          insucarrier1: insucarrier1 || null,
           pensioninfo1: pensioninfo1.trim() || null,
+          pensioncountry2: pensioncountry2 || null,
+          insucarrier2: insucarrier2 || null,
           pensioninfo2: pensioninfo2.trim() || null,
           active: active,
           notes: notes.trim() || null,
@@ -220,7 +339,7 @@ function AddClientModal({ onClientCreated }) {
 
       <Modal
         show={show}
-        size="lg"
+        size="xl"
         onHide={handleClose}
         aria-labelledby="contained-modal-title-vcenter"
         centered
@@ -297,17 +416,100 @@ function AddClientModal({ onClientCreated }) {
                       />
                     </Form.Group>
                   </Col>
-                   <Col md={6}>
-                     <Form.Group className="mb-3">
-                       <Form.Label>Eponymo (Greek Surname) *:</Form.Label>
-                       <Form.Control
-                         maxLength={40}
-                         placeholder="e.g., Παπαδόπουλος"
-                         onChange={(e) => setEponymo(clampLen(e.target.value, 40))}
-                         value={eponymo}
-                       />
-                     </Form.Group>
-                   </Col>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Profession:</Form.Label>
+                      <Form.Control
+                        maxLength={40}
+                        placeholder="e.g., Engineer"
+                        onChange={(e) => setProfession(clampLen(e.target.value, 40))}
+                        value={profession}
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                {/* Location Information */}
+                <h6 className="mb-3 mt-4">Location Information</h6>
+                <Row>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Country *:</Form.Label>
+                      <Form.Control
+                        as="select"
+                        onChange={(e) => setCountry(e.target.value)}
+                        value={country}
+                      >
+                        <option value="">Select Country</option>
+                        {Array.isArray(countries) && countries.map((country) => (
+                          <option key={country.country_id} value={country.country_id}>
+                            {country.title}
+                          </option>
+                        ))}
+                      </Form.Control>
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Province *:</Form.Label>
+                      <Form.Control
+                        as="select"
+                        onChange={(e) => setProvince(e.target.value)}
+                        value={province}
+                        disabled={!country}
+                      >
+                        <option value="">Select Province</option>
+                        {Array.isArray(provinces) && provinces.map((province) => (
+                          <option key={province.province_id} value={province.province_id}>
+                            {province.title}
+                          </option>
+                        ))}
+                      </Form.Control>
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>City *:</Form.Label>
+                      <Form.Control
+                        as="select"
+                        onChange={(e) => setCity(e.target.value)}
+                        value={city}
+                        disabled={!province}
+                      >
+                        <option value="">Select City</option>
+                        {Array.isArray(cities) && cities.map((city) => (
+                          <option key={city.city_id} value={city.city_id}>
+                            {city.title}
+                          </option>
+                        ))}
+                      </Form.Control>
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Address *:</Form.Label>
+                      <Form.Control
+                        maxLength={120}
+                        placeholder="e.g., 123 Main Street"
+                        onChange={(e) => setAddress(clampLen(e.target.value, 120))}
+                        value={address}
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Postal Code *:</Form.Label>
+                      <Form.Control
+                        maxLength={10}
+                        placeholder="e.g., 12345"
+                        onChange={(e) => setPostalcode(clampLen(e.target.value, 10))}
+                        value={postalcode}
+                      />
+                    </Form.Group>
+                  </Col>
                 </Row>
 
                 {/* Contact Information */}
@@ -379,28 +581,7 @@ function AddClientModal({ onClientCreated }) {
                       />
                     </Form.Group>
                   </Col>
-                                     <Col md={6}>
-                     <Form.Group className="mb-3">
-                       <Form.Label>Postal Code *:</Form.Label>
-                       <Form.Control
-                         maxLength={10}
-                         placeholder="e.g., 12345"
-                         onChange={(e) => setPostalcode(clampLen(e.target.value, 10))}
-                         value={postalcode}
-                       />
-                     </Form.Group>
-                   </Col>
                 </Row>
-
-                                  <Form.Group className="mb-3">
-                    <Form.Label>Address *:</Form.Label>
-                    <Form.Control
-                      maxLength={120}
-                      placeholder="e.g., 123 Main Street, Athens, Attica"
-                      onChange={(e) => setAddress(clampLen(e.target.value, 120))}
-                      value={address}
-                    />
-                  </Form.Group>
 
                 {/* Personal Information */}
                 <h6 className="mb-3 mt-4">Personal Information</h6>
@@ -473,20 +654,6 @@ function AddClientModal({ onClientCreated }) {
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Profession:</Form.Label>
-                      <Form.Control
-                        maxLength={40}
-                        placeholder="e.g., Engineer"
-                        onChange={(e) => setProfession(clampLen(e.target.value, 40))}
-                        value={profession}
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-
-                <Row>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
                       <Form.Check
                         type="switch"
                         id="deceased-switch"
@@ -496,8 +663,11 @@ function AddClientModal({ onClientCreated }) {
                       />
                     </Form.Group>
                   </Col>
-                  <Col md={6}>
-                    {deceased && (
+                </Row>
+
+                {deceased && (
+                  <Row>
+                    <Col md={6}>
                       <Form.Group className="mb-3">
                         <Form.Label>Deceased Date:</Form.Label>
                         <Form.Control
@@ -506,9 +676,9 @@ function AddClientModal({ onClientCreated }) {
                           value={deceasedate}
                         />
                       </Form.Group>
-                    )}
-                  </Col>
-                </Row>
+                    </Col>
+                  </Row>
+                )}
 
                 {/* Tax Information */}
                 <h6 className="mb-3 mt-4">Tax Information</h6>
@@ -549,7 +719,7 @@ function AddClientModal({ onClientCreated }) {
                 </Row>
 
                 <Row>
-                  <Col md={6}>
+                  <Col md={4}>
                     <Form.Group className="mb-3">
                       <Form.Check
                         type="switch"
@@ -560,7 +730,7 @@ function AddClientModal({ onClientCreated }) {
                       />
                     </Form.Group>
                   </Col>
-                  <Col md={6}>
+                  <Col md={4}>
                     <Form.Group className="mb-3">
                       <Form.Check
                         type="switch"
@@ -568,6 +738,17 @@ function AddClientModal({ onClientCreated }) {
                         label="Tax Representation"
                         checked={taxrepresentation}
                         onChange={(e) => setTaxrepresentation(e.target.checked)}
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Check
+                        type="switch"
+                        id="retired-switch"
+                        label="Retired"
+                        checked={retired}
+                        onChange={(e) => setRetired(e.target.checked)}
                       />
                     </Form.Group>
                   </Col>
@@ -587,34 +768,26 @@ function AddClientModal({ onClientCreated }) {
                   </Form.Group>
                 )}
 
-                <Row>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Check
-                        type="switch"
-                        id="retired-switch"
-                        label="Retired"
-                        checked={retired}
-                        onChange={(e) => setRetired(e.target.checked)}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Check
-                        type="switch"
-                        id="active-switch"
-                        label="Active"
-                        checked={active}
-                        onChange={(e) => setActive(e.target.checked)}
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-
                 {/* Passport Information */}
                 <h6 className="mb-3 mt-4">Passport Information</h6>
                 <Row>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Passport Country:</Form.Label>
+                      <Form.Control
+                        as="select"
+                        onChange={(e) => setPassportcountry(e.target.value)}
+                        value={passportcountry}
+                      >
+                        <option value="">Select Country</option>
+                        {Array.isArray(countries) && countries.map((country) => (
+                          <option key={country.country_id} value={country.country_id}>
+                            {country.title}
+                          </option>
+                        ))}
+                      </Form.Control>
+                    </Form.Group>
+                  </Col>
                   <Col md={4}>
                     <Form.Group className="mb-3">
                       <Form.Label>Passport Number:</Form.Label>
@@ -636,7 +809,10 @@ function AddClientModal({ onClientCreated }) {
                       />
                     </Form.Group>
                   </Col>
-                  <Col md={4}>
+                </Row>
+
+                <Row>
+                  <Col md={6}>
                     <Form.Group className="mb-3">
                       <Form.Label>Police ID Number:</Form.Label>
                       <Form.Control
@@ -652,7 +828,41 @@ function AddClientModal({ onClientCreated }) {
                 {/* Pension Information */}
                 <h6 className="mb-3 mt-4">Pension Information</h6>
                 <Row>
-                  <Col md={6}>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Pension Country 1:</Form.Label>
+                      <Form.Control
+                        as="select"
+                        onChange={(e) => setPensioncountry1(e.target.value)}
+                        value={pensioncountry1}
+                      >
+                        <option value="">Select Country</option>
+                        {Array.isArray(countries) && countries.map((country) => (
+                          <option key={country.country_id} value={country.country_id}>
+                            {country.title}
+                          </option>
+                        ))}
+                      </Form.Control>
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Insurance Carrier 1:</Form.Label>
+                      <Form.Control
+                        as="select"
+                        onChange={(e) => setInsucarrier1(e.target.value)}
+                        value={insucarrier1}
+                      >
+                        <option value="">Select Insurance Carrier</option>
+                        {Array.isArray(insuranceCarriers) && insuranceCarriers.map((carrier) => (
+                          <option key={carrier.insucarrier_id} value={carrier.insucarrier_id}>
+                            {carrier.title}
+                          </option>
+                        ))}
+                      </Form.Control>
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
                     <Form.Group className="mb-3">
                       <Form.Label>Pension Info 1:</Form.Label>
                       <Form.Control
@@ -663,7 +873,44 @@ function AddClientModal({ onClientCreated }) {
                       />
                     </Form.Group>
                   </Col>
-                  <Col md={6}>
+                </Row>
+
+                <Row>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Pension Country 2:</Form.Label>
+                      <Form.Control
+                        as="select"
+                        onChange={(e) => setPensioncountry2(e.target.value)}
+                        value={pensioncountry2}
+                      >
+                        <option value="">Select Country</option>
+                        {Array.isArray(countries) && countries.map((country) => (
+                          <option key={country.country_id} value={country.country_id}>
+                            {country.title}
+                          </option>
+                        ))}
+                      </Form.Control>
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Insurance Carrier 2:</Form.Label>
+                      <Form.Control
+                        as="select"
+                        onChange={(e) => setInsucarrier2(e.target.value)}
+                        value={insucarrier2}
+                      >
+                        <option value="">Select Insurance Carrier</option>
+                        {Array.isArray(insuranceCarriers) && insuranceCarriers.map((carrier) => (
+                          <option key={carrier.insucarrier_id} value={carrier.insucarrier_id}>
+                            {carrier.title}
+                          </option>
+                        ))}
+                      </Form.Control>
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
                     <Form.Group className="mb-3">
                       <Form.Label>Pension Info 2:</Form.Label>
                       <Form.Control
@@ -676,7 +923,22 @@ function AddClientModal({ onClientCreated }) {
                   </Col>
                 </Row>
 
-                {/* Notes */}
+                {/* System Information */}
+                <h6 className="mb-3 mt-4">System Information</h6>
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Check
+                        type="switch"
+                        id="active-switch"
+                        label="Active"
+                        checked={active}
+                        onChange={(e) => setActive(e.target.checked)}
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
+
                 <Form.Group className="mb-3">
                   <Form.Label>Notes:</Form.Label>
                   <Form.Control
@@ -739,6 +1001,24 @@ function AddClientModal({ onClientCreated }) {
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
                     Postal Code is required (1–10 chars).
+                  </li>
+                )}
+                {!isCountryValid && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Country is required.
+                  </li>
+                )}
+                {!isProvinceValid && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Province is required.
+                  </li>
+                )}
+                {!isCityValid && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    City is required.
                   </li>
                 )}
                 {!isEmailValid && (

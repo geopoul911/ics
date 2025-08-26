@@ -14,7 +14,6 @@ import {
 import axios from "axios";
 
 // Modules / Functions
-
 import { Card } from "react-bootstrap";
 import { Grid } from "semantic-ui-react";
 import Swal from "sweetalert2";
@@ -28,8 +27,8 @@ import {
   pageHeader,
 } from "../../../global_vars";
 
-// API (adjust port/path to match your backend)
-const VIEW_COUNTRY = "http://localhost:8000/api/regions/country/";
+// API (Updated to use new data_management API)
+const VIEW_COUNTRY = "http://localhost:8000/api/data_management/countries/";
 
 // Helpers to read URL like: /regions/country/<country_id>
 function getCountryIdFromPath() {
@@ -52,18 +51,19 @@ class CountryOverview extends React.Component {
   }
 
   componentDidMount() {
-
-    headers["Authorization"] = "Token " + localStorage.getItem("userToken");
+    // Update headers with current token
+    const currentHeaders = {
+      ...headers,
+      "Authorization": "Token " + localStorage.getItem("userToken")
+    };
 
     const countryId = getCountryIdFromPath();
 
     axios
-      .get(`${VIEW_COUNTRY}${countryId}`, { headers })
+      .get(`${VIEW_COUNTRY}${countryId}/`, { headers: currentHeaders })
       .then((res) => {
         // Accept a few possible payload shapes safely
         const country =
-          res?.data?.country ||
-          res?.data?.region || // fallback if backend reused "region"
           res?.data ||
           {};
 
@@ -85,104 +85,83 @@ class CountryOverview extends React.Component {
       });
   }
 
-  // When modals return a fresh object, replace state.country
-  update_state = (updated) => {
-    this.setState({ country: updated });
-  };
-
   render() {
     const { country } = this.state;
+
     return (
       <>
         <div className="mainContainer">
           {pageHeader("country_overview", `${country.title || "Country"}`)}
               <Grid stackable columns={2} divided>
                 <Grid.Column>
-                <Card>
-                  <Card.Header>
-                      <BsInfoSquare
-                        style={{
-                          color: "#F3702D",
-                          fontSize: "1.5em",
-                          marginRight: "0.5em",
-                        }}
-                      />
-                      Country Information
-                    </Card.Header>
-                  <Card.Body>
-                    {/* Title */}
-                    <div className={"info_descr"}>
-                      <FiType style={overviewIconStyle} /> Title
-                    </div>
-                    <div className={"info_span"}>
-                      {country.title ? country.title : "N/A"}
-                      <span style={{ marginLeft: 8 }}>
-                        <EditCountryTitleModal
-                          country={country}
-                          update_state={this.update_state}
-                        />
-                      </span>
-                    </div>
+              <Card>
+                <Card.Header>
+                  <h3>
+                    <BsInfoSquare style={overviewIconStyle} />
+                    Country Information
+                  </h3>
+                </Card.Header>
+                <Card.Body>
+                  <Grid>
+                      <Grid.Column width={8}>
+                        <p>
+                          <strong>Country ID:</strong> {country.country_id}
+                          <EditCountryIdModal
+                            country={country}
+                            update_state={(updated) =>
+                              this.setState({ country: updated })
+                            }
+                          />
+                        </p>
+                      </Grid.Column>
+                      <Grid.Column width={8}>
+                        <p>
+                          <strong>Title:</strong> {country.title}
+                          <EditCountryTitleModal
+                            country={country}
+                            update_state={(updated) =>
+                              this.setState({ country: updated })
+                            }
+                          />
+                        </p>
+                      </Grid.Column>
+                      <Grid.Column width={8}>
+                        <p>
+                          <strong>Currency:</strong> {country.currency || "N/A"}
+                          <EditCountryCurrencyModal
+                            country={country}
+                            update_state={(updated) =>
+                              this.setState({ country: updated })
+                            }
+                          />
+                        </p>
+                      </Grid.Column>
+                      <Grid.Column width={8}>
+                        <p>
+                          <strong>Order Index:</strong> {country.orderindex}
+                          <EditCountryOrderIndexModal
+                            country={country}
+                            update_state={(updated) =>
+                              this.setState({ country: updated })
+                            }
+                          />
+                        </p>
+                      </Grid.Column>
+                  </Grid>
+                </Card.Body>
+              </Card>
+            </Grid.Column>
 
-                    {/* Country ID */}
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <FaHashtag style={overviewIconStyle} /> Country ID (2–3 chars)
-                    </div>
-                    <div className={"info_span"}>
-                      {country.country_id ? country.country_id : "N/A"}
-                      <span style={{ marginLeft: 8 }}>
-                        <EditCountryIdModal
-                          country={country}
-                          update_state={this.update_state}
-                        />
-                      </span>
-                    </div>
-
-                    {/* Currency */}
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <FaHashtag style={overviewIconStyle} /> Currency
-                    </div>
-                    <div className={"info_span"}>
-                      {country.currency ? country.currency : "N/A"}
-                      <span style={{ marginLeft: 8 }}>
-                        <EditCountryCurrencyModal
-                          country={country}
-                          update_state={this.update_state}
-                        />
-                      </span>
-                    </div>
-
-                    {/* Order Index */}
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <FaHashtag style={overviewIconStyle} /> Order Index
-                    </div>
-                    <div className={"info_span"}>
-                      {(typeof country.orderindex === "number" ||
-                        typeof country.orderindex === "string")
-                        ? country.orderindex
-                        : "N/A"}
-                      <span style={{ marginLeft: 8 }}>
-                        <EditCountryOrderIndexModal
-                          country={country}
-                          update_state={this.update_state}
-                        />
-                      </span>
-                    </div>
-                  </Card.Body>
-                  <Card.Footer>
-                    <DeleteObjectModal
-                      object_id={country.country_id}
-                      object_name={country.title}
-                      object_type="Country"
-                      warningMessage="This will also delete all provinces and cities associated with this country."
-                      onDeleteSuccess={() => {
-                        window.location.href = "/regions/all_countries";
-                      }}
-                    />
-                  </Card.Footer>
-                  </Card>
-                </Grid.Column>
-              </Grid>
+            <Grid.Column width={16}>
+              <DeleteObjectModal
+                object={country}
+                object_type="country"
+                object_id={country.country_id}
+                object_name={country.title}
+                redirect_url="/regions"
+              />
+            </Grid.Column>
+        </Grid>
         </div>
       </>
     );

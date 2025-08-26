@@ -5,8 +5,8 @@ import React from "react";
 import NavigationBar from "../../core/navigation_bar/navigation_bar";
 import Footer from "../../core/footer/footer";
 import axios from "axios";
-// Modules / Functions
 
+// Modules / Functions
 import filterFactory, { textFilter } from "react-bootstrap-table2-filter";
 import ToolkitProvider from "react-bootstrap-table2-toolkit";
 import Swal from "sweetalert2";
@@ -31,7 +31,8 @@ import {
 // Variables
 window.Swal = Swal;
 
-const GET_PROVINCES = "http://localhost:8000/api/regions/all_provinces/";
+// Updated to use new data_management API
+const GET_PROVINCES = "http://localhost:8000/api/data_management/provinces/";
 
 const columns = [
   {
@@ -58,13 +59,18 @@ const columns = [
     text: "Country",
     sort: true,
     filter: textFilter(),
-    formatter: (cell, row) => (
-      <Button>
-        <a href={"/regions/country/" + row.country} basic id="cell_link">
-          {row.country}
-        </a>
-      </Button>
-    ),
+    formatter: (cell, row) => {
+      const countryData = row.country;
+      const countryId = typeof countryData === 'object' ? countryData.country_id : countryData;
+      const countryTitle = typeof countryData === 'object' ? countryData.title : countryId;
+      return (
+        <Button>
+          <a href={"/regions/country/" + countryId} basic id="cell_link">
+            {countryTitle}
+          </a>
+        </Button>
+      );
+    },
   },
   {
     dataField: "orderindex",
@@ -76,8 +82,8 @@ const columns = [
 
 const defaultSorted = [
   {
-    dataField: "id",
-    order: "desc",
+    dataField: "orderindex",
+    order: "asc",
   },
 ];
 
@@ -97,20 +103,44 @@ class AllProvinces extends React.Component {
   }
 
   fetchProvinces() {
+    // Update headers with current token
+    const currentHeaders = {
+      ...headers,
+      "Authorization": "Token " + localStorage.getItem("userToken")
+    };
+
     axios
       .get(GET_PROVINCES, {
-        headers: headers,
+        headers: currentHeaders,
       })
       .then((res) => {
-        const allProvinces = res.data.all_provinces;
+        console.log('API Response:', res.data); // Debug log
+        
+        // Handle different response structures
+        let allProvinces = [];
+        if (Array.isArray(res.data)) {
+          allProvinces = res.data;
+        } else if (res.data && Array.isArray(res.data.results)) {
+          allProvinces = res.data.results;
+        } else if (res.data && Array.isArray(res.data.data)) {
+          allProvinces = res.data.data;
+        } else if (res.data && res.data.all_provinces) {
+          allProvinces = res.data.all_provinces;
+        } else {
+          console.warn('Unexpected API response structure:', res.data);
+          allProvinces = [];
+        }
+        
+        console.log('Processed provinces:', allProvinces); // Debug log
+        
         this.setState({
           all_provinces: allProvinces,
           is_loaded: true,
         });
       })
       .catch((e) => {
-        console.log(e)
-        if (e.response.status === 401) {
+        console.error('Error fetching provinces:', e);
+        if (e.response?.status === 401) {
           this.setState({
             forbidden: true,
           });
@@ -118,9 +148,14 @@ class AllProvinces extends React.Component {
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: "An unknown error has occured.",
+            text: "An unknown error has occurred.",
           });
         }
+        // Set empty array on error to prevent filter issues
+        this.setState({
+          all_provinces: [],
+          is_loaded: true,
+        });
       });
   }
 
@@ -135,37 +170,45 @@ class AllProvinces extends React.Component {
   }
 
   render() {
+    // Ensure we always have an array for the table
+    const tableData = Array.isArray(this.state.all_provinces) ? this.state.all_provinces : [];
+    
     return (
       <>
         <NavigationBar />
         <div className="mainContainer">
-          {pageHeader("all_provinces")}
-            <ToolkitProvider
-              keyField={(row, index) => index}
-              data={this.state.all_provinces}
-              columns={columns}
-              search
-              noDataIndication={<NoDataToShow />}
-              bootstrap4
-              condensed
-              defaultSorted={defaultSorted}
-              exportCSV
-            >
-              {(props) => (
-                <div>
-                  <BootstrapTable
-                    {...props.baseProps}
-                    pagination={paginationFactory(paginationOptions)}
-                    hover
-                    bordered={false}
-                    striped
-                    filter={filterFactory()}
-                  />
-                </div>
+          {pageHeader("all_provinces", "All Provinces")}
+          <div className="contentContainer">
+            <div className="contentHeader">
+              <AddProvinceModal />
+            </div>
+            <div className="contentBody">
+              {this.state.is_loaded ? (
+                <ToolkitProvider
+                  bootstrap4
+                  keyField="province_id"
+                  data={tableData}
+                  columns={columns}
+                  search
+                >
+                  {(props) => (
+                    <div>
+                      <BootstrapTable
+                        {...props.baseProps}
+                        pagination={paginationFactory(paginationOptions)}
+                        filter={filterFactory()}
+                        defaultSorted={defaultSorted}
+                        noDataIndication={() => <NoDataToShow />}
+                      />
+                    </div>
+                  )}
+                </ToolkitProvider>
+              ) : (
+                <div>Loading...</div>
               )}
-            </ToolkitProvider>
-            <AddProvinceModal/>
+            </div>
           </div>
+        </div>
         <Footer />
       </>
     );

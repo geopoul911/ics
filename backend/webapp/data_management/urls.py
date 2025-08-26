@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .data_management_views import (
+from .views import (
     # Reference Data Viewsets
     CountryViewSet, ProvinceViewSet, CityViewSet, BankViewSet, InsuranceCarrierViewSet,
     

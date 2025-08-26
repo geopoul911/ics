@@ -6,8 +6,8 @@ import { BiPlus } from "react-icons/bi";
 import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
 import axios from "axios";
 import { apiGet } from "../../../utils/api";
-// Modules / Functions
 
+// Modules / Functions
 import Swal from "sweetalert2";
 import { Modal, Col, Form, Row } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
@@ -18,9 +18,9 @@ import { headers } from "../../global_vars";
 // Variables
 window.Swal = Swal;
 
-// API endpoints
-const ADD_PROVINCE = "http://localhost:8000/api/view/add_province/";
-const GET_COUNTRIES = "http://localhost:8000/api/regions/all_countries/";
+// API endpoints - Updated to use new data_management API
+const ADD_PROVINCE = "http://localhost:8000/api/data_management/provinces/";
+const GET_COUNTRIES = "http://localhost:8000/api/data_management/countries/";
 
 // Helpers
 const onlyUpperLetters = (value) => value.replace(/[^A-Z]/g, "");
@@ -63,31 +63,56 @@ function AddProvinceModal() {
   // Fetch countries for dropdown
   useEffect(() => {
     if (show) {
-      apiGet(GET_COUNTRIES)
+      console.log('Loading countries for province modal...');
+      console.log('Current auth token:', localStorage.getItem('userToken'));
+      
+      // Try using axios directly with proper headers
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      
+      console.log('Using headers:', currentHeaders);
+      
+      axios.get(GET_COUNTRIES, { headers: currentHeaders })
         .then((res) => {
-          setCountries(res.data.all_countries || []);
+          console.log('Countries API response:', res.data);
+          // Handle different response structures
+          const countriesData = Array.isArray(res.data) ? res.data : 
+                               Array.isArray(res.data.results) ? res.data.results : 
+                               Array.isArray(res.data.data) ? res.data.data : [];
+          console.log('Processed countries data:', countriesData);
+          setCountries(countriesData);
         })
         .catch((e) => {
           console.error("Failed to fetch countries:", e);
+          console.error("Error response:", e.response?.data);
+          setCountries([]);
         });
     }
   }, [show]);
 
   const createNewProvince = async () => {
     try {
+      // Update headers with current token
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+
       const res = await axios({
         method: "post",
         url: ADD_PROVINCE,
-        headers,
+        headers: currentHeaders,
         data: {
           title: title.trim(),
           province_id: provinceId,
-          country_id: countryId,
+          country: countryId, // Use country ID as foreign key
           orderindex: Number(orderindex),
         },
       });
 
-      const newId = res?.data?.model?.province_id || provinceId;
+      const newId = res?.data?.province_id || res?.data?.id || provinceId;
       window.location.href = "/regions/province/" + newId;
     } catch (e) {
       const apiMsg =
@@ -139,14 +164,12 @@ function AddProvinceModal() {
                 </Form.Group>
 
                 <Form.Group className="mb-3">
-                  <Form.Label>Province Code (2–10 letters):</Form.Label>
+                  <Form.Label>Province ID:</Form.Label>
                   <Form.Control
                     maxLength={10}
                     placeholder="e.g., ATT"
                     onChange={(e) =>
-                      setProvinceId(
-                        onlyUpperLetters(e.target.value.toUpperCase()).slice(0, 10)
-                      )
+                      setProvinceId(onlyUpperLetters(clampLen(e.target.value, 10)))
                     }
                     value={provinceId}
                   />
@@ -156,26 +179,24 @@ function AddProvinceModal() {
                   <Form.Label>Country:</Form.Label>
                   <Form.Control
                     as="select"
-                    value={countryId}
                     onChange={(e) => setCountryId(e.target.value)}
+                    value={countryId}
                   >
-                    <option value="">Select a country...</option>
-                    {countries.map((country) => (
+                    <option value="">Select Country</option>
+                    {Array.isArray(countries) && countries.map((country) => (
                       <option key={country.country_id} value={country.country_id}>
-                        {country.country_id} - {country.title}
+                        {country.title}
                       </option>
                     ))}
                   </Form.Control>
                 </Form.Group>
 
-                <Form.Group>
+                <Form.Group className="mb-3">
                   <Form.Label>Order Index:</Form.Label>
                   <Form.Control
                     type="number"
                     placeholder="e.g., 1"
-                    onChange={(e) =>
-                      setOrderindex(toSmallInt(e.target.value).toString())
-                    }
+                    onChange={(e) => setOrderindex(toSmallInt(e.target.value))}
                     value={orderindex}
                   />
                 </Form.Group>
@@ -200,7 +221,7 @@ function AddProvinceModal() {
                 {!isProvinceIdValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Province code must be 2–10 uppercase letters (A–Z).
+                    Province ID is required (2–10 chars).
                   </li>
                 )}
                 {!isCountryIdValid && (
@@ -212,7 +233,7 @@ function AddProvinceModal() {
                 {!isOrderIndexValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Order index is required and must be an integer.
+                    Order Index is required (integer).
                   </li>
                 )}
               </ul>

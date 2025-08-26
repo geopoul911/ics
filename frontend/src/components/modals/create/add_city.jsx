@@ -5,9 +5,9 @@ import { useState, useEffect } from "react";
 import { BiPlus } from "react-icons/bi";
 import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
 import axios from "axios";
-import { apiGet, } from "../../../utils/api";
-// Modules / Functions
+import { apiGet } from "../../../utils/api";
 
+// Modules / Functions
 import Swal from "sweetalert2";
 import { Modal, Col, Form, Row } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
@@ -18,10 +18,10 @@ import { headers } from "../../global_vars";
 // Variables
 window.Swal = Swal;
 
-// API endpoints
-const ADD_CITY = "http://localhost:8000/api/view/add_city/";
-const GET_COUNTRIES = "http://localhost:8000/api/regions/all_countries/";
-const GET_PROVINCES = "http://localhost:8000/api/regions/all_provinces/";
+// API endpoints - Updated to use new data_management API
+const ADD_CITY = "http://localhost:8000/api/data_management/cities/";
+const GET_COUNTRIES = "http://localhost:8000/api/data_management/countries/";
+const GET_PROVINCES = "http://localhost:8000/api/data_management/provinces/";
 
 // Helpers
 const onlyUpperLetters = (value) => value.replace(/[^A-Z]/g, "");
@@ -70,10 +70,14 @@ function AddCityModal() {
     if (show) {
       apiGet(GET_COUNTRIES)
         .then((res) => {
-          setCountries(res.data.all_countries || []);
+          // Handle different response structures
+          const countriesData = Array.isArray(res) ? res : 
+                               Array.isArray(res.data) ? res.data : [];
+          setCountries(countriesData);
         })
         .catch((e) => {
           console.error("Failed to fetch countries:", e);
+          setCountries([]);
         });
     }
   }, [show]);
@@ -81,14 +85,16 @@ function AddCityModal() {
   // Fetch provinces when country changes
   useEffect(() => {
     if (countryId && show) {
-      apiGet(GET_PROVINCES)
+      apiGet(`${GET_PROVINCES}?country=${countryId}`)
         .then((res) => {
-          const allProvinces = res.data.all_provinces || [];
-          const filteredProvinces = allProvinces.filter(province => province.country === countryId);
-          setProvinces(filteredProvinces);
+          // Handle different response structures
+          const provincesData = Array.isArray(res) ? res : 
+                               Array.isArray(res.data) ? res.data : [];
+          setProvinces(provincesData);
         })
         .catch((e) => {
           console.error("Failed to fetch provinces:", e);
+          setProvinces([]);
         });
     } else {
       setProvinces([]);
@@ -99,20 +105,26 @@ function AddCityModal() {
 
   const createNewCity = async () => {
     try {
+      // Update headers with current token
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+
       const res = await axios({
         method: "post",
         url: ADD_CITY,
-        headers,
+        headers: currentHeaders,
         data: {
           title: title.trim(),
           city_id: cityId,
-          country_id: countryId,
-          province_id: provinceId,
+          country: countryId, // Use country ID as foreign key
+          province: provinceId, // Use province ID as foreign key
           orderindex: Number(orderindex),
         },
       });
 
-      const newId = res?.data?.model?.city_id || cityId;
+      const newId = res?.data?.city_id || res?.data?.id || cityId;
       window.location.href = "/regions/city/" + newId;
     } catch (e) {
       const apiMsg =
@@ -164,14 +176,12 @@ function AddCityModal() {
                 </Form.Group>
 
                 <Form.Group className="mb-3">
-                  <Form.Label>City Code (2–10 letters):</Form.Label>
+                  <Form.Label>City ID:</Form.Label>
                   <Form.Control
                     maxLength={10}
                     placeholder="e.g., ATH"
                     onChange={(e) =>
-                      setCityId(
-                        onlyUpperLetters(e.target.value.toUpperCase()).slice(0, 10)
-                      )
+                      setCityId(onlyUpperLetters(clampLen(e.target.value, 10)))
                     }
                     value={cityId}
                   />
@@ -181,13 +191,13 @@ function AddCityModal() {
                   <Form.Label>Country:</Form.Label>
                   <Form.Control
                     as="select"
-                    value={countryId}
                     onChange={(e) => setCountryId(e.target.value)}
+                    value={countryId}
                   >
-                    <option value="">Select a country...</option>
-                    {countries.map((country) => (
+                    <option value="">Select Country</option>
+                    {Array.isArray(countries) && countries.map((country) => (
                       <option key={country.country_id} value={country.country_id}>
-                        {country.country_id} - {country.title}
+                        {country.title}
                       </option>
                     ))}
                   </Form.Control>
@@ -197,27 +207,25 @@ function AddCityModal() {
                   <Form.Label>Province:</Form.Label>
                   <Form.Control
                     as="select"
-                    value={provinceId}
                     onChange={(e) => setProvinceId(e.target.value)}
+                    value={provinceId}
                     disabled={!countryId}
                   >
-                    <option value="">Select a province...</option>
-                    {provinces.map((province) => (
+                    <option value="">Select Province</option>
+                    {Array.isArray(provinces) && provinces.map((province) => (
                       <option key={province.province_id} value={province.province_id}>
-                        {province.province_id} - {province.title}
+                        {province.title}
                       </option>
                     ))}
                   </Form.Control>
                 </Form.Group>
 
-                <Form.Group>
+                <Form.Group className="mb-3">
                   <Form.Label>Order Index:</Form.Label>
                   <Form.Control
                     type="number"
                     placeholder="e.g., 1"
-                    onChange={(e) =>
-                      setOrderindex(toSmallInt(e.target.value).toString())
-                    }
+                    onChange={(e) => setOrderindex(toSmallInt(e.target.value))}
                     value={orderindex}
                   />
                 </Form.Group>
@@ -242,7 +250,7 @@ function AddCityModal() {
                 {!isCityIdValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    City code must be 2–10 uppercase letters (A–Z).
+                    City ID is required (2–10 chars).
                   </li>
                 )}
                 {!isCountryIdValid && (
@@ -260,7 +268,7 @@ function AddCityModal() {
                 {!isOrderIndexValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Order index is required and must be an integer.
+                    Order Index is required (integer).
                   </li>
                 )}
               </ul>

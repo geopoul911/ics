@@ -5,8 +5,8 @@ import React from "react";
 import NavigationBar from "../../core/navigation_bar/navigation_bar";
 import Footer from "../../core/footer/footer";
 import axios from "axios";
-// Modules / Functions
 
+// Modules / Functions
 import filterFactory, { textFilter } from "react-bootstrap-table2-filter";
 import ToolkitProvider from "react-bootstrap-table2-toolkit";
 import Swal from "sweetalert2";
@@ -31,7 +31,8 @@ import {
 // Variables
 window.Swal = Swal;
 
-const GET_COUNTRIES = "http://localhost:8000/api/regions/all_countries/";
+// Updated to use new data_management API
+const GET_COUNTRIES = "http://localhost:8000/api/data_management/countries/";
 
 const columns = [
   {
@@ -47,7 +48,7 @@ const columns = [
       </Button>
     ),
   },
-    {
+  {
     dataField: "title",
     text: "Title",
     sort: true,
@@ -59,19 +60,18 @@ const columns = [
     sort: true,
     filter: textFilter(),
   },
-
-      {
+  {
     dataField: "orderindex",
     text: "Order Index",
     sort: true,
     filter: textFilter(),
   },
-]
+];
 
 const defaultSorted = [
   {
-    dataField: "id",
-    order: "desc",
+    dataField: "orderindex",
+    order: "asc",
   },
 ];
 
@@ -91,20 +91,44 @@ class AllCountries extends React.Component {
   }
 
   fetchCountries() {
+    // Update headers with current token
+    const currentHeaders = {
+      ...headers,
+      "Authorization": "Token " + localStorage.getItem("userToken")
+    };
+
     axios
       .get(GET_COUNTRIES, {
-        headers: headers,
+        headers: currentHeaders,
       })
       .then((res) => {
-        const allCountries = res.data.all_countries;
+        console.log('API Response:', res.data); // Debug log
+        
+        // Handle different response structures
+        let allCountries = [];
+        if (Array.isArray(res.data)) {
+          allCountries = res.data;
+        } else if (res.data && Array.isArray(res.data.results)) {
+          allCountries = res.data.results;
+        } else if (res.data && Array.isArray(res.data.data)) {
+          allCountries = res.data.data;
+        } else if (res.data && res.data.all_countries) {
+          allCountries = res.data.all_countries;
+        } else {
+          console.warn('Unexpected API response structure:', res.data);
+          allCountries = [];
+        }
+        
+        console.log('Processed countries:', allCountries); // Debug log
+        
         this.setState({
           all_countries: allCountries,
           is_loaded: true,
         });
       })
       .catch((e) => {
-        console.log(e)
-        if (e.response.status === 401) {
+        console.error('Error fetching countries:', e);
+        if (e.response?.status === 401) {
           this.setState({
             forbidden: true,
           });
@@ -112,9 +136,14 @@ class AllCountries extends React.Component {
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: "An unknown error has occured.",
+            text: "An unknown error has occurred.",
           });
         }
+        // Set empty array on error to prevent filter issues
+        this.setState({
+          all_countries: [],
+          is_loaded: true,
+        });
       });
   }
 
@@ -129,37 +158,45 @@ class AllCountries extends React.Component {
   }
 
   render() {
+    // Ensure we always have an array for the table
+    const tableData = Array.isArray(this.state.all_countries) ? this.state.all_countries : [];
+    
     return (
       <>
         <NavigationBar />
         <div className="mainContainer">
-          {pageHeader("all_countries")}
-            <ToolkitProvider
-              keyField={(row, index) => index}
-              data={this.state.all_countries}
-              columns={columns}
-              search
-              noDataIndication={<NoDataToShow />}
-              bootstrap4
-              condensed
-              defaultSorted={defaultSorted}
-              exportCSV
-            >
-              {(props) => (
-                <div>
-                  <BootstrapTable
-                    {...props.baseProps}
-                    pagination={paginationFactory(paginationOptions)}
-                    hover
-                    bordered={false}
-                    striped
-                    filter={filterFactory()}
-                  />
-                </div>
+          {pageHeader("all_countries", "All Countries")}
+          <div className="contentContainer">
+            <div className="contentHeader">
+              <AddCountryModal />
+            </div>
+            <div className="contentBody">
+              {this.state.is_loaded ? (
+                <ToolkitProvider
+                  bootstrap4
+                  keyField="country_id"
+                  data={tableData}
+                  columns={columns}
+                  search
+                >
+                  {(props) => (
+                    <div>
+                      <BootstrapTable
+                        {...props.baseProps}
+                        pagination={paginationFactory(paginationOptions)}
+                        filter={filterFactory()}
+                        defaultSorted={defaultSorted}
+                        noDataIndication={() => <NoDataToShow />}
+                      />
+                    </div>
+                  )}
+                </ToolkitProvider>
+              ) : (
+                <div>Loading...</div>
               )}
-            </ToolkitProvider>
-            <AddCountryModal/>
+            </div>
           </div>
+        </div>
         <Footer />
       </>
     );
