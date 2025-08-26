@@ -678,9 +678,7 @@ img {
 }
 
 .rootMenu {
-  width: 20% !important;
-  margin-left: 40% !important;
-  margin-right: 40% !important;
+  margin-left: 5% !important;
 }
 
 .rootMenu > a {

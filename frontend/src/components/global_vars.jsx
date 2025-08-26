@@ -16,12 +16,11 @@ import {
   FaDatabase,
   FaSuitcaseRolling,
   FaInfo,
+  FaUser,
   FaArrowRight ,
+  FaChartLine,
 } from "react-icons/fa";
-import {
-  GiConvergenceTarget,
-} from "react-icons/gi";
-
+import { FaGlobe } from "react-icons/fa";
 
 export const iconStyle = {
   color: "#2a9fd9",
@@ -338,7 +337,7 @@ export function pageHeader(value, objName) {
       <>
         <div className="page_header">
           <h2>
-            <GiConvergenceTarget style={iconStyle} /> Regions
+            <FaGlobe style={iconStyle} /> Regions
           </h2>
           <Breadcrumb>
             <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
@@ -348,6 +347,36 @@ export function pageHeader(value, objName) {
         <hr />
       </>
     );
+    } else if (value === "administration_root") {
+      return (
+        <>
+          <div className="page_header">
+            <h2>
+              <FaUser style={iconStyle} /> Administration
+            </h2>
+            <Breadcrumb>
+              <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+              <Breadcrumb.Item active> Administration </Breadcrumb.Item>
+            </Breadcrumb>
+          </div>
+          <hr />
+        </>
+      );
+    } else if (value === "reports_root") {
+      return (
+        <>
+          <div className="page_header">
+            <h2>
+              <FaChartLine style={iconStyle} /> Reports
+            </h2>
+            <Breadcrumb>
+              <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+              <Breadcrumb.Item active> Reports </Breadcrumb.Item>
+            </Breadcrumb>
+          </div>
+          <hr />
+        </>
+      );
   }
   return <></>;
 }

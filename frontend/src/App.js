@@ -46,6 +46,8 @@ import TaskCommentDetail from "./components/data_management/task_comments/task_c
 import TaxationProjects from "./components/data_management/taxation_projects/taxation_projects";
 import TaxationProjectDetail from "./components/data_management/taxation_projects/taxation_project_detail";
 import RegionRoot from "./components/regions/region_root/region_root";
+import AdministrationRoot from "./components/administration/administration_root/administration_root";
+import ReportsRoot from "./components/reports/reports_root/reports_root";
 import Dashboard from "./components/dashboard/Dashboard";
 
 import ProtectedRoute from "./components/core/router/protected_route";
@@ -405,6 +407,25 @@ function App() {
           path="/regions/root"
           render={(props) => (
             <RegionRoot {...props} setUserToken={setUserToken} />
+          )}
+        />
+
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/reports/root"
+          render={(props) => (
+            <ReportsRoot {...props} setUserToken={setUserToken} />
+          )}
+        />
+
+        <ProtectedRoute
+
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/administration/root"
+          render={(props) => (
+            <AdministrationRoot {...props} setUserToken={setUserToken} />
           )}
         />
 
