@@ -12,7 +12,7 @@ import { Form, Button, Card, Row, Col, Badge } from "react-bootstrap";
 // import { useParams, useHistory } from "react-router-dom";
 
 // Global Variables
-import { headers, pageHeader } from "../../global_vars";
+import { pageHeader } from "../../global_vars";
 
 // Variables
 window.Swal = Swal;

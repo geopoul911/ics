@@ -189,6 +189,7 @@ class CheckAccessStatus(generics.GenericAPIView):
         failures = _attempts_for_ip(ip)
         is_blocked = failures >= limit
         attempts_remaining = max(limit - failures, 0)
+        print("!!")
 
         return Response(
             {"isBlocked": is_blocked, "attempts_remaining": attempts_remaining},

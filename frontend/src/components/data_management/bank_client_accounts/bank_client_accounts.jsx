@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
+import { apiGet, API_ENDPOINTS } from '../../../utils/api';
 // Built-ins
 import React from "react";
 
@@ -23,7 +23,6 @@ import NoDataToShowImage from "../../../images/generic/no_results_found.png";
 // Global Variables
 import {
   paginationOptions,
-  headers,
 } from "../../global_vars";
 
 // Variables

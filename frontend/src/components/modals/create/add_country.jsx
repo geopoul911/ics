@@ -5,7 +5,6 @@ import { useState } from "react";
 import { BiPlus } from "react-icons/bi";
 import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
 
-import { apiGet, apiPut, apiPost, apiDelete, API_ENDPOINTS } from "../../../utils/api";
 import axios from "axios";
 
 // Modules / Functions

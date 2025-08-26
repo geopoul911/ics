@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { BiPlus } from "react-icons/bi";
 import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
 import axios from "axios";
-import { apiGet, apiPut, apiPost, apiDelete, API_ENDPOINTS } from "../../../utils/api";
+import { apiGet, } from "../../../utils/api";
 // Modules / Functions
 
 import Swal from "sweetalert2";

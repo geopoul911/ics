@@ -1,7 +1,7 @@
 // Built-ins
 import { useState, useEffect } from "react";
 
-import { apiGet, apiPut, apiPost, apiDelete, API_ENDPOINTS } from "../../utils/api";
+import { apiGet, apiPut } from "../../utils/api";
 
 // Icons
 import { FiEdit } from "react-icons/fi";
@@ -13,8 +13,6 @@ import Swal from "sweetalert2";
 import { Modal, Form } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
 
-// Globals
-import { headers } from "../global_vars";
 
 // API base
 const CITY_DETAIL = "http://localhost:8000/api/regions/city/";
@@ -33,7 +31,7 @@ const toSmallInt = (value) => {
 
 const patchCity = async (id, payload) => {
   const url = `${CITY_DETAIL}${encodeURIComponent(id)}`;
-  return apiPut(url, data);
+  return apiPut(url, payload);
 };
 
 /* ===========================

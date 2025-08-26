@@ -17,13 +17,13 @@ import "./login.css";
 import { loader, pageHeader } from "../../global_vars";
 
 // Icons - Images
-import CosmoplanLogo from "../../../images/core/logos/logo_white.png";
+import Logo from "../../../images/core/logos/logo_white.png";
 import { AiFillLock } from "react-icons/ai";
 import { BiShow, BiHide } from "react-icons/bi";
 
 // Variables
-const LOGIN = "/api/user/login/";
-const CHECK_IP = "/api/user/check_access_status/";
+const LOGIN = "/user/login/";
+const CHECK_IP = "/user/check_access_status/";
 
 // url path = '/login'
 class Login extends React.Component {
@@ -171,9 +171,9 @@ class Login extends React.Component {
               <div className="centered">
                 <Form onSubmit={this.onSubmit}>
                   <img
-                    src={CosmoplanLogo}
+                    src={Logo}
                     alt="logo"
-                    className="cosmoplanLogo"
+                    className="logo"
                   />
                   {/* If user has no attempts left, forms and log in button will be disabled */}
                   <Form.Group controlId="username">
@@ -243,7 +243,7 @@ class Login extends React.Component {
                       color: "white",
                     }}
                     type="submit"
-                    disabled={this.state.isBlocked || this.state.error_message}
+                    disabled={this.state.isBlocked || !!this.state.error_message}
                   >
                     Log in
                   </Button>

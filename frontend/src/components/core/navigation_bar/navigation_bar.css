@@ -43,9 +43,10 @@
 #nav_report_dropdown {
   background-color: rgb(16, 16, 16) !important;
   margin-top: 5px !important;
-  margin-left: -230px !important;
-  columns: 3;
+  columns: 1;
+  column-gap: 0;
   z-index: 1001;
+  min-width: 200px;
 }
 
 /* report dropdown's links */
@@ -66,9 +67,10 @@
 #nav_data_dropdown {
   background-color: rgb(16, 16, 16) !important;
   margin-top: 5px !important;
-  margin-left: -300px !important;
-  columns: 4;
+  columns: 1;
+  column-gap: 0;
   z-index: 1001;
+  min-width: 250px;
 }
 
 /* data management dropdown's links */
@@ -89,7 +91,9 @@
   background-color: rgb(16, 16, 16) !important;
   margin-top: 5px !important;
   margin-left: -330px !important;
-  columns: 3;
+  columns: 1;
+  column-gap: 0;
+  min-width: 200px;
 }
 
 /* data management dropdown's links */

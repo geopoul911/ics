@@ -18,7 +18,7 @@ SECRET_KEY = 'f2h*8c#j3m@!q!z4&jv@1g4rb5o5-8ox-^d%o6=gi+e8&d=ofp'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', '127.0.0.1', 'localhost']
 
 # Applications
 INSTALLED_APPS = [
@@ -121,7 +121,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # CORS is a mechanism to allow interaction with resources hosted on different domains.
 # For instance, one of the most common scenarios to apply it is with Ajax requests.
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+CORS_ALLOW_CREDENTIALS = False
 
 # Headers allowed on requests
 CORS_ALLOW_HEADERS = [
@@ -135,6 +140,9 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
     'user-Token',
+    'cache-control',
+    'pragma',
+    'expires',
 ]
 
 # Used for pagination

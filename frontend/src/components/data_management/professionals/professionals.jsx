@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '../../../utils/api';
+import { apiGet,  API_ENDPOINTS } from '../../../utils/api';
 // Built-ins
 import React from "react";
 

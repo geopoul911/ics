@@ -24,7 +24,6 @@ import NoDataToShowImage from "../../../images/generic/no_results_found.png";
 // Global Variables
 import {
   paginationOptions,
-  headers,
 } from "../../global_vars";
 
 // Variables
@@ -252,7 +251,7 @@ class Cash extends React.Component {
     this.fetchCashTransactions();
   }
 
-  async render() {
+  render() {
     return (
       <>
         <NavigationBar />

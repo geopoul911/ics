@@ -6,7 +6,6 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import "bootstrap-css-only/css/bootstrap.min.css";
 import "./navigation_bar.css";
 
-import axios from "axios";
 import { apiPost, API_ENDPOINTS } from "../../../utils/api";
 
 // Modules / Functions
@@ -24,13 +23,15 @@ import {
   AiOutlineLogin,
   AiOutlineHome,
 } from "react-icons/ai";
-import { RiAdminLine } from "react-icons/ri";
 import { CgProfile } from "react-icons/cg";
 import { FaArrowRight } from "react-icons/fa";
-import { GiConvergenceTarget } from "react-icons/gi";
-
-// Global Variables
-import { headers } from "../../global_vars";
+import { 
+  FaUsers, 
+  FaFileAlt, 
+  FaChartBar,
+  FaCog,
+  FaGlobe
+} from "react-icons/fa";
 
 // Variables
 let iconStyle = {
@@ -38,8 +39,6 @@ let iconStyle = {
   fontSize: "1.5em",
   marginRight: "0.5em",
 };
-
-const LOGOUT = "http://localhost:8000/api/user/logout/";
 
 // Navigation Bar has no url , it is included in all pages
 class NavigationBar extends Component {
@@ -50,6 +49,7 @@ class NavigationBar extends Component {
       adminIsOpen: false,
       meIsOpen: false,
       reportIsOpen: false,
+      regionIsOpen: false,
     };
     this.dataOpen = this.dataOpen.bind(this);
     this.dataClose = this.dataClose.bind(this);
@@ -84,28 +84,28 @@ class NavigationBar extends Component {
     });
   };
 
-    // Open Report Dropdown
+  // Open Report Dropdown
   reportOpen = () => {
     this.setState({
       reportIsOpen: true,
     });
   };
 
-  // Close Data Management Dropdown
+  // Close Report Dropdown
   reportClose = () => {
     this.setState({
       reportIsOpen: false,
     });
   };
 
-  // Open Site Administration Dropdown
+  // Open Administration Dropdown
   adminOpen = () => {
     this.setState({
       adminIsOpen: true,
     });
   };
 
-  // Close Site Administration Dropdown
+  // Close Administration Dropdown
   adminClose = () => {
     this.setState({
       adminIsOpen: false,
@@ -126,7 +126,7 @@ class NavigationBar extends Component {
     });
   };
 
-    // Open Region Dropdown
+  // Open Region Dropdown
   regionOpen = () => {
     this.setState({
       regionIsOpen: true,
@@ -137,13 +137,6 @@ class NavigationBar extends Component {
   regionClose = () => {
     this.setState({
       regionIsOpen: false,
-    });
-  };
-
-  // Close Me Dropdown
-  meClose = () => {
-    this.setState({
-      meIsOpen: false,
     });
   };
 
@@ -164,108 +157,190 @@ class NavigationBar extends Component {
                 <AiOutlineHome style={iconStyle} /> Home
               </Nav.Link>
 
+              {/* Dashboard */}
+              <Nav.Link href="/dashboard">
+                <FaChartBar style={iconStyle} /> Dashboard
+              </Nav.Link>
+
               {/* Data Management */}
               <Nav.Link href="/data_management/root/" onMouseLeave={this.dataClose} onMouseOver={this.dataOpen}>
-                <RiAdminLine style={iconStyle} />
+                <FaUsers style={iconStyle} />
                 Data Management
                 <Dropdown onMouseLeave={this.dataClose} onMouseOver={this.dataOpen}>
-                  <Dropdown.Menu show={this.state.dataIsOpen} id="nav_admin_dropdown">
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Associated Clients</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Bank Client Accounts</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Bank Project Accounts</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Banks</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Cash</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Cities</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Client Contacts</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Clients</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Consultants</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Countries</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Documents</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Insurance Carriers</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Professionals</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Professions</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Project Categories</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Project Tasks</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Projects</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Properties</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Provinces</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Task Categories</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Task Comments</Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs"><FaArrowRight style={iconStyle}/>Taxation Projects</Dropdown.Item>
+                  <Dropdown.Menu show={this.state.dataIsOpen} id="nav_data_dropdown">
+                    {/* Clients & Contacts */}
+                    <Dropdown.Header>Clients & Contacts</Dropdown.Header>
+                    <Dropdown.Item href="/data_management/clients">
+                      <FaArrowRight style={iconStyle}/> Clients
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/data_management/client_contacts">
+                      <FaArrowRight style={iconStyle}/> Client Contacts
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/data_management/bank_client_accounts">
+                      <FaArrowRight style={iconStyle}/> Bank Client Accounts
+                    </Dropdown.Item>
+                    
+                    {/* Projects & Tasks */}
+                    <Dropdown.Divider />
+                    <Dropdown.Header>Projects & Tasks</Dropdown.Header>
+                    <Dropdown.Item href="/data_management/projects">
+                      <FaArrowRight style={iconStyle}/> Projects
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/data_management/associated_clients">
+                      <FaArrowRight style={iconStyle}/> Associated Clients
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/data_management/project_tasks">
+                      <FaArrowRight style={iconStyle}/> Project Tasks
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/data_management/task_comments">
+                      <FaArrowRight style={iconStyle}/> Task Comments
+                    </Dropdown.Item>
+                    
+                    {/* Documents */}
+                    <Dropdown.Divider />
+                    <Dropdown.Header>Documents</Dropdown.Header>
+                    <Dropdown.Item href="/data_management/documents">
+                      <FaArrowRight style={iconStyle}/> Documents
+                    </Dropdown.Item>
+                    
+                    {/* Properties */}
+                    <Dropdown.Divider />
+                    <Dropdown.Header>Properties</Dropdown.Header>
+                    <Dropdown.Item href="/data_management/properties">
+                      <FaArrowRight style={iconStyle}/> Properties
+                    </Dropdown.Item>
+                    
+                    {/* Financial */}
+                    <Dropdown.Divider />
+                    <Dropdown.Header>Financial</Dropdown.Header>
+                    <Dropdown.Item href="/data_management/cash">
+                      <FaArrowRight style={iconStyle}/> Cash
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/data_management/bank_project_accounts">
+                      <FaArrowRight style={iconStyle}/> Bank Project Accounts
+                    </Dropdown.Item>
+                    
+                    {/* Directory */}
+                    <Dropdown.Divider />
+                    <Dropdown.Header>Directory</Dropdown.Header>
+                    <Dropdown.Item href="/data_management/professionals">
+                      <FaArrowRight style={iconStyle}/> Professionals
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/data_management/taxation_projects">
+                      <FaArrowRight style={iconStyle}/> Taxation Projects
+                    </Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
               </Nav.Link>
 
-              {/* Site Administration */}
-              <Nav.Link href="/site_administration/root/" onMouseLeave={this.adminClose} onMouseOver={this.adminOpen}>
-                <RiAdminLine style={iconStyle} />
-                Site Administration
-                <Dropdown onMouseLeave={this.adminClose} onMouseOver={this.adminOpen}>
-                  <Dropdown.Menu show={this.state.adminIsOpen} id="nav_admin_dropdown">
-                    <Dropdown.Item href="/site_administration/access_history">
-                      <FaArrowRight style={iconStyle}/> Access History
-                    </Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/logs">
-                      <FaArrowRight style={iconStyle}/> Logs
-                    </Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/all_users">
-                      <FaArrowRight style={iconStyle}/> Users
-                    </Dropdown.Item>
-                    <Dropdown.Item href="/site_administration/all_regions">
-                      <GiConvergenceTarget style={iconStyle}/> Regions
-                    </Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
-              </Nav.Link>
 
               {/* Reports */}
               <Nav.Link href="/reports/root/" onMouseLeave={this.reportClose} onMouseOver={this.reportOpen}>
-                <RiAdminLine style={iconStyle} />
+                <FaFileAlt style={iconStyle} />
                 Reports
                 <Dropdown onMouseLeave={this.reportClose} onMouseOver={this.reportOpen}>
-                  <Dropdown.Menu show={this.state.reportIsOpen} id="nav_admin_dropdown">
-                    <Dropdown.Item href="/reports/access_history">
+                  <Dropdown.Menu show={this.state.reportIsOpen} id="nav_report_dropdown">
+                    <Dropdown.Header> Reports </Dropdown.Header>
+                    <Dropdown.Item href="/reports/clients">
                       <FaArrowRight style={iconStyle}/> Clients
                     </Dropdown.Item>
-                    <Dropdown.Item href="/reports/logs">
-                      <FaArrowRight style={iconStyle}/> Projects  
+                    <Dropdown.Item href="/reports/projects">
+                      <FaArrowRight style={iconStyle}/> Projects
                     </Dropdown.Item>
-                    <Dropdown.Item href="/reports/all_users">
+                    <Dropdown.Item href="/reports/tasks">
                       <FaArrowRight style={iconStyle}/> Tasks
                     </Dropdown.Item>
-                    <Dropdown.Item href="/reports/all_users">
+                    <Dropdown.Item href="/reports/properties">
                       <FaArrowRight style={iconStyle}/> Properties
                     </Dropdown.Item>
-                  <Dropdown.Item href="/reports/all_users">
-                    <FaArrowRight style={iconStyle}/> Documents
-                      </Dropdown.Item>
-                  <Dropdown.Item href="/reports/all_users">
-                    <FaArrowRight style={iconStyle}/> Cash
-                      </Dropdown.Item>
-                  <Dropdown.Item href="/reports/all_users">
-                    <FaArrowRight style={iconStyle}/> Professionals
-                      </Dropdown.Item>
-                  <Dropdown.Item href="/reports/all_users">
-                    <FaArrowRight style={iconStyle}/> Statistics
-                      </Dropdown.Item>
-                    </Dropdown.Menu>
+                    <Dropdown.Item href="/reports/documents">
+                      <FaArrowRight style={iconStyle}/> Documents
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/reports/cash">
+                      <FaArrowRight style={iconStyle}/> Cash
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/reports/professionals">
+                      <FaArrowRight style={iconStyle}/> Professionals
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/reports/statistics">
+                      <FaArrowRight style={iconStyle}/> Statistics
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
                 </Dropdown>
               </Nav.Link>
 
               {/* Regions */}
               <Nav.Link href="/regions/root/" onMouseLeave={this.regionClose} onMouseOver={this.regionOpen}>
-                <GiConvergenceTarget style={iconStyle} />
+                <FaGlobe style={iconStyle} />
                 Regions
                 <Dropdown onMouseLeave={this.regionClose} onMouseOver={this.regionOpen}>
-                  <Dropdown.Menu show={this.state.regionIsOpen} id="nav_admin_dropdown">
-                    <Dropdown.Item href="/regions/all_countries"> <FaArrowRight style={iconStyle}/> Countries </Dropdown.Item>
-                    <Dropdown.Item href="/regions/all_provinces"> <FaArrowRight style={iconStyle}/> Provinces </Dropdown.Item>
-                    <Dropdown.Item href="/regions/all_cities"> <FaArrowRight style={iconStyle}/> Cities </Dropdown.Item>
-                    
-                    </Dropdown.Menu>
+                  <Dropdown.Menu show={this.state.regionIsOpen} id="nav_data_dropdown">
+                    <Dropdown.Header> Regions </Dropdown.Header>
+                    <Dropdown.Item href="/regions/all_countries">
+                      <FaArrowRight style={iconStyle}/> Countries
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/regions/all_provinces">
+                      <FaArrowRight style={iconStyle}/> Provinces
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/regions/all_cities">
+                      <FaArrowRight style={iconStyle}/> Cities
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
                 </Dropdown>
               </Nav.Link>
 
+              {/* Administration */}
+              <Nav.Link href="/administration/root/" onMouseLeave={this.adminClose} onMouseOver={this.adminOpen}>
+                <FaCog style={iconStyle} />
+                Administration
+                <Dropdown onMouseLeave={this.adminClose} onMouseOver={this.adminOpen}>
+                  <Dropdown.Menu show={this.state.adminIsOpen} id="nav_admin_dropdown">
+                    {/* User Management */}
+                    <Dropdown.Header>User Management</Dropdown.Header>
+                    <Dropdown.Item href="/administration/consultants">
+                      <FaArrowRight style={iconStyle}/> Consultants
+                    </Dropdown.Item>
+                    
+                    {/* Master Data */}
+                    <Dropdown.Divider />
+                    <Dropdown.Header>Master Data</Dropdown.Header>
+                    <Dropdown.Item href="/administration/countries">
+                      <FaArrowRight style={iconStyle}/> Countries
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/administration/provinces">
+                      <FaArrowRight style={iconStyle}/> Provinces
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/administration/cities">
+                      <FaArrowRight style={iconStyle}/> Cities
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/administration/banks">
+                      <FaArrowRight style={iconStyle}/> Banks
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/administration/insurance_carriers">
+                      <FaArrowRight style={iconStyle}/> Insurance Carriers
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/administration/professions">
+                      <FaArrowRight style={iconStyle}/> Professions
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/administration/project_categories">
+                      <FaArrowRight style={iconStyle}/> Project Categories
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/administration/task_categories">
+                      <FaArrowRight style={iconStyle}/> Task Categories
+                    </Dropdown.Item>
+                    
+                    {/* System */}
+                    <Dropdown.Divider />
+                    <Dropdown.Header>System</Dropdown.Header>
+                    <Dropdown.Item href="/administration/logs">
+                      <FaArrowRight style={iconStyle}/> Logs
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/administration/access_history">
+                      <FaArrowRight style={iconStyle}/> Access History
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </Nav.Link>
             </Nav>
 
             {!isLoggedIn ? (
@@ -276,11 +351,11 @@ class NavigationBar extends Component {
             ) : (
               /* Else get profile's dropdown  with "Me, Help, Useful links" */
               <>
-                <Nav.Link href={"/site_administration/user/" + localStorage.getItem("user_id")} onMouseLeave={this.meClose} onMouseOver={this.meOpen}>
+                <Nav.Link href={"/administration/user/" + localStorage.getItem("user_id")} onMouseLeave={this.meClose} onMouseOver={this.meOpen}>
                   <CgProfile style={iconStyle} /> {localStorage.getItem("user")}
                   <Dropdown onMouseLeave={this.meClose} onMouseOver={this.meOpen}>
-                    <Dropdown.Menu  show={this.state.meIsOpen}  id="nav_me_dropdown">
-                      <Dropdown.Item href={"/site_administration/user/" + localStorage.getItem("user_id")}>
+                    <Dropdown.Menu show={this.state.meIsOpen} id="nav_me_dropdown">
+                      <Dropdown.Item href={"/administration/user/" + localStorage.getItem("user_id")}>
                         <CgProfile /> My profile
                       </Dropdown.Item>
                       <Dropdown.Item href="/help">

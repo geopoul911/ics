@@ -4,8 +4,7 @@ import { useState } from "react";
 // Icons
 import { FiEdit } from "react-icons/fi";
 import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
-import axios from "axios";
-import { apiGet, apiPut, apiPost, apiDelete, API_ENDPOINTS } from "../../utils/api";
+import { apiPut, } from "../../utils/api";
 
 // Libs
 
@@ -14,7 +13,6 @@ import { Modal, Form } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
 
 // Globals
-import { headers } from "../global_vars";
 
 // API base
 const COUNTRY_DETAIL = "http://localhost:8000/api/regions/country/";
@@ -31,7 +29,7 @@ const toSmallInt = (value) => {
 
 const patchCountry = async (id, payload) => {
   const url = `${COUNTRY_DETAIL}${encodeURIComponent(id)}`;
-  return apiPut(url, data);
+  return apiPut(url, payload);
 };
 
 /* ===========================

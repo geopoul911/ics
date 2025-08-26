@@ -13,10 +13,7 @@ const getCSRFToken = () => {
 
 export const apiRequest = async (method, endpoint, data = null, isBlob = false) => {
   const headers = {
-    'Content-Type': 'application/json',
-    'Cache-Control': 'no-cache, no-store, must-revalidate',
-    'Pragma': 'no-cache',
-    'Expires': '0'
+    'Content-Type': 'application/json'
   };
 
   // Add authentication headers
@@ -39,7 +36,6 @@ export const apiRequest = async (method, endpoint, data = null, isBlob = false) 
   const options = {
     method,
     headers,
-    credentials: 'include',
     cache: 'no-store'
   };
 

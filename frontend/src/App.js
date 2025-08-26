@@ -76,13 +76,13 @@ function App() {
         <ProtectedRoute
           isLoggedIn={!!userToken}
           exact={true}
-          path="/"
+          path="/dashboard"
           render={(props) => <Dashboard {...props} setUserToken={setUserToken} />}
         />
         <ProtectedRoute
           isLoggedIn={!!userToken}
           exact={true}
-          path="/home"
+          path="/"
           render={(props) => <Home {...props} setUserToken={setUserToken} />}
         />
         <Route

@@ -1951,7 +1951,43 @@ export function pageHeader(value, objName) {
         <hr />
       </>
     );
-  }  else if (value === "all_cities") {
+  } else if (value === "clients") {
+    return (
+      <>
+        <div className="page_header">
+          <h2>
+            <FaArrowRight style={iconStyle} /> All Clients
+          </h2>
+          <Breadcrumb>
+            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href="/data_management/root">
+              Data Management
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>All Clients</Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
+        <hr />
+      </>
+    );
+  } else if (value === "client_overview") {
+    return (
+      <>
+        <div className="page_header">
+          <h2>
+            <FaArrowRight style={iconStyle} /> Client Overview
+          </h2>
+          <Breadcrumb>
+            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href="/data_management/root">
+              Data Management
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
+        <hr />
+      </>
+    );
+  } else if (value === "all_cities") {
     return (
       <>
         <div className="page_header">
@@ -1969,25 +2005,7 @@ export function pageHeader(value, objName) {
         <hr />
       </>
     );
-  }  else if (value === "city_overview") {
-    return (
-      <>
-        <div className="page_header">
-          <h2>
-            <FaArrowRight style={iconStyle} /> City Overview
-          </h2>
-          <Breadcrumb>
-            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-            <Breadcrumb.Item href="/regions/root">
-              Regions
-            </Breadcrumb.Item>
-            <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
-          </Breadcrumb>
-        </div>
-        <hr />
-      </>
-    );
-  }   else if (value === "city_overview") {
+  } else if (value === "city_overview") {
     return (
       <>
         <div className="page_header">
@@ -2347,24 +2365,6 @@ export function pageHeader(value, objName) {
               Data Management
             </Breadcrumb.Item>
             <Breadcrumb.Item active>Gallery of {objName}</Breadcrumb.Item>
-          </Breadcrumb>
-        </div>
-        <hr />
-      </>
-    );
-  } else if (value === "client_overview") {
-    return (
-      <>
-        <div className="page_header">
-          <h2>
-            <FaSuitcaseRolling style={iconStyle} /> Client Overview
-          </h2>
-          <Breadcrumb>
-            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-            <Breadcrumb.Item href="/data_management/root">
-              Data Management
-            </Breadcrumb.Item>
-            <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
           </Breadcrumb>
         </div>
         <hr />
