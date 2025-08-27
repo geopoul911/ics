@@ -19,6 +19,10 @@ const DELETE_ENDPOINTS = {
   'City': 'http://localhost:8000/api/regions/city/',
   'User': 'http://localhost:8000/api/site_admin/del_usr/',
   'Consultant': 'http://localhost:8000/api/administration/consultant/',
+  'Bank': 'http://localhost:8000/api/administration/bank/',
+  'InsuranceCarrier': 'http://localhost:8000/api/administration/insurance_carrier/',
+  'Profession': 'http://localhost:8000/api/administration/profession/',
+  'ProjectCategory': 'http://localhost:8000/api/administration/project_category/',
   // Add more object types as needed
 };
 
@@ -29,6 +33,10 @@ const REDIRECT_URLS = {
   'City': '/regions/all_cities',
   'User': '/site_administration/all_users',
   'Consultant': '/administration/all_consultants',
+  'Bank': '/administration/all_banks',
+  'InsuranceCarrier': '/administration/all_insurance_carriers',
+  'Profession': '/administration/all_professions',
+  'ProjectCategory': '/administration/all_project_categories',
   // Add more redirect URLs as needed
 };
 

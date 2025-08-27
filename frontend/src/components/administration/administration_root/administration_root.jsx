@@ -75,13 +75,13 @@ class AdministrationRoot extends React.Component {
                 <Menu.Item as={Link} to="/administration/insurance_carriers">
                   <FaArrowRight style={iconStyle} /> Insurance Carriers
                 </Menu.Item>
-                <Menu.Item as={Link} to="/administration/professions">
+                <Menu.Item as={Link} to="/administration/all_professions">
                   <FaArrowRight style={iconStyle} /> Professions
                 </Menu.Item>
-                <Menu.Item as={Link} to="/administration/project_categories">
+                <Menu.Item as={Link} to="/administration/all_project_categories">
                   <FaArrowRight style={iconStyle} /> Project Categories
                 </Menu.Item>
-                <Menu.Item as={Link} to="/administration/task_categories">
+                <Menu.Item as={Link} to="/administration/all_task_categories">
                   <FaArrowRight style={iconStyle} /> Task Categories
                 </Menu.Item>
               </Menu>

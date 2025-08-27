@@ -51,6 +51,10 @@ import AllBanks from "./components/administration/all_banks/all_banks";
 import Bank from "./components/administration/bank/bank_overview/bank_overview";
 import AllInsuranceCarriersComponent from "./components/administration/all_insurance_carriers/all_insurance_carriers";
 import InsuranceCarrier from "./components/administration/insurance_carrier/insurance_carrier_overview/insurance_carrier_overview";
+import AllProfessionsComponent from "./components/administration/all_professions/all_professions";
+import Profession from "./components/administration/profession/profession_overview/profession_overview";
+import AllProjectCategoriesComponent from "./components/administration/all_project_categories/all_project_categories";
+import ProjectCategory from "./components/administration/project_category/project_category_overview/project_category_overview";
 
 import ProtectedRoute from "./components/core/router/protected_route";
 
@@ -160,6 +164,38 @@ function App() {
           path="/administration/insurance_carrier/:id"
           render={(props) => (
             <InsuranceCarrier {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/administration/all_professions"
+          render={(props) => (
+            <AllProfessionsComponent {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/administration/profession/:id"
+          render={(props) => (
+            <Profession {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/administration/all_project_categories"
+          render={(props) => (
+            <AllProjectCategoriesComponent {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/administration/project_category/:id"
+          render={(props) => (
+            <ProjectCategory {...props} setUserToken={setUserToken} />
           )}
         />
         <ProtectedRoute

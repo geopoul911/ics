@@ -571,6 +571,63 @@ class ProjectCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectCategory
         fields = '__all__'
+        extra_kwargs = {
+            'active': {'required': False}  # Default to True
+        }
+
+    def validate_projcate_id(self, value):
+        """Validate projcate_id uniqueness"""
+        # Get the current instance (for updates) or None (for creates)
+        instance = getattr(self, 'instance', None)
+        
+        # Check if this projcate_id is already taken by another project category
+        try:
+            existing_category = ProjectCategory.objects.get(projcate_id=value)
+            # If this is an update and the existing category is the same as the current instance, it's OK
+            if instance and existing_category.projcate_id == instance.projcate_id:
+                return value
+            raise serializers.ValidationError("This project category ID is already in use.")
+        except ProjectCategory.DoesNotExist:
+            return value
+
+    def validate_orderindex(self, value):
+        """Validate orderindex uniqueness"""
+        # Get the current instance (for updates) or None (for creates)
+        instance = getattr(self, 'instance', None)
+        
+        # Check if this orderindex is already taken by another project category
+        try:
+            existing_category = ProjectCategory.objects.get(orderindex=value)
+            # If this is an update and the existing category is the same as the current instance, it's OK
+            if instance and existing_category.projcate_id == instance.projcate_id:
+                return value
+            raise serializers.ValidationError("This order index is already in use.")
+        except ProjectCategory.DoesNotExist:
+            return value
+
+    def validate_title(self, value):
+        """Validate title format"""
+        if not value or len(value.strip()) < 2:
+            raise serializers.ValidationError("Title must be at least 2 characters long.")
+        if len(value.strip()) > 40:
+            raise serializers.ValidationError("Title must be at most 40 characters long.")
+        return value.strip()
+
+    def create(self, validated_data):
+        """Create a new project category with validation"""
+        # Set default values
+        if 'active' not in validated_data:
+            validated_data['active'] = True
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        """Update project category with validation"""
+        # Prevent primary key updates - projcate_id is immutable
+        if 'projcate_id' in validated_data and validated_data['projcate_id'] != instance.projcate_id:
+            raise serializers.ValidationError(
+                "Project Category ID cannot be changed once created"
+            )
+        return super().update(instance, validated_data)
 
 class ProjectSerializer(serializers.ModelSerializer):
     consultant = ConsultantSerializer(read_only=True)
@@ -602,6 +659,42 @@ class ProfessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profession
         fields = '__all__'
+
+    def validate_profession_id(self, value):
+        """Validate profession_id uniqueness"""
+        # Get the current instance (for updates) or None (for creates)
+        instance = getattr(self, 'instance', None)
+        
+        # Check if this profession_id is already taken by another profession
+        try:
+            existing_profession = Profession.objects.get(profession_id=value)
+            # If this is an update and the existing profession is the same as the current instance, it's OK
+            if instance and existing_profession.profession_id == instance.profession_id:
+                return value
+            raise serializers.ValidationError("This profession ID is already in use.")
+        except Profession.DoesNotExist:
+            return value
+
+    def validate_title(self, value):
+        """Validate title format"""
+        if not value or len(value.strip()) < 2:
+            raise serializers.ValidationError("Title must be at least 2 characters long.")
+        if len(value.strip()) > 40:
+            raise serializers.ValidationError("Title must be at most 40 characters long.")
+        return value.strip()
+
+    def create(self, validated_data):
+        """Create a new profession with validation"""
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        """Update profession with validation"""
+        # Prevent primary key updates - profession_id is immutable
+        if 'profession_id' in validated_data and validated_data['profession_id'] != instance.profession_id:
+            raise serializers.ValidationError(
+                "Profession ID cannot be changed once created"
+            )
+        return super().update(instance, validated_data)
 
 class ProfessionalSerializer(serializers.ModelSerializer):
     profession = ProfessionSerializer(read_only=True)

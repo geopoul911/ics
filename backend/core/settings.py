@@ -1,5 +1,9 @@
 from pathlib import Path
 import os
+import warnings
+
+# Suppress pkg_resources deprecation warning from coreapi
+warnings.filterwarnings("ignore", message="pkg_resources is deprecated", category=UserWarning)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/

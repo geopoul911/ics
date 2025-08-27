@@ -2,6 +2,8 @@ from webapp.models import (
     User,
     Bank,
     InsuranceCarrier,
+    Profession,
+    ProjectCategory,
 )
 from accounts.models import Consultant
 from rest_framework.authtoken.models import Token
@@ -246,5 +248,87 @@ class DeleteInsuranceCarrier(APIView):
             logger.error(f"Error deleting insurance carrier {insucarrier_id}: {str(e)}")
             return Response(
                 {"error": f"Failed to delete insurance carrier: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class DeleteProfession(APIView):
+    """
+    URL: delete_profession/
+    Descr: Delete a profession
+    """
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            profession_id = request.data.get('profession_id')
+            if not profession_id:
+                return Response(
+                    {"error": "Profession ID is required."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            profession = Profession.objects.get(profession_id=profession_id)
+            profession.delete()
+            
+            return Response(
+                {"message": "Profession deleted successfully"},
+                status=status.HTTP_200_OK
+            )
+        except Profession.DoesNotExist:
+            return Response(
+                {"error": "Profession not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ProtectedError:
+            return Response(
+                {"error": "Cannot delete profession as it is referenced by other records"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to delete profession: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class DeleteProjectCategory(APIView):
+    """
+    URL: delete_project_category/
+    Descr: Delete a project category
+    """
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            projcate_id = request.data.get('projcate_id')
+            if not projcate_id:
+                return Response(
+                    {"error": "Project Category ID is required."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            project_category = ProjectCategory.objects.get(projcate_id=projcate_id)
+            project_category.delete()
+            
+            return Response(
+                {"message": "Project Category deleted successfully"},
+                status=status.HTTP_200_OK
+            )
+        except ProjectCategory.DoesNotExist:
+            return Response(
+                {"error": "Project Category not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ProtectedError:
+            return Response(
+                {"error": "Cannot delete project category as it is referenced by other records"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to delete project category: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

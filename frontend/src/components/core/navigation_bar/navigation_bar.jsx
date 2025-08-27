@@ -310,13 +310,13 @@ class NavigationBar extends Component {
                     <Dropdown.Item href="/administration/all_insurance_carriers">
                       <FaArrowRight style={iconStyle}/> Insurance Carriers
                     </Dropdown.Item>
-                    <Dropdown.Item href="/administration/professions">
+                    <Dropdown.Item href="/administration/all_professions">
                       <FaArrowRight style={iconStyle}/> Professions
                     </Dropdown.Item>
-                    <Dropdown.Item href="/administration/project_categories">
+                    <Dropdown.Item href="/administration/all_project_categories">
                       <FaArrowRight style={iconStyle}/> Project Categories
                     </Dropdown.Item>
-                    <Dropdown.Item href="/administration/task_categories">
+                    <Dropdown.Item href="/administration/all_task_categories">
                       <FaArrowRight style={iconStyle}/> Task Categories
                     </Dropdown.Item>
                     

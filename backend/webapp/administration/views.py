@@ -2,12 +2,16 @@ from webapp.models import (
     User,
     Bank,
     InsuranceCarrier,
+    Profession,
+    ProjectCategory,
 )
 from accounts.models import Consultant
 from webapp.serializers import (
     ConsultantSerializer,
     BankSerializer,
     InsuranceCarrierSerializer,
+    ProfessionSerializer,
+    ProjectCategorySerializer,
 )
 
 import datetime
@@ -515,8 +519,298 @@ class InsuranceCarrierView(RetrieveUpdateDestroyAPIView):
                 return Response(status=status.HTTP_204_NO_CONTENT)
                 
         except Exception as e:
+                            return Response(
+                    {"error": f"Failed to delete insurance carrier: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
+
+class AllProfessions(generics.ListCreateAPIView):
+    """
+    API endpoint for listing all professions and creating new professions.
+    """
+    serializer_class = ProfessionSerializer
+    queryset = Profession.objects.all().order_by('title')
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, *args, **kwargs):
+        """Get all professions"""
+        try:
+            queryset = self.get_queryset()
+            data = self.get_serializer(queryset, many=True, context={"request": request}).data
+            return Response({"all_professions": data})
+        except Exception as e:
             return Response(
-                {"error": f"Failed to delete insurance carrier: {str(e)}"},
+                {"error": f"Failed to fetch professions: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def post(self, request, *args, **kwargs):
+        """Create a new profession"""
+        serializer = self.get_serializer(data=request.data, context={"request": request})
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    profession = serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except ValidationError as e:
+                return Response(
+                    {"error": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to create profession: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProfessionView(RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint for retrieving, updating, and deleting a specific profession.
+    """
+    serializer_class = ProfessionSerializer
+    queryset = Profession.objects.all()
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'profession_id'
+
+    def get(self, request, *args, **kwargs):
+        """Get a specific profession"""
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, context={"request": request})
+            return Response(serializer.data)
+        except Profession.DoesNotExist:
+            return Response(
+                {"error": "Profession not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to fetch profession: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def put(self, request, *args, **kwargs):
+        """Update a profession"""
+        try:
+            instance = self.get_object()
+            
+            # Prevent profession_id updates - profession_id is immutable
+            if 'profession_id' in request.data and request.data['profession_id'] != instance.profession_id:
+                return Response(
+                    {"error": "Profession ID cannot be changed once created"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            serializer = self.get_serializer(instance, data=request.data, partial=True, context={"request": request})
+            if serializer.is_valid():
+                with transaction.atomic():
+                    profession = serializer.save()
+                    return Response(serializer.data)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Profession.DoesNotExist:
+            return Response(
+                {"error": "Profession not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ValidationError as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to update profession: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def delete(self, request, *args, **kwargs):
+        """Delete a profession"""
+        try:
+            instance = self.get_object()
+            with transaction.atomic():
+                instance.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+        except Profession.DoesNotExist:
+            return Response(
+                {"error": "Profession not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ProtectedError:
+            return Response(
+                {"error": "Cannot delete profession as it is referenced by other records"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to delete profession: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+"""
+    # Project Categories
+
+    - AllProjectCategories
+    - ProjectCategoryView
+"""
+
+
+class AllProjectCategories(generics.ListCreateAPIView):
+    """
+    URL: all_project_categories/
+    Descr: Returns array of all project categories and allows creation
+    """
+    serializer_class = ProjectCategorySerializer
+    queryset = ProjectCategory.objects.all().order_by("orderindex", "title")
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        data = self.get_serializer(queryset, many=True, context={"request": request}).data
+        return Response({"all_project_categories": data})
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, context={"request": request})
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    project_category = serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except IntegrityError as e:
+                error_str = str(e).lower()
+                
+                # Check if this is a unique constraint violation on orderindex
+                if 'orderindex' in error_str and 'unique' in error_str:
+                    try:
+                        new_orderindex = request.data.get('orderindex')
+                        conflicting_category = ProjectCategory.objects.get(orderindex=new_orderindex)
+                        return Response(
+                            {"error": f"Order index {new_orderindex} is already taken by Project Category: {conflicting_category.title} (ID: {conflicting_category.projcate_id})"},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    except ProjectCategory.DoesNotExist:
+                        pass
+                
+                # Check if this is a unique constraint violation on projcate_id
+                if 'projcate_id' in error_str and 'unique' in error_str:
+                    try:
+                        new_projcate_id = request.data.get('projcate_id')
+                        conflicting_category = ProjectCategory.objects.get(projcate_id=new_projcate_id)
+                        return Response(
+                            {"error": f"Project Category ID '{new_projcate_id}' is already taken by Project Category: {conflicting_category.title}"},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    except ProjectCategory.DoesNotExist:
+                        pass
+                
+                return Response(
+                    {"error": "A project category with this ID or order index already exists"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except ValidationError as e:
+                return Response(
+                    {"error": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to create project category: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProjectCategoryView(RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint for retrieving, updating, and deleting a specific project category.
+    """
+    serializer_class = ProjectCategorySerializer
+    queryset = ProjectCategory.objects.all()
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'projcate_id'
+
+    def get(self, request, *args, **kwargs):
+        """Get a specific project category"""
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, context={"request": request})
+            return Response(serializer.data)
+        except ProjectCategory.DoesNotExist:
+            return Response(
+                {"error": "Project category not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to fetch project category: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def put(self, request, *args, **kwargs):
+        """Update a project category"""
+        try:
+            instance = self.get_object()
+            
+            # Prevent projcate_id updates - projcate_id is immutable
+            if 'projcate_id' in request.data and request.data['projcate_id'] != instance.projcate_id:
+                return Response(
+                    {"error": "Project Category ID cannot be changed once created"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            serializer = self.get_serializer(instance, data=request.data, partial=True, context={"request": request})
+            if serializer.is_valid():
+                with transaction.atomic():
+                    project_category = serializer.save()
+                    return Response(serializer.data)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except ProjectCategory.DoesNotExist:
+            return Response(
+                {"error": "Project category not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ValidationError as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to update project category: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def delete(self, request, *args, **kwargs):
+        """Delete a project category"""
+        try:
+            instance = self.get_object()
+            with transaction.atomic():
+                instance.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+        except ProjectCategory.DoesNotExist:
+            return Response(
+                {"error": "Project category not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ProtectedError:
+            return Response(
+                {"error": "Cannot delete project category as it is referenced by other records"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to delete project category: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 

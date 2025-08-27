@@ -20,4 +20,14 @@ urlpatterns = [
     path("insurance_carrier/<str:insucarrier_id>/", views.InsuranceCarrierView.as_view(), name="insurance-carrier-detail"),
     path('delete_insurance_carrier/', administration_xhr.DeleteInsuranceCarrier.as_view()),
 
+    # Professions
+    path('all_professions/', views.AllProfessions.as_view()),
+    path("profession/<str:profession_id>/", views.ProfessionView.as_view(), name="profession-detail"),
+    path('delete_profession/', administration_xhr.DeleteProfession.as_view()),
+
+    # Project Categories
+    path('all_project_categories/', views.AllProjectCategories.as_view()),
+    path("project_category/<str:projcate_id>/", views.ProjectCategoryView.as_view(), name="project-category-detail"),
+    path('delete_project_category/', administration_xhr.DeleteProjectCategory.as_view()),
+
 ]
