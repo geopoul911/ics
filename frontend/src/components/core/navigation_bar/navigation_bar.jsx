@@ -170,7 +170,7 @@ class NavigationBar extends Component {
                   <Dropdown.Menu show={this.state.dataIsOpen} id="nav_data_dropdown">
                     {/* Clients & Contacts */}
                     <Dropdown.Header>Clients & Contacts</Dropdown.Header>
-                    <Dropdown.Item href="/data_management/clients">
+                    <Dropdown.Item href="/data_management/all_clients">
                       <FaArrowRight style={iconStyle}/> Clients
                     </Dropdown.Item>
                     <Dropdown.Item href="/data_management/client_contacts">
@@ -199,7 +199,7 @@ class NavigationBar extends Component {
                     {/* Documents */}
                     <Dropdown.Divider />
                     <Dropdown.Header>Documents</Dropdown.Header>
-                    <Dropdown.Item href="/data_management/documents">
+                    <Dropdown.Item href="/data_management/all_documents">
                       <FaArrowRight style={iconStyle}/> Documents
                     </Dropdown.Item>
                     

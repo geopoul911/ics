@@ -283,6 +283,13 @@ class AllCities(generics.ListCreateAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        queryset = City.objects.all().order_by("orderindex")
+        province_id = self.request.query_params.get('province', None)
+        if province_id:
+            queryset = queryset.filter(province__province_id=province_id)
+        return queryset
+
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         data = self.get_serializer(queryset, many=True, context={"request": request}).data
@@ -459,6 +466,13 @@ class AllProvinces(generics.ListCreateAPIView):
     queryset = Province.objects.all().order_by("orderindex")
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = Province.objects.all().order_by("orderindex")
+        country_id = self.request.query_params.get('country', None)
+        if country_id:
+            queryset = queryset.filter(country__country_id=country_id)
+        return queryset
 
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()

@@ -15,7 +15,7 @@ import {
 } from "react-icons/md";
 import {
   FaDatabase,
-  FaSuitcaseRolling,
+  FaBriefcase,
   FaInfo,
   FaUser,
   FaArrowRight ,
@@ -197,7 +197,7 @@ export function pageHeader(value, objName) {
       <>
         <div className="page_header">
           <h2>
-            <FaSuitcaseRolling style={iconStyle} /> All Clients
+            <FaBriefcase style={iconStyle} /> All Clients
           </h2>
           <Breadcrumb>
             <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
@@ -594,7 +594,61 @@ export function pageHeader(value, objName) {
         <hr />
       </>
     );
-  } 
+  } else if (value === "documents") {
+    return (
+      <>
+        <div className="page_header">
+          <h2>
+            <FaArrowRight style={iconStyle} /> All Documents
+          </h2>
+          <Breadcrumb>
+            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href="/data_management/root">
+              Data Management
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>All Documents</Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
+        <hr />
+      </>
+    );
+           } else if (value === "documents") {
+           return (
+             <>
+               <div className="page_header">
+                 <h2>
+                   <FaArrowRight style={iconStyle} /> All Documents
+                 </h2>
+                 <Breadcrumb>
+                   <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                   <Breadcrumb.Item href="/data_management/root">
+                     Data Management
+                   </Breadcrumb.Item>
+                   <Breadcrumb.Item active>All Documents</Breadcrumb.Item>
+                 </Breadcrumb>
+               </div>
+               <hr />
+             </>
+           );
+         } else if (value === "document_overview") {
+           return (
+             <>
+               <div className="page_header">
+                 <h2>
+                   <FaArrowRight style={iconStyle} /> Document Overview
+                 </h2>
+                 <Breadcrumb>
+                   <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                   <Breadcrumb.Item href="/data_management/root">
+                     Data Management
+                   </Breadcrumb.Item>
+                   <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
+                 </Breadcrumb>
+               </div>
+               <hr />
+             </>
+           );
+         } 
   return <></>;
 }
 

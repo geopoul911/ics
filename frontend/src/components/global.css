@@ -161,6 +161,19 @@ ul {
   margin-bottom: 5px;
 }
 
+.info_span_id {
+  padding: 6px 6px 6px 12px;
+  border-radius: 5px;
+  margin: 0 auto;
+  background-color: transparent;
+  border: none;
+  display: inline-block;
+  line-height: 20px !important;
+  width: 65%;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
 label {
   vertical-align: middle;
 }

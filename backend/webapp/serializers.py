@@ -433,9 +433,172 @@ class ClientSerializer(serializers.ModelSerializer):
     insucarrier1 = InsuranceCarrierSerializer(read_only=True)
     insucarrier2 = InsuranceCarrierSerializer(read_only=True)
     
+    # Write-only fields for foreign keys
+    country_id = serializers.CharField(write_only=True, required=False)
+    province_id = serializers.CharField(write_only=True, required=False)
+    city_id = serializers.CharField(write_only=True, required=False)
+    passportcountry_id = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
+    pensioncountry1_id = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
+    pensioncountry2_id = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
+    insucarrier1_id = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
+    insucarrier2_id = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
+    
     class Meta:
         model = Client
         fields = '__all__'
+        extra_kwargs = {
+            'active': {'required': False},  # Default to True
+        }
+
+    def validate_client_id(self, value):
+        """Validate client_id uniqueness"""
+        instance = getattr(self, 'instance', None)
+        try:
+            existing_client = Client.objects.get(client_id=value)
+            if instance and existing_client.client_id == instance.client_id:
+                return value
+            raise serializers.ValidationError(
+                f"Client ID '{value}' is already taken by Client: {existing_client.surname} {existing_client.name}"
+            )
+        except Client.DoesNotExist:
+            return value
+
+    def validate_email(self, value):
+        """Validate email format and uniqueness"""
+        if value:
+            # Check email format
+            import re
+            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            if not re.match(email_pattern, value):
+                raise serializers.ValidationError("Invalid email format.")
+            
+            # Check uniqueness
+            instance = getattr(self, 'instance', None)
+            try:
+                existing_client = Client.objects.get(email=value)
+                if instance and existing_client.client_id == instance.client_id:
+                    return value
+                raise serializers.ValidationError(
+                    f"Email '{value}' is already taken by Client: {existing_client.surname} {existing_client.name}"
+                )
+            except Client.DoesNotExist:
+                return value
+        return value
+
+    def validate_afm(self, value):
+        """Validate AFM format"""
+        if value:
+            if not value.isdigit() or len(value) != 9:
+                raise serializers.ValidationError("AFM must be exactly 9 digits.")
+        return value
+
+    def validate_sin(self, value):
+        """Validate SIN format"""
+        if value:
+            if not value.isdigit() or len(value) != 9:
+                raise serializers.ValidationError("SIN must be exactly 9 digits.")
+        return value
+
+    def validate_amka(self, value):
+        """Validate AMKA format"""
+        if value:
+            if not value.isdigit() or len(value) != 11:
+                raise serializers.ValidationError("AMKA must be exactly 11 digits.")
+        return value
+
+    def create(self, validated_data):
+        """Create a new client instance"""
+        # Handle foreign key conversions
+        self._handle_foreign_keys(validated_data)
+        
+        # Set default values
+        if 'active' not in validated_data:
+            validated_data['active'] = True
+        
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        """Update an existing client instance"""
+        # Handle foreign key conversions
+        self._handle_foreign_keys(validated_data)
+        
+        # Prevent primary key updates - client_id is immutable
+        if 'client_id' in validated_data and validated_data['client_id'] != instance.client_id:
+            raise serializers.ValidationError(
+                "Client ID cannot be changed once created"
+            )
+        
+        return super().update(instance, validated_data)
+
+    def _handle_foreign_keys(self, validated_data):
+        """Handle foreign key field conversions"""
+        from webapp.models import Country, Province, City, InsuranceCarrier
+        
+        # Handle required foreign keys
+        country_id = validated_data.pop('country_id', None)
+        if country_id:
+            try:
+                country = Country.objects.get(country_id=country_id)
+                validated_data['country'] = country
+            except Country.DoesNotExist:
+                raise serializers.ValidationError(f"Country with ID '{country_id}' does not exist.")
+        
+        province_id = validated_data.pop('province_id', None)
+        if province_id:
+            try:
+                province = Province.objects.get(province_id=province_id)
+                validated_data['province'] = province
+            except Province.DoesNotExist:
+                raise serializers.ValidationError(f"Province with ID '{province_id}' does not exist.")
+        
+        city_id = validated_data.pop('city_id', None)
+        if city_id:
+            try:
+                city = City.objects.get(city_id=city_id)
+                validated_data['city'] = city
+            except City.DoesNotExist:
+                raise serializers.ValidationError(f"City with ID '{city_id}' does not exist.")
+        
+        # Handle optional foreign keys
+        passportcountry_id = validated_data.pop('passportcountry_id', None)
+        if passportcountry_id:
+            try:
+                passportcountry = Country.objects.get(country_id=passportcountry_id)
+                validated_data['passportcountry'] = passportcountry
+            except Country.DoesNotExist:
+                raise serializers.ValidationError(f"Passport Country with ID '{passportcountry_id}' does not exist.")
+        
+        pensioncountry1_id = validated_data.pop('pensioncountry1_id', None)
+        if pensioncountry1_id:
+            try:
+                pensioncountry1 = Country.objects.get(country_id=pensioncountry1_id)
+                validated_data['pensioncountry1'] = pensioncountry1
+            except Country.DoesNotExist:
+                raise serializers.ValidationError(f"Pension Country 1 with ID '{pensioncountry1_id}' does not exist.")
+        
+        pensioncountry2_id = validated_data.pop('pensioncountry2_id', None)
+        if pensioncountry2_id:
+            try:
+                pensioncountry2 = Country.objects.get(country_id=pensioncountry2_id)
+                validated_data['pensioncountry2'] = pensioncountry2
+            except Country.DoesNotExist:
+                raise serializers.ValidationError(f"Pension Country 2 with ID '{pensioncountry2_id}' does not exist.")
+        
+        insucarrier1_id = validated_data.pop('insucarrier1_id', None)
+        if insucarrier1_id:
+            try:
+                insucarrier1 = InsuranceCarrier.objects.get(insucarrier_id=insucarrier1_id)
+                validated_data['insucarrier1'] = insucarrier1
+            except InsuranceCarrier.DoesNotExist:
+                raise serializers.ValidationError(f"Insurance Carrier 1 with ID '{insucarrier1_id}' does not exist.")
+        
+        insucarrier2_id = validated_data.pop('insucarrier2_id', None)
+        if insucarrier2_id:
+            try:
+                insucarrier2 = InsuranceCarrier.objects.get(insucarrier_id=insucarrier2_id)
+                validated_data['insucarrier2'] = insucarrier2
+            except InsuranceCarrier.DoesNotExist:
+                raise serializers.ValidationError(f"Insurance Carrier 2 with ID '{insucarrier2_id}' does not exist.")
 
 class BankClientAccountSerializer(serializers.ModelSerializer):
     client = ClientSerializer(read_only=True)
@@ -649,10 +812,128 @@ class AssociatedClientSerializer(serializers.ModelSerializer):
 class DocumentSerializer(serializers.ModelSerializer):
     project = ProjectSerializer(read_only=True)
     client = ClientSerializer(read_only=True)
+    project_id = serializers.CharField(write_only=True, required=False)
+    client_id = serializers.CharField(write_only=True, required=False)
     
     class Meta:
         model = Document
         fields = '__all__'
+        extra_kwargs = {
+            'original': {'required': False},  # Default to False
+            'trafficable': {'required': False},  # Default to False
+        }
+
+    def validate_document_id(self, value):
+        """Validate document_id uniqueness"""
+        # Get the current instance (for updates) or None (for creates)
+        instance = getattr(self, 'instance', None)
+        
+        # Check if this document_id is already taken by another document
+        try:
+            existing_document = Document.objects.get(document_id=value)
+            # If this is an update and the existing document is the same as the current instance, it's OK
+            if instance and existing_document.document_id == instance.document_id:
+                return value
+            # Otherwise, it's a conflict
+            raise serializers.ValidationError(
+                f"Document ID '{value}' is already taken by Document: {existing_document.title}"
+            )
+        except Document.DoesNotExist:
+            # No conflict, value is OK
+            return value
+
+    def validate_title(self, value):
+        """Validate title format"""
+        if not value or len(value.strip()) < 2:
+            raise serializers.ValidationError("Title must be at least 2 characters long.")
+        if len(value.strip()) > 40:
+            raise serializers.ValidationError("Title must be at most 40 characters long.")
+        return value.strip()
+
+    def validate_filepath(self, value):
+        """Validate filepath format"""
+        if not value or len(value.strip()) < 1:
+            raise serializers.ValidationError("Filepath is required.")
+        if len(value.strip()) > 120:
+            raise serializers.ValidationError("Filepath must be at most 120 characters long.")
+        return value.strip()
+
+    def validate(self, data):
+        """Validate that at least one of project or client is set"""
+        project_id = data.get('project_id')
+        client_id = data.get('client_id')
+        
+        # For updates, check existing relationships if not provided
+        if not project_id and not client_id:
+            if hasattr(self, 'instance') and self.instance:
+                # This is an update, check existing relationships
+                if not self.instance.project and not self.instance.client:
+                    raise serializers.ValidationError(
+                        "Document must be associated with either a project or a client"
+                    )
+            else:
+                # This is a create, both are required to be provided
+                raise serializers.ValidationError(
+                    "Document must be associated with either a project or a client"
+                )
+        
+        return data
+
+    def create(self, validated_data):
+        """Create a new document instance"""
+        # Handle project_id conversion
+        project_id = validated_data.pop('project_id', None)
+        if project_id:
+            try:
+                project = Project.objects.get(project_id=project_id)
+                validated_data['project'] = project
+            except Project.DoesNotExist:
+                raise serializers.ValidationError(f"Project with ID '{project_id}' does not exist.")
+        
+        # Handle client_id conversion
+        client_id = validated_data.pop('client_id', None)
+        if client_id:
+            try:
+                client = Client.objects.get(client_id=client_id)
+                validated_data['client'] = client
+            except Client.DoesNotExist:
+                raise serializers.ValidationError(f"Client with ID '{client_id}' does not exist.")
+        
+        # Set default values
+        if 'original' not in validated_data:
+            validated_data['original'] = False
+        if 'trafficable' not in validated_data:
+            validated_data['trafficable'] = False
+        
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        """Update an existing document instance"""
+        # Handle project_id conversion
+        project_id = validated_data.pop('project_id', None)
+        if project_id:
+            try:
+                project = Project.objects.get(project_id=project_id)
+                validated_data['project'] = project
+            except Project.DoesNotExist:
+                raise serializers.ValidationError(f"Project with ID '{project_id}' does not exist.")
+        
+        # Handle client_id conversion
+        client_id = validated_data.pop('client_id', None)
+        if client_id:
+            try:
+                client = Client.objects.get(client_id=client_id)
+                validated_data['client'] = client
+            except Client.DoesNotExist:
+                raise serializers.ValidationError(f"Client with ID '{client_id}' does not exist.")
+        
+        # Prevent primary key updates - document_id is immutable
+        if 'document_id' in validated_data and validated_data['document_id'] != instance.document_id:
+            raise serializers.ValidationError(
+                "Document ID cannot be changed once created"
+            )
+        
+        return super().update(instance, validated_data)
 
 # Professional serializers
 class ProfessionSerializer(serializers.ModelSerializer):
@@ -1029,3 +1310,18 @@ class InsuranceCarrierReferenceSerializer(serializers.ModelSerializer):
     class Meta:
         model = InsuranceCarrier
         fields = ['insucarrier_id', 'title', 'active']
+
+class ProjectReferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = ['project_id', 'title', 'status']
+
+class ClientReferenceSerializer(serializers.ModelSerializer):
+    fullname = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Client
+        fields = ['client_id', 'fullname', 'active']
+    
+    def get_fullname(self, obj):
+        return f"{obj.surname} {obj.name}"

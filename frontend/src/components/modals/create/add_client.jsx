@@ -175,69 +175,117 @@ function AddClientModal({ onClientCreated }) {
 
   const loadDropdownData = async () => {
     try {
-                   // Load reference data for dropdowns using apiGet utility
-             const [countriesRes, insuranceCarriersRes] = await Promise.all([
-               apiGet(API_ENDPOINTS.COUNTRIES),
-               apiGet(API_ENDPOINTS.INSURANCE_CARRIERS)
-             ]);
+      console.log('Loading dropdown data...');
+      console.log('API endpoints:', {
+        countries: API_ENDPOINTS.COUNTRIES,
+        insuranceCarriers: API_ENDPOINTS.INSURANCE_CARRIERS
+      });
       
-      // Ensure we have arrays and handle potential response structures
-      const countriesData = Array.isArray(countriesRes) ? countriesRes : 
-                           Array.isArray(countriesRes.data) ? countriesRes.data : [];
-      const insuranceCarriersData = Array.isArray(insuranceCarriersRes) ? insuranceCarriersRes : 
-                                   Array.isArray(insuranceCarriersRes.data) ? insuranceCarriersRes.data : [];
+      // Load reference data for dropdowns using apiGet utility
+      const [countriesRes, insuranceCarriersRes] = await Promise.all([
+        apiGet(API_ENDPOINTS.COUNTRIES),
+        apiGet(API_ENDPOINTS.INSURANCE_CARRIERS)
+      ]);
+      
+      console.log('Raw API responses:', {
+        countries: countriesRes,
+        insuranceCarriers: insuranceCarriersRes
+      });
+      
+      // Handle the response structure correctly
+      // Countries API returns {"all_countries": [...]}
+      const countriesData = countriesRes?.all_countries || [];
+      
+      // Insurance carriers API returns {"all_insurance_carriers": [...]}
+      const insuranceCarriersData = insuranceCarriersRes?.all_insurance_carriers || [];
+      
+      console.log('Processed data:', {
+        countries: countriesData,
+        insuranceCarriers: insuranceCarriersData
+      });
       
       setCountries(countriesData);
       setInsuranceCarriers(insuranceCarriersData);
     } catch (error) {
       console.error('Error loading dropdown data:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        response: error.response
+      });
       // Set empty arrays to prevent map errors
       setCountries([]);
       setInsuranceCarriers([]);
     }
   };
 
-           const loadProvinces = async (countryId) => {
-           try {
-             const response = await apiGet(`${API_ENDPOINTS.PROVINCES}?country=${countryId}`);
-             const provincesData = Array.isArray(response) ? response :
-                                  Array.isArray(response.data) ? response.data : [];
-             setProvinces(provincesData);
-           } catch (error) {
-             console.error('Error loading provinces:', error);
-             setProvinces([]);
-           }
-         };
+  const loadProvinces = async (countryId) => {
+    try {
+      console.log('Loading provinces for country:', countryId);
+      const response = await apiGet(`${API_ENDPOINTS.PROVINCES}?country=${countryId}`);
+      console.log('Raw provinces response:', response);
+      // Provinces API returns {"all_provinces": [...]}
+      const provincesData = response?.all_provinces || [];
+      console.log('Processed provinces data:', provincesData);
+      setProvinces(provincesData);
+    } catch (error) {
+      console.error('Error loading provinces:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        response: error.response
+      });
+      setProvinces([]);
+    }
+  };
 
-         const loadCities = async (provinceId) => {
-           try {
-             const response = await apiGet(`${API_ENDPOINTS.CITIES}?province=${provinceId}`);
-             const citiesData = Array.isArray(response) ? response :
-                               Array.isArray(response.data) ? response.data : [];
-             setCities(citiesData);
-           } catch (error) {
-             console.error('Error loading cities:', error);
-             setCities([]);
-           }
-         };
+  const loadCities = async (provinceId) => {
+    try {
+      console.log('Loading cities for province:', provinceId);
+      const response = await apiGet(`${API_ENDPOINTS.CITIES}?province=${provinceId}`);
+      console.log('Raw cities response:', response);
+      // Cities API returns {"all_cities": [...]}
+      const citiesData = response?.all_cities || [];
+      console.log('Processed cities data:', citiesData);
+      setCities(citiesData);
+    } catch (error) {
+      console.error('Error loading cities:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        response: error.response
+      });
+      setCities([]);
+    }
+  };
 
   // Validation
   const isClientIdValid = clientId.trim().length >= 2 && clientId.trim().length <= 10;
-  const isSurnameValid = surname.trim().length >= 2 && surname.trim().length <= 40;
-  const isNameValid = name.trim().length >= 2 && name.trim().length <= 40;
-  const isOnomaValid = onoma.trim().length >= 2 && onoma.trim().length <= 40;
-  const isEponymoValid = eponymo.trim().length >= 2 && eponymo.trim().length <= 40;
+  const isSurnameValid = !surname.trim() || (surname.trim().length >= 2 && surname.trim().length <= 40);
+  const isNameValid = !name.trim() || (name.trim().length >= 2 && name.trim().length <= 40);
+  const isOnomaValid = !onoma.trim() || (onoma.trim().length >= 2 && onoma.trim().length <= 40);
+  const isEponymoValid = !eponymo.trim() || (eponymo.trim().length >= 2 && eponymo.trim().length <= 40);
   const isAddressValid = address.trim().length >= 2 && address.trim().length <= 120;
   const isPostalCodeValid = postalcode.trim().length >= 1 && postalcode.trim().length <= 10;
   const isEmailValid = validateEmail(email);
-  const isPhoneValid = !phone1 || phone1.length >= 7;
+  const isPhone1Valid = !phone1 || phone1.length >= 7;
+  const isPhone2Valid = !phone2 || phone2.length >= 7;
+  const isMobile1Valid = !mobile1 || mobile1.length >= 7;
+  const isMobile2Valid = !mobile2 || mobile2.length >= 7;
   const isCountryValid = country.length > 0;
   const isProvinceValid = province.length > 0;
   const isCityValid = city.length > 0;
+  
+  // AFM, SIN, and AMKA validation - must be exactly the required digits if provided
+  const isAfmValid = !afm || (afm.length === 9 && /^\d{9}$/.test(afm));
+  const isSinValid = !sin || (sin.length === 9 && /^\d{9}$/.test(sin));
+  const isAmkaValid = !amka || (amka.length === 11 && /^\d{11}$/.test(amka));
 
   const isFormValid = isClientIdValid && isSurnameValid && isNameValid && isOnomaValid && 
                      isEponymoValid && isAddressValid && isPostalCodeValid && isEmailValid && 
-                     isPhoneValid && isCountryValid && isProvinceValid && isCityValid;
+                     isPhone1Valid && isPhone2Valid && isMobile1Valid && isMobile2Valid &&
+                     isCountryValid && isProvinceValid && isCityValid &&
+                     isAfmValid && isSinValid && isAmkaValid;
 
   const createNewClient = async () => {
     try {
@@ -260,9 +308,9 @@ function AddClientModal({ onClientCreated }) {
           eponymo: eponymo.trim(),
           address: address.trim(),
           postalcode: postalcode.trim(),
-          country: country,
-          province: province,
-          city: city,
+          country_id: country,
+          province_id: province,
+          city_id: city,
           registrationdate: new Date().toISOString().split('T')[0], // Today's date
           registrationuser: localStorage.getItem('username') || 'testuser', // Current user
           
@@ -282,7 +330,7 @@ function AddClientModal({ onClientCreated }) {
           afm: afm.trim() || null,
           sin: sin.trim() || null,
           amka: amka.trim() || null,
-          passportcountry: passportcountry || null,
+          passportcountry_id: passportcountry || null,
           passportnumber: passportnumber.trim() || null,
           passportexpiredate: passportexpiredate || null,
           policeid: policeid.trim() || null,
@@ -291,11 +339,11 @@ function AddClientModal({ onClientCreated }) {
           taxrepresentation: taxrepresentation,
           taxrepresentative: taxrepresentative.trim() || null,
           retired: retired,
-          pensioncountry1: pensioncountry1 || null,
-          insucarrier1: insucarrier1 || null,
+          pensioncountry1_id: pensioncountry1 || null,
+          insucarrier1_id: insucarrier1 || null,
           pensioninfo1: pensioninfo1.trim() || null,
-          pensioncountry2: pensioncountry2 || null,
-          insucarrier2: insucarrier2 || null,
+          pensioncountry2_id: pensioncountry2 || null,
+          insucarrier2_id: insucarrier2 || null,
           pensioninfo2: pensioninfo2.trim() || null,
           active: active,
           notes: notes.trim() || null,
@@ -368,7 +416,7 @@ function AddClientModal({ onClientCreated }) {
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Surname *:</Form.Label>
+                      <Form.Label>Surname:</Form.Label>
                       <Form.Control
                         maxLength={40}
                         placeholder="e.g., Smith"
@@ -382,7 +430,7 @@ function AddClientModal({ onClientCreated }) {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Name *:</Form.Label>
+                      <Form.Label>Name:</Form.Label>
                       <Form.Control
                         maxLength={40}
                         placeholder="e.g., John"
@@ -393,7 +441,7 @@ function AddClientModal({ onClientCreated }) {
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Onoma (Greek Name) *:</Form.Label>
+                      <Form.Label>Onoma (Greek Name):</Form.Label>
                       <Form.Control
                         maxLength={40}
                         placeholder="e.g., Ιωάννης"
@@ -407,7 +455,7 @@ function AddClientModal({ onClientCreated }) {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Eponymo (Greek Surname) *:</Form.Label>
+                      <Form.Label>Eponymo (Greek Surname):</Form.Label>
                       <Form.Control
                         maxLength={40}
                         placeholder="e.g., Παπαδόπουλος"
@@ -687,35 +735,44 @@ function AddClientModal({ onClientCreated }) {
                     <Form.Group className="mb-3">
                       <Form.Label>AFM (Greek Tax Number):</Form.Label>
                       <Form.Control
-                        maxLength={10}
+                        maxLength={9}
                         placeholder="e.g., 123456789"
-                        onChange={(e) => setAfm(clampLen(e.target.value, 10))}
+                        onChange={(e) => setAfm(clampLen(e.target.value.replace(/\D/g, ''), 9))}
                         value={afm}
                       />
+                      <Form.Text className="text-muted">
+                        Must be exactly 9 digits
+                      </Form.Text>
                     </Form.Group>
                   </Col>
                   <Col md={4}>
                     <Form.Group className="mb-3">
                       <Form.Label>SIN (Canadian Tax Number):</Form.Label>
                       <Form.Control
-                        maxLength={10}
-                        placeholder="e.g., 123-456-789"
-                        onChange={(e) => setSin(clampLen(e.target.value, 10))}
+                        maxLength={9}
+                        placeholder="e.g., 123456789"
+                        onChange={(e) => setSin(clampLen(e.target.value.replace(/\D/g, ''), 9))}
                         value={sin}
                       />
+                      <Form.Text className="text-muted">
+                        Must be exactly 9 digits
+                      </Form.Text>
                     </Form.Group>
                   </Col>
-                  <Col md={4}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>AMKA:</Form.Label>
-                      <Form.Control
-                        maxLength={11}
-                        placeholder="e.g., 12345678901"
-                        onChange={(e) => setAmka(clampLen(e.target.value, 11))}
-                        value={amka}
-                      />
-                    </Form.Group>
-                  </Col>
+                                     <Col md={4}>
+                     <Form.Group className="mb-3">
+                       <Form.Label>AMKA:</Form.Label>
+                       <Form.Control
+                         maxLength={11}
+                         placeholder="e.g., 12345678901"
+                         onChange={(e) => setAmka(clampLen(e.target.value.replace(/\D/g, ''), 11))}
+                         value={amka}
+                       />
+                       <Form.Text className="text-muted">
+                         Must be exactly 11 digits
+                       </Form.Text>
+                     </Form.Group>
+                   </Col>
                 </Row>
 
                 <Row>
@@ -970,25 +1027,25 @@ function AddClientModal({ onClientCreated }) {
                 {!isSurnameValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Surname is required (2–40 chars).
+                    Surname must be 2–40 chars if provided.
                   </li>
                 )}
                 {!isNameValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Name is required (2–40 chars).
+                    Name must be 2–40 chars if provided.
                   </li>
                 )}
                 {!isOnomaValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Greek Name (Onoma) is required (2–40 chars).
+                    Greek Name (Onoma) must be 2–40 chars if provided.
                   </li>
                 )}
                 {!isEponymoValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Greek Surname (Eponymo) is required (2–40 chars).
+                    Greek Surname (Eponymo) must be 2–40 chars if provided.
                   </li>
                 )}
                 {!isAddressValid && (
@@ -1021,16 +1078,52 @@ function AddClientModal({ onClientCreated }) {
                     City is required.
                   </li>
                 )}
-                {!isEmailValid && (
+                {!isAfmValid && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    AFM must be exactly 9 digits.
+                  </li>
+                )}
+                                 {!isSinValid && (
+                   <li>
+                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                     SIN must be exactly 9 digits.
+                   </li>
+                 )}
+                 {!isAmkaValid && (
+                   <li>
+                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                     AMKA must be exactly 11 digits.
+                   </li>
+                 )}
+                 {!isEmailValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
                     Email must be a valid email address.
                   </li>
                 )}
-                {!isPhoneValid && (
+                {!isPhone1Valid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Phone number must be at least 7 characters.
+                    Phone 1 must be at least 7 characters if provided.
+                  </li>
+                )}
+                {!isPhone2Valid && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Phone 2 must be at least 7 characters if provided.
+                  </li>
+                )}
+                {!isMobile1Valid && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Mobile 1 must be at least 7 characters if provided.
+                  </li>
+                )}
+                {!isMobile2Valid && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Mobile 2 must be at least 7 characters if provided.
                   </li>
                 )}
               </ul>

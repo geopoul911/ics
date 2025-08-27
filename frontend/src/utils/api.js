@@ -101,42 +101,44 @@ export const apiPatch = (endpoint, data) => apiRequest('PATCH', endpoint, data);
 // Data Management API endpoints
 export const API_ENDPOINTS = {
   // Reference Data
-  COUNTRIES: '/data_management/countries/',
-  PROVINCES: '/data_management/provinces/',
-  CITIES: '/data_management/cities/',
-  BANKS: '/data_management/banks/',
-  INSURANCE_CARRIERS: '/data_management/insurance-carriers/',
+  COUNTRIES: '/regions/all_countries/',
+  PROVINCES: '/regions/all_provinces/',
+  CITIES: '/regions/all_cities/',
+  BANKS: '/administration/all_banks/',
+  INSURANCE_CARRIERS: '/administration/all_insurance_carriers/',
   
   // Reference Data for dropdowns
-  REFERENCE_COUNTRIES: '/data_management/reference/countries/',
-  REFERENCE_PROVINCES: '/data_management/reference/provinces/',
-  REFERENCE_CITIES: '/data_management/reference/cities/',
-  REFERENCE_BANKS: '/data_management/reference/banks/',
-  REFERENCE_CONSULTANTS: '/data_management/reference/consultants/',
-  REFERENCE_PROJECT_CATEGORIES: '/data_management/reference/project-categories/',
-  REFERENCE_TASK_CATEGORIES: '/data_management/reference/task-categories/',
-  REFERENCE_PROFESSIONS: '/data_management/reference/professions/',
-  REFERENCE_PROFESSIONALS: '/data_management/reference/professionals/',
-  REFERENCE_INSURANCE_CARRIERS: '/data_management/reference/insurance-carriers/',
+  REFERENCE_COUNTRIES: '/regions/all_countries/',
+  REFERENCE_PROVINCES: '/regions/all_provinces/',
+  REFERENCE_CITIES: '/regions/all_cities/',
+  REFERENCE_BANKS: '/administration/all_banks/',
+  REFERENCE_CONSULTANTS: '/administration/all_consultants/',
+  REFERENCE_PROJECT_CATEGORIES: '/administration/all_project_categories/',
+  REFERENCE_TASK_CATEGORIES: '/administration/all_task_categories/',
+  REFERENCE_PROFESSIONS: '/administration/all_professions/',
+  REFERENCE_PROFESSIONALS: '/administration/all_professionals/',
+  REFERENCE_INSURANCE_CARRIERS: '/administration/all_insurance_carriers/',
+  REFERENCE_PROJECTS: '/data_management/all_projects/',
+  REFERENCE_CLIENTS: '/data_management/all_clients/',
   
   // Client Management
   CLIENTS: '/data_management/clients/',
   BANK_CLIENT_ACCOUNTS: '/data_management/bank-client-accounts/',
   
   // Consultant Management
-  CONSULTANTS: '/data_management/consultants/',
+  CONSULTANTS: '/administration/all_consultants/',
   
   // Project Management
-  PROJECT_CATEGORIES: '/data_management/project-categories/',
+  PROJECT_CATEGORIES: '/administration/all_project_categories/',
   PROJECTS: '/data_management/projects/',
   ASSOCIATED_CLIENTS: '/data_management/associated-clients/',
   
   // Document Management
-  DOCUMENTS: '/data_management/documents/',
+  DOCUMENTS: '/data_management/all_documents/',
   
   // Professional Management
-  PROFESSIONS: '/data_management/professions/',
-  PROFESSIONALS: '/data_management/professionals/',
+  PROFESSIONS: '/administration/all_professions/',
+  PROFESSIONALS: '/administration/all_professionals/',
   CLIENT_CONTACTS: '/data_management/client-contacts/',
   
   // Property Management
@@ -144,7 +146,7 @@ export const API_ENDPOINTS = {
   BANK_PROJECT_ACCOUNTS: '/data_management/bank-project-accounts/',
   
   // Task Management
-  TASK_CATEGORIES: '/data_management/task-categories/',
+  TASK_CATEGORIES: '/administration/all_task_categories/',
   PROJECT_TASKS: '/data_management/project-tasks/',
   TASK_COMMENTS: '/data_management/task-comments/',
   

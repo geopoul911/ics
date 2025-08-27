@@ -4,7 +4,7 @@ import React from "react";
 // Custom Made Components
 import NavigationBar from "../../core/navigation_bar/navigation_bar";
 import Footer from "../../core/footer/footer";
-import AddInsuranceCarrierModal from "../../modals/create/add_insurance_carrier";
+import axios from "axios";
 
 // Modules / Functions
 import filterFactory, { textFilter } from "react-bootstrap-table2-filter";
@@ -12,12 +12,8 @@ import ToolkitProvider from "react-bootstrap-table2-toolkit";
 import Swal from "sweetalert2";
 import BootstrapTable from "react-bootstrap-table-next";
 import paginationFactory from "react-bootstrap-table2-paginator";
+import AddClientModal from "../../modals/create/add_client";
 import { Button } from "semantic-ui-react";
-import axios from "axios";
-
-
-// Headers
-import { headers } from "../../global_vars";
 
 // CSS
 import "react-bootstrap-table-next/dist/react-bootstrap-table2.min.css";
@@ -25,40 +21,88 @@ import "react-bootstrap-table-next/dist/react-bootstrap-table2.min.css";
 // Global Variables
 import {
   paginationOptions,
+  headers,
   pageHeader,
 } from "../../global_vars";
 
 // Variables
 window.Swal = Swal;
 
-// API endpoint for insurance carriers
-const ALL_INSURANCE_CARRIERS = "http://localhost:8000/api/administration/all_insurance_carriers/";
+// API endpoint
+const ALL_CLIENTS = "http://localhost:8000/api/data_management/clients/";
 
 const columns = [
   {
-    dataField: "insucarrier_id",
-    text: "Insurance Carrier ID",
+    dataField: "client_id",
+    text: "Client ID",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => (
       <Button>
-        <a href={"/administration/insurance_carrier/" + row.insucarrier_id} basic id="cell_link">
-          {row.insucarrier_id}
+        <a href={"/data_management/client/" + row.client_id} basic id="cell_link">
+          {row.client_id}
         </a>
       </Button>
     ),
   },
   {
-    dataField: "title",
-    text: "Title",
+    dataField: "surname",
+    text: "Surname",
     sort: true,
     filter: textFilter(),
   },
   {
-    dataField: "orderindex",
-    text: "Order Index",
+    dataField: "name",
+    text: "Name",
     sort: true,
     filter: textFilter(),
+  },
+  {
+    dataField: "email",
+    text: "Email",
+    sort: true,
+    filter: textFilter(),
+    formatter: (cell, row) => row.email || "",
+  },
+  {
+    dataField: "phone1",
+    text: "Phone 1",
+    sort: true,
+    filter: textFilter(),
+    formatter: (cell, row) => row.phone1 || "",
+  },
+  {
+    dataField: "mobile1",
+    text: "Mobile 1",
+    sort: true,
+    filter: textFilter(),
+    formatter: (cell, row) => row.mobile1 || "",
+  },
+  {
+    dataField: "country.title",
+    text: "Country",
+    sort: true,
+    filter: textFilter(),
+    formatter: (cell, row) => row.country?.title || "",
+  },
+  {
+    dataField: "city.title",
+    text: "City",
+    sort: true,
+    filter: textFilter(),
+    formatter: (cell, row) => row.city?.title || "",
+  },
+  {
+    dataField: "registrationdate",
+    text: "Registration Date",
+    sort: true,
+    filter: textFilter(),
+    formatter: (cell, row) => {
+      if (row.registrationdate) {
+        return new Date(row.registrationdate).toLocaleDateString();
+      }
+      return "";
+    },
   },
   {
     dataField: "active",
@@ -75,21 +119,21 @@ const columns = [
 
 const defaultSorted = [
   {
-    dataField: "orderindex",
-    order: "asc",
+    dataField: "registrationdate",
+    order: "desc",
   },
 ];
 
-class AllInsuranceCarriersComponent extends React.Component {
+class AllClients extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      all_insurance_carriers: [],
+      all_clients: [],
       is_loaded: false,
     };
   }
 
-  fetchInsuranceCarriers = () => {
+  fetchClients = () => {
     // Update headers with current token
     const currentHeaders = {
       ...headers,
@@ -97,72 +141,70 @@ class AllInsuranceCarriersComponent extends React.Component {
     };
 
     axios
-      .get(ALL_INSURANCE_CARRIERS, {
+      .get(ALL_CLIENTS, {
         headers: currentHeaders,
       })
       .then((res) => {
         // Handle different response structures
-        let allInsuranceCarriers = [];
+        let allClients = [];
 
         if (Array.isArray(res.data)) {
-          allInsuranceCarriers = res.data;
+          allClients = res.data;
         } else if (res.data && Array.isArray(res.data.results)) {
-          allInsuranceCarriers = res.data.results;
+          allClients = res.data.results;
         } else if (res.data && Array.isArray(res.data.data)) {
-          allInsuranceCarriers = res.data.data;
-        } else if (res.data && res.data.all_insurance_carriers) {
-          allInsuranceCarriers = res.data.all_insurance_carriers;
+          allClients = res.data.data;
+        } else if (res.data && res.data.all_clients) {
+          allClients = res.data.all_clients;
         } else {
           console.warn('Unexpected API response structure:', res.data);
-          allInsuranceCarriers = [];
+          allClients = [];
         }
         
         this.setState({
-          all_insurance_carriers: allInsuranceCarriers,
+          all_clients: allClients,
           is_loaded: true,
         });
       })
       .catch((e) => {
-        console.error('Error fetching insurance carriers:', e);
-        if (e.response?.status === 401) {
-          this.setState({
-            forbidden: true,
-          });
+        console.error('Error fetching clients:', e);
+        if (e?.response?.status === 401) {
+          this.setState({ forbidden: true });
         } else {
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: "An unknown error has occurred.",
+            text: "Failed to load clients. Please try again.",
           });
         }
         // Set empty array on error to prevent filter issues
         this.setState({
-          all_insurance_carriers: [],
+          all_clients: [],
           is_loaded: true,
         });
       });
   };
 
   componentDidMount() {
-    this.fetchInsuranceCarriers();
+    this.fetchClients();
   }
 
   render() {
     // Ensure we always have an array for the table
-    const tableData = Array.isArray(this.state.all_insurance_carriers) ? this.state.all_insurance_carriers : [];
+    const tableData = Array.isArray(this.state.all_clients) ? this.state.all_clients : [];
     
     return (
       <>
         <NavigationBar />
         <div className="mainContainer">
-          {pageHeader("all_insurance_carriers", "All Insurance Carriers")}
+          {pageHeader("all_clients")}
           <div className="contentContainer">
             <div className="contentBody">
               {this.state.is_loaded ? (
                 <>
                   <ToolkitProvider
                     bootstrap4
-                    keyField="insucarrier_id"
+                    keyField="client_id"
                     data={tableData}
                     columns={columns}
                     search
@@ -183,7 +225,7 @@ class AllInsuranceCarriersComponent extends React.Component {
                     )}
                   </ToolkitProvider>
                   <div className="contentHeader">
-                    <AddInsuranceCarrierModal onInsuranceCarrierCreated={this.fetchInsuranceCarriers} />
+                    <AddClientModal onClientCreated={this.fetchClients} />
                   </div>
                 </>
               ) : (
@@ -198,4 +240,4 @@ class AllInsuranceCarriersComponent extends React.Component {
   }
 }
 
-export default AllInsuranceCarriersComponent;
+export default AllClients;

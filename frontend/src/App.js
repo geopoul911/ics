@@ -10,37 +10,17 @@ import Help from "./components/core/help/help";
 import FourOFour from "./components/core/404/404";
 import UnderConstruction from "./components/core/under_construction/under_construction";
 import Login from "./components/core/login/login";
+
+import ProtectedRoute from "./components/core/router/protected_route";
+
+// Data Management
 import DataManagementRoot from "./components/data_management/data_management_root/data_management_root";
-import Clients from "./components/data_management/clients/clients";
-import ClientDetail from "./components/data_management/clients/client_detail";
-import ProjectCategories from "./components/data_management/project_categories/project_categories";
-import ProjectCategoryDetail from "./components/data_management/project_categories/project_category_detail";
-import TaskCategories from "./components/data_management/task_categories/task_categories";
-import TaskCategoryDetail from "./components/data_management/task_categories/task_category_detail";
-import Professions from "./components/data_management/professions/professions";
-import ProfessionDetail from "./components/data_management/professions/profession_detail";
-import Projects from "./components/data_management/projects/projects";
-import ProjectDetail from "./components/data_management/projects/project_detail";
-import ProjectTasks from "./components/data_management/project_tasks/project_tasks";
-import ProjectTaskDetail from "./components/data_management/project_tasks/project_task_detail";
-import BankClientAccounts from "./components/data_management/bank_client_accounts/bank_client_accounts";
-import BankClientAccountDetail from "./components/data_management/bank_client_accounts/bank_client_account_detail";
-import Documents from "./components/data_management/documents/documents";
-import DocumentDetail from "./components/data_management/documents/document_detail";
-import Properties from "./components/data_management/properties/properties";
-import PropertyDetail from "./components/data_management/properties/property_detail";
-import Cash from "./components/data_management/cash/cash";
-import CashDetail from "./components/data_management/cash/cash_detail";
-import ClientContacts from "./components/data_management/client_contacts/client_contacts";
-import ClientContactDetail from "./components/data_management/client_contacts/client_contact_detail";
-import Professionals from "./components/data_management/professionals/professionals";
-import ProfessionalDetail from "./components/data_management/professionals/professional_detail";
-import TaskComments from "./components/data_management/task_comments/task_comments";
-import TaskCommentDetail from "./components/data_management/task_comments/task_comment_detail";
-import TaxationProjects from "./components/data_management/taxation_projects/taxation_projects";
-import TaxationProjectDetail from "./components/data_management/taxation_projects/taxation_project_detail";
-import RegionRoot from "./components/regions/region_root/region_root";
-import AdministrationRoot from "./components/administration/administration_root/administration_root";
+import AllDocuments from "./components/data_management/all_documents/all_documents";
+import DocumentOverview from "./components/data_management/document/document_overview/document_overview";
+import AllClients from "./components/data_management/all_clients/all_clients";
+import ClientOverview from "./components/data_management/client/client_overview/client_overview";
+
+// Reports
 import ReportsRoot from "./components/reports/reports_root/reports_root";
 import Dashboard from "./components/dashboard/Dashboard";
 
@@ -57,11 +37,11 @@ import AllProjectCategoriesComponent from "./components/administration/all_proje
 import ProjectCategory from "./components/administration/project_category/project_category_overview/project_category_overview";
 import AllTaskCategoriesComponent from "./components/administration/all_task_categories/all_task_categories";
 import TaskCategoryOverview from "./components/administration/task_category/task_category_overview/task_category_overview";
-
-import ProtectedRoute from "./components/core/router/protected_route";
+import AdministrationRoot from "./components/administration/administration_root/administration_root";
 
 
 // Regions
+import RegionRoot from "./components/regions/region_root/region_root";
 import AllCountries from "./components/regions/all_countries/all_countries";
 import Country from "./components/regions/country/country";
 import AllProvinces from "./components/regions/all_provinces/all_provinces";
@@ -139,22 +119,6 @@ function App() {
         <ProtectedRoute
           isLoggedIn={!!userToken}
           exact={true}
-          path="/data_management/clients"
-          render={(props) => (
-            <Clients {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/clients/:id"
-          render={(props) => (
-            <ClientDetail {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
           path="/administration/all_insurance_carriers"
           render={(props) => (
             <AllInsuranceCarriersComponent {...props} setUserToken={setUserToken} />
@@ -216,214 +180,38 @@ function App() {
             <TaskCategoryOverview {...props} setUserToken={setUserToken} />
           )}
         />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/project_categories"
-          render={(props) => (
-            <ProjectCategories {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/project_categories/:id"
-          render={(props) => (
-            <ProjectCategoryDetail {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/task_categories"
-          render={(props) => (
-            <TaskCategories {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/task_categories/:id"
-          render={(props) => (
-            <TaskCategoryDetail {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/professions"
-          render={(props) => (
-            <Professions {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/professions/:id"
-          render={(props) => (
-            <ProfessionDetail {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/projects"
-          render={(props) => (
-            <Projects {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/projects/:id"
-          render={(props) => (
-            <ProjectDetail {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/project_tasks"
-          render={(props) => (
-            <ProjectTasks {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/project_tasks/:id"
-          render={(props) => (
-            <ProjectTaskDetail {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/bank_client_accounts"
-          render={(props) => (
-            <BankClientAccounts {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/bank_client_accounts/:id"
-          render={(props) => (
-            <BankClientAccountDetail {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/documents"
-          render={(props) => (
-            <Documents {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/documents/:id"
-          render={(props) => (
-            <DocumentDetail {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/properties"
-          render={(props) => (
-            <Properties {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/properties/:id"
-          render={(props) => (
-            <PropertyDetail {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/cash"
-          render={(props) => (
-            <Cash {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/cash/:id"
-          render={(props) => (
-            <CashDetail {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/client_contacts"
-          render={(props) => (
-            <ClientContacts {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/client_contacts/:id"
-          render={(props) => (
-            <ClientContactDetail {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/professionals"
-          render={(props) => (
-            <Professionals {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/professionals/:id"
-          render={(props) => (
-            <ProfessionalDetail {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/task_comments"
-          render={(props) => (
-            <TaskComments {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/task_comments/:id"
-          render={(props) => (
-            <TaskCommentDetail {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/taxation_projects"
-          render={(props) => (
-            <TaxationProjects {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/taxation_projects/:id"
-          render={(props) => (
-            <TaxationProjectDetail {...props} setUserToken={setUserToken} />
-          )}
-        />
+                 <ProtectedRoute
+           isLoggedIn={!!userToken}
+           exact={true}
+           path="/data_management/all_documents"
+           render={(props) => (
+             <AllDocuments {...props} setUserToken={setUserToken} />
+           )}
+         />
+         <ProtectedRoute
+           isLoggedIn={!!userToken}
+           exact={true}
+           path="/data_management/document/:id"
+           render={(props) => (
+             <DocumentOverview {...props} setUserToken={setUserToken} />
+           )}
+         />
+         <ProtectedRoute
+           isLoggedIn={!!userToken}
+           exact={true}
+           path="/data_management/all_clients"
+           render={(props) => (
+             <AllClients {...props} setUserToken={setUserToken} />
+           )}
+         />
+         <ProtectedRoute
+           isLoggedIn={!!userToken}
+           exact={true}
+           path="/data_management/client/:id"
+           render={(props) => (
+             <ClientOverview {...props} setUserToken={setUserToken} />
+           )}
+         />
 
         <ProtectedRoute
           isLoggedIn={!!userToken}

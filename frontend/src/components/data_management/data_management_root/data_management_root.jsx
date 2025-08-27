@@ -48,7 +48,7 @@ class DataManagementRoot extends React.Component {
                   <Menu.Item as={Link} to="/data_management/banks"><FaArrowRight style={iconStyle} />Banks</Menu.Item>
                   <Menu.Item as={Link} to="/data_management/cash"><FaArrowRight style={iconStyle} />Cash</Menu.Item>
                   <Menu.Item as={Link} to="/data_management/client_contacts"><FaArrowRight style={iconStyle} />Client Contacts</Menu.Item>
-                  <Menu.Item as={Link} to="/data_management/clients"><FaArrowRight style={iconStyle} />Clients</Menu.Item>
+                  <Menu.Item as={Link} to="/data_management/all_clients"><FaArrowRight style={iconStyle} />Clients</Menu.Item>
                   <Menu.Item as={Link} to="/data_management/consultants"><FaArrowRight style={iconStyle} />Consultants </Menu.Item>
                 </Menu>
               </Grid.Column>
@@ -72,7 +72,7 @@ class DataManagementRoot extends React.Component {
                   }}>Professional Services</h3>
                 </div>
                 <Menu vertical className="dmRootMenu">
-                  <Menu.Item as={Link} to="/data_management/documents"><FaArrowRight style={iconStyle} />Documents</Menu.Item>
+                  <Menu.Item as={Link} to="/data_management/all_documents"><FaArrowRight style={iconStyle} />Documents</Menu.Item>
                   <Menu.Item as={Link} to="/data_management/insurance_carriers"><FaArrowRight style={iconStyle} />Insurance Carriers</Menu.Item>
                   <Menu.Item as={Link} to="/data_management/professions"><FaArrowRight style={iconStyle} />Professions</Menu.Item>
                   <Menu.Item as={Link} to="/data_management/professionals"><FaArrowRight style={iconStyle} />Professionals</Menu.Item>

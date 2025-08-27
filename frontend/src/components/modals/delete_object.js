@@ -24,6 +24,8 @@ const DELETE_ENDPOINTS = {
   'Profession': 'http://localhost:8000/api/administration/profession/',
   'ProjectCategory': 'http://localhost:8000/api/administration/project_category/',
   'TaskCategory': 'http://localhost:8000/api/administration/task_category/',
+  'Document': 'http://localhost:8000/api/data_management/document/',
+  'Client': 'http://localhost:8000/api/data_management/client/',
   // Add more object types as needed
 };
 
@@ -39,6 +41,8 @@ const REDIRECT_URLS = {
   'Profession': '/administration/all_professions',
   'ProjectCategory': '/administration/all_project_categories',
   'TaskCategory': '/administration/all_task_categories',
+  'Document': '/data_management/documents',
+  'Client': '/data_management/all_clients',
   // Add more redirect URLs as needed
 };
 
@@ -50,9 +54,9 @@ function DeleteObjectModal(props) {
     setBusy(true);
     
     try {
-      const endpoint = DELETE_ENDPOINTS[props.object_type];
+      const endpoint = DELETE_ENDPOINTS[props.objectType];
       if (!endpoint) {
-        throw new Error(`No delete endpoint configured for object type: ${props.object_type}`);
+        throw new Error(`No delete endpoint configured for object type: ${props.objectType}`);
       }
 
       // Update headers with current token
@@ -62,7 +66,7 @@ function DeleteObjectModal(props) {
       };
 
       // For the new data_management API, we use DELETE method with the ID in the URL
-      const deleteUrl = `${endpoint}${props.object_id}/`;
+      const deleteUrl = `${endpoint}${props.objectId}/`;
 
       const response = await axios({
         method: "delete",
@@ -74,14 +78,14 @@ function DeleteObjectModal(props) {
       Swal.fire({
         icon: "success",
         title: "Success!",
-        text: `${props.object_type} deleted successfully`,
+        text: `${props.objectType} deleted successfully`,
       });
 
       // Redirect if callback is provided, otherwise use default redirect
-      if (props.onDeleteSuccess) {
-        props.onDeleteSuccess(response.data);
+      if (props.onObjectDeleted) {
+        props.onObjectDeleted(response.data);
       } else {
-        const redirectUrl = REDIRECT_URLS[props.object_type];
+        const redirectUrl = REDIRECT_URLS[props.objectType];
         if (redirectUrl) {
           window.location.href = redirectUrl;
         }
@@ -115,7 +119,7 @@ function DeleteObjectModal(props) {
             }
           });
         } else if (relatedObjects.length > 0) {
-          htmlContent += `<p><strong>Cannot delete this ${props.object_type.toLowerCase()} because it is referenced by the following objects:</strong></p>
+          htmlContent += `<p><strong>Cannot delete this ${props.objectType.toLowerCase()} because it is referenced by the following objects:</strong></p>
             <ul style="margin: 10px 0; padding-left: 20px;">`;
           
           relatedObjects.forEach(obj => {
@@ -124,7 +128,7 @@ function DeleteObjectModal(props) {
           
           htmlContent += `</ul>
             <p style="color: #666; font-size: 0.9em; margin-top: 15px;">
-              <strong>Solution:</strong> Delete or reassign these related objects first, then try deleting this ${props.object_type.toLowerCase()} again.
+              <strong>Solution:</strong> Delete or reassign these related objects first, then try deleting this ${props.objectType.toLowerCase()} again.
             </p>`;
         }
         
@@ -143,7 +147,7 @@ function DeleteObjectModal(props) {
                             error.response?.data?.error || 
                             error.response?.data?.detail || 
                             error.message || 
-                            `Failed to delete ${props.object_type}`;
+                            `Failed to delete ${props.objectType}`;
         
         Swal.fire({
           icon: "error",
@@ -160,7 +164,7 @@ function DeleteObjectModal(props) {
   // Custom trigger button if provided, otherwise use default
   const triggerButton = props.trigger || (
     <Button color="red" style={{ float: "right" }}>
-      Delete {props.object_type}
+      Delete {props.objectType}
     </Button>
   );
 
@@ -175,13 +179,13 @@ function DeleteObjectModal(props) {
     >
       <Header icon>
         <Icon name="delete" style={{ color: "red" }} />
-        <h1 style={{ color: "red" }}>Delete {props.object_type}</h1>
+        <h1 style={{ color: "red" }}>Delete {props.objectType}</h1>
       </Header>
       <Modal.Content>
         <p>
-          Are you sure you want to delete this {props.object_type}?
-          {props.object_name && (
-            <strong> "{props.object_name}"</strong>
+          Are you sure you want to delete this {props.objectType}?
+          {props.objectName && (
+            <strong> "{props.objectName}"</strong>
           )}
         </p>
         {props.warningMessage && (
