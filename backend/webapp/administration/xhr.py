@@ -4,6 +4,7 @@ from webapp.models import (
     InsuranceCarrier,
     Profession,
     ProjectCategory,
+    TaskCategory,
 )
 from accounts.models import Consultant
 from rest_framework.authtoken.models import Token
@@ -330,5 +331,46 @@ class DeleteProjectCategory(APIView):
         except Exception as e:
             return Response(
                 {"error": f"Failed to delete project category: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class DeleteTaskCategory(APIView):
+    """
+    URL: delete_task_category/
+    Descr: Delete a task category
+    """
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            taskcate_id = request.data.get('taskcate_id')
+            if not taskcate_id:
+                return Response(
+                    {"error": "Task Category ID is required."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            task_category = TaskCategory.objects.get(taskcate_id=taskcate_id)
+            task_category.delete()
+            
+            return Response(
+                {"message": "Task Category deleted successfully"},
+                status=status.HTTP_200_OK
+            )
+        except TaskCategory.DoesNotExist:
+            return Response(
+                {"error": "Task Category not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ProtectedError:
+            return Response(
+                {"error": "Cannot delete task category as it is referenced by other records"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to delete task category: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

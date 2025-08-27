@@ -23,6 +23,7 @@ const DELETE_ENDPOINTS = {
   'InsuranceCarrier': 'http://localhost:8000/api/administration/insurance_carrier/',
   'Profession': 'http://localhost:8000/api/administration/profession/',
   'ProjectCategory': 'http://localhost:8000/api/administration/project_category/',
+  'TaskCategory': 'http://localhost:8000/api/administration/task_category/',
   // Add more object types as needed
 };
 
@@ -37,6 +38,7 @@ const REDIRECT_URLS = {
   'InsuranceCarrier': '/administration/all_insurance_carriers',
   'Profession': '/administration/all_professions',
   'ProjectCategory': '/administration/all_project_categories',
+  'TaskCategory': '/administration/all_task_categories',
   // Add more redirect URLs as needed
 };
 

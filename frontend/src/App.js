@@ -55,6 +55,8 @@ import AllProfessionsComponent from "./components/administration/all_professions
 import Profession from "./components/administration/profession/profession_overview/profession_overview";
 import AllProjectCategoriesComponent from "./components/administration/all_project_categories/all_project_categories";
 import ProjectCategory from "./components/administration/project_category/project_category_overview/project_category_overview";
+import AllTaskCategoriesComponent from "./components/administration/all_task_categories/all_task_categories";
+import TaskCategoryOverview from "./components/administration/task_category/task_category_overview/task_category_overview";
 
 import ProtectedRoute from "./components/core/router/protected_route";
 
@@ -196,6 +198,22 @@ function App() {
           path="/administration/project_category/:id"
           render={(props) => (
             <ProjectCategory {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/administration/all_task_categories"
+          render={(props) => (
+            <AllTaskCategoriesComponent {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/administration/task_category/:id"
+          render={(props) => (
+            <TaskCategoryOverview {...props} setUserToken={setUserToken} />
           )}
         />
         <ProtectedRoute

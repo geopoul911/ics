@@ -558,6 +558,42 @@ export function pageHeader(value, objName) {
         <hr />
       </>
     );
+  } else if (value === "all_task_categories") {
+    return (
+      <>
+        <div className="page_header">
+          <h2>
+            <FaArrowRight style={iconStyle} /> All Task Categories
+          </h2>
+          <Breadcrumb>
+            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href="/administration/root">
+              Administration
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>All Task Categories</Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
+        <hr />
+      </>
+    );
+  } else if (value === "task_category_overview") {
+    return (
+      <>
+        <div className="page_header">
+          <h2>
+            <FaArrowRight style={iconStyle} /> Task Category Overview
+          </h2>
+          <Breadcrumb>
+            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href="/administration/root">
+              Administration
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
+        <hr />
+      </>
+    );
   } 
   return <></>;
 }

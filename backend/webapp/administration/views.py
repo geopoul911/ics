@@ -4,6 +4,7 @@ from webapp.models import (
     InsuranceCarrier,
     Profession,
     ProjectCategory,
+    TaskCategory,
 )
 from accounts.models import Consultant
 from webapp.serializers import (
@@ -12,6 +13,7 @@ from webapp.serializers import (
     InsuranceCarrierSerializer,
     ProfessionSerializer,
     ProjectCategorySerializer,
+    TaskCategorySerializer,
 )
 
 import datetime
@@ -811,6 +813,167 @@ class ProjectCategoryView(RetrieveUpdateDestroyAPIView):
         except Exception as e:
             return Response(
                 {"error": f"Failed to delete project category: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+"""
+    # Task Categories
+
+    - AllTaskCategories
+    - TaskCategoryView
+"""
+
+
+class AllTaskCategories(generics.ListCreateAPIView):
+    """
+    URL: all_task_categories/
+    Descr: Returns array of all task categories and allows creation
+    """
+    serializer_class = TaskCategorySerializer
+    queryset = TaskCategory.objects.all().order_by("orderindex", "title")
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        data = self.get_serializer(queryset, many=True, context={"request": request}).data
+        return Response({"all_task_categories": data})
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, context={"request": request})
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    task_category = serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except IntegrityError as e:
+                error_str = str(e).lower()
+                
+                # Check if this is a unique constraint violation on orderindex
+                if 'orderindex' in error_str and 'unique' in error_str:
+                    try:
+                        new_orderindex = request.data.get('orderindex')
+                        conflicting_category = TaskCategory.objects.get(orderindex=new_orderindex)
+                        return Response(
+                            {"error": f"Order index {new_orderindex} is already taken by Task Category: {conflicting_category.title} (ID: {conflicting_category.taskcate_id})"},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    except TaskCategory.DoesNotExist:
+                        pass
+                
+                # Check if this is a unique constraint violation on taskcate_id
+                if 'taskcate_id' in error_str and 'unique' in error_str:
+                    try:
+                        new_taskcate_id = request.data.get('taskcate_id')
+                        conflicting_category = TaskCategory.objects.get(taskcate_id=new_taskcate_id)
+                        return Response(
+                            {"error": f"Task Category ID '{new_taskcate_id}' is already taken by Task Category: {conflicting_category.title}"},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    except TaskCategory.DoesNotExist:
+                        pass
+                
+                return Response(
+                    {"error": "A task category with this ID or order index already exists"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except ValidationError as e:
+                return Response(
+                    {"error": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to create task category: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TaskCategoryView(RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint for retrieving, updating, and deleting a specific task category.
+    """
+    serializer_class = TaskCategorySerializer
+    queryset = TaskCategory.objects.all()
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'taskcate_id'
+
+    def get(self, request, *args, **kwargs):
+        """Get a specific task category"""
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, context={"request": request})
+            return Response(serializer.data)
+        except TaskCategory.DoesNotExist:
+            return Response(
+                {"error": "Task category not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to fetch task category: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def put(self, request, *args, **kwargs):
+        """Update a task category"""
+        try:
+            instance = self.get_object()
+            
+            # Prevent taskcate_id updates - taskcate_id is immutable
+            if 'taskcate_id' in request.data and request.data['taskcate_id'] != instance.taskcate_id:
+                return Response(
+                    {"error": "Task Category ID cannot be changed once created"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            serializer = self.get_serializer(instance, data=request.data, partial=True, context={"request": request})
+            if serializer.is_valid():
+                with transaction.atomic():
+                    task_category = serializer.save()
+                    return Response(serializer.data)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except TaskCategory.DoesNotExist:
+            return Response(
+                {"error": "Task category not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ValidationError as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to update task category: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def delete(self, request, *args, **kwargs):
+        """Delete a task category"""
+        try:
+            instance = self.get_object()
+            with transaction.atomic():
+                instance.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+        except TaskCategory.DoesNotExist:
+            return Response(
+                {"error": "Task category not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ProtectedError:
+            return Response(
+                {"error": "Cannot delete task category as it is referenced by other records"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to delete task category: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 

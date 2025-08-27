@@ -30,4 +30,9 @@ urlpatterns = [
     path("project_category/<str:projcate_id>/", views.ProjectCategoryView.as_view(), name="project-category-detail"),
     path('delete_project_category/', administration_xhr.DeleteProjectCategory.as_view()),
 
+    # Task Categories
+    path('all_task_categories/', views.AllTaskCategories.as_view()),
+    path("task_category/<str:taskcate_id>/", views.TaskCategoryView.as_view(), name="task-category-detail"),
+    path('delete_task_category/', administration_xhr.DeleteTaskCategory.as_view()),
+
 ]
