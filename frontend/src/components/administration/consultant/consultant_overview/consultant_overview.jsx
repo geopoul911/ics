@@ -4,7 +4,6 @@ import React from "react";
 // Icons / Images
 import { BsInfoSquare } from "react-icons/bs";
 import { FaHashtag, FaEnvelope, FaPhone, FaMobile, FaSort } from "react-icons/fa";
-import { FiType } from "react-icons/fi";
 import { MdSecurity, MdCheckCircle, MdCancel, MdPerson, MdLock, MdTask, MdCheckCircleOutline } from "react-icons/md";
 import { GiMoneyStack } from "react-icons/gi";
 import { FaUserTag } from "react-icons/fa";
@@ -31,6 +30,7 @@ import {
   EditConsultantCashPassportModal,
   EditConsultantActiveModal,
   EditConsultantOrderIndexModal,
+  EditConsultantPhotoModal,
 } from "../../../modals/consultant_edit_modals";
 import axios from "axios";
 
@@ -114,6 +114,88 @@ class ConsultantOverview extends React.Component {
           {pageHeader("consultant_overview", `Consultant: ${consultant.fullname || 'Loading...'}`)}
           {this.state.is_loaded ? (
             <>
+              {/* New Consultant Photo and Name Section */}
+              <Card style={{ marginBottom: "20px", backgroundColor: "#f8f9fa" }}>
+                <Card.Body style={{ padding: "30px" }}>
+                  <div style={{ 
+                    display: "flex", 
+                    alignItems: "center", 
+                    justifyContent: "flex-start",
+                    gap: "40px"
+                  }}>
+                    {/* Photo Section */}
+                    <div style={{ position: "relative" }}>
+                      {consultant.photo_url ? (
+                        <img
+                          src={consultant.photo_url}
+                          alt="Consultant"
+                          style={{
+                            width: "150px",
+                            height: "150px",
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                            border: "4px solid #2a9fd9",
+                            boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: "150px",
+                            height: "150px",
+                            borderRadius: "50%",
+                            backgroundColor: "#e9ecef",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            border: "4px solid #2a9fd9",
+                            boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
+                          }}
+                        >
+                          <MdPerson style={{ fontSize: "75px", color: "#6c757d" }} />
+                        </div>
+                      )}
+                      {/* Photo Edit Button */}
+                      <div style={{ 
+                        marginTop: "10px",
+                        textAlign: "center"
+                      }}>
+                        <EditConsultantPhotoModal
+                          consultant={consultant}
+                          update_state={this.update_state}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Name Section */}
+                    <div style={{ textAlign: "left" }}>
+                      <h1 style={{ 
+                        margin: "0", 
+                        fontSize: "2.5rem", 
+                        fontWeight: "bold",
+                        color: "#2a9fd9"
+                      }}>
+                        {consultant.fullname || "N/A"}
+                      </h1>
+                      <p style={{ 
+                        margin: "10px 0 0 0", 
+                        fontSize: "1.2rem", 
+                        color: "#6c757d",
+                        fontWeight: "500"
+                      }}>
+                        Consultant ID: {consultant.consultant_id || "N/A"}
+                      </p>
+                      <div style={{ marginTop: "15px" }}>
+                        <EditConsultantFullnameModal
+                          consultant={consultant}
+                          update_state={this.update_state}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+
               <Grid stackable columns={2} divided>
                 <Grid.Column>
                   <Card>
@@ -128,22 +210,8 @@ class ConsultantOverview extends React.Component {
                       Basic Information
                     </Card.Header>
                     <Card.Body>
-                      {/* Full Name */}
-                      <div className={"info_descr"}>
-                        <FiType style={overviewIconStyle} /> Full Name
-                      </div>
-                      <div className={"info_span"} style={{ position: "relative" }}>
-                        {consultant.fullname ? consultant.fullname : "N/A"}
-                        <span style={{ position: "absolute", right: "0px", top: "50%", transform: "translateY(-50%)" }}>
-                          <EditConsultantFullnameModal
-                            consultant={consultant}
-                            update_state={this.update_state}
-                          />
-                        </span>
-                      </div>
-
                       {/* Consultant ID */}
-                      <div className={"info_descr"} style={{ marginTop: 16 }}>
+                      <div className={"info_descr"}>
                         <FaHashtag style={overviewIconStyle} /> Consultant ID
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>

@@ -1,9 +1,13 @@
 from webapp.models import (
     User,
+    Bank,
+    InsuranceCarrier,
 )
 from accounts.models import Consultant
 from webapp.serializers import (
     ConsultantSerializer,
+    BankSerializer,
+    InsuranceCarrierSerializer,
 )
 
 import datetime
@@ -11,8 +15,9 @@ from rest_framework.authtoken.models import Token
 from rest_framework import generics
 from rest_framework.response import Response
 from django.db.models import Q, ProtectedError
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from rest_framework.views import APIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from django.http import HttpResponse, FileResponse, JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework import status
@@ -20,6 +25,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from django.views import View
 from django.conf import settings
+from django.core.exceptions import ValidationError
 
 # views.py
 from rest_framework import generics
@@ -77,7 +83,7 @@ class AllConsultants(generics.ListCreateAPIView):
         return Response({"all_consultants": data})
 
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             try:
                 serializer.save()
@@ -141,7 +147,7 @@ class ConsultantView(generics.RetrieveUpdateDestroyAPIView):
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance)
+        serializer = self.get_serializer(instance, context={"request": request})
         return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
@@ -155,7 +161,7 @@ class ConsultantView(generics.RetrieveUpdateDestroyAPIView):
             )
         
         # Use the data directly from request for partial updates
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer = self.get_serializer(instance, data=request.data, partial=True, context={"request": request})
         
         if serializer.is_valid():
             try:
@@ -262,5 +268,255 @@ class ConsultantView(generics.RetrieveUpdateDestroyAPIView):
                     "related_objects": related_objects
                 },
                 status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class AllBanks(generics.ListCreateAPIView):
+    """
+    API endpoint for listing all banks and creating new banks.
+    """
+    serializer_class = BankSerializer
+    queryset = Bank.objects.all().order_by('orderindex', 'bankname')
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, *args, **kwargs):
+        """Get all banks"""
+        try:
+            queryset = self.get_queryset()
+            data = self.get_serializer(queryset, many=True, context={"request": request}).data
+            
+            return Response({"all_banks": data})
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to retrieve banks: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def post(self, request, *args, **kwargs):
+        """Create a new bank"""
+        serializer = self.get_serializer(data=request.data, context={"request": request})
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    bank = serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except ValidationError as e:
+                return Response(
+                    {"error": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to create bank: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BankView(RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint for retrieving, updating, and deleting a specific bank.
+    """
+    queryset = Bank.objects.all()
+    serializer_class = BankSerializer
+    lookup_field = 'bank_id'
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, context={"request": request})
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Prevent primary key updates - bank_id is immutable
+        if 'bank_id' in request.data and request.data['bank_id'] != instance.bank_id:
+            return Response(
+                {"error": "Bank ID cannot be changed once created"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Use the data directly from request for partial updates
+        serializer = self.get_serializer(instance, data=request.data, partial=True, context={"request": request})
+        
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    bank = serializer.save()
+                    return Response(serializer.data)
+            except ValidationError as e:
+                return Response(
+                    {"error": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to update bank: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        
+        try:
+            with transaction.atomic():
+                # Check for related objects before deletion
+                related_objects = []
+                
+                # Check for related bank client accounts
+                related_accounts = instance.bankclientaccount_set.all()
+                if related_accounts.exists():
+                    related_objects.append(f"{related_accounts.count()} bank client account(s): {', '.join([f'{acc.client.surname} {acc.client.name} - {acc.accountnumber}' for acc in related_accounts[:5]])}{'...' if related_accounts.count() > 5 else ''}")
+                
+                # Check for related bank project accounts
+                related_project_accounts = instance.bankprojectaccount_set.all()
+                if related_project_accounts.exists():
+                    related_objects.append(f"{related_project_accounts.count()} bank project account(s): {', '.join([f'{acc.project.title} - {acc.client.surname} {acc.client.name}' for acc in related_project_accounts[:5]])}{'...' if related_project_accounts.count() > 5 else ''}")
+                
+                if related_objects:
+                    return Response(
+                        {
+                            "error": "Cannot delete bank because it has related objects",
+                            "related_objects": related_objects
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                
+                instance.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+                
+        except Exception as e:
+                            return Response(
+                    {"error": f"Failed to delete bank: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
+
+class AllInsuranceCarriers(generics.ListCreateAPIView):
+    """
+    API endpoint for listing all insurance carriers and creating new insurance carriers.
+    """
+    serializer_class = InsuranceCarrierSerializer
+    queryset = InsuranceCarrier.objects.all().order_by('orderindex', 'title')
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, *args, **kwargs):
+        """Get all insurance carriers"""
+        try:
+            queryset = self.get_queryset()
+            data = self.get_serializer(queryset, many=True, context={"request": request}).data
+            
+            return Response({"all_insurance_carriers": data})
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to retrieve insurance carriers: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def post(self, request, *args, **kwargs):
+        """Create a new insurance carrier"""
+        serializer = self.get_serializer(data=request.data, context={"request": request})
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    insurance_carrier = serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except ValidationError as e:
+                return Response(
+                    {"error": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to create insurance carrier: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class InsuranceCarrierView(RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint for retrieving, updating, and deleting a specific insurance carrier.
+    """
+    queryset = InsuranceCarrier.objects.all()
+    serializer_class = InsuranceCarrierSerializer
+    lookup_field = 'insucarrier_id'
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, context={"request": request})
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Prevent primary key updates - insucarrier_id is immutable
+        if 'insucarrier_id' in request.data and request.data['insucarrier_id'] != instance.insucarrier_id:
+            return Response(
+                {"error": "Insurance Carrier ID cannot be changed once created"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Use the data directly from request for partial updates
+        serializer = self.get_serializer(instance, data=request.data, partial=True, context={"request": request})
+        
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    insurance_carrier = serializer.save()
+                    return Response(serializer.data)
+            except ValidationError as e:
+                return Response(
+                    {"error": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to update insurance carrier: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        
+        try:
+            with transaction.atomic():
+                # Check for related objects before deletion
+                related_objects = []
+                
+                # Check for related clients (insucarrier1)
+                related_clients1 = instance.clients_insucarrier1.all()
+                if related_clients1.exists():
+                    related_objects.append(f"{related_clients1.count()} client(s) with primary insurance carrier: {', '.join([f'{client.surname} {client.name}' for client in related_clients1[:5]])}{'...' if related_clients1.count() > 5 else ''}")
+                
+                # Check for related clients (insucarrier2)
+                related_clients2 = instance.clients_insucarrier2.all()
+                if related_clients2.exists():
+                    related_objects.append(f"{related_clients2.count()} client(s) with secondary insurance carrier: {', '.join([f'{client.surname} {client.name}' for client in related_clients2[:5]])}{'...' if related_clients2.count() > 5 else ''}")
+                
+                if related_objects:
+                    return Response(
+                        {
+                            "error": "Cannot delete insurance carrier because it has related objects",
+                            "related_objects": related_objects
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                
+                instance.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+                
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to delete insurance carrier: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 

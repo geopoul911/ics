@@ -145,6 +145,11 @@ class ConsultantViewSet(viewsets.ModelViewSet):
             return ConsultantReferenceSerializer
         return ConsultantSerializer
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
 # Project Viewsets
 class ProjectCategoryViewSet(viewsets.ModelViewSet):
     queryset = ProjectCategory.objects.filter(active=True).order_by('orderindex', 'title')

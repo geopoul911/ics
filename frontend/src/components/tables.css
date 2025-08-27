@@ -5,7 +5,7 @@ table {
 }
 
 table > thead > tr > th:nth-child(1) {
-  width: 6%;
+  width: 12%;
 }
 
 .react-bootstrap-table-pagination {

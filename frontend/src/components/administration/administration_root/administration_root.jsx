@@ -69,7 +69,7 @@ class AdministrationRoot extends React.Component {
                 }}>Master Data</h3>
               </div>
               <Menu vertical className="dmRootMenu">
-                <Menu.Item as={Link} to="/administration/banks">
+                <Menu.Item as={Link} to="/administration/all_banks">
                   <FaArrowRight style={iconStyle} /> Banks
                 </Menu.Item>
                 <Menu.Item as={Link} to="/administration/insurance_carriers">

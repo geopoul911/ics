@@ -1,5 +1,7 @@
 from webapp.models import (
     User,
+    Bank,
+    InsuranceCarrier,
 )
 from accounts.models import Consultant
 from rest_framework.authtoken.models import Token
@@ -99,22 +101,150 @@ class DeleteConsultant(APIView):
                     'items': list(related_banks.values_list('title', flat=True)[:5])  # First 5 bank names
                 })
             
-            error_message = f"Cannot delete Consultant '{consultant.fullname}' because it is referenced by:"
-            for obj in related_objects:
-                error_message += f"\n- {obj['count']} {obj['model']}"
-                if obj['items']:
-                    error_message += f" (including: {', '.join(obj['items'])})"
-            
             return Response(
                 {
-                    "error": error_message,
+                    "error": "Cannot delete consultant because it has related objects.",
                     "related_objects": related_objects
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
-            logger.error(f"Error deleting consultant: {e}")
+            logger.error(f"Error deleting consultant {consultant_id}: {str(e)}")
             return Response(
-                {"error": "An error occurred while deleting the consultant."},
+                {"error": f"Failed to delete consultant: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class DeleteBank(APIView):
+    """
+    URL: delete_bank/
+    Descr: Delete a bank
+    """
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            bank_id = request.data.get('bank_id')
+            if not bank_id:
+                return Response(
+                    {"error": "Bank ID is required."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            bank = Bank.objects.get(bank_id=bank_id)
+            bank.delete()
+            
+            return Response(
+                {"message": f"Bank '{bank.bankname}' deleted successfully."},
+                status=status.HTTP_200_OK
+            )
+
+        except Bank.DoesNotExist:
+            return Response(
+                {"error": f"Bank with ID '{bank_id}' not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ProtectedError as e:
+            # Get the related objects that are preventing deletion
+            related_objects = []
+            
+            # Check for related bank client accounts
+            related_accounts = bank.bankclientaccount_set.all()
+            if related_accounts.exists():
+                related_objects.append({
+                    'model': 'Bank Client Accounts',
+                    'count': related_accounts.count(),
+                    'items': list(related_accounts.values_list('accountnumber', flat=True)[:5])  # First 5 account numbers
+                })
+            
+            # Check for related bank project accounts
+            related_project_accounts = bank.bankprojectaccount_set.all()
+            if related_project_accounts.exists():
+                related_objects.append({
+                    'model': 'Bank Project Accounts',
+                    'count': related_project_accounts.count(),
+                    'items': list(related_project_accounts.values_list('project__title', flat=True)[:5])  # First 5 project titles
+                })
+            
+            return Response(
+                {
+                    "error": "Cannot delete bank because it has related objects.",
+                    "related_objects": related_objects
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"Error deleting bank {bank_id}: {str(e)}")
+            return Response(
+                {"error": f"Failed to delete bank: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class DeleteInsuranceCarrier(APIView):
+    """
+    URL: delete_insurance_carrier/
+    Descr: Delete an insurance carrier
+    """
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            insucarrier_id = request.data.get('insucarrier_id')
+            if not insucarrier_id:
+                return Response(
+                    {"error": "Insurance Carrier ID is required."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            insurance_carrier = InsuranceCarrier.objects.get(insucarrier_id=insucarrier_id)
+            insurance_carrier.delete()
+            
+            return Response(
+                {"message": f"Insurance Carrier '{insurance_carrier.title}' deleted successfully."},
+                status=status.HTTP_200_OK
+            )
+
+        except InsuranceCarrier.DoesNotExist:
+            return Response(
+                {"error": f"Insurance Carrier with ID '{insucarrier_id}' not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ProtectedError as e:
+            # Get the related objects that are preventing deletion
+            related_objects = []
+            
+            # Check for related clients (insucarrier1)
+            related_clients1 = insurance_carrier.clients_insucarrier1.all()
+            if related_clients1.exists():
+                related_objects.append({
+                    'model': 'Clients (Primary Insurance)',
+                    'count': related_clients1.count(),
+                    'items': list(related_clients1.values_list('surname', flat=True)[:5])  # First 5 client surnames
+                })
+            
+            # Check for related clients (insucarrier2)
+            related_clients2 = insurance_carrier.clients_insucarrier2.all()
+            if related_clients2.exists():
+                related_objects.append({
+                    'model': 'Clients (Secondary Insurance)',
+                    'count': related_clients2.count(),
+                    'items': list(related_clients2.values_list('surname', flat=True)[:5])  # First 5 client surnames
+                })
+            
+            return Response(
+                {
+                    "error": "Cannot delete insurance carrier because it has related objects.",
+                    "related_objects": related_objects
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"Error deleting insurance carrier {insucarrier_id}: {str(e)}")
+            return Response(
+                {"error": f"Failed to delete insurance carrier: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

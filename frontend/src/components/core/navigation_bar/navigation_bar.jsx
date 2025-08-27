@@ -304,10 +304,10 @@ class NavigationBar extends Component {
                     {/* Master Data */}
                     <Dropdown.Divider />
                     <Dropdown.Header>Master Data</Dropdown.Header>
-                    <Dropdown.Item href="/administration/banks">
+                    <Dropdown.Item href="/administration/all_banks">
                       <FaArrowRight style={iconStyle}/> Banks
                     </Dropdown.Item>
-                    <Dropdown.Item href="/administration/insurance_carriers">
+                    <Dropdown.Item href="/administration/all_insurance_carriers">
                       <FaArrowRight style={iconStyle}/> Insurance Carriers
                     </Dropdown.Item>
                     <Dropdown.Item href="/administration/professions">

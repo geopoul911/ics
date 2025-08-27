@@ -13,18 +13,12 @@ import Login from "./components/core/login/login";
 import DataManagementRoot from "./components/data_management/data_management_root/data_management_root";
 import Clients from "./components/data_management/clients/clients";
 import ClientDetail from "./components/data_management/clients/client_detail";
-import InsuranceCarriers from "./components/data_management/insurance_carriers/insurance_carriers";
-import InsuranceCarrierDetail from "./components/data_management/insurance_carriers/insurance_carrier_detail";
 import ProjectCategories from "./components/data_management/project_categories/project_categories";
 import ProjectCategoryDetail from "./components/data_management/project_categories/project_category_detail";
 import TaskCategories from "./components/data_management/task_categories/task_categories";
 import TaskCategoryDetail from "./components/data_management/task_categories/task_category_detail";
 import Professions from "./components/data_management/professions/professions";
 import ProfessionDetail from "./components/data_management/professions/profession_detail";
-import Banks from "./components/data_management/banks/banks";
-import BankDetail from "./components/data_management/banks/bank_detail";
-import Consultants from "./components/data_management/consultants/consultants";
-import ConsultantDetail from "./components/data_management/consultants/consultant_detail";
 import Projects from "./components/data_management/projects/projects";
 import ProjectDetail from "./components/data_management/projects/project_detail";
 import ProjectTasks from "./components/data_management/project_tasks/project_tasks";
@@ -53,6 +47,10 @@ import Dashboard from "./components/dashboard/Dashboard";
 // Administration
 import AllConsultants from "./components/administration/all_consultants/all_consultants";
 import Consultant from "./components/administration/consultant/consultant";
+import AllBanks from "./components/administration/all_banks/all_banks";
+import Bank from "./components/administration/bank/bank_overview/bank_overview";
+import AllInsuranceCarriersComponent from "./components/administration/all_insurance_carriers/all_insurance_carriers";
+import InsuranceCarrier from "./components/administration/insurance_carrier/insurance_carrier_overview/insurance_carrier_overview";
 
 import ProtectedRoute from "./components/core/router/protected_route";
 
@@ -151,17 +149,17 @@ function App() {
         <ProtectedRoute
           isLoggedIn={!!userToken}
           exact={true}
-          path="/data_management/insurance_carriers"
+          path="/administration/all_insurance_carriers"
           render={(props) => (
-            <InsuranceCarriers {...props} setUserToken={setUserToken} />
+            <AllInsuranceCarriersComponent {...props} setUserToken={setUserToken} />
           )}
         />
         <ProtectedRoute
           isLoggedIn={!!userToken}
           exact={true}
-          path="/data_management/insurance_carriers/:id"
+          path="/administration/insurance_carrier/:id"
           render={(props) => (
-            <InsuranceCarrierDetail {...props} setUserToken={setUserToken} />
+            <InsuranceCarrier {...props} setUserToken={setUserToken} />
           )}
         />
         <ProtectedRoute
@@ -210,38 +208,6 @@ function App() {
           path="/data_management/professions/:id"
           render={(props) => (
             <ProfessionDetail {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/banks"
-          render={(props) => (
-            <Banks {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/banks/:id"
-          render={(props) => (
-            <BankDetail {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/consultants"
-          render={(props) => (
-            <Consultants {...props} setUserToken={setUserToken} />
-          )}
-        />
-        <ProtectedRoute
-          isLoggedIn={!!userToken}
-          exact={true}
-          path="/data_management/consultants/:id"
-          render={(props) => (
-            <ConsultantDetail {...props} setUserToken={setUserToken} />
           )}
         />
         <ProtectedRoute
@@ -495,6 +461,20 @@ function App() {
           exact={true}
           path="/administration/consultant/:id"
           component={Consultant}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/administration/all_banks"
+          render={(props) => (
+            <AllBanks {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/administration/bank/:id"
+          component={Bank}
         />
 
         {/* 404 ( Has to be last ) */}

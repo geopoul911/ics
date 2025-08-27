@@ -2,8 +2,9 @@
 import { useState } from "react";
 
 // Icons / Images
-import { BiEdit } from "react-icons/bi";
+import { FiEdit } from "react-icons/fi";
 import { FaStop } from "react-icons/fa";
+import { MdPhotoCamera } from "react-icons/md";
 
 // Modules / Functions
 import Swal from "sweetalert2";
@@ -56,7 +57,7 @@ const validatePassword = (password) => {
 // Edit Consultant ID Modal (PK - Immutable)
 export function EditConsultantIdModal({ consultant, update_state }) {
   return (
-    <Button size="mini" basic disabled>
+    <Button size="tiny" basic disabled>
       <FaStop style={{ marginRight: 6, color: "red" }} title="Consultant ID is immutable"/>
       ID
     </Button>
@@ -120,8 +121,8 @@ export function EditConsultantFullnameModal({ consultant, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="mini" basic title="Edit Full Name">
-        <BiEdit style={{ marginRight: 6 }} />
+      <Button onClick={handleShow} size="tiny" basic title="Edit Full Name">
+        <FiEdit style={{ marginRight: 6 }} />
         Name
       </Button>
 
@@ -228,8 +229,8 @@ export function EditConsultantEmailModal({ consultant, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="mini" basic title="Edit Email">
-        <BiEdit style={{ marginRight: 6 }} />
+      <Button onClick={handleShow} size="tiny" basic title="Edit Email">
+        <FiEdit style={{ marginRight: 6 }} />
         Email
       </Button>
 
@@ -336,8 +337,8 @@ export function EditConsultantPhoneModal({ consultant, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="mini" basic title="Edit Phone">
-        <BiEdit style={{ marginRight: 6 }} />
+      <Button onClick={handleShow} size="tiny" basic title="Edit Phone">
+        <FiEdit style={{ marginRight: 6 }} />
         Phone
       </Button>
 
@@ -444,8 +445,8 @@ export function EditConsultantMobileModal({ consultant, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="mini" basic title="Edit Mobile">
-        <BiEdit style={{ marginRight: 6 }} />
+      <Button onClick={handleShow} size="tiny" basic title="Edit Mobile">
+        <FiEdit style={{ marginRight: 6 }} />
         Mobile
       </Button>
 
@@ -552,8 +553,8 @@ export function EditConsultantRoleModal({ consultant, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="mini" basic title="Edit Role">
-        <BiEdit style={{ marginRight: 6 }} />
+      <Button onClick={handleShow} size="tiny" basic title="Edit Role">
+        <FiEdit style={{ marginRight: 6 }} />
         Role
       </Button>
 
@@ -611,7 +612,7 @@ export function EditConsultantRoleModal({ consultant, update_state }) {
 // Edit Consultant Username Modal (Immutable)
 export function EditConsultantUsernameModal({ consultant, update_state }) {
   return (
-    <Button size="mini" basic disabled>
+    <Button size="tiny" basic disabled>
       <FaStop style={{ marginRight: 6, color: "red" }} title="Username is immutable"/>
       Username
     </Button>
@@ -677,8 +678,8 @@ export function EditConsultantPasswordModal({ consultant, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="mini" basic title="Edit Password">
-        <BiEdit style={{ marginRight: 6 }} />
+      <Button onClick={handleShow} size="tiny" basic title="Edit Password">
+        <FiEdit style={{ marginRight: 6 }} />
         Password
       </Button>
 
@@ -796,8 +797,8 @@ export function EditConsultantCanAssignTaskModal({ consultant, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="mini" basic title="Edit Can Assign Task">
-        <BiEdit style={{ marginRight: 6 }} />
+      <Button onClick={handleShow} size="tiny" basic title="Edit Can Assign Task">
+        <FiEdit style={{ marginRight: 6 }} />
         Tasks
       </Button>
 
@@ -902,8 +903,8 @@ export function EditConsultantCashPassportModal({ consultant, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="mini" basic title="Edit Cash Passport">
-        <BiEdit style={{ marginRight: 6 }} />
+      <Button onClick={handleShow} size="tiny" basic title="Edit Cash Passport">
+        <FiEdit style={{ marginRight: 6 }} />
         Passport
       </Button>
 
@@ -1008,8 +1009,8 @@ export function EditConsultantActiveModal({ consultant, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="mini" basic title="Edit Active Status">
-        <BiEdit style={{ marginRight: 6 }} />
+      <Button onClick={handleShow} size="tiny" basic title="Edit Active Status">
+        <FiEdit style={{ marginRight: 6 }} />
         Active
       </Button>
 
@@ -1112,8 +1113,8 @@ export function EditConsultantOrderIndexModal({ consultant, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="mini" basic title="Edit Order Index">
-        <BiEdit style={{ marginRight: 6 }} />
+      <Button onClick={handleShow} size="tiny" basic title="Edit Order Index">
+        <FiEdit style={{ marginRight: 6 }} />
         Order
       </Button>
 
@@ -1157,6 +1158,267 @@ export function EditConsultantOrderIndexModal({ consultant, update_state }) {
                </Button>
              </div>
            </div>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+}
+
+// Edit Consultant Photo Modal
+export function EditConsultantPhotoModal({ consultant, update_state }) {
+  const [show, setShow] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleClose = () => {
+    setShow(false);
+    setSelectedFile(null);
+    setPreviewUrl(null);
+  };
+
+  const handleShow = () => {
+    setShow(true);
+  };
+
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        Swal.fire({
+          icon: "error",
+          title: "Invalid File Type",
+          text: "Please select an image file (JPEG, PNG, GIF, etc.)",
+        });
+        return;
+      }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        Swal.fire({
+          icon: "error",
+          title: "File Too Large",
+          text: "Please select an image smaller than 5MB",
+        });
+        return;
+      }
+
+      setSelectedFile(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreviewUrl(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const onSave = async () => {
+    if (!selectedFile) {
+      Swal.fire({
+        icon: "error",
+        title: "No File Selected",
+        text: "Please select an image file to upload",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+
+      // Remove Content-Type header to let browser set it with boundary for multipart/form-data
+      delete currentHeaders["Content-Type"];
+
+      const formData = new FormData();
+      formData.append('photo', selectedFile);
+
+      const response = await fetch(`${UPDATE_CONSULTANT}${consultant.consultant_id}/`, {
+        method: 'PUT',
+        headers: {
+          "Authorization": currentHeaders["Authorization"]
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const res = await response.json();
+      update_state(res);
+      setShow(false);
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Photo updated successfully!",
+      });
+    } catch (e) {
+      console.log('Error updating photo:', e);
+      
+      let apiMsg = "Failed to update photo.";
+      
+      if (e?.response?.data?.error) {
+        apiMsg = e.response.data.error;
+      } else if (e?.response?.data?.photo) {
+        apiMsg = e.response.data.photo[0];
+      } else if (e?.response?.data?.detail) {
+        apiMsg = e.response.data.detail;
+      }
+      
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: apiMsg,
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removePhoto = async () => {
+    try {
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+
+      const res = await apiPut(
+        `${UPDATE_CONSULTANT}${consultant.consultant_id}/`,
+        { photo: null },
+        currentHeaders
+      );
+
+      update_state(res);
+      setShow(false);
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Photo removed successfully!",
+      });
+    } catch (e) {
+      console.log('Error removing photo:', e);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to remove photo.",
+      });
+    }
+  };
+
+  return (
+    <>
+      <Button onClick={handleShow} size="tiny" basic title="Edit Photo">
+        <MdPhotoCamera style={{ marginRight: 6 }} />
+        Photo
+      </Button>
+
+      <Modal show={show} onHide={handleClose} centered size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Photo</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group as={Row}>
+              <Form.Label column sm={3}>
+                Current Photo:
+              </Form.Label>
+              <Col sm={9}>
+                {consultant.photo_url ? (
+                  <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                    <img 
+                      src={consultant.photo_url} 
+                      alt="Current" 
+                      style={{ 
+                        maxWidth: '200px', 
+                        maxHeight: '200px', 
+                        borderRadius: '8px',
+                        border: '2px solid #ddd'
+                      }} 
+                    />
+                  </div>
+                ) : (
+                  <div style={{ 
+                    textAlign: 'center', 
+                    marginBottom: '20px',
+                    padding: '40px',
+                    border: '2px dashed #ddd',
+                    borderRadius: '8px',
+                    color: '#666'
+                  }}>
+                    No photo uploaded
+                  </div>
+                )}
+              </Col>
+            </Form.Group>
+            
+            <Form.Group as={Row}>
+              <Form.Label column sm={3}>
+                Upload New Photo:
+              </Form.Label>
+              <Col sm={9}>
+                <Form.Control
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                />
+                <Form.Text className="text-muted">
+                  Supported formats: JPEG, PNG, GIF. Maximum size: 5MB
+                </Form.Text>
+              </Col>
+            </Form.Group>
+
+            {previewUrl && (
+              <Form.Group as={Row}>
+                <Form.Label column sm={3}>
+                  Preview:
+                </Form.Label>
+                <Col sm={9}>
+                  <div style={{ textAlign: 'center' }}>
+                    <img 
+                      src={previewUrl} 
+                      alt="Preview" 
+                      style={{ 
+                        maxWidth: '200px', 
+                        maxHeight: '200px', 
+                        borderRadius: '8px',
+                        border: '2px solid #ddd'
+                      }} 
+                    />
+                  </div>
+                </Col>
+              </Form.Group>
+            )}
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <div>
+              {consultant.photo_url && (
+                <Button color="red" onClick={removePhoto} style={{ marginRight: "10px" }}>
+                  Remove Photo
+                </Button>
+              )}
+            </div>
+            <div>
+              <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
+                Cancel
+              </Button>
+              <Button
+                color="green"
+                onClick={onSave}
+                disabled={!selectedFile || isUploading}
+                loading={isUploading}
+              >
+                {isUploading ? "Uploading..." : "Upload Photo"}
+              </Button>
+            </div>
+          </div>
         </Modal.Footer>
       </Modal>
     </>

@@ -253,13 +253,174 @@ class InsuranceCarrierSerializer(serializers.ModelSerializer):
     class Meta:
         model = InsuranceCarrier
         fields = '__all__'
+        extra_kwargs = {
+            'active': {'required': False}  # Default to True
+        }
+
+    def validate_insucarrier_id(self, value):
+        """Validate insucarrier_id uniqueness"""
+        # Get the current instance (for updates) or None (for creates)
+        instance = getattr(self, 'instance', None)
+        
+        # Check if this insucarrier_id is already taken by another insurance carrier
+        try:
+            existing_carrier = InsuranceCarrier.objects.get(insucarrier_id=value)
+            # If this is an update and the existing carrier is the same as the current instance, it's OK
+            if instance and existing_carrier.insucarrier_id == instance.insucarrier_id:
+                return value
+            # Otherwise, it's a conflict
+            raise serializers.ValidationError(
+                f"Insurance Carrier ID '{value}' is already taken by Carrier: {existing_carrier.title}"
+            )
+        except InsuranceCarrier.DoesNotExist:
+            # No conflict, value is OK
+            return value
+
+    def validate_orderindex(self, value):
+        """Validate orderindex uniqueness"""
+        # Get the current instance (for updates) or None (for creates)
+        instance = getattr(self, 'instance', None)
+        
+        # Check if this orderindex is already taken by another insurance carrier
+        try:
+            existing_carrier = InsuranceCarrier.objects.get(orderindex=value)
+            # If this is an update and the existing carrier is the same as the current instance, it's OK
+            if instance and existing_carrier.insucarrier_id == instance.insucarrier_id:
+                return value
+            # Otherwise, it's a conflict
+            raise serializers.ValidationError(
+                f"Order index {value} is already taken by Insurance Carrier: {existing_carrier.title} (ID: {existing_carrier.insucarrier_id})"
+            )
+        except InsuranceCarrier.DoesNotExist:
+            # No conflict, value is OK
+            return value
+
+    def validate_title(self, value):
+        """Validate title format"""
+        if not value or len(value.strip()) < 2 or len(value.strip()) > 40:
+            raise serializers.ValidationError(
+                "Title must be between 2 and 40 characters"
+            )
+        return value.strip()
+
+    def create(self, validated_data):
+        """Create a new insurance carrier instance"""
+        # Set default values
+        if 'active' not in validated_data:
+            validated_data['active'] = True
+        
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        """Update an existing insurance carrier instance"""
+        # Prevent primary key updates - insucarrier_id is immutable
+        if 'insucarrier_id' in validated_data and validated_data['insucarrier_id'] != instance.insucarrier_id:
+            raise serializers.ValidationError(
+                "Insurance Carrier ID cannot be changed once created"
+            )
+        
+        return super().update(instance, validated_data)
 
 class BankSerializer(serializers.ModelSerializer):
     country = CountrySerializer(read_only=True)
+    country_id = serializers.CharField(write_only=True, required=False)
     
     class Meta:
         model = Bank
         fields = '__all__'
+        extra_kwargs = {
+            'active': {'required': False}  # Default to True
+        }
+
+    def validate_bank_id(self, value):
+        """Validate bank_id uniqueness"""
+        # Get the current instance (for updates) or None (for creates)
+        instance = getattr(self, 'instance', None)
+        
+        # Check if this bank_id is already taken by another bank
+        try:
+            existing_bank = Bank.objects.get(bank_id=value)
+            # If this is an update and the existing bank is the same as the current instance, it's OK
+            if instance and existing_bank.bank_id == instance.bank_id:
+                return value
+            # Otherwise, it's a conflict
+            raise serializers.ValidationError(
+                f"Bank ID '{value}' is already taken by Bank: {existing_bank.bankname}"
+            )
+        except Bank.DoesNotExist:
+            # No conflict, value is OK
+            return value
+
+    def validate_orderindex(self, value):
+        """Validate orderindex uniqueness"""
+        # Get the current instance (for updates) or None (for creates)
+        instance = getattr(self, 'instance', None)
+        
+        # Check if this orderindex is already taken by another bank
+        try:
+            existing_bank = Bank.objects.get(orderindex=value)
+            # If this is an update and the existing bank is the same as the current instance, it's OK
+            if instance and existing_bank.bank_id == instance.bank_id:
+                return value
+            # Otherwise, it's a conflict
+            raise serializers.ValidationError(
+                f"Order index {value} is already taken by Bank: {existing_bank.bankname} (ID: {existing_bank.bank_id})"
+            )
+        except Bank.DoesNotExist:
+            # No conflict, value is OK
+            return value
+
+    def validate_institutionnumber(self, value):
+        """Validate institution number format"""
+        if not value.isdigit() or len(value) != 3:
+            raise serializers.ValidationError(
+                "Institution number must be exactly 3 digits"
+            )
+        return value
+
+    def validate_swiftcode(self, value):
+        """Validate SWIFT code format"""
+        if not value.isalnum() or len(value) < 8 or len(value) > 11:
+            raise serializers.ValidationError(
+                "SWIFT code must be 8-11 alphanumeric characters"
+            )
+        return value.upper()
+
+    def create(self, validated_data):
+        """Create a new bank instance"""
+        # Handle country_id conversion
+        country_id = validated_data.pop('country_id', None)
+        if country_id:
+            try:
+                country = Country.objects.get(country_id=country_id)
+                validated_data['country'] = country
+            except Country.DoesNotExist:
+                raise serializers.ValidationError(f"Country with ID '{country_id}' does not exist.")
+        
+        # Set default values
+        if 'active' not in validated_data:
+            validated_data['active'] = True
+        
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        """Update an existing bank instance"""
+        # Handle country_id conversion
+        country_id = validated_data.pop('country_id', None)
+        if country_id:
+            try:
+                country = Country.objects.get(country_id=country_id)
+                validated_data['country'] = country
+            except Country.DoesNotExist:
+                raise serializers.ValidationError(f"Country with ID '{country_id}' does not exist.")
+        
+        # Prevent primary key updates - bank_id is immutable
+        if 'bank_id' in validated_data and validated_data['bank_id'] != instance.bank_id:
+            raise serializers.ValidationError(
+                "Bank ID cannot be changed once created"
+            )
+        
+        return super().update(instance, validated_data)
 
 # Client related serializers
 class ClientSerializer(serializers.ModelSerializer):
@@ -287,12 +448,13 @@ class BankClientAccountSerializer(serializers.ModelSerializer):
 # Consultant serializers
 class ConsultantSerializer(serializers.ModelSerializer):
     active = serializers.BooleanField(source='is_active', required=False)
+    photo_url = serializers.SerializerMethodField()
     
     class Meta:
         model = Consultant
         fields = [
             'consultant_id', 'orderindex', 'fullname', 'email', 'phone', 'mobile', 
-            'photo', 'role', 'username', 'password', 'is_active', 'is_staff', 
+            'photo', 'photo_url', 'role', 'username', 'password', 'is_active', 'is_staff', 
             'canassigntask', 'cashpassport', 'active'
         ]
         extra_kwargs = {
@@ -389,6 +551,20 @@ class ConsultantSerializer(serializers.ModelSerializer):
         
         instance.save()
         return instance
+
+    def get_photo_url(self, obj):
+        """
+        Absolute URL to the consultant's photo if present.
+        Requires MEDIA settings and request in serializer context.
+        """
+        if not obj.photo:
+            return None
+        request = self.context.get("request")
+        try:
+            url = obj.photo.url
+        except Exception:
+            return None
+        return request.build_absolute_uri(url) if request else url
 
 # Project related serializers
 class ProjectCategorySerializer(serializers.ModelSerializer):
@@ -656,9 +832,25 @@ class BankReferenceSerializer(serializers.ModelSerializer):
         fields = ['bank_id', 'bankname', 'country', 'institutionnumber', 'swiftcode']
 
 class ConsultantReferenceSerializer(serializers.ModelSerializer):
+    photo_url = serializers.SerializerMethodField()
+    
     class Meta:
         model = Consultant
-        fields = ['consultant_id', 'fullname', 'email', 'role', 'active']
+        fields = ['consultant_id', 'fullname', 'email', 'role', 'active', 'photo_url']
+
+    def get_photo_url(self, obj):
+        """
+        Absolute URL to the consultant's photo if present.
+        Requires MEDIA settings and request in serializer context.
+        """
+        if not obj.photo:
+            return None
+        request = self.context.get("request")
+        try:
+            url = obj.photo.url
+        except Exception:
+            return None
+        return request.build_absolute_uri(url) if request else url
 
 class ProjectCategoryReferenceSerializer(serializers.ModelSerializer):
     class Meta:

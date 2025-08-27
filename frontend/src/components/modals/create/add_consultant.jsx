@@ -4,6 +4,7 @@ import { useState } from "react";
 // Icons / Images
 import { BiPlus } from "react-icons/bi";
 import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
+import { MdPhotoCamera } from "react-icons/md";
 
 import axios from "axios";
 
@@ -64,6 +65,8 @@ function AddConsultantModal() {
   const [cashPassport, setCashPassport] = useState(""); // optional
   const [active, setActive] = useState(true); // optional, default true
   const [orderindex, setOrderindex] = useState(""); // required small int
+  const [selectedPhoto, setSelectedPhoto] = useState(null); // optional photo file
+  const [photoPreview, setPhotoPreview] = useState(null); // photo preview URL
 
   const resetForm = () => {
     setConsultantId("");
@@ -79,12 +82,48 @@ function AddConsultantModal() {
     setCashPassport("");
     setActive(true);
     setOrderindex("");
+    setSelectedPhoto(null);
+    setPhotoPreview(null);
   };
 
   const handleClose = () => setShow(false);
   const handleShow = () => {
     resetForm();
     setShow(true);
+  };
+
+  const handlePhotoSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        Swal.fire({
+          icon: "error",
+          title: "Invalid File Type",
+          text: "Please select an image file (JPEG, PNG, GIF, etc.)",
+        });
+        return;
+      }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        Swal.fire({
+          icon: "error",
+          title: "File Too Large",
+          text: "Please select an image smaller than 5MB",
+        });
+        return;
+      }
+
+      setSelectedPhoto(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPhotoPreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const isConsultantIdValid = consultantId.length >= 2 && consultantId.length <= 10;
@@ -111,24 +150,35 @@ function AddConsultantModal() {
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
+      // Remove Content-Type header to let browser set it with boundary for multipart/form-data
+      delete currentHeaders["Content-Type"];
+
+      const formData = new FormData();
+      formData.append('consultant_id', consultantId);
+      formData.append('fullname', fullname.trim());
+      formData.append('email', email || '');
+      formData.append('phone', phone || '');
+      formData.append('mobile', mobile || '');
+      formData.append('role', role);
+      formData.append('username', username);
+      formData.append('password', password);
+      formData.append('canassigntask', canAssignTask);
+      formData.append('cashpassport', cashPassport || '');
+      formData.append('active', active);
+      formData.append('orderindex', Number(orderindex));
+      
+      // Add photo if selected
+      if (selectedPhoto) {
+        formData.append('photo', selectedPhoto);
+      }
+
       const res = await axios({
         method: "post",
         url: ADD_CONSULTANT,
-        headers: currentHeaders,
-        data: {
-          consultant_id: consultantId,
-          fullname: fullname.trim(),
-          email: email || null,
-          phone: phone || null,
-          mobile: mobile || null,
-          role: role,
-          username: username,
-          password: password,
-          canassigntask: canAssignTask,
-          cashpassport: cashPassport || null,
-          active: active,
-          orderindex: Number(orderindex),
+        headers: {
+          "Authorization": currentHeaders["Authorization"]
         },
+        data: formData,
       });
 
       const newId =
@@ -177,6 +227,9 @@ function AddConsultantModal() {
       } else if (e?.response?.data?.cashpassport) {
         // Serializer validation error for cashpassport
         apiMsg = e.response.data.cashpassport[0];
+      } else if (e?.response?.data?.photo) {
+        // Serializer validation error for photo
+        apiMsg = e.response.data.photo[0];
       } else if (e?.response?.data?.detail) {
         // Generic DRF error
         apiMsg = e.response.data.detail;
@@ -374,6 +427,45 @@ function AddConsultantModal() {
                 </Form.Group>
               </Col>
             </Row>
+
+            <Row>
+              <Col md={12}>
+                <Form.Group>
+                  <Form.Label>Photo</Form.Label>
+                  <Form.Control
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoSelect}
+                  />
+                  <Form.Text className="text-muted">
+                    <MdPhotoCamera style={{ marginRight: 6 }} />
+                    Supported formats: JPEG, PNG, GIF. Maximum size: 5MB (optional)
+                  </Form.Text>
+                </Form.Group>
+              </Col>
+            </Row>
+
+            {photoPreview && (
+              <Row>
+                <Col md={12}>
+                  <Form.Group>
+                    <Form.Label>Photo Preview</Form.Label>
+                    <div style={{ textAlign: 'center', marginTop: '10px' }}>
+                      <img
+                        src={photoPreview}
+                        alt="preview"
+                        style={{
+                          maxWidth: '200px',
+                          maxHeight: '200px',
+                          borderRadius: '8px',
+                          border: '2px solid #ddd'
+                        }}
+                      />
+                    </div>
+                  </Form.Group>
+                </Col>
+              </Row>
+            )}
 
                          <Row>
                <Col md={12}>
