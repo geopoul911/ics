@@ -8,7 +8,7 @@ import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
 
 // Modules / Functions
 import Swal from "sweetalert2";
-import { Modal, Col, Form, Row } from "react-bootstrap";
+import { Modal, Form } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
 import axios from "axios";
 
@@ -101,6 +101,11 @@ export default function AddProfessionModal({ onProfessionCreated }) {
         apiMsg = e.response.data.profession_id[0];
       } else if (e?.response?.data?.title) {
         apiMsg = e.response.data.title[0];
+      } else if (typeof e?.response?.data === 'object') {
+        try {
+          const all = Object.values(e.response.data).flat().join(' ');
+          if (all) apiMsg = all;
+        } catch (_ignored) {}
       } else if (e?.response?.data?.detail) {
         apiMsg = e.response.data.detail;
       }
@@ -126,54 +131,46 @@ export default function AddProfessionModal({ onProfessionCreated }) {
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Profession ID:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  type="text"
-                  name="profession_id"
-                  value={formData.profession_id}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    profession_id: validateProfessionId(clampLen(e.target.value, 10))
-                  }))}
-                  placeholder="Enter profession ID (1-10 alphanumeric characters)"
-                  isInvalid={
-                    formData.profession_id !== "" &&
-                    (formData.profession_id.trim().length < 1 || formData.profession_id.trim().length > 10)
-                  }
-                />
-                <Form.Control.Feedback type="invalid">
-                  Profession ID must be 1-10 alphanumeric characters
-                </Form.Control.Feedback>
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Profession ID:</Form.Label>
+              <Form.Control
+                type="text"
+                name="profession_id"
+                value={formData.profession_id}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  profession_id: validateProfessionId(clampLen(e.target.value, 10))
+                }))}
+                placeholder="e.g., LAW"
+                isInvalid={
+                  formData.profession_id !== "" &&
+                  (formData.profession_id.trim().length < 1 || formData.profession_id.trim().length > 10)
+                }
+              />
+              <Form.Control.Feedback type="invalid">
+                Profession ID must be 1-10 alphanumeric characters
+              </Form.Control.Feedback>
             </Form.Group>
 
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Title:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    title: validateTitle(clampLen(e.target.value, 40))
-                  }))}
-                  placeholder="Enter profession title (2-40 characters)"
-                  isInvalid={
-                    formData.title !== "" &&
-                    (formData.title.trim().length < 2 || formData.title.trim().length > 40)
-                  }
-                />
-                <Form.Control.Feedback type="invalid">
-                  Title must be 2-40 characters
-                </Form.Control.Feedback>
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Title:</Form.Label>
+              <Form.Control
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  title: validateTitle(clampLen(e.target.value, 40))
+                }))}
+                placeholder="e.g., Lawyer"
+                isInvalid={
+                  formData.title !== "" &&
+                  (formData.title.trim().length < 2 || formData.title.trim().length > 40)
+                }
+              />
+              <Form.Control.Feedback type="invalid">
+                Title must be 2-40 characters
+              </Form.Control.Feedback>
             </Form.Group>
           </Form>
         </Modal.Body>

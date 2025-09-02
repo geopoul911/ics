@@ -40,7 +40,7 @@ function AddCityModal() {
   const [cityId, setCityId] = useState(""); // maps to city_id
   const [countryId, setCountryId] = useState(""); // maps to country_id
   const [provinceId, setProvinceId] = useState(""); // maps to province_id
-  const [orderindex, setOrderindex] = useState(""); // required small int
+  const [orderindex, setOrderindex] = useState(""); // optional small int
 
   const resetForm = () => {
     setTitle("");
@@ -60,7 +60,7 @@ function AddCityModal() {
   const isCityIdValid = cityId.length >= 2 && cityId.length <= 10;
   const isCountryIdValid = countryId.length > 0;
   const isProvinceIdValid = provinceId.length > 0;
-  const isOrderIndexValid = orderindex !== "" && Number.isInteger(+orderindex);
+  const isOrderIndexValid = orderindex === "" || Number.isInteger(+orderindex);
 
   const isFormValid = isTitleValid && isCityIdValid && isCountryIdValid && isProvinceIdValid && isOrderIndexValid;
 
@@ -149,7 +149,7 @@ function AddCityModal() {
           city_id: cityId,
           country_id: countryId, // Use country_id instead of country
           province_id: provinceId, // Use province_id instead of province
-          orderindex: Number(orderindex),
+          orderindex: orderindex === "" ? null : Number(orderindex),
         },
       });
 
@@ -314,7 +314,7 @@ function AddCityModal() {
                 {!isOrderIndexValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Order Index is required (integer).
+                    Order Index must be an integer when provided.
                   </li>
                 )}
               </ul>

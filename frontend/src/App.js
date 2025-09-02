@@ -19,6 +19,27 @@ import AllDocuments from "./components/data_management/all_documents/all_documen
 import DocumentOverview from "./components/data_management/document/document_overview/document_overview";
 import AllClients from "./components/data_management/all_clients/all_clients";
 import ClientOverview from "./components/data_management/client/client_overview/client_overview";
+import AllClientContacts from "./components/data_management/all_client_contacts/all_client_contacts";
+import ClientContactOverview from "./components/data_management/client_contact/client_contact_overview/client_contact_overview";
+import AllBankClientAccounts from "./components/data_management/all_bank_client_accounts/all_bank_client_accounts";
+import BankClientAccountOverview from "./components/data_management/bank_client_account/bank_client_account_overview/bank_client_account_overview";
+import AllProjects from "./components/data_management/all_projects/all_projects";
+import ProjectOverview from "./components/data_management/project/project_overview/project_overview";
+import AllAssociatedClients from "./components/data_management/all_associated_clients/all_associated_clients";
+import AssociatedClientOverview from "./components/data_management/associated_client/associated_client_overview/associated_client_overview";
+import AllTaskComments from "./components/data_management/all_task_comments/all_task_comments";
+import TaskCommentOverview from "./components/data_management/task_comment/task_comment_overview/task_comment_overview";
+import AllProjectTasks from "./components/data_management/all_project_tasks/all_project_tasks";
+import AllProperties from "./components/data_management/all_properties/all_properties";
+import PropertyOverview from "./components/data_management/property/property_overview/property_overview";
+import AllCash from "./components/data_management/all_cash/all_cash";
+import CashOverview from "./components/data_management/cash/cash_overview/cash_overview";
+import AllBankProjectAccounts from "./components/data_management/all_bank_project_accounts/all_bank_project_accounts";
+import BankProjectAccountOverview from "./components/data_management/bank_project_account/bank_project_account_overview";
+import AllProfessionals from "./components/data_management/all_professionals/all_professionals";
+import ProfessionalOverview from "./components/data_management/professional/professional_overview/professional_overview";
+import AllTaxationProjects from "./components/data_management/all_taxation_projects/all_taxation_projects";
+import TaxationProjectOverview from "./components/data_management/taxation_project/taxation_project_overview/taxation_project_overview";
 
 // Reports
 import ReportsRoot from "./components/reports/reports_root/reports_root";
@@ -212,6 +233,174 @@ function App() {
              <ClientOverview {...props} setUserToken={setUserToken} />
            )}
          />
+         <ProtectedRoute
+           isLoggedIn={!!userToken}
+           exact={true}
+           path="/data_management/all_client_contacts"
+           render={(props) => (
+             <AllClientContacts {...props} setUserToken={setUserToken} />
+           )}
+         />
+         <ProtectedRoute
+           isLoggedIn={!!userToken}
+           exact={true}
+           path="/data_management/client_contact/:id"
+           render={(props) => (
+             <ClientContactOverview {...props} setUserToken={setUserToken} />
+           )}
+         />
+         <ProtectedRoute
+           isLoggedIn={!!userToken}
+           exact={true}
+           path="/data_management/all_bank_client_accounts"
+           render={(props) => (
+             <AllBankClientAccounts {...props} setUserToken={setUserToken} />
+           )}
+         />
+                     <ProtectedRoute
+              isLoggedIn={!!userToken}
+              exact={true}
+              path="/data_management/bank_client_account/:id"
+              render={(props) => (
+                <BankClientAccountOverview {...props} setUserToken={setUserToken} />
+              )}
+            />
+            <ProtectedRoute
+              isLoggedIn={!!userToken}
+              exact={true}
+              path="/data_management/all_projects"
+              render={(props) => (
+                <AllProjects {...props} setUserToken={setUserToken} />
+              )}
+            />
+            <ProtectedRoute
+              isLoggedIn={!!userToken}
+              exact={true}
+              path="/data_management/project/:id"
+              render={(props) => (
+                <ProjectOverview {...props} setUserToken={setUserToken} />
+              )}
+            />
+            <ProtectedRoute
+              isLoggedIn={!!userToken}
+              exact={true}
+              path="/data_management/all_associated_clients"
+              render={(props) => (
+                <AllAssociatedClients {...props} setUserToken={setUserToken} />
+              )}
+            />
+            <ProtectedRoute
+              isLoggedIn={!!userToken}
+              exact={true}
+              path="/data_management/associated_client/:id"
+              render={(props) => (
+                <AssociatedClientOverview {...props} setUserToken={setUserToken} />
+              )}
+            />
+            <ProtectedRoute
+              isLoggedIn={!!userToken}
+              exact={true}
+              path="/data_management/all_task_comments"
+              render={(props) => (
+                <AllTaskComments {...props} setUserToken={setUserToken} />
+              )}
+            />
+            <ProtectedRoute
+              isLoggedIn={!!userToken}
+              exact={true}
+              path="/data_management/all_project_tasks"
+              render={(props) => (
+                <AllProjectTasks {...props} setUserToken={setUserToken} />
+              )}
+            />
+            <ProtectedRoute
+              isLoggedIn={!!userToken}
+              exact={true}
+              path="/data_management/task_comment/:id"
+              render={(props) => (
+                <TaskCommentOverview {...props} setUserToken={setUserToken} />
+              )}
+            />
+            <ProtectedRoute
+              isLoggedIn={!!userToken}
+              exact={true}
+              path="/data_management/all_properties"
+              render={(props) => (
+                <AllProperties {...props} setUserToken={setUserToken} />
+              )}
+            />
+            <ProtectedRoute
+              isLoggedIn={!!userToken}
+              exact={true}
+              path="/data_management/property/:id"
+              render={(props) => (
+                <PropertyOverview {...props} setUserToken={setUserToken} />
+              )}
+            />
+            <ProtectedRoute
+              isLoggedIn={!!userToken}
+              exact={true}
+              path="/data_management/all_cash"
+              render={(props) => (
+                <AllCash {...props} setUserToken={setUserToken} />
+              )}
+            />
+            <ProtectedRoute
+              isLoggedIn={!!userToken}
+              exact={true}
+              path="/data_management/cash/:id"
+              render={(props) => (
+                <CashOverview {...props} setUserToken={setUserToken} />
+              )}
+            />
+            <ProtectedRoute
+              isLoggedIn={!!userToken}
+              exact={true}
+              path="/data_management/all_bank_project_accounts"
+              render={(props) => (
+                <AllBankProjectAccounts {...props} setUserToken={setUserToken} />
+              )}
+            />
+            <ProtectedRoute
+              isLoggedIn={!!userToken}
+              exact={true}
+              path="/data_management/bank_project_account/:id"
+              render={(props) => (
+                <BankProjectAccountOverview {...props} setUserToken={setUserToken} />
+              )}
+            />
+            <ProtectedRoute
+              isLoggedIn={!!userToken}
+              exact={true}
+              path="/data_management/all_professionals"
+              render={(props) => (
+                <AllProfessionals {...props} setUserToken={setUserToken} />
+              )}
+            />
+            <ProtectedRoute
+              isLoggedIn={!!userToken}
+              exact={true}
+              path="/data_management/professional/:id"
+              render={(props) => (
+                <ProfessionalOverview {...props} setUserToken={setUserToken} />
+              )}
+            />
+            <ProtectedRoute
+              isLoggedIn={!!userToken}
+              exact={true}
+              path="/data_management/all_taxation_projects"
+              render={(props) => (
+                <AllTaxationProjects {...props} setUserToken={setUserToken} />
+              )}
+            />
+            <ProtectedRoute
+              isLoggedIn={!!userToken}
+              exact={true}
+              path="/data_management/taxation_project/:id"
+              render={(props) => (
+                <TaxationProjectOverview {...props} setUserToken={setUserToken} />
+              )}
+            />
 
         <ProtectedRoute
           isLoggedIn={!!userToken}

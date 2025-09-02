@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { FiEdit } from "react-icons/fi";
 import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
 import { FaStop } from "react-icons/fa";
-import { apiPut } from "../../utils/api";
+
 import axios from "axios";
 import { headers } from "../global_vars";
 // Libs
@@ -30,7 +30,12 @@ const toSmallInt = (value) => {
 const patchProvince = async (id, payload) => {
   const url = `${PROVINCE_DETAIL}${encodeURIComponent(id)}/`;
   console.log('Patching province at URL:', url, 'with payload:', payload);
-  return apiPut(url, payload);
+  const currentHeaders = {
+    ...headers,
+    "Authorization": "Token " + localStorage.getItem("userToken")
+  };
+  const response = await axios.patch(url, payload, { headers: currentHeaders });
+  return response.data;
 };
 
 /* ===========================

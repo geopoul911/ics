@@ -13,7 +13,7 @@ import { Button } from "semantic-ui-react";
 
 // Global Variables
 import { headers } from "../global_vars";
-import { API_ENDPOINTS, apiGet } from "../../utils/api";
+
 
 // Variables
 window.Swal = Swal;
@@ -63,8 +63,14 @@ export function EditClientLocationModal({ client, update_state }) {
 
   const loadCountries = async () => {
     try {
-      const response = await apiGet(API_ENDPOINTS.COUNTRIES);
-      const countriesData = response?.all_countries || [];
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+              const response = await axios.get("http://localhost:8000/api/regions/all_countries/", {
+        headers: currentHeaders
+      });
+      const countriesData = response?.data?.all_countries || [];
       setCountries(countriesData);
     } catch (error) {
       console.error('Error loading countries:', error);
@@ -74,8 +80,8 @@ export function EditClientLocationModal({ client, update_state }) {
 
   const loadProvinces = async (countryId) => {
     try {
-      const response = await apiGet(`${API_ENDPOINTS.PROVINCES}?country=${countryId}`);
-      const provincesData = response?.all_provinces || [];
+              const response = await axios.get(`http://localhost:8000/api/regions/all_provinces/?country=${countryId}`);
+      const provincesData = response?.data?.all_provinces || [];
       setProvinces(provincesData);
     } catch (error) {
       console.error('Error loading provinces:', error);
@@ -85,8 +91,8 @@ export function EditClientLocationModal({ client, update_state }) {
 
   const loadCities = async (provinceId) => {
     try {
-      const response = await apiGet(`${API_ENDPOINTS.CITIES}?province=${provinceId}`);
-      const citiesData = response?.all_cities || [];
+              const response = await axios.get(`http://localhost:8000/api/regions/all_cities/?province=${provinceId}`);
+      const citiesData = response?.data?.all_cities || [];
       setCities(citiesData);
     } catch (error) {
       console.error('Error loading cities:', error);
@@ -205,7 +211,7 @@ export function EditClientLocationModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose} disabled={isLoading}>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
           <Button color="green" onClick={handleSave} loading={isLoading}>
@@ -286,7 +292,7 @@ export function EditClientSurnameModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
           <Button color="green" onClick={handleSave}>
@@ -367,7 +373,7 @@ export function EditClientNameModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
           <Button color="green" onClick={handleSave}>
@@ -448,7 +454,7 @@ export function EditClientOnomaModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
           <Button color="green" onClick={handleSave}>
@@ -529,7 +535,7 @@ export function EditClientEponymoModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
           <Button color="green" onClick={handleSave}>
@@ -633,7 +639,7 @@ export function EditClientEmailModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
           <Button color="green" onClick={handleSave}>
@@ -714,7 +720,7 @@ export function EditClientPhone1Modal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
           <Button color="green" onClick={handleSave}>
@@ -795,7 +801,7 @@ export function EditClientMobile1Modal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
           <Button color="green" onClick={handleSave}>
@@ -876,7 +882,7 @@ export function EditClientPhone2Modal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
           <Button color="green" onClick={handleSave}>
@@ -957,7 +963,7 @@ export function EditClientMobile2Modal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
           <Button color="green" onClick={handleSave}>
@@ -1035,7 +1041,7 @@ export function EditClientAddressModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
           <Button color="green" onClick={handleSave}>
@@ -1113,7 +1119,7 @@ export function EditClientPostalcodeModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
           <Button color="green" onClick={handleSave}>
@@ -1190,7 +1196,7 @@ export function EditClientActiveModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
           <Button color="green" onClick={handleSave}>
@@ -1269,7 +1275,7 @@ export function EditClientNotesModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
           <Button color="green" onClick={handleSave}>
@@ -2200,8 +2206,8 @@ export function EditClientPassportcountryModal({ client, update_state }) {
 
   const loadCountries = async () => {
     try {
-      const response = await apiGet(API_ENDPOINTS.COUNTRIES);
-      const countriesData = response?.all_countries || [];
+      const response = await axios.get("http://localhost:8000/api/regions/all_countries/");
+      const countriesData = response?.data?.all_countries || [];
       setCountries(countriesData);
     } catch (error) {
       console.error('Error loading countries:', error);
@@ -2940,8 +2946,8 @@ export function EditClientPensioncountry1Modal({ client, update_state }) {
 
   const loadCountries = async () => {
     try {
-      const response = await apiGet(API_ENDPOINTS.COUNTRIES);
-      const countriesData = response?.all_countries || [];
+      const response = await axios.get("http://localhost:8000/api/regions/all_countries/");
+      const countriesData = response?.data?.all_countries || [];
       setCountries(countriesData);
     } catch (error) {
       console.error('Error loading countries:', error);
@@ -3039,8 +3045,8 @@ export function EditClientInsucarrier1Modal({ client, update_state }) {
 
   const loadInsuranceCarriers = async () => {
     try {
-      const response = await apiGet(API_ENDPOINTS.INSURANCE_CARRIERS);
-      const carriersData = response?.all_insurance_carriers || [];
+      const response = await axios.get("http://localhost:8000/api/data_management/all_insurance_carriers/");
+      const carriersData = response?.data?.all_insurance_carriers || [];
       setInsuranceCarriers(carriersData);
     } catch (error) {
       console.error('Error loading insurance carriers:', error);
@@ -3219,8 +3225,8 @@ export function EditClientPensioncountry2Modal({ client, update_state }) {
 
   const loadCountries = async () => {
     try {
-      const response = await apiGet(API_ENDPOINTS.COUNTRIES);
-      const countriesData = response?.all_countries || [];
+      const response = await axios.get("http://localhost:8000/api/regions/all_countries/");
+      const countriesData = response?.data?.all_countries || [];
       setCountries(countriesData);
     } catch (error) {
       console.error('Error loading countries:', error);
@@ -3318,8 +3324,8 @@ export function EditClientInsucarrier2Modal({ client, update_state }) {
 
   const loadInsuranceCarriers = async () => {
     try {
-      const response = await apiGet(API_ENDPOINTS.INSURANCE_CARRIERS);
-      const carriersData = response?.all_insurance_carriers || [];
+      const response = await axios.get("http://localhost:8000/api/data_management/all_insurance_carriers/");
+      const carriersData = response?.data?.all_insurance_carriers || [];
       setInsuranceCarriers(carriersData);
     } catch (error) {
       console.error('Error loading insurance carriers:', error);

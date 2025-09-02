@@ -8,7 +8,7 @@ import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
 
 // Modules / Functions
 import Swal from "sweetalert2";
-import { Modal, Col, Form, Row } from "react-bootstrap";
+import { Modal, Form } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
 import axios from "axios";
 
@@ -62,16 +62,13 @@ export default function AddInsuranceCarrierModal({ onInsuranceCarrierCreated }) 
     }));
   };
 
-  const isFormValid = () => {
-    return (
-      formData.insucarrier_id.trim().length >= 1 &&
-      formData.insucarrier_id.trim().length <= 10 &&
-      formData.title.trim().length >= 2 &&
-      formData.title.trim().length <= 40 &&
-      formData.orderindex !== "" &&
-      Number.isInteger(+formData.orderindex)
-    );
-  };
+  const isFormValid = () => (
+    formData.insucarrier_id.trim().length >= 1 &&
+    formData.insucarrier_id.trim().length <= 10 &&
+    formData.title.trim().length >= 2 &&
+    formData.title.trim().length <= 40 &&
+    (formData.orderindex === "" || Number.isInteger(+formData.orderindex))
+  );
 
   const createNewInsuranceCarrier = async () => {
     if (!isFormValid()) {
@@ -92,7 +89,7 @@ export default function AddInsuranceCarrierModal({ onInsuranceCarrierCreated }) 
       const payload = {
         insucarrier_id: formData.insucarrier_id.trim().toUpperCase(),
         title: formData.title.trim(),
-        orderindex: Number(formData.orderindex),
+        orderindex: formData.orderindex === "" ? null : Number(formData.orderindex),
         active: formData.active,
       };
 
@@ -115,17 +112,23 @@ export default function AddInsuranceCarrierModal({ onInsuranceCarrierCreated }) 
       console.log('Error creating insurance carrier:', e);
       
       let apiMsg = "Failed to create insurance carrier.";
+      const data = e?.response?.data;
       
-      if (e?.response?.data?.error) {
-        apiMsg = e.response.data.error;
-      } else if (e?.response?.data?.insucarrier_id) {
-        apiMsg = e.response.data.insucarrier_id[0];
-      } else if (e?.response?.data?.title) {
-        apiMsg = e.response.data.title[0];
-      } else if (e?.response?.data?.orderindex) {
-        apiMsg = e.response.data.orderindex[0];
-      } else if (e?.response?.data?.detail) {
-        apiMsg = e.response.data.detail;
+      if (data?.error) {
+        apiMsg = data.error;
+      } else if (data?.insucarrier_id) {
+        apiMsg = data.insucarrier_id[0];
+      } else if (data?.title) {
+        apiMsg = data.title[0];
+      } else if (data?.orderindex) {
+        apiMsg = data.orderindex[0];
+      } else if (typeof data === 'object' && data) {
+        try {
+          const all = Object.values(data).flat().join(' ');
+          if (all) apiMsg = all;
+        } catch (_ignored) {}
+      } else if (data?.detail) {
+        apiMsg = data.detail;
       }
       
       Swal.fire({
@@ -149,94 +152,77 @@ export default function AddInsuranceCarrierModal({ onInsuranceCarrierCreated }) 
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Insurance Carrier ID:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  type="text"
-                  name="insucarrier_id"
-                  value={formData.insucarrier_id}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    insucarrier_id: validateInsuranceCarrierId(clampLen(e.target.value, 10))
-                  }))}
-                  placeholder="Enter insurance carrier ID (1-10 alphanumeric characters)"
-                  isInvalid={
-                    formData.insucarrier_id !== "" &&
-                    (formData.insucarrier_id.trim().length < 1 || formData.insucarrier_id.trim().length > 10)
-                  }
-                />
-                <Form.Control.Feedback type="invalid">
-                  Insurance carrier ID must be 1-10 alphanumeric characters
-                </Form.Control.Feedback>
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Insurance Carrier ID:</Form.Label>
+              <Form.Control
+                type="text"
+                name="insucarrier_id"
+                value={formData.insucarrier_id}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  insucarrier_id: validateInsuranceCarrierId(clampLen(e.target.value, 10))
+                }))}
+                placeholder="e.g., ABC01"
+                isInvalid={
+                  formData.insucarrier_id !== "" &&
+                  (formData.insucarrier_id.trim().length < 1 || formData.insucarrier_id.trim().length > 10)
+                }
+              />
+              <Form.Control.Feedback type="invalid">
+                Insurance carrier ID must be 1-10 alphanumeric characters
+              </Form.Control.Feedback>
             </Form.Group>
 
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Title:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    title: validateTitle(clampLen(e.target.value, 40))
-                  }))}
-                  placeholder="Enter insurance carrier title (2-40 characters)"
-                  isInvalid={
-                    formData.title !== "" &&
-                    (formData.title.trim().length < 2 || formData.title.trim().length > 40)
-                  }
-                />
-                <Form.Control.Feedback type="invalid">
-                  Title must be 2-40 characters
-                </Form.Control.Feedback>
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Title:</Form.Label>
+              <Form.Control
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  title: validateTitle(clampLen(e.target.value, 40))
+                }))}
+                placeholder="e.g., Alpha Insurance"
+                isInvalid={
+                  formData.title !== "" &&
+                  (formData.title.trim().length < 2 || formData.title.trim().length > 40)
+                }
+              />
+              <Form.Control.Feedback type="invalid">
+                Title must be 2-40 characters
+              </Form.Control.Feedback>
             </Form.Group>
 
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Order Index:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  type="number"
-                  name="orderindex"
-                  value={formData.orderindex}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    orderindex: toSmallInt(e.target.value)
-                  }))}
-                  placeholder="Enter order index"
-                  isInvalid={
-                    formData.orderindex !== "" &&
-                    !Number.isInteger(+formData.orderindex)
-                  }
-                />
-                <Form.Control.Feedback type="invalid">
-                  Please enter a valid order index
-                </Form.Control.Feedback>
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Order Index:</Form.Label>
+              <Form.Control
+                type="number"
+                name="orderindex"
+                value={formData.orderindex}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  orderindex: toSmallInt(e.target.value)
+                }))}
+                placeholder="Optional: numeric"
+                isInvalid={
+                  formData.orderindex !== "" &&
+                  !Number.isInteger(+formData.orderindex)
+                }
+              />
+              <Form.Control.Feedback type="invalid">
+                Please enter a valid order index when provided
+              </Form.Control.Feedback>
             </Form.Group>
 
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Active:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Check
-                  type="checkbox"
-                  name="active"
-                  checked={formData.active}
-                  onChange={handleInputChange}
-                  label="Insurance carrier is active"
-                />
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Check
+                type="checkbox"
+                name="active"
+                checked={formData.active}
+                onChange={handleInputChange}
+                label="Insurance carrier is active"
+              />
             </Form.Group>
           </Form>
         </Modal.Body>
@@ -269,12 +255,6 @@ export default function AddInsuranceCarrierModal({ onInsuranceCarrierCreated }) 
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
                     Title must be 2–40 chars.
-                  </li>
-                )}
-                {formData.orderindex === "" && (
-                  <li>
-                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Order Index is required (valid number).
                   </li>
                 )}
                 {formData.orderindex !== "" && !Number.isInteger(+formData.orderindex) && (

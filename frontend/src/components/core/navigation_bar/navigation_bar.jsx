@@ -6,7 +6,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import "bootstrap-css-only/css/bootstrap.min.css";
 import "./navigation_bar.css";
 
-import { apiPost, API_ENDPOINTS } from "../../../utils/api";
+import axios from "axios";
 
 // Modules / Functions
 import { Navbar, Nav, Dropdown } from "react-bootstrap";
@@ -65,7 +65,7 @@ class NavigationBar extends Component {
 
   // Logout
   handleLogout = ({ setUserToken }) => {
-    apiPost(API_ENDPOINTS.LOGOUT);
+    axios.post("/user/logout/");
     localStorage.removeItem("userToken");
     setUserToken(null);
   };
@@ -173,26 +173,26 @@ class NavigationBar extends Component {
                     <Dropdown.Item href="/data_management/all_clients">
                       <FaArrowRight style={iconStyle}/> Clients
                     </Dropdown.Item>
-                    <Dropdown.Item href="/data_management/client_contacts">
+                    <Dropdown.Item href="/data_management/all_client_contacts">
                       <FaArrowRight style={iconStyle}/> Client Contacts
                     </Dropdown.Item>
-                    <Dropdown.Item href="/data_management/bank_client_accounts">
+                    <Dropdown.Item href="/data_management/all_bank_client_accounts">
                       <FaArrowRight style={iconStyle}/> Bank Client Accounts
                     </Dropdown.Item>
                     
                     {/* Projects & Tasks */}
                     <Dropdown.Divider />
                     <Dropdown.Header>Projects & Tasks</Dropdown.Header>
-                    <Dropdown.Item href="/data_management/projects">
+                    <Dropdown.Item href="/data_management/all_projects">
                       <FaArrowRight style={iconStyle}/> Projects
                     </Dropdown.Item>
-                    <Dropdown.Item href="/data_management/associated_clients">
+                    <Dropdown.Item href="/data_management/all_associated_clients">
                       <FaArrowRight style={iconStyle}/> Associated Clients
                     </Dropdown.Item>
-                    <Dropdown.Item href="/data_management/project_tasks">
+                    <Dropdown.Item href="/data_management/all_project_tasks">
                       <FaArrowRight style={iconStyle}/> Project Tasks
                     </Dropdown.Item>
-                    <Dropdown.Item href="/data_management/task_comments">
+                    <Dropdown.Item href="/data_management/all_task_comments">
                       <FaArrowRight style={iconStyle}/> Task Comments
                     </Dropdown.Item>
                     
@@ -206,27 +206,27 @@ class NavigationBar extends Component {
                     {/* Properties */}
                     <Dropdown.Divider />
                     <Dropdown.Header>Properties</Dropdown.Header>
-                    <Dropdown.Item href="/data_management/properties">
+                    <Dropdown.Item href="/data_management/all_properties">
                       <FaArrowRight style={iconStyle}/> Properties
                     </Dropdown.Item>
                     
                     {/* Financial */}
                     <Dropdown.Divider />
                     <Dropdown.Header>Financial</Dropdown.Header>
-                    <Dropdown.Item href="/data_management/cash">
+                    <Dropdown.Item href="/data_management/all_cash">
                       <FaArrowRight style={iconStyle}/> Cash
                     </Dropdown.Item>
-                    <Dropdown.Item href="/data_management/bank_project_accounts">
+                    <Dropdown.Item href="/data_management/all_bank_project_accounts">
                       <FaArrowRight style={iconStyle}/> Bank Project Accounts
                     </Dropdown.Item>
                     
                     {/* Directory */}
                     <Dropdown.Divider />
                     <Dropdown.Header>Directory</Dropdown.Header>
-                    <Dropdown.Item href="/data_management/professionals">
+                    <Dropdown.Item href="/data_management/all_professionals">
                       <FaArrowRight style={iconStyle}/> Professionals
                     </Dropdown.Item>
-                    <Dropdown.Item href="/data_management/taxation_projects">
+                    <Dropdown.Item href="/data_management/all_taxation_projects">
                       <FaArrowRight style={iconStyle}/> Taxation Projects
                     </Dropdown.Item>
                   </Dropdown.Menu>

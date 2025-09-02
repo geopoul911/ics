@@ -8,7 +8,7 @@ import TaskCompletionChart from './charts/TaskCompletionChart';
 import RecentActivities from './RecentActivities';
 import TopClients from './TopClients';
 import OverdueItems from './OverdueItems';
-import { apiGet } from '../../utils/api';
+import axios from 'axios';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -29,9 +29,9 @@ const Dashboard = () => {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await apiGet('/api/dashboard/stats/');
-      if (response.success) {
-        setStats(response.data);
+      const response = await axios.get('http://localhost:8000/api/dashboard/stats/');
+      if (response.data.success) {
+        setStats(response.data.data);
       }
     } catch (err) {
       setError('Failed to load dashboard data');

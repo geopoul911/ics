@@ -8,12 +8,22 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models.deletion import ProtectedError
+from django.http import Http404
 
-from webapp.models import Document, Project, Client
+from webapp.models import Document, Project, Client, ClientContact, BankClientAccount, AssociatedClient, TaskComment, Property, Cash, Professional, TaxationProject, BankProjectAccount
 from webapp.serializers import (
     DocumentSerializer, DocumentListSerializer, 
-    ProjectReferenceSerializer, ClientReferenceSerializer,
-    ClientSerializer, ClientListSerializer
+    ProjectReferenceSerializer, ProjectSerializer, ProjectListSerializer, ClientReferenceSerializer,
+    ClientSerializer, ClientListSerializer,
+    ClientContactSerializer, ClientContactListSerializer,
+    BankClientAccountSerializer, BankClientAccountListSerializer,
+    AssociatedClientSerializer,
+    TaskCommentSerializer, PropertySerializer, PropertyListSerializer,
+    CashSerializer, CashListSerializer,
+    ProfessionalSerializer, ProfessionalReferenceSerializer,
+    TaxationProjectSerializer, TaxationProjectListSerializer,
+    BankProjectAccountSerializer,
+    ProjectTaskSerializer, ProjectTaskListSerializer,
 )
 
 
@@ -162,6 +172,364 @@ class AllProjects(generics.ListAPIView):
             )
 
 
+class AllProjectsCRUD(generics.ListCreateAPIView):
+    """
+    API endpoint for listing all projects and creating new projects.
+    """
+    serializer_class = ProjectListSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Project.objects.all().order_by('-registrationdate')
+
+    def get(self, request, *args, **kwargs):
+        """Get all projects"""
+        try:
+            queryset = self.get_queryset()
+            data = self.get_serializer(queryset, many=True, context={"request": request}).data
+            return Response({"all_projects": data})
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def post(self, request, *args, **kwargs):
+        """Create a new project"""
+        serializer = ProjectSerializer(data=request.data, context={"request": request})
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    project = serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except ValidationError as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return Response({"error": f"Failed to create project: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProjectView(RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint for retrieving, updating, and deleting a single project.
+    """
+    serializer_class = ProjectSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'project_id'
+
+    def get_queryset(self):
+        return Project.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        """Get a single project"""
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, context={"request": request})
+            return Response(serializer.data)
+        except Http404:
+            return Response({"error": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def put(self, request, *args, **kwargs):
+        """Update a project"""
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True, context={"request": request})
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    project = serializer.save()
+                    return Response(serializer.data)
+            except ValidationError as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return Response({"error": f"Failed to update project: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        """Delete a project"""
+        instance = self.get_object()
+        try:
+            self.perform_destroy(instance)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except ProtectedError:
+            return Response({"error": "Cannot delete project as it is referenced by other objects"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": f"Failed to delete project: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# Associated Client Views
+class AllAssociatedClients(generics.ListCreateAPIView):
+    """
+    API endpoint for listing all associated clients and creating new ones.
+    """
+    serializer_class = AssociatedClientSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return AssociatedClient.objects.all().order_by('orderindex', 'client__surname', 'client__name')
+    
+    def get(self, request, *args, **kwargs):
+        """Get all associated clients"""
+        try:
+            queryset = self.get_queryset()
+            data = self.get_serializer(queryset, many=True, context={"request": request}).data
+            
+            return Response({"all_associated_clients": data})
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to retrieve associated clients: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def post(self, request, *args, **kwargs):
+        """Create a new associated client"""
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to create associated client: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class AssociatedClientView(RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint for retrieving, updating, and deleting a specific associated client.
+    """
+    serializer_class = AssociatedClientSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'assoclient_id'
+    
+    def get_queryset(self):
+        return AssociatedClient.objects.all()
+    
+    def get_object(self):
+        assoclient_id = self.kwargs.get('assoclient_id')
+        try:
+            return AssociatedClient.objects.get(assoclient_id=assoclient_id)
+        except AssociatedClient.DoesNotExist:
+            raise Http404("Associated Client not found")
+    
+    def put(self, request, *args, **kwargs):
+        """Update an associated client"""
+        try:
+            associated_client = self.get_object()
+            serializer = self.get_serializer(associated_client, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to update associated client: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def delete(self, request, *args, **kwargs):
+        """Delete an associated client"""
+        try:
+            associated_client = self.get_object()
+            associated_client.delete()
+            return Response({"message": "Associated Client deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except ProtectedError:
+            return Response(
+                {"error": "Cannot delete associated client because it has related records"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+                         return Response(
+                 {"error": f"Failed to delete associated client: {str(e)}"},
+                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
+             )
+
+
+# Task Comment Views
+class AllTaskComments(generics.ListCreateAPIView):
+    """
+    API endpoint for listing all task comments and creating new ones.
+    """
+    serializer_class = TaskCommentSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return TaskComment.objects.all().order_by('-commentregistration')
+    
+    def get(self, request, *args, **kwargs):
+        """Get all task comments"""
+        try:
+            queryset = self.get_queryset()
+            data = self.get_serializer(queryset, many=True, context={"request": request}).data
+            
+            return Response({"all_task_comments": data})
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to retrieve task comments: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def post(self, request, *args, **kwargs):
+        """Create a new task comment"""
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to create task comment: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class TaskCommentView(RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint for retrieving, updating, and deleting a specific task comment.
+    """
+    serializer_class = TaskCommentSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'taskcomm_id'
+    
+    def get_queryset(self):
+        return TaskComment.objects.all()
+    
+    def get_object(self):
+        taskcomm_id = self.kwargs.get('taskcomm_id')
+        try:
+            return TaskComment.objects.get(taskcomm_id=taskcomm_id)
+        except TaskComment.DoesNotExist:
+            raise Http404("Task Comment not found")
+    
+    def put(self, request, *args, **kwargs):
+        """Update a task comment"""
+        try:
+            task_comment = self.get_object()
+            serializer = self.get_serializer(task_comment, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to update task comment: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def delete(self, request, *args, **kwargs):
+        """Delete a task comment"""
+        try:
+            task_comment = self.get_object()
+            task_comment.delete()
+            return Response({"message": "Task Comment deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except ProtectedError:
+            return Response(
+                {"error": "Cannot delete task comment because it has related records"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to delete task comment: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+# Project Task Views
+class AllProjectTasks(generics.ListCreateAPIView):
+    """
+    API endpoint for listing all project tasks and creating new ones.
+    """
+    serializer_class = ProjectTaskSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        from webapp.models import ProjectTask
+        return ProjectTask.objects.all().order_by('-assigndate')
+
+    def get(self, request, *args, **kwargs):
+        """Get all project tasks"""
+        try:
+            queryset = self.get_queryset()
+            data = ProjectTaskListSerializer(queryset, many=True, context={"request": request}).data
+            return Response({"all_project_tasks": data})
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to retrieve project tasks: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def post(self, request, *args, **kwargs):
+        """Create a new project task"""
+        try:
+            serializer = self.get_serializer(data=request.data, context={"request": request})
+            serializer.is_valid(raise_exception=True)
+            with transaction.atomic():
+                obj = serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except ValidationError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to create project task: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class ProjectTaskView(RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint for retrieving, updating, and deleting a specific project task.
+    """
+    serializer_class = ProjectTaskSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'projtask_id'
+
+    def get_queryset(self):
+        from webapp.models import ProjectTask
+        return ProjectTask.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, context={"request": request})
+            return Response(serializer.data)
+        except Http404:
+            return Response({"error": "Project Task not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def put(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=True, context={"request": request})
+            serializer.is_valid(raise_exception=True)
+            with transaction.atomic():
+                obj = serializer.save()
+            return Response(serializer.data)
+        except ValidationError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": f"Failed to update project task: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            instance.delete()
+            return Response({"message": "Project Task deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except ProtectedError:
+            return Response(
+                {"error": "Cannot delete project task because it has related records"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to delete project task: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 class AllClients(generics.ListCreateAPIView):
     """
     API endpoint for listing all clients and creating new clients.
@@ -287,6 +655,270 @@ class ClientView(RetrieveUpdateDestroyAPIView):
             )
 
 
+class AllClientContacts(generics.ListCreateAPIView):
+    """
+    API endpoint for listing all client contacts and creating new client contacts.
+    """
+    serializer_class = ClientContactSerializer
+    queryset = ClientContact.objects.all().order_by('fullname')
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, *args, **kwargs):
+        """Get all client contacts"""
+        try:
+            queryset = self.get_queryset()
+            data = ClientContactListSerializer(queryset, many=True, context={"request": request}).data
+            
+            return Response({"all_client_contacts": data})
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to retrieve client contacts: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def post(self, request, *args, **kwargs):
+        """Create a new client contact"""
+        serializer = self.get_serializer(data=request.data, context={"request": request})
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    client_contact = serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except ValidationError as e:
+                return Response(
+                    {"error": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to create client contact: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ClientContactView(RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint for retrieving, updating, and deleting a specific client contact.
+    """
+    queryset = ClientContact.objects.all()
+    serializer_class = ClientContactSerializer
+    lookup_field = 'clientcont_id'
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, context={"request": request})
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Prevent primary key updates - clientcont_id is immutable
+        if 'clientcont_id' in request.data and request.data['clientcont_id'] != instance.clientcont_id:
+            return Response(
+                {"error": "Client Contact ID cannot be changed once created"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        serializer = self.get_serializer(instance, data=request.data, partial=True, context={"request": request})
+        
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    client_contact = serializer.save()
+                    return Response(serializer.data)
+            except ValidationError as e:
+                return Response(
+                    {"error": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to update client contact: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        
+        try:
+            with transaction.atomic():
+                instance.delete()
+                return Response({"message": "Client contact deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+                
+        except ProtectedError as e:
+            return Response(
+                {"error": f"Cannot delete client contact. It is referenced by other objects."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to delete client contact: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class AllClientContactsReference(generics.ListAPIView):
+    """
+    API endpoint for listing all client contacts for reference (used in dropdowns).
+    """
+    serializer_class = ClientContactListSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return ClientContact.objects.filter(active=True).order_by('fullname')
+    
+    def get(self, request, *args, **kwargs):
+        """Get all client contacts for reference"""
+        try:
+            queryset = self.get_queryset()
+            data = self.get_serializer(queryset, many=True, context={"request": request}).data
+            
+            return Response({"all_client_contacts": data})
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to retrieve client contacts: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class AllBankClientAccounts(generics.ListCreateAPIView):
+    """
+    API endpoint for listing all bank client accounts and creating new bank client accounts.
+    """
+    serializer_class = BankClientAccountSerializer
+    queryset = BankClientAccount.objects.all().order_by('accountnumber')
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, *args, **kwargs):
+        """Get all bank client accounts"""
+        try:
+            queryset = self.get_queryset()
+            data = BankClientAccountListSerializer(queryset, many=True, context={"request": request}).data
+            
+            return Response({"all_bank_client_accounts": data})
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to retrieve bank client accounts: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def post(self, request, *args, **kwargs):
+        """Create a new bank client account"""
+        serializer = self.get_serializer(data=request.data, context={"request": request})
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    bank_client_account = serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except ValidationError as e:
+                return Response(
+                    {"error": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to create bank client account: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BankClientAccountView(RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint for retrieving, updating, and deleting a specific bank client account.
+    """
+    queryset = BankClientAccount.objects.all()
+    serializer_class = BankClientAccountSerializer
+    lookup_field = 'bankclientacco_id'
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, context={"request": request})
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Prevent primary key updates - bankclientacco_id is immutable
+        if 'bankclientacco_id' in request.data and request.data['bankclientacco_id'] != instance.bankclientacco_id:
+            return Response(
+                {"error": "Bank Client Account ID cannot be changed once created"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        serializer = self.get_serializer(instance, data=request.data, partial=True, context={"request": request})
+        
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    bank_client_account = serializer.save()
+                    return Response(serializer.data)
+            except ValidationError as e:
+                return Response(
+                    {"error": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to update bank client account: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        
+        try:
+            with transaction.atomic():
+                instance.delete()
+                return Response({"message": "Bank client account deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+                
+        except ProtectedError as e:
+            return Response(
+                {"error": f"Cannot delete bank client account. It is referenced by other objects."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to delete bank client account: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class AllBankClientAccountsReference(generics.ListAPIView):
+    """
+    API endpoint for listing all bank client accounts for reference (used in dropdowns).
+    """
+    serializer_class = BankClientAccountListSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return BankClientAccount.objects.filter(active=True).order_by('accountnumber')
+    
+    def get(self, request, *args, **kwargs):
+        """Get all bank client accounts for reference"""
+        try:
+            queryset = self.get_queryset()
+            data = self.get_serializer(queryset, many=True, context={"request": request}).data
+            
+            return Response({"all_bank_client_accounts": data})
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to retrieve bank client accounts: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
 class AllClientsReference(generics.ListAPIView):
     """
     API endpoint for listing all clients for reference (used in dropdowns).
@@ -310,3 +942,485 @@ class AllClientsReference(generics.ListAPIView):
                 {"error": f"Failed to retrieve clients: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class AllProperties(generics.ListCreateAPIView):
+    """
+    API endpoint for listing all properties and creating new properties.
+    """
+    serializer_class = PropertySerializer
+    queryset = Property.objects.all().order_by('property_id')
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, *args, **kwargs):
+        """Get all properties"""
+        try:
+            queryset = self.get_queryset()
+            data = PropertyListSerializer(queryset, many=True, context={"request": request}).data
+            
+            return Response({"all_properties": data})
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to retrieve properties: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def post(self, request, *args, **kwargs):
+        """Create a new property"""
+        serializer = self.get_serializer(data=request.data, context={"request": request})
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    property_obj = serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except ValidationError as e:
+                return Response(
+                    {"error": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to create property: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PropertyView(RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint for retrieving, updating, and deleting a specific property.
+    """
+    queryset = Property.objects.all()
+    serializer_class = PropertySerializer
+    lookup_field = 'property_id'
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, context={"request": request})
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Prevent primary key updates - property_id is immutable
+        if 'property_id' in request.data and request.data['property_id'] != instance.property_id:
+            return Response(
+                {"error": "Property ID cannot be changed once created"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        serializer = self.get_serializer(instance, data=request.data, partial=True, context={"request": request})
+        
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    property_obj = serializer.save()
+                    return Response(serializer.data)
+            except ValidationError as e:
+                return Response(
+                    {"error": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to update property: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        
+        try:
+            with transaction.atomic():
+                instance.delete()
+                return Response({"message": "Property deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+                
+        except ProtectedError as e:
+            return Response(
+                {"error": f"Cannot delete property. It is referenced by other objects."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to delete property: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class AllCash(generics.ListCreateAPIView):
+    """
+    API endpoint for listing all cash entries and creating new cash entries.
+    """
+    serializer_class = CashSerializer
+    queryset = Cash.objects.all().order_by('-trandate')
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, *args, **kwargs):
+        """Get all cash entries"""
+        try:
+            queryset = self.get_queryset()
+            data = CashListSerializer(queryset, many=True, context={"request": request}).data
+            
+            return Response({"all_cash": data})
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to retrieve cash entries: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def post(self, request, *args, **kwargs):
+        """Create a new cash entry"""
+        serializer = self.get_serializer(data=request.data, context={"request": request})
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    cash_entry = serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except ValidationError as e:
+                return Response(
+                    {"error": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to create cash entry: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CashView(RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint for retrieving, updating, and deleting a specific cash entry.
+    """
+    queryset = Cash.objects.all()
+    serializer_class = CashSerializer
+    lookup_field = 'cash_id'
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, context={"request": request})
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Prevent primary key updates - cash_id is immutable
+        if 'cash_id' in request.data and request.data['cash_id'] != instance.cash_id:
+            return Response(
+                {"error": "Cash ID cannot be changed once created"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        serializer = self.get_serializer(instance, data=request.data, partial=True, context={"request": request})
+        
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    cash_entry = serializer.save()
+                    return Response(serializer.data)
+            except ValidationError as e:
+                return Response(
+                    {"error": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to update cash entry: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        
+        try:
+            with transaction.atomic():
+                instance.delete()
+                return Response({"message": "Cash entry deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+                
+        except ProtectedError as e:
+            return Response(
+                {"error": f"Cannot delete cash entry. It is referenced by other objects."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to delete cash entry: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class AllBankProjectAccounts(generics.ListCreateAPIView):
+    """
+    API endpoint for listing all bank project accounts and creating new bank project accounts.
+    """
+    serializer_class = BankProjectAccountSerializer
+    queryset = BankProjectAccount.objects.all().order_by('bankprojacco_id')
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, *args, **kwargs):
+        """Get all bank project accounts"""
+        try:
+            queryset = self.get_queryset()
+            data = self.get_serializer(queryset, many=True, context={"request": request}).data
+            return Response({"all_bank_project_accounts": data})
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to retrieve bank project accounts: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def post(self, request, *args, **kwargs):
+        """Create a new bank project account"""
+        serializer = self.get_serializer(data=request.data, context={"request": request})
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    bank_project_account = serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except ValidationError as e:
+                return Response(
+                    {"error": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to create bank project account: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BankProjectAccountView(RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint for retrieving, updating, and deleting a specific bank project account.
+    """
+    queryset = BankProjectAccount.objects.all()
+    serializer_class = BankProjectAccountSerializer
+    lookup_field = 'bankprojacco_id'
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, context={"request": request})
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Prevent primary key updates - bankprojacco_id is immutable
+        if 'bankprojacco_id' in request.data and request.data['bankprojacco_id'] != instance.bankprojacco_id:
+            return Response(
+                {"error": "Bank Project Account ID cannot be changed once created"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = self.get_serializer(instance, data=request.data, partial=True, context={"request": request})
+
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    bank_project_account = serializer.save()
+                    return Response(serializer.data)
+            except ValidationError as e:
+                return Response(
+                    {"error": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to update bank project account: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        try:
+            with transaction.atomic():
+                instance.delete()
+                return Response({"message": "Bank project account deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+        except ProtectedError as e:
+            return Response(
+                {"error": f"Cannot delete bank project account. It is referenced by other objects."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to delete bank project account: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class AllProfessionalsReference(generics.ListAPIView):
+    """
+    API endpoint for listing all professionals for reference (dropdowns).
+    """
+    serializer_class = ProfessionalReferenceSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Professional.objects.filter(active=True).order_by('fullname')
+
+    def get(self, request, *args, **kwargs):
+        try:
+            queryset = self.get_queryset()
+            data = self.get_serializer(queryset, many=True, context={"request": request}).data
+            return Response({"all_professionals": data})
+        except Exception as e:
+            return Response({"error": f"Failed to retrieve professionals: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class AllProfessionals(generics.ListCreateAPIView):
+    """
+    API endpoint for listing all professionals and creating new ones.
+    """
+    serializer_class = ProfessionalSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Professional.objects.all().order_by('fullname')
+
+    def get(self, request, *args, **kwargs):
+        try:
+            queryset = self.get_queryset()
+            data = ProfessionalReferenceSerializer(queryset, many=True, context={"request": request}).data
+            return Response({"all_professionals": data})
+        except Exception as e:
+            return Response({"error": f"Failed to retrieve professionals: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, context={"request": request})
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    obj = serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except ValidationError as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return Response({"error": f"Failed to create professional: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProfessionalView(RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint for retrieving, updating, and deleting a specific professional.
+    """
+    queryset = Professional.objects.all()
+    serializer_class = ProfessionalSerializer
+    lookup_field = 'professional_id'
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, context={"request": request})
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True, context={"request": request})
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    obj = serializer.save()
+                    return Response(serializer.data)
+            except ValidationError as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return Response({"error": f"Failed to update professional: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            with transaction.atomic():
+                instance.delete()
+                return Response({"message": "Professional deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except ProtectedError:
+            return Response({"error": "Cannot delete professional because it has related records"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": f"Failed to delete professional: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class AllTaxationProjects(generics.ListCreateAPIView):
+    serializer_class = TaxationProjectSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return TaxationProject.objects.all().order_by('-deadline')
+
+    def get(self, request, *args, **kwargs):
+        try:
+            queryset = self.get_queryset()
+            data = TaxationProjectListSerializer(queryset, many=True, context={"request": request}).data
+            return Response({"all_taxation_projects": data})
+        except Exception as e:
+            return Response({"error": f"Failed to retrieve taxation projects: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, context={"request": request})
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    obj = serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except ValidationError as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return Response({"error": f"Failed to create taxation project: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TaxationProjectView(RetrieveUpdateDestroyAPIView):
+    queryset = TaxationProject.objects.all()
+    serializer_class = TaxationProjectSerializer
+    lookup_field = 'taxproj_id'
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, context={"request": request})
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True, context={"request": request})
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    obj = serializer.save()
+                    return Response(serializer.data)
+            except ValidationError as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return Response({"error": f"Failed to update taxation project: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            with transaction.atomic():
+                instance.delete()
+                return Response({"message": "Taxation project deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except ProtectedError:
+            return Response({"error": "Cannot delete taxation project because it has related records"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": f"Failed to delete taxation project: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

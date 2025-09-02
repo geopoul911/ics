@@ -5,7 +5,7 @@ import { useState } from "react";
 import { FiEdit } from "react-icons/fi";
 import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
 import { FaStop } from "react-icons/fa";
-import { apiPut, } from "../../utils/api";
+import axios from "axios";
 
 // Libs
 
@@ -29,7 +29,11 @@ const toSmallInt = (value) => {
 
 const patchCountry = async (id, payload) => {
   const url = `${COUNTRY_DETAIL}${encodeURIComponent(id)}/`;
-  return apiPut(url, payload);
+  const currentHeaders = {
+    "Authorization": "Token " + localStorage.getItem("userToken")
+  };
+  const response = await axios.patch(url, payload, { headers: currentHeaders });
+  return response.data;
 };
 
 /* ===========================

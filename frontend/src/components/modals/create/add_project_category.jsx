@@ -8,7 +8,7 @@ import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
 
 // Modules / Functions
 import Swal from "sweetalert2";
-import { Modal, Col, Form, Row } from "react-bootstrap";
+import { Modal, Form } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
 import axios from "axios";
 
@@ -48,7 +48,7 @@ export default function AddProjectCategoryModal({ onProjectCategoryCreated }) {
 
   const isProjcateIdValid = projcate_id.trim().length === 1;
   const isTitleValid = title.trim().length >= 2 && title.trim().length <= 40;
-  const isOrderIndexValid = orderindex.trim().length > 0 && !isNaN(orderindex);
+  const isOrderIndexValid = orderindex.trim().length === 0 || !isNaN(orderindex);
 
   const createProjectCategory = async () => {
     if (!isProjcateIdValid || !isTitleValid || !isOrderIndexValid) {
@@ -69,7 +69,7 @@ export default function AddProjectCategoryModal({ onProjectCategoryCreated }) {
       const payload = {
         projcate_id: projcate_id.trim().toUpperCase(),
         title: title.trim(),
-        orderindex: parseInt(orderindex),
+        orderindex: orderindex.trim().length === 0 ? null : parseInt(orderindex),
         active: active,
       };
 
@@ -99,17 +99,23 @@ export default function AddProjectCategoryModal({ onProjectCategoryCreated }) {
       console.log('Error creating project category:', e);
       
       let apiMsg = "Failed to create project category.";
+      const data = e?.response?.data;
       
-      if (e?.response?.data?.error) {
-        apiMsg = e.response.data.error;
-      } else if (e?.response?.data?.projcate_id) {
-        apiMsg = e.response.data.projcate_id[0];
-      } else if (e?.response?.data?.title) {
-        apiMsg = e.response.data.title[0];
-      } else if (e?.response?.data?.orderindex) {
-        apiMsg = e.response.data.orderindex[0];
-      } else if (e?.response?.data?.detail) {
-        apiMsg = e.response.data.detail;
+      if (data?.error) {
+        apiMsg = data.error;
+      } else if (data?.projcate_id) {
+        apiMsg = data.projcate_id[0];
+      } else if (data?.title) {
+        apiMsg = data.title[0];
+      } else if (data?.orderindex) {
+        apiMsg = data.orderindex[0];
+      } else if (typeof data === 'object' && data) {
+        try {
+          const all = Object.values(data).flat().join(' ');
+          if (all) apiMsg = all;
+        } catch (_ignored) {}
+      } else if (data?.detail) {
+        apiMsg = data.detail;
       }
       
       Swal.fire({
@@ -135,72 +141,55 @@ export default function AddProjectCategoryModal({ onProjectCategoryCreated }) {
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Category ID:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  type="text"
-                  value={projcate_id}
-                  onChange={(e) => setProjcateId(validateProjectCategoryId(clampLen(e.target.value, 1)))}
-                  placeholder="Enter single character ID (A-Z, 0-9)"
-                  isInvalid={projcate_id !== "" && !isProjcateIdValid}
-                />
-                <Form.Control.Feedback type="invalid">
-                  Category ID must be exactly 1 character
-                </Form.Control.Feedback>
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Category ID:</Form.Label>
+              <Form.Control
+                type="text"
+                value={projcate_id}
+                onChange={(e) => setProjcateId(validateProjectCategoryId(clampLen(e.target.value, 1)))}
+                placeholder="e.g., A"
+                isInvalid={projcate_id !== "" && !isProjcateIdValid}
+              />
+              <Form.Control.Feedback type="invalid">
+                Category ID must be exactly 1 character
+              </Form.Control.Feedback>
             </Form.Group>
 
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Title:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(validateTitle(clampLen(e.target.value, 40)))}
-                  placeholder="Enter project category title (2-40 characters)"
-                  isInvalid={title !== "" && !isTitleValid}
-                />
-                <Form.Control.Feedback type="invalid">
-                  Title must be 2-40 characters
-                </Form.Control.Feedback>
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Title:</Form.Label>
+              <Form.Control
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(validateTitle(clampLen(e.target.value, 40)))}
+                placeholder="e.g., Real Estate"
+                isInvalid={title !== "" && !isTitleValid}
+              />
+              <Form.Control.Feedback type="invalid">
+                Title must be 2-40 characters
+              </Form.Control.Feedback>
             </Form.Group>
 
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Order Index:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  type="text"
-                  value={orderindex}
-                  onChange={(e) => setOrderIndex(validateOrderIndex(clampLen(e.target.value, 5)))}
-                  placeholder="Enter order index (numeric)"
-                  isInvalid={orderindex !== "" && !isOrderIndexValid}
-                />
-                <Form.Control.Feedback type="invalid">
-                  Order index must be a valid number
-                </Form.Control.Feedback>
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Order Index:</Form.Label>
+              <Form.Control
+                type="text"
+                value={orderindex}
+                onChange={(e) => setOrderIndex(validateOrderIndex(clampLen(e.target.value, 5)))}
+                placeholder="Optional: numeric"
+                isInvalid={orderindex !== "" && !isOrderIndexValid}
+              />
+              <Form.Control.Feedback type="invalid">
+                Order index must be a valid number when provided
+              </Form.Control.Feedback>
             </Form.Group>
 
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Active:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Check
-                  type="checkbox"
-                  checked={active}
-                  onChange={(e) => setActive(e.target.checked)}
-                  label="Project category is active"
-                />
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Check
+                type="checkbox"
+                checked={active}
+                onChange={(e) => setActive(e.target.checked)}
+                label="Project category is active"
+              />
             </Form.Group>
           </Form>
         </Modal.Body>
@@ -226,7 +215,7 @@ export default function AddProjectCategoryModal({ onProjectCategoryCreated }) {
                 {!isOrderIndexValid && (
                   <li>
                     <AiOutlineWarning style={{ marginRight: 5 }} />
-                    Order index must be a valid number
+                    Order index must be a valid number when provided
                   </li>
                 )}
               </ul>

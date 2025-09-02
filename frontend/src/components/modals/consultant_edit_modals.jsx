@@ -12,7 +12,8 @@ import { Modal, Col, Form, Row } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
 
 // Global Variables
-import { headers, apiPut } from "../global_vars";
+import { headers } from "../global_vars";
+import axios from "axios";
 
 // Variables
 window.Swal = Swal;
@@ -84,10 +85,10 @@ export function EditConsultantFullnameModal({ consultant, update_state }) {
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
-      const res = await apiPut(
+      const res = await axios.patch(
         `${UPDATE_CONSULTANT}${consultant.consultant_id}/`,
         { fullname: fullname.trim() },
-        currentHeaders
+        { headers: currentHeaders }
       );
 
       update_state(res);
@@ -192,10 +193,10 @@ export function EditConsultantEmailModal({ consultant, update_state }) {
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
-      const res = await apiPut(
+      const res = await axios.patch(
         `${UPDATE_CONSULTANT}${consultant.consultant_id}/`,
         { email: email || null },
-        currentHeaders
+        { headers: currentHeaders }
       );
 
       update_state(res);
@@ -300,10 +301,10 @@ export function EditConsultantPhoneModal({ consultant, update_state }) {
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
-      const res = await apiPut(
+      const res = await axios.patch(
         `${UPDATE_CONSULTANT}${consultant.consultant_id}/`,
         { phone: phone || null },
-        currentHeaders
+        { headers: currentHeaders }
       );
 
       update_state(res);
@@ -408,10 +409,10 @@ export function EditConsultantMobileModal({ consultant, update_state }) {
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
-      const res = await apiPut(
+      const res = await axios.patch(
         `${UPDATE_CONSULTANT}${consultant.consultant_id}/`,
         { mobile: mobile || null },
-        currentHeaders
+        { headers: currentHeaders }
       );
 
       update_state(res);
@@ -516,10 +517,10 @@ export function EditConsultantRoleModal({ consultant, update_state }) {
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
-      const res = await apiPut(
+      const res = await axios.patch(
         `${UPDATE_CONSULTANT}${consultant.consultant_id}/`,
         { role: role },
-        currentHeaders
+        { headers: currentHeaders }
       );
 
       update_state(res);
@@ -641,10 +642,10 @@ export function EditConsultantPasswordModal({ consultant, update_state }) {
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
-      const res = await apiPut(
+      const res = await axios.patch(
         `${UPDATE_CONSULTANT}${consultant.consultant_id}/`,
         { password: password },
-        currentHeaders
+        { headers: currentHeaders }
       );
 
       update_state(res);
@@ -760,10 +761,10 @@ export function EditConsultantCanAssignTaskModal({ consultant, update_state }) {
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
-      const res = await apiPut(
+      const res = await axios.patch(
         `${UPDATE_CONSULTANT}${consultant.consultant_id}/`,
         { canassigntask: canAssignTask },
-        currentHeaders
+        { headers: currentHeaders }
       );
 
       update_state(res);
@@ -866,10 +867,10 @@ export function EditConsultantCashPassportModal({ consultant, update_state }) {
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
-      const res = await apiPut(
+      const res = await axios.patch(
         `${UPDATE_CONSULTANT}${consultant.consultant_id}/`,
         { cashpassport: cashPassport || null },
-        currentHeaders
+        { headers: currentHeaders }
       );
 
       update_state(res);
@@ -972,10 +973,10 @@ export function EditConsultantActiveModal({ consultant, update_state }) {
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
-      const res = await apiPut(
+      const res = await axios.patch(
         `${UPDATE_CONSULTANT}${consultant.consultant_id}/`,
         { active: active },
-        currentHeaders
+        { headers: currentHeaders }
       );
 
       update_state(res);
@@ -1076,10 +1077,10 @@ export function EditConsultantOrderIndexModal({ consultant, update_state }) {
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
-      const res = await apiPut(
+      const res = await axios.patch(
         `${UPDATE_CONSULTANT}${consultant.consultant_id}/`,
         { orderindex: Number(orderindex) },
-        currentHeaders
+        { headers: currentHeaders }
       );
 
       update_state(res);
@@ -1288,10 +1289,10 @@ export function EditConsultantPhotoModal({ consultant, update_state }) {
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
-      const res = await apiPut(
+      const res = await axios.patch(
         `${UPDATE_CONSULTANT}${consultant.consultant_id}/`,
         { photo: null },
-        currentHeaders
+        { headers: currentHeaders }
       );
 
       update_state(res);

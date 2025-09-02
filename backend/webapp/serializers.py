@@ -11,16 +11,114 @@ from accounts.models import Consultant
 
 User = get_user_model()
 
+# Reference data serializers for dropdowns (must be defined first)
+class CountryReferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Country
+        fields = ['country_id', 'title', 'currency']
+
+class ProvinceReferenceSerializer(serializers.ModelSerializer):
+    country = CountryReferenceSerializer(read_only=True)
+    
+    class Meta:
+        model = Province
+        fields = ['province_id', 'title', 'country']
+
+class CityReferenceSerializer(serializers.ModelSerializer):
+    country = CountryReferenceSerializer(read_only=True)
+    province = ProvinceReferenceSerializer(read_only=True)
+    
+    class Meta:
+        model = City
+        fields = ['city_id', 'title', 'country', 'province']
+
+class BankReferenceSerializer(serializers.ModelSerializer):
+    country = CountryReferenceSerializer(read_only=True)
+    
+    class Meta:
+        model = Bank
+        fields = ['bank_id', 'bankname', 'country', 'institutionnumber', 'swiftcode']
+
+class ConsultantReferenceSerializer(serializers.ModelSerializer):
+    photo_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Consultant
+        fields = ['consultant_id', 'fullname', 'email', 'role', 'active', 'photo_url']
+
+    def get_photo_url(self, obj):
+        """
+        Absolute URL to the consultant's photo if present.
+        Requires MEDIA settings and request in serializer context.
+        """
+        if not obj.photo:
+            return None
+        request = self.context.get("request")
+        try:
+            url = obj.photo.url
+        except Exception:
+            return None
+        return request.build_absolute_uri(url) if request else url
+
+class ProjectCategoryReferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProjectCategory
+        fields = ['projcate_id', 'title', 'active']
+
+class TaskCategoryReferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskCategory
+        fields = ['taskcate_id', 'title', 'active']
+
+class ProfessionReferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profession
+        fields = ['profession_id', 'title']
+
+class ProfessionalReferenceSerializer(serializers.ModelSerializer):
+    profession = ProfessionReferenceSerializer(read_only=True)
+    city = CityReferenceSerializer(read_only=True)
+    
+    class Meta:
+        model = Professional
+        fields = ['professional_id', 'fullname', 'profession', 'city', 'reliability', 'active']
+
+class InsuranceCarrierReferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InsuranceCarrier
+        fields = ['insucarrier_id', 'title', 'active']
+
+class ProjectReferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = ['project_id', 'title', 'status']
+
+class ClientReferenceSerializer(serializers.ModelSerializer):
+    fullname = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Client
+        fields = ['client_id', 'fullname', 'active']
+    
+    def get_fullname(self, obj):
+        return f"{obj.surname} {obj.name}"
+
 # Basic serializers for reference data
 class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
         fields = '__all__'
+        extra_kwargs = {
+            'orderindex': {'required': False, 'allow_null': True}
+        }
     
     def validate_orderindex(self, value):
         """
         Custom validation for orderindex to provide better error messages
         """
+        # Allow null/empty values (orderindex is optional now)
+        if value in (None, ""):
+            return value
         # Get the current instance (for updates) or None (for creates)
         instance = getattr(self, 'instance', None)
         
@@ -37,6 +135,20 @@ class CountrySerializer(serializers.ModelSerializer):
         except Country.DoesNotExist:
             # No conflict, value is OK
             return value
+
+    def validate_title(self, value):
+        """Provide clearer error when title uniqueness is violated."""
+        value = (value or '').strip()
+        if not value or len(value) < 2 or len(value) > 40:
+            raise serializers.ValidationError("Title must be between 2 and 40 characters")
+        # Uniqueness check with case-insensitive match
+        instance = getattr(self, 'instance', None)
+        qs = Country.objects.filter(title__iexact=value)
+        if instance:
+            qs = qs.exclude(country_id=instance.country_id)
+        if qs.exists():
+            raise serializers.ValidationError(f"Country with title '{value}' already exists")
+        return value
     
 
     
@@ -68,11 +180,16 @@ class ProvinceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Province
         fields = '__all__'
+        extra_kwargs = {
+            'orderindex': {'required': False, 'allow_null': True}
+        }
     
     def validate_orderindex(self, value):
         """
         Custom validation for orderindex to provide better error messages
         """
+        if value in (None, ""):
+            return value
         # Get the current instance (for updates) or None (for creates)
         instance = getattr(self, 'instance', None)
         
@@ -89,6 +206,18 @@ class ProvinceSerializer(serializers.ModelSerializer):
         except Province.DoesNotExist:
             # No conflict, value is OK
             return value
+    
+    def validate_title(self, value):
+        value = (value or '').strip()
+        if not value or len(value) < 2 or len(value) > 40:
+            raise serializers.ValidationError("Title must be between 2 and 40 characters")
+        instance = getattr(self, 'instance', None)
+        qs = Province.objects.filter(title__iexact=value)
+        if instance:
+            qs = qs.exclude(province_id=instance.province_id)
+        if qs.exists():
+            raise serializers.ValidationError(f"Province with title '{value}' already exists")
+        return value
     
     def validate_province_id(self, value):
         """
@@ -143,11 +272,16 @@ class CitySerializer(serializers.ModelSerializer):
     class Meta:
         model = City
         fields = '__all__'
+        extra_kwargs = {
+            'orderindex': {'required': False, 'allow_null': True}
+        }
     
     def validate_orderindex(self, value):
         """
         Custom validation for orderindex to provide better error messages
         """
+        if value in (None, ""):
+            return value
         # Get the current instance (for updates) or None (for creates)
         instance = getattr(self, 'instance', None)
         
@@ -164,6 +298,18 @@ class CitySerializer(serializers.ModelSerializer):
         except City.DoesNotExist:
             # No conflict, value is OK
             return value
+    
+    def validate_title(self, value):
+        value = (value or '').strip()
+        if not value or len(value) < 2 or len(value) > 40:
+            raise serializers.ValidationError("Title must be between 2 and 40 characters")
+        instance = getattr(self, 'instance', None)
+        qs = City.objects.filter(title__iexact=value)
+        if instance:
+            qs = qs.exclude(city_id=instance.city_id)
+        if qs.exists():
+            raise serializers.ValidationError(f"City with title '{value}' already exists")
+        return value
     
     def validate_city_id(self, value):
         """
@@ -254,7 +400,8 @@ class InsuranceCarrierSerializer(serializers.ModelSerializer):
         model = InsuranceCarrier
         fields = '__all__'
         extra_kwargs = {
-            'active': {'required': False}  # Default to True
+            'active': {'required': False},  # Default to True
+            'orderindex': {'required': False, 'allow_null': True}
         }
 
     def validate_insucarrier_id(self, value):
@@ -278,6 +425,8 @@ class InsuranceCarrierSerializer(serializers.ModelSerializer):
 
     def validate_orderindex(self, value):
         """Validate orderindex uniqueness"""
+        if value in (None, ""):
+            return value
         # Get the current instance (for updates) or None (for creates)
         instance = getattr(self, 'instance', None)
         
@@ -329,7 +478,8 @@ class BankSerializer(serializers.ModelSerializer):
         model = Bank
         fields = '__all__'
         extra_kwargs = {
-            'active': {'required': False}  # Default to True
+            'active': {'required': False},  # Default to True
+            'orderindex': {'required': False, 'allow_null': True}
         }
 
     def validate_bank_id(self, value):
@@ -353,6 +503,8 @@ class BankSerializer(serializers.ModelSerializer):
 
     def validate_orderindex(self, value):
         """Validate orderindex uniqueness"""
+        if value in (None, ""):
+            return value
         # Get the current instance (for updates) or None (for creates)
         instance = getattr(self, 'instance', None)
         
@@ -601,12 +753,100 @@ class ClientSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(f"Insurance Carrier 2 with ID '{insucarrier2_id}' does not exist.")
 
 class BankClientAccountSerializer(serializers.ModelSerializer):
-    client = ClientSerializer(read_only=True)
-    bank = BankSerializer(read_only=True)
+    client = ClientReferenceSerializer(read_only=True)
+    bank = BankReferenceSerializer(read_only=True)
+    
+    # Write-only fields for foreign keys
+    client_id = serializers.CharField(write_only=True, required=False)
+    bank_id = serializers.CharField(write_only=True, required=False)
     
     class Meta:
         model = BankClientAccount
         fields = '__all__'
+        extra_kwargs = {
+            'active': {'required': False},  # Default to True
+        }
+
+    def validate_bankclientacco_id(self, value):
+        """Validate bankclientacco_id uniqueness"""
+        instance = getattr(self, 'instance', None)
+        try:
+            existing_account = BankClientAccount.objects.get(bankclientacco_id=value)
+            if instance and existing_account.bankclientacco_id == instance.bankclientacco_id:
+                return value
+            raise serializers.ValidationError(
+                f"Bank Client Account ID '{value}' is already taken by Account: {existing_account.accountnumber}"
+            )
+        except BankClientAccount.DoesNotExist:
+            return value
+
+    def validate_iban(self, value):
+        """Validate IBAN format"""
+        if value:
+            import re
+            # Basic IBAN validation - should be alphanumeric and 15-34 characters
+            iban_pattern = r'^[A-Z0-9]{15,34}$'
+            if not re.match(iban_pattern, value.upper()):
+                raise serializers.ValidationError("Invalid IBAN format.")
+        return value
+
+    def validate_accountnumber(self, value):
+        """Validate account number format"""
+        if not value or len(value.strip()) < 1:
+            raise serializers.ValidationError("Account number is required.")
+        if len(value.strip()) > 20:
+            raise serializers.ValidationError("Account number must be at most 20 characters.")
+        return value.strip()
+
+    def create(self, validated_data):
+        """Create a new bank client account instance"""
+        # Handle foreign key conversions
+        self._handle_foreign_keys(validated_data)
+        
+        # Set default values
+        if 'active' not in validated_data:
+            validated_data['active'] = True
+        
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        """Update an existing bank client account instance"""
+        # Handle foreign key conversions
+        self._handle_foreign_keys(validated_data)
+        
+        return super().update(instance, validated_data)
+
+    def _handle_foreign_keys(self, validated_data):
+        """Handle foreign key field conversions"""
+        # Handle client_id
+        if 'client_id' in validated_data:
+            try:
+                client = Client.objects.get(client_id=validated_data['client_id'])
+                validated_data['client'] = client
+                del validated_data['client_id']
+            except Client.DoesNotExist:
+                raise serializers.ValidationError(f"Client with ID '{validated_data['client_id']}' does not exist.")
+
+        # Handle bank_id
+        if 'bank_id' in validated_data:
+            try:
+                bank = Bank.objects.get(bank_id=validated_data['bank_id'])
+                validated_data['bank'] = bank
+                del validated_data['bank_id']
+            except Bank.DoesNotExist:
+                raise serializers.ValidationError(f"Bank with ID '{validated_data['bank_id']}' does not exist.")
+
+
+class BankClientAccountListSerializer(serializers.ModelSerializer):
+    client = ClientReferenceSerializer(read_only=True)
+    bank = BankReferenceSerializer(read_only=True)
+    
+    class Meta:
+        model = BankClientAccount
+        fields = [
+            'bankclientacco_id', 'client', 'bank', 'transitnumber', 
+            'accountnumber', 'iban', 'active'
+        ]
 
 # Consultant serializers
 class ConsultantSerializer(serializers.ModelSerializer):
@@ -735,7 +975,8 @@ class ProjectCategorySerializer(serializers.ModelSerializer):
         model = ProjectCategory
         fields = '__all__'
         extra_kwargs = {
-            'active': {'required': False}  # Default to True
+            'active': {'required': False},  # Default to True
+            'orderindex': {'required': False, 'allow_null': True}
         }
 
     def validate_projcate_id(self, value):
@@ -755,6 +996,9 @@ class ProjectCategorySerializer(serializers.ModelSerializer):
 
     def validate_orderindex(self, value):
         """Validate orderindex uniqueness"""
+        # Allow null/empty as optional
+        if value in (None, ""):
+            return value
         # Get the current instance (for updates) or None (for creates)
         instance = getattr(self, 'instance', None)
         
@@ -767,6 +1011,9 @@ class ProjectCategorySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("This order index is already in use.")
         except ProjectCategory.DoesNotExist:
             return value
+        except ProjectCategory.MultipleObjectsReturned:
+            # Multiple rows share the same order index; treat as 'in use'
+            raise serializers.ValidationError("This order index is already in use.")
 
     def validate_title(self, value):
         """Validate title format"""
@@ -957,12 +1204,19 @@ class ProfessionSerializer(serializers.ModelSerializer):
             return value
 
     def validate_title(self, value):
-        """Validate title format"""
+        """Validate title format and uniqueness (case-insensitive)."""
         if not value or len(value.strip()) < 2:
             raise serializers.ValidationError("Title must be at least 2 characters long.")
         if len(value.strip()) > 40:
             raise serializers.ValidationError("Title must be at most 40 characters long.")
-        return value.strip()
+        value = value.strip()
+        instance = getattr(self, 'instance', None)
+        qs = Profession.objects.filter(title__iexact=value)
+        if instance:
+            qs = qs.exclude(profession_id=instance.profession_id)
+        if qs.exists():
+            raise serializers.ValidationError(f"Profession with title '{value}' already exists")
+        return value
 
     def create(self, validated_data):
         """Create a new profession with validation"""
@@ -980,20 +1234,57 @@ class ProfessionSerializer(serializers.ModelSerializer):
 class ProfessionalSerializer(serializers.ModelSerializer):
     profession = ProfessionSerializer(read_only=True)
     city = CitySerializer(read_only=True)
+    # Write-only fields for foreign keys
+    profession_id = serializers.CharField(write_only=True, required=False)
+    city_id = serializers.CharField(write_only=True, required=False)
     
     class Meta:
         model = Professional
         fields = '__all__'
 
-class ClientContactSerializer(serializers.ModelSerializer):
-    project = ProjectSerializer(read_only=True)
-    professional = ProfessionalSerializer(read_only=True)
-    
-    class Meta:
-        model = ClientContact
-        fields = '__all__'
+    def create(self, validated_data):
+        from webapp.models import Profession, City
+        profession_id = validated_data.pop('profession_id', None)
+        city_id = validated_data.pop('city_id', None)
+        if profession_id:
+            try:
+                validated_data['profession'] = Profession.objects.get(profession_id=profession_id)
+            except Profession.DoesNotExist:
+                raise serializers.ValidationError(f"Profession with ID '{profession_id}' does not exist.")
+        if city_id:
+            try:
+                validated_data['city'] = City.objects.get(city_id=city_id)
+            except City.DoesNotExist:
+                raise serializers.ValidationError(f"City with ID '{city_id}' does not exist.")
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        from webapp.models import Profession, City
+        profession_id = validated_data.pop('profession_id', None)
+        city_id = validated_data.pop('city_id', None)
+        if profession_id:
+            try:
+                validated_data['profession'] = Profession.objects.get(profession_id=profession_id)
+            except Profession.DoesNotExist:
+                raise serializers.ValidationError(f"Profession with ID '{profession_id}' does not exist.")
+        if city_id:
+            try:
+                validated_data['city'] = City.objects.get(city_id=city_id)
+            except City.DoesNotExist:
+                raise serializers.ValidationError(f"City with ID '{city_id}' does not exist.")
+        return super().update(instance, validated_data)
 
 # Property serializers
+class PropertyListSerializer(serializers.ModelSerializer):
+    project = ProjectReferenceSerializer(read_only=True)
+    country = CountrySerializer(read_only=True)
+    province = ProvinceSerializer(read_only=True)
+    city = CitySerializer(read_only=True)
+    
+    class Meta:
+        model = Property
+        fields = ['property_id', 'project', 'country', 'province', 'city', 'description', 'location', 'type', 'constructyear', 'status', 'market', 'broker', 'active']
+
 class PropertySerializer(serializers.ModelSerializer):
     project = ProjectSerializer(read_only=True)
     country = CountrySerializer(read_only=True)
@@ -1019,7 +1310,8 @@ class TaskCategorySerializer(serializers.ModelSerializer):
         model = TaskCategory
         fields = '__all__'
         extra_kwargs = {
-            'active': {'required': False}  # Default to True
+            'active': {'required': False},  # Default to True
+            'orderindex': {'required': False, 'allow_null': True}
         }
 
     def validate_taskcate_id(self, value):
@@ -1039,6 +1331,8 @@ class TaskCategorySerializer(serializers.ModelSerializer):
 
     def validate_orderindex(self, value):
         """Validate orderindex uniqueness"""
+        if value in (None, ""):
+            return value
         # Get the current instance (for updates) or None (for creates)
         instance = getattr(self, 'instance', None)
         
@@ -1081,10 +1375,46 @@ class ProjectTaskSerializer(serializers.ModelSerializer):
     taskcate = TaskCategorySerializer(read_only=True)
     assigner = ConsultantSerializer(read_only=True)
     assignee = ConsultantSerializer(read_only=True)
+    # Write-only ID fields for creation/update
+    project_id = serializers.CharField(write_only=True, required=False)
+    taskcate_id = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
+    assigner_id = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
+    assignee_id = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
     
     class Meta:
         model = ProjectTask
         fields = '__all__'
+
+    def _assign_fk(self, validated_data, key, model, field_name):
+        obj_id = validated_data.pop(key, None)
+        if obj_id is None:
+            return
+        if obj_id == "":
+            validated_data[field_name] = None
+            return
+        try:
+            obj = model.objects.get(**{model._meta.pk.name: obj_id})
+            validated_data[field_name] = obj
+        except model.DoesNotExist:
+            raise serializers.ValidationError(f"{model.__name__} with ID '{obj_id}' does not exist.")
+
+    def create(self, validated_data):
+        from webapp.models import Project, TaskCategory
+        from accounts.models import Consultant
+        self._assign_fk(validated_data, 'project_id', Project, 'project')
+        self._assign_fk(validated_data, 'taskcate_id', TaskCategory, 'taskcate')
+        self._assign_fk(validated_data, 'assigner_id', Consultant, 'assigner')
+        self._assign_fk(validated_data, 'assignee_id', Consultant, 'assignee')
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        from webapp.models import Project, TaskCategory
+        from accounts.models import Consultant
+        self._assign_fk(validated_data, 'project_id', Project, 'project')
+        self._assign_fk(validated_data, 'taskcate_id', TaskCategory, 'taskcate')
+        self._assign_fk(validated_data, 'assigner_id', Consultant, 'assigner')
+        self._assign_fk(validated_data, 'assignee_id', Consultant, 'assignee')
+        return super().update(instance, validated_data)
 
 class TaskCommentSerializer(serializers.ModelSerializer):
     projtask = ProjectTaskSerializer(read_only=True)
@@ -1107,10 +1437,58 @@ class CashSerializer(serializers.ModelSerializer):
 class TaxationProjectSerializer(serializers.ModelSerializer):
     client = ClientSerializer(read_only=True)
     consultant = ConsultantSerializer(read_only=True)
+    # Write-only fields for foreign keys
+    client_id = serializers.CharField(write_only=True, required=False)
+    consultant_id = serializers.CharField(write_only=True, required=False)
     
     class Meta:
         model = TaxationProject
         fields = '__all__'
+
+    def create(self, validated_data):
+        client_id = validated_data.pop('client_id', None)
+        consultant_id = validated_data.pop('consultant_id', None)
+        if client_id:
+            try:
+                client = Client.objects.get(client_id=client_id)
+                validated_data['client'] = client
+            except Client.DoesNotExist:
+                raise serializers.ValidationError(f"Client with ID '{client_id}' does not exist.")
+        if consultant_id:
+            try:
+                consultant = Consultant.objects.get(consultant_id=consultant_id)
+                validated_data['consultant'] = consultant
+            except Consultant.DoesNotExist:
+                raise serializers.ValidationError(f"Consultant with ID '{consultant_id}' does not exist.")
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        client_id = validated_data.pop('client_id', None)
+        consultant_id = validated_data.pop('consultant_id', None)
+        if client_id:
+            try:
+                client = Client.objects.get(client_id=client_id)
+                validated_data['client'] = client
+            except Client.DoesNotExist:
+                raise serializers.ValidationError(f"Client with ID '{client_id}' does not exist.")
+        if consultant_id:
+            try:
+                consultant = Consultant.objects.get(consultant_id=consultant_id)
+                validated_data['consultant'] = consultant
+            except Consultant.DoesNotExist:
+                raise serializers.ValidationError(f"Consultant with ID '{consultant_id}' does not exist.")
+        return super().update(instance, validated_data)
+
+class TaxationProjectListSerializer(serializers.ModelSerializer):
+    client = ClientSerializer(read_only=True)
+    consultant = ConsultantSerializer(read_only=True)
+
+    class Meta:
+        model = TaxationProject
+        fields = [
+            'taxproj_id', 'client', 'consultant', 'taxuse', 'deadline',
+            'declaredone', 'declarationdate', 'comment'
+        ]
 
 # Notification serializer
 class NotificationSerializer(serializers.ModelSerializer):
@@ -1132,11 +1510,16 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
     properties = PropertySerializer(many=True, read_only=True)
     bank_accounts = BankProjectAccountSerializer(many=True, read_only=True)
     cash_transactions = CashSerializer(many=True, read_only=True)
-    contacts = ClientContactSerializer(many=True, read_only=True)
+    contacts = serializers.SerializerMethodField()
     
     class Meta:
         model = Project
         fields = '__all__'
+    
+    def get_contacts(self, obj):
+        from .models import ClientContact
+        contacts = ClientContact.objects.filter(project=obj)
+        return ClientContactListSerializer(contacts, many=True, context=self.context).data
 
 class ClientDetailSerializer(serializers.ModelSerializer):
     country = CountrySerializer(read_only=True)
@@ -1234,94 +1617,121 @@ class CashListSerializer(serializers.ModelSerializer):
         fields = ['cash_id', 'project', 'country', 'trandate', 'consultant', 
                  'kind', 'amountexp', 'amountpay', 'reason']
 
-# Reference data serializers for dropdowns
-class CountryReferenceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Country
-        fields = ['country_id', 'title', 'currency']
+    def get_contacts(self, obj):
+        from .models import ClientContact
+        contacts = ClientContact.objects.filter(project=obj)
+        return ClientContactListSerializer(contacts, many=True, context=self.context).data      
 
-class ProvinceReferenceSerializer(serializers.ModelSerializer):
-    country = CountryReferenceSerializer(read_only=True)
+# ClientContact related serializers
+class ClientContactSerializer(serializers.ModelSerializer):
+    project = ProjectReferenceSerializer(read_only=True)
+    professional = ProfessionalReferenceSerializer(read_only=True)
+    
+    # Write-only fields for foreign keys
+    project_id = serializers.CharField(write_only=True, required=False)
+    professional_id = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
     
     class Meta:
-        model = Province
-        fields = ['province_id', 'title', 'country']
+        model = ClientContact
+        fields = '__all__'
+        extra_kwargs = {
+            'active': {'required': False},  # Default to True
+        }
 
-class CityReferenceSerializer(serializers.ModelSerializer):
-    country = CountryReferenceSerializer(read_only=True)
-    province = ProvinceReferenceSerializer(read_only=True)
-    
-    class Meta:
-        model = City
-        fields = ['city_id', 'title', 'country', 'province']
-
-class BankReferenceSerializer(serializers.ModelSerializer):
-    country = CountryReferenceSerializer(read_only=True)
-    
-    class Meta:
-        model = Bank
-        fields = ['bank_id', 'bankname', 'country', 'institutionnumber', 'swiftcode']
-
-class ConsultantReferenceSerializer(serializers.ModelSerializer):
-    photo_url = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = Consultant
-        fields = ['consultant_id', 'fullname', 'email', 'role', 'active', 'photo_url']
-
-    def get_photo_url(self, obj):
-        """
-        Absolute URL to the consultant's photo if present.
-        Requires MEDIA settings and request in serializer context.
-        """
-        if not obj.photo:
-            return None
-        request = self.context.get("request")
+    def validate_clientcont_id(self, value):
+        """Validate clientcont_id uniqueness"""
+        instance = getattr(self, 'instance', None)
         try:
-            url = obj.photo.url
-        except Exception:
-            return None
-        return request.build_absolute_uri(url) if request else url
+            existing_contact = ClientContact.objects.get(clientcont_id=value)
+            if instance and existing_contact.clientcont_id == instance.clientcont_id:
+                return value
+            raise serializers.ValidationError(
+                f"Client Contact ID '{value}' is already taken by Contact: {existing_contact.fullname}"
+            )
+        except ClientContact.DoesNotExist:
+            return value
 
-class ProjectCategoryReferenceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProjectCategory
-        fields = ['projcate_id', 'title', 'active']
+    def validate_email(self, value):
+        """Validate email format"""
+        if value:
+            import re
+            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            if not re.match(email_pattern, value):
+                raise serializers.ValidationError("Invalid email format.")
+        return value
 
-class TaskCategoryReferenceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TaskCategory
-        fields = ['taskcate_id', 'title', 'active']
+    def validate_phone(self, value):
+        """Validate phone format"""
+        if value:
+            import re
+            phone_pattern = r'^[\+]?[1-9][\d]{0,15}$'
+            if not re.match(phone_pattern, value):
+                raise serializers.ValidationError("Invalid phone number format.")
+        return value
 
-class ProfessionReferenceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Profession
-        fields = ['profession_id', 'title']
+    def validate_mobile(self, value):
+        """Validate mobile format"""
+        if value:
+            import re
+            mobile_pattern = r'^[\+]?[1-9][\d]{0,15}$'
+            if not re.match(mobile_pattern, value):
+                raise serializers.ValidationError("Invalid mobile number format.")
+        return value
 
-class ProfessionalReferenceSerializer(serializers.ModelSerializer):
-    profession = ProfessionReferenceSerializer(read_only=True)
-    city = CityReferenceSerializer(read_only=True)
+    def create(self, validated_data):
+        """Create a new client contact instance"""
+        # Handle foreign key conversions
+        self._handle_foreign_keys(validated_data)
+        
+        # Set default values
+        if 'active' not in validated_data:
+            validated_data['active'] = True
+        
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        """Update an existing client contact instance"""
+        # Handle foreign key conversions
+        self._handle_foreign_keys(validated_data)
+        
+        return super().update(instance, validated_data)
+
+    def _handle_foreign_keys(self, validated_data):
+        """Handle foreign key field conversions"""
+        # Handle project_id
+        if 'project_id' in validated_data:
+            try:
+                project = Project.objects.get(project_id=validated_data['project_id'])
+                validated_data['project'] = project
+                del validated_data['project_id']
+            except Project.DoesNotExist:
+                raise serializers.ValidationError(f"Project with ID '{validated_data['project_id']}' does not exist.")
+
+        # Handle professional_id (optional)
+        if 'professional_id' in validated_data:
+            professional_id = validated_data['professional_id']
+            if professional_id:
+                try:
+                    professional = Professional.objects.get(professional_id=professional_id)
+                    validated_data['professional'] = professional
+                except Professional.DoesNotExist:
+                    raise serializers.ValidationError(f"Professional with ID '{professional_id}' does not exist.")
+            else:
+                validated_data['professional'] = None
+            del validated_data['professional_id']
+
+
+class ClientContactListSerializer(serializers.ModelSerializer):
+    project = ProjectReferenceSerializer(read_only=True)
+    professional = ProfessionalReferenceSerializer(read_only=True)
     
     class Meta:
-        model = Professional
-        fields = ['professional_id', 'fullname', 'profession', 'city', 'reliability', 'active']
+        model = ClientContact
+        fields = [
+            'clientcont_id', 'project', 'professional', 'fullname', 
+            'connection', 'email', 'phone', 'mobile', 'profession', 
+            'reliability', 'city', 'active'
+        ]
 
-class InsuranceCarrierReferenceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = InsuranceCarrier
-        fields = ['insucarrier_id', 'title', 'active']
 
-class ProjectReferenceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Project
-        fields = ['project_id', 'title', 'status']
 
-class ClientReferenceSerializer(serializers.ModelSerializer):
-    fullname = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = Client
-        fields = ['client_id', 'fullname', 'active']
-    
-    def get_fullname(self, obj):
-        return f"{obj.surname} {obj.name}"

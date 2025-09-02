@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ListGroup, Badge, Spinner } from 'react-bootstrap';
 import { FaCrown, FaMedal, FaAward } from 'react-icons/fa';
-import { apiGet } from '../../utils/api';
+import axios from 'axios';
 
 const TopClients = () => {
   const [clients, setClients] = useState([]);
@@ -13,9 +13,9 @@ const TopClients = () => {
 
   const loadTopClients = async () => {
     try {
-      const response = await apiGet('/api/dashboard/top-clients/');
-      if (response.success) {
-        setClients(response.data);
+      const response = await axios.get('http://localhost:8000/api/dashboard/top-clients/');
+      if (response.data.success) {
+        setClients(response.data.data);
       }
     } catch (error) {
       console.error('Error loading top clients:', error);

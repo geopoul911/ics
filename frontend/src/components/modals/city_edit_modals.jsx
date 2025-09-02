@@ -1,7 +1,7 @@
 // Built-ins
 import { useState, useEffect } from "react";
 
-import { apiPut } from "../../utils/api";
+
 import axios from "axios";
 import { headers } from "../global_vars";
 
@@ -33,7 +33,12 @@ const toSmallInt = (value) => {
 
 const patchCity = async (id, payload) => {
   const url = `${CITY_DETAIL}${encodeURIComponent(id)}/`;
-  return apiPut(url, payload);
+  const currentHeaders = {
+    ...headers,
+    "Authorization": "Token " + localStorage.getItem("userToken")
+  };
+  const response = await axios.patch(url, payload, { headers: currentHeaders });
+  return response.data;
 };
 
 /* ===========================

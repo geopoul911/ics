@@ -53,9 +53,8 @@ function AddCountryModal() {
 
   const isTitleValid = title.trim().length >= 2 && title.trim().length <= 40;
   const isCountryIdValid = countryId.length >= 2 && countryId.length <= 3; // ✅ allow 2 or 3 chars
-  const isOrderIndexValid = orderindex !== "" && Number.isInteger(+orderindex);
-
-  const isFormValid = isTitleValid && isCountryIdValid && isOrderIndexValid;
+  const isCurrencyValid = currency.length === 3;
+  const isFormValid = isTitleValid && isCountryIdValid && isCurrencyValid;
 
   const createNewCountry = async () => {
     try {
@@ -73,7 +72,7 @@ function AddCountryModal() {
           title: title.trim(),
           country_id: countryId,        // ✅ field name matches Django model
           currency: currency || null,   // optional
-          orderindex: Number(orderindex),
+          orderindex: orderindex,
         },
       });
 
@@ -84,27 +83,30 @@ function AddCountryModal() {
 
       window.location.href = "/regions/country/" + newId;
     } catch (e) {
-      console.log('Error creating country:', e);
-      console.log('Error response data:', e?.response?.data);
-      
       // Handle different error response formats
       let apiMsg = "Something went wrong while creating the country.";
-      
-      if (e?.response?.data?.error) {
-        // Custom error format from our enhanced error handling
-        apiMsg = e.response.data.error;
-      } else if (e?.response?.data?.orderindex) {
-        // Serializer validation error for orderindex
-        apiMsg = e.response.data.orderindex[0];
-      } else if (e?.response?.data?.country_id) {
-        // Serializer validation error for country_id
-        apiMsg = e.response.data.country_id[0];
-      } else if (e?.response?.data?.errormsg) {
-        apiMsg = e.response.data.errormsg;
-      } else if (e?.response?.data?.detail) {
-        apiMsg = e.response.data.detail;
+      const data = e?.response?.data;
+
+      if (data?.error) {
+        apiMsg = data.error;
+      } else if (data?.title && Array.isArray(data.title)) {
+        apiMsg = data.title[0];
+      } else if (data?.country_id && Array.isArray(data.country_id)) {
+        apiMsg = data.country_id[0];
+      } else if (data?.orderindex && Array.isArray(data.orderindex)) {
+        apiMsg = data.orderindex[0];
+      } else if (typeof data === 'object' && data) {
+        try {
+          // Fallback: join all field errors
+          const all = Object.values(data).flat().join(' ');
+          if (all) apiMsg = all;
+        } catch (_ignored) {}
+      } else if (data?.errormsg) {
+        apiMsg = data.errormsg;
+      } else if (data?.detail) {
+        apiMsg = data.detail;
       }
-      
+
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -206,10 +208,10 @@ function AddCountryModal() {
                     Country ID is required (2–3 chars).
                   </li>
                 )}
-                {!isOrderIndexValid && (
+                {!isCurrencyValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Order Index is required (integer).
+                    Currency is required (3 chars).
                   </li>
                 )}
               </ul>

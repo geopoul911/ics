@@ -36,7 +36,7 @@ class AddCountry(generics.UpdateAPIView):
         try:
             country = Country.objects.create(
                 country_id=request.data["country_id"],
-                orderindex=request.data.get("orderindex", 0),
+                orderindex=request.data["orderindex"],
                 currency=request.data.get("currency"),
                 title=request.data["title"],
             )

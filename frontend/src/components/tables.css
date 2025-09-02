@@ -238,6 +238,29 @@ table > thead > tr > th:nth-child(1) {
   width: 4% !important;
 }
 
+/* All Project Tasks */
+#all_project_tasks_table > thead > tr > th:nth-child(1) {
+  width: 8% !important;
+}
+#all_project_tasks_table > thead > tr > th:nth-child(2) {
+  width: 20% !important;
+}
+#all_project_tasks_table > thead > tr > th:nth-child(3) {
+  width: 20% !important;
+}
+#all_project_tasks_table > thead > tr > th:nth-child(4) {
+  width: 8% !important;
+}
+#all_project_tasks_table > thead > tr > th:nth-child(5) {
+  width: 6% !important;
+}
+#all_project_tasks_table > thead > tr > th:nth-child(6) {
+  width: 10% !important;
+}
+#all_project_tasks_table > thead > tr > th:nth-child(7) {
+  width: 12% !important;
+}
+
 /* 1) ID */
 #all_drivers_table > thead > tr > th:nth-child(1) {
   width: 4% !important;

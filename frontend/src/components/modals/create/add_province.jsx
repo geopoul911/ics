@@ -37,7 +37,7 @@ function AddProvinceModal() {
   const [title, setTitle] = useState("");
   const [provinceId, setProvinceId] = useState(""); // maps to province_id
   const [countryId, setCountryId] = useState(""); // maps to country_id
-  const [orderindex, setOrderindex] = useState(""); // required small int
+  const [orderindex, setOrderindex] = useState(""); // optional small int
 
   const resetForm = () => {
     setTitle("");
@@ -55,7 +55,7 @@ function AddProvinceModal() {
   const isTitleValid = title.trim().length >= 2 && title.trim().length <= 40;
   const isProvinceIdValid = provinceId.length >= 2 && provinceId.length <= 10;
   const isCountryIdValid = countryId.length > 0;
-  const isOrderIndexValid = orderindex !== "" && Number.isInteger(+orderindex);
+  const isOrderIndexValid = orderindex === "" || Number.isInteger(+orderindex);
 
   const isFormValid = isTitleValid && isProvinceIdValid && isCountryIdValid && isOrderIndexValid;
 
@@ -107,7 +107,7 @@ function AddProvinceModal() {
           title: title.trim(),
           province_id: provinceId,
           country_id: countryId, // Use country_id instead of country
-          orderindex: Number(orderindex),
+          orderindex: orderindex === "" ? null : Number(orderindex),
         },
       });
 
@@ -249,7 +249,7 @@ function AddProvinceModal() {
                 {!isOrderIndexValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Order Index is required (integer).
+                    Order Index must be an integer when provided.
                   </li>
                 )}
               </ul>

@@ -27,7 +27,7 @@ const GET_CLIENTS = "http://localhost:8000/api/data_management/all_clients/";
 const onlyAlphanumeric = (value) => value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
 const clampLen = (value, max) => value.slice(0, max);
 
-function AddDocumentModal({ onDocumentCreated }) {
+function AddDocumentModal({ onClientCreated }) {
   const [show, setShow] = useState(false);
   const [projects, setProjects] = useState([]);
   const [clients, setClients] = useState([]);
@@ -146,8 +146,8 @@ function AddDocumentModal({ onDocumentCreated }) {
         });
 
         handleClose();
-        if (onDocumentCreated) {
-          onDocumentCreated();
+        if (onClientCreated) {
+          onClientCreated();
         }
       }
     } catch (error) {

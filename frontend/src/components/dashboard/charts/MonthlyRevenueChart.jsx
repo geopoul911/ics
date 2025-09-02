@@ -10,7 +10,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { apiGet } from '../../../utils/api';
+import axios from 'axios';
 
 ChartJS.register(
   CategoryScale,
@@ -35,9 +35,9 @@ const MonthlyRevenueChart = () => {
 
   const loadRevenueData = async () => {
     try {
-      const response = await apiGet('/api/dashboard/revenue-trend/');
-      if (response.success) {
-        const data = response.data;
+      const response = await axios.get('http://localhost:8000/api/dashboard/revenue-trend/');
+      if (response.data.success) {
+        const data = response.data.data;
         setChartData({
           labels: data.labels,
           datasets: [

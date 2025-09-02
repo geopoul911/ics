@@ -36,11 +36,11 @@ class Consultant(AbstractBaseUser, PermissionsMixin):
     ]
 
     consultant_id = models.CharField(max_length=10, primary_key=True)
-    orderindex = models.SmallIntegerField()
+    orderindex = models.SmallIntegerField(blank=True, null=True)
     fullname = models.CharField(max_length=40)
-    email = models.EmailField(blank=True, null=True)
+    email = models.EmailField()
     phone = models.CharField(max_length=15, blank=True, null=True)
-    mobile = models.CharField(max_length=15, blank=True, null=True)
+    mobile = models.CharField(max_length=15)
     photo = models.ImageField(upload_to='consultant_photos/', blank=True, null=True)
     role = models.CharField(max_length=1, choices=ROLE_CHOICES)
 

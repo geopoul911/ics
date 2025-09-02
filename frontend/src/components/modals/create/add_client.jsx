@@ -14,7 +14,7 @@ import { Button } from "semantic-ui-react";
 
 // Global Variables
 import { headers } from "../../global_vars";
-import { API_ENDPOINTS, apiGet } from "../../../utils/api";
+
 
 // Variables
 window.Swal = Swal;
@@ -176,15 +176,12 @@ function AddClientModal({ onClientCreated }) {
   const loadDropdownData = async () => {
     try {
       console.log('Loading dropdown data...');
-      console.log('API endpoints:', {
-        countries: API_ENDPOINTS.COUNTRIES,
-        insuranceCarriers: API_ENDPOINTS.INSURANCE_CARRIERS
-      });
+      console.log('Loading dropdown data...');
       
-      // Load reference data for dropdowns using apiGet utility
+      // Load reference data for dropdowns using axios
       const [countriesRes, insuranceCarriersRes] = await Promise.all([
-        apiGet(API_ENDPOINTS.COUNTRIES),
-        apiGet(API_ENDPOINTS.INSURANCE_CARRIERS)
+        axios.get("http://localhost:8000/api/data_management/all_countries/"),
+        axios.get("http://localhost:8000/api/data_management/all_insurance_carriers/")
       ]);
       
       console.log('Raw API responses:', {
@@ -194,10 +191,10 @@ function AddClientModal({ onClientCreated }) {
       
       // Handle the response structure correctly
       // Countries API returns {"all_countries": [...]}
-      const countriesData = countriesRes?.all_countries || [];
+      const countriesData = countriesRes?.data?.all_countries || [];
       
       // Insurance carriers API returns {"all_insurance_carriers": [...]}
-      const insuranceCarriersData = insuranceCarriersRes?.all_insurance_carriers || [];
+      const insuranceCarriersData = insuranceCarriersRes?.data?.all_insurance_carriers || [];
       
       console.log('Processed data:', {
         countries: countriesData,
@@ -222,10 +219,10 @@ function AddClientModal({ onClientCreated }) {
   const loadProvinces = async (countryId) => {
     try {
       console.log('Loading provinces for country:', countryId);
-      const response = await apiGet(`${API_ENDPOINTS.PROVINCES}?country=${countryId}`);
+      const response = await axios.get(`http://localhost:8000/api/data_management/all_provinces/?country=${countryId}`);
       console.log('Raw provinces response:', response);
       // Provinces API returns {"all_provinces": [...]}
-      const provincesData = response?.all_provinces || [];
+      const provincesData = response?.data?.all_provinces || [];
       console.log('Processed provinces data:', provincesData);
       setProvinces(provincesData);
     } catch (error) {
@@ -242,10 +239,10 @@ function AddClientModal({ onClientCreated }) {
   const loadCities = async (provinceId) => {
     try {
       console.log('Loading cities for province:', provinceId);
-      const response = await apiGet(`${API_ENDPOINTS.CITIES}?province=${provinceId}`);
+      const response = await axios.get(`http://localhost:8000/api/data_management/all_cities/?province=${provinceId}`);
       console.log('Raw cities response:', response);
       // Cities API returns {"all_cities": [...]}
-      const citiesData = response?.all_cities || [];
+      const citiesData = response?.data?.all_cities || [];
       console.log('Processed cities data:', citiesData);
       setCities(citiesData);
     } catch (error) {

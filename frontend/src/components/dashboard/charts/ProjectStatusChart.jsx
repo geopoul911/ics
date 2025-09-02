@@ -6,7 +6,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { apiGet } from '../../../utils/api';
+import axios from 'axios';
 
 ChartJS.register(
   ArcElement,
@@ -27,9 +27,9 @@ const ProjectStatusChart = () => {
 
   const loadProjectStatusData = async () => {
     try {
-      const response = await apiGet('/api/dashboard/project-status/');
-      if (response.success) {
-        const data = response.data;
+      const response = await axios.get('http://localhost:8000/api/dashboard/project-status/');
+      if (response.data.success) {
+        const data = response.data.data;
         setChartData({
           labels: data.labels,
           datasets: [{

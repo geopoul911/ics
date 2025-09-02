@@ -1,51 +1,40 @@
 // Built-ins
 import React from "react";
 
+// Custom Made Components
+import NavigationBar from "../../../core/navigation_bar/navigation_bar";
+import Footer from "../../../core/footer/footer";
+
 // Icons / Images
 import { BsInfoSquare } from "react-icons/bs";
-import { FaHashtag, FaSort } from "react-icons/fa";
-import { MdSecurity, MdCheckCircle, MdCancel } from "react-icons/md";
 
 // Modules / Functions
 import { Card } from "react-bootstrap";
 import { Grid } from "semantic-ui-react";
-import Swal from "sweetalert2";
+import axios from "axios";
 
-// Custom Made Components
-import NavigationBar from "../../../core/navigation_bar/navigation_bar";
-import Footer from "../../../core/footer/footer";
-import DeleteObjectModal from "../../../modals/delete_object";
+// Global Variables
+import { headers, pageHeader } from "../../../global_vars";
 import {
+  EditDocumentIdModal,
   EditDocumentTitleModal,
   EditDocumentProjectModal,
   EditDocumentClientModal,
   EditDocumentCreatedModal,
   EditDocumentValidUntilModal,
-  EditDocumentFilePathModal,
+  EditDocumentFilepathModal,
   EditDocumentOriginalModal,
   EditDocumentTrafficableModal,
   EditDocumentStatusModal,
   EditDocumentNotesModal,
 } from "../../../modals/document_edit_modals";
-import axios from "axios";
+import DeleteObjectModal from "../../../modals/delete_object";
 
-// Global Variables
-import {
-  headers,
-  pageHeader,
-  loader,
-} from "../../../global_vars";
-
-// API endpoint for document
 const VIEW_DOCUMENT = "http://localhost:8000/api/data_management/document/";
 
-// Helpers to read URL like: /data_management/document/<document_id>
 function getDocumentIdFromPath() {
-  const parts = window.location.pathname.split("/").filter(Boolean); // removes '' from // or trailing /
-  const idx = parts.indexOf("document");
-  if (idx === -1) return null;
-  const id = parts[idx + 1] || null;
-  return id ? decodeURIComponent(id) : null;
+  const pathParts = window.location.pathname.split('/');
+  return pathParts[pathParts.length - 1];
 }
 
 let overviewIconStyle = { color: "#2a9fd9", marginRight: "0.5em" };
@@ -60,55 +49,54 @@ class DocumentOverview extends React.Component {
   }
 
   componentDidMount() {
-    // Update headers with current token
+    this.fetchDocument();
+  }
+
+  fetchDocument = () => {
+    const documentId = getDocumentIdFromPath();
     const currentHeaders = {
       ...headers,
       "Authorization": "Token " + localStorage.getItem("userToken")
     };
 
-    const documentId = getDocumentIdFromPath();
-
     axios
-      .get(`${VIEW_DOCUMENT}${documentId}/`, { headers: currentHeaders })
+      .get(VIEW_DOCUMENT + documentId + "/", {
+        headers: currentHeaders,
+      })
       .then((res) => {
-        // Accept a few possible payload shapes safely
-        const document =
-          res?.data ||
-          {};
-
         this.setState({
-          document,
+          document: res.data,
           is_loaded: true,
         });
       })
       .catch((e) => {
-        if (e?.response?.status === 401) {
-          this.setState({ forbidden: true });
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "An unknown error has occurred.",
-          });
-        }
+        console.error("Error fetching document:", e);
+        this.setState({
+          is_loaded: true,
+        });
       });
-  }
+  };
 
-  // When modals return a fresh object, replace state.document
-  update_state = (updated) => {
-    this.setState({ document: updated });
+  update_state = (newData) => {
+    this.setState({
+      document: { ...this.state.document, ...newData },
+    });
   };
 
   render() {
-    const { document } = this.state;
-    
-    if (!this.state.is_loaded) {
+    const { document, is_loaded } = this.state;
+
+    if (!is_loaded) {
       return (
         <>
           <NavigationBar />
-          <div className="rootContainer">
-            {pageHeader("document_overview", document.title)}
-            {loader()}
+          <div className="mainContainer">
+            {pageHeader("document_overview", "Loading...")}
+            <div className="contentContainer">
+              <div className="contentBody">
+                <div>Loading...</div>
+              </div>
+            </div>
           </div>
           <Footer />
         </>
@@ -118,198 +106,154 @@ class DocumentOverview extends React.Component {
     return (
       <>
         <NavigationBar />
-        <div className="rootContainer">
-          {pageHeader("document_overview", document.title)}
-          <div className="contentHeader">
-            <div className="contentHeaderLeft">
-              <h3>
-                <BsInfoSquare style={overviewIconStyle} />
-                Document Overview
-              </h3>
+        <div className="mainContainer">
+          {pageHeader("document_overview", document.document_id || "Not set")}
+          <div className="contentContainer">
+            <div className="contentBody">
+              <Grid>
+                <Grid.Row>
+                  <Grid.Column width={16}>
+                    <Card>
+                      <Card.Header>
+                        <BsInfoSquare style={overviewIconStyle} />
+                        Document Information
+                      </Card.Header>
+                      <Card.Body>
+                        <Grid>
+                          <Grid.Row>
+                            <Grid.Column width={8}>
+                              <p>
+                                <strong>Document ID:</strong> {document.document_id || "Not set"}
+                                <EditDocumentIdModal
+                                  document={document}
+                                  update_state={this.update_state}
+                                />
+                              </p>
+                            </Grid.Column>
+                            <Grid.Column width={8}>
+                              <p>
+                                <strong>Title:</strong> {document.title || "Not set"}
+                                <EditDocumentTitleModal
+                                  document={document}
+                                  update_state={this.update_state}
+                                />
+                              </p>
+                            </Grid.Column>
+                          </Grid.Row>
+                          <Grid.Row>
+                            <Grid.Column width={8}>
+                              <p>
+                                <strong>Project:</strong> {document.project?.title || "Not set"}
+                                <EditDocumentProjectModal
+                                  document={document}
+                                  update_state={this.update_state}
+                                />
+                              </p>
+                            </Grid.Column>
+                            <Grid.Column width={8}>
+                              <p>
+                                <strong>Client:</strong>{" "}
+                                {document.client?.surname || "Not set"} {document.client?.name || ""}
+                                <EditDocumentClientModal
+                                  document={document}
+                                  update_state={this.update_state}
+                                />
+                              </p>
+                            </Grid.Column>
+                          </Grid.Row>
+                          <Grid.Row>
+                            <Grid.Column width={8}>
+                              <p>
+                                <strong>Created Date:</strong>{" "}
+                                {document.created
+                                  ? new Date(document.created).toLocaleDateString()
+                                  : "Not set"}
+                                <EditDocumentCreatedModal
+                                  document={document}
+                                  update_state={this.update_state}
+                                />
+                              </p>
+                            </Grid.Column>
+                            <Grid.Column width={8}>
+                              <p>
+                                <strong>Valid Until:</strong>{" "}
+                                {document.validuntil
+                                  ? new Date(document.validuntil).toLocaleDateString()
+                                  : "Not set"}
+                                <EditDocumentValidUntilModal
+                                  document={document}
+                                  update_state={this.update_state}
+                                />
+                              </p>
+                            </Grid.Column>
+                          </Grid.Row>
+                          <Grid.Row>
+                            <Grid.Column width={8}>
+                              <p>
+                                <strong>Filepath:</strong> {document.filepath || "Not set"}
+                                <EditDocumentFilepathModal
+                                  document={document}
+                                  update_state={this.update_state}
+                                />
+                              </p>
+                            </Grid.Column>
+                            <Grid.Column width={8}>
+                              <p>
+                                <strong>Status:</strong> {document.status || "Not set"}
+                                <EditDocumentStatusModal
+                                  document={document}
+                                  update_state={this.update_state}
+                                />
+                              </p>
+                            </Grid.Column>
+                          </Grid.Row>
+                          <Grid.Row>
+                            <Grid.Column width={8}>
+                              <p>
+                                <strong>Original:</strong> {document.original ? "Yes" : "No"}
+                                <EditDocumentOriginalModal
+                                  document={document}
+                                  update_state={this.update_state}
+                                />
+                              </p>
+                            </Grid.Column>
+                            <Grid.Column width={8}>
+                              <p>
+                                <strong>Trafficable:</strong> {document.trafficable ? "Yes" : "No"}
+                                <EditDocumentTrafficableModal
+                                  document={document}
+                                  update_state={this.update_state}
+                                />
+                              </p>
+                            </Grid.Column>
+                          </Grid.Row>
+                          <Grid.Row>
+                            <Grid.Column width={16}>
+                              <p>
+                                <strong>Notes:</strong> {document.notes || "Not set"}
+                                <EditDocumentNotesModal
+                                  document={document}
+                                  update_state={this.update_state}
+                                />
+                              </p>
+                            </Grid.Column>
+                          </Grid.Row>
+                        </Grid>
+                      </Card.Body>
+                    </Card>
+                  </Grid.Column>
+                </Grid.Row>
+                <Grid.Row>
+                  <Grid.Column width={16}>
+                    <DeleteObjectModal
+                      objectType="document"
+                      objectId={document.document_id}
+                      objectName={document.document_id}
+                    />
+                  </Grid.Column>
+                </Grid.Row>
+              </Grid>
             </div>
-            <div className="contentHeaderRight">
-              <DeleteObjectModal
-                objectType="Document"
-                objectId={document.document_id}
-                objectName={document.title}
-                onObjectDeleted={() => {
-                  window.location.href = "/data_management/all_documents";
-                }}
-              />
-            </div>
-          </div>
-          <div className="contentBody">
-            <Grid stackable columns={2}>
-              <Grid.Column>
-                <Card>
-                  <Card.Header>
-                    <h4>
-                      <FaHashtag style={overviewIconStyle} />
-                      Basic Information
-                    </h4>
-                  </Card.Header>
-                  <Card.Body>
-                    <div className="overviewItem">
-                      <strong>Document ID:</strong>
-                      <span>{document.document_id}</span>
-                    </div>
-                    <div className="overviewItem">
-                      <strong>Title:</strong>
-                      <span>
-                        {document.title}
-                        <EditDocumentTitleModal
-                          document={document}
-                          update_state={this.update_state}
-                        />
-                      </span>
-                    </div>
-                    <div className="overviewItem">
-                      <strong>Project:</strong>
-                      <span>
-                        {document.project?.title || "Not assigned"}
-                        <EditDocumentProjectModal
-                          document={document}
-                          update_state={this.update_state}
-                        />
-                      </span>
-                    </div>
-                    <div className="overviewItem">
-                      <strong>Client:</strong>
-                      <span>
-                        {document.client?.fullname || "Not assigned"}
-                        <EditDocumentClientModal
-                          document={document}
-                          update_state={this.update_state}
-                        />
-                      </span>
-                    </div>
-                    <div className="overviewItem">
-                      <strong>Created:</strong>
-                      <span>
-                        {document.created ? new Date(document.created).toLocaleDateString() : "Not set"}
-                        <EditDocumentCreatedModal
-                          document={document}
-                          update_state={this.update_state}
-                        />
-                      </span>
-                    </div>
-                    <div className="overviewItem">
-                      <strong>Valid Until:</strong>
-                      <span>
-                        {document.validuntil ? new Date(document.validuntil).toLocaleDateString() : "Not set"}
-                        <EditDocumentValidUntilModal
-                          document={document}
-                          update_state={this.update_state}
-                        />
-                      </span>
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Grid.Column>
-              <Grid.Column>
-                <Card>
-                  <Card.Header>
-                    <h4>
-                      <MdSecurity style={overviewIconStyle} />
-                      Document Properties
-                    </h4>
-                  </Card.Header>
-                  <Card.Body>
-                    <div className="overviewItem">
-                      <strong>File Path:</strong>
-                      <span>
-                        {document.filepath || "Not set"}
-                        <EditDocumentFilePathModal
-                          document={document}
-                          update_state={this.update_state}
-                        />
-                      </span>
-                    </div>
-                    <div className="overviewItem">
-                      <strong>Original:</strong>
-                      <span>
-                        {document.original ? (
-                          <MdCheckCircle style={{ color: "green", marginRight: "0.5em" }} />
-                        ) : (
-                          <MdCancel style={{ color: "red", marginRight: "0.5em" }} />
-                        )}
-                        {document.original ? "Yes" : "No"}
-                        <EditDocumentOriginalModal
-                          document={document}
-                          update_state={this.update_state}
-                        />
-                      </span>
-                    </div>
-                    <div className="overviewItem">
-                      <strong>Trafficable:</strong>
-                      <span>
-                        {document.trafficable ? (
-                          <MdCheckCircle style={{ color: "green", marginRight: "0.5em" }} />
-                        ) : (
-                          <MdCancel style={{ color: "red", marginRight: "0.5em" }} />
-                        )}
-                        {document.trafficable ? "Yes" : "No"}
-                        <EditDocumentTrafficableModal
-                          document={document}
-                          update_state={this.update_state}
-                        />
-                      </span>
-                    </div>
-                    <div className="overviewItem">
-                      <strong>Status:</strong>
-                      <span>
-                        {document.status || "Not set"}
-                        <EditDocumentStatusModal
-                          document={document}
-                          update_state={this.update_state}
-                        />
-                      </span>
-                    </div>
-                    <div className="overviewItem">
-                      <strong>Status Date:</strong>
-                      <span>
-                        {document.statusdate ? new Date(document.statusdate).toLocaleDateString() : "Not set"}
-                      </span>
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Grid.Column>
-            </Grid>
-            
-            <Grid stackable columns={1}>
-              <Grid.Column>
-                <Card>
-                  <Card.Header>
-                    <h4>
-                      <FaSort style={overviewIconStyle} />
-                      Additional Information
-                    </h4>
-                  </Card.Header>
-                  <Card.Body>
-                    <div className="overviewItem">
-                      <strong>Notes:</strong>
-                      <span>
-                        {document.notes || "No notes"}
-                        <EditDocumentNotesModal
-                          document={document}
-                          update_state={this.update_state}
-                        />
-                      </span>
-                    </div>
-                    {document.logstatus && (
-                      <div className="overviewItem">
-                        <strong>Status Log:</strong>
-                        <span>
-                          <pre style={{ whiteSpace: "pre-wrap", fontSize: "0.9em" }}>
-                            {document.logstatus}
-                          </pre>
-                        </span>
-                      </div>
-                    )}
-                  </Card.Body>
-                </Card>
-              </Grid.Column>
-            </Grid>
           </div>
         </div>
         <Footer />

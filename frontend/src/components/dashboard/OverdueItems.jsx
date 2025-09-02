@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ListGroup, Badge, Spinner, Button } from 'react-bootstrap';
 import { FaExclamationTriangle, FaCalendarAlt, FaClock } from 'react-icons/fa';
-import { apiGet } from '../../utils/api';
+import axios from 'axios';
 
 const OverdueItems = () => {
   const [overdueItems, setOverdueItems] = useState([]);
@@ -13,9 +13,9 @@ const OverdueItems = () => {
 
   const loadOverdueItems = async () => {
     try {
-      const response = await apiGet('/api/dashboard/overdue-items/');
-      if (response.success) {
-        setOverdueItems(response.data);
+      const response = await axios.get('http://localhost:8000/api/dashboard/overdue-items/');
+      if (response.data.success) {
+        setOverdueItems(response.data.data);
       }
     } catch (error) {
       console.error('Error loading overdue items:', error);

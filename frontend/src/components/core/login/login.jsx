@@ -4,7 +4,7 @@ import React from "react";
 // Modules / Functions
 import { Form, Alert } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
-import { apiPost, apiGet } from "../../../utils/api";
+import axios from "axios";
 
 // Custom made components
 import NavigationBar from "../navigation_bar/navigation_bar";
@@ -22,8 +22,8 @@ import { AiFillLock } from "react-icons/ai";
 import { BiShow, BiHide } from "react-icons/bi";
 
 // Variables
-const LOGIN = "/user/login/";
-const CHECK_IP = "/user/check_access_status/";
+const LOGIN = "http://localhost:8000/api/user/login/";
+const CHECK_IP = "http://localhost:8000/api/user/check_access_status/";
 
 // url path = '/login'
 class Login extends React.Component {
@@ -50,18 +50,18 @@ class Login extends React.Component {
     const password = e.target.password.value;
     
     try {
-      const response = await apiPost(LOGIN, {
+      const response = await axios.post(LOGIN, {
         username,
         password,
       });
       
       // Local Storage is set whenever a user is logged in.
-      const token = response.token;
+      const token = response?.data?.token;
       localStorage.setItem("userToken", token);
       localStorage.setItem("user-token", token); // Also set for new API
       localStorage.setItem("user", username);
-      localStorage.setItem("user_id", response.user.id);
-      localStorage.setItem("user_email", response.user.email);
+      localStorage.setItem("user_id", response?.data?.user?.id);
+      localStorage.setItem("user_email", response?.data?.user?.email);
 
       this.props.setUserToken(token);
       this.props.history.push("/");
@@ -96,10 +96,10 @@ class Login extends React.Component {
   // and also get attempt num / block status
   componentDidMount = async () => {
     try {
-      const response = await apiGet(CHECK_IP);
+      const response = await axios.get(CHECK_IP);
       this.setState({
-        isBlocked: response.isBlocked,
-        attemptsRemaining: response.attempts_remaining,
+        isBlocked: response?.data?.isBlocked,
+        attemptsRemaining: response?.data?.attempts_remaining,
         is_loaded: true,
       });
     } catch (error) {

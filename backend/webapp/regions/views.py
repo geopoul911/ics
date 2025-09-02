@@ -93,7 +93,11 @@ class AllCountries(generics.ListCreateAPIView):
         return Response({"all_countries": data})
 
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        # Normalize null/empty orderindex to None
+        mutable_data = request.data.copy()
+        if 'orderindex' in mutable_data and (mutable_data['orderindex'] == '' or mutable_data['orderindex'] is None):
+            mutable_data['orderindex'] = None
+        serializer = self.get_serializer(data=mutable_data)
         if serializer.is_valid():
             try:
                 serializer.save()
@@ -106,7 +110,7 @@ class AllCountries(generics.ListCreateAPIView):
                 
                 # Check if this is a unique constraint violation on orderindex
                 if 'orderindex' in error_str and 'unique' in error_str:
-                    new_orderindex = request.data.get('orderindex')
+                    new_orderindex = mutable_data.get('orderindex')
                     if new_orderindex is not None:
                         try:
                             conflicting_country = Country.objects.get(orderindex=new_orderindex)

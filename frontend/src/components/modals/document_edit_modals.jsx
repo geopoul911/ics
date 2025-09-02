@@ -3,8 +3,6 @@ import { useState, useEffect } from "react";
 
 // Icons / Images
 import { FiEdit } from "react-icons/fi";
-import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
-
 import axios from "axios";
 
 // Modules / Functions
@@ -15,31 +13,35 @@ import { Button } from "semantic-ui-react";
 // Global Variables
 import { headers } from "../global_vars";
 
+
 // Variables
 window.Swal = Swal;
 
 // API endpoints
 const UPDATE_DOCUMENT = "http://localhost:8000/api/data_management/document/";
-const GET_PROJECTS = "http://localhost:8000/api/data_management/all_projects/";
-const GET_CLIENTS = "http://localhost:8000/api/data_management/all_clients/";
 
-// Helpers
-const clampLen = (value, max) => value.slice(0, max);
-
-// Edit Document Title Modal
-export function EditDocumentTitleModal({ document, update_state }) {
+// Edit Document ID Modal
+export function EditDocumentIdModal({ document, update_state }) {
   const [show, setShow] = useState(false);
-  const [title, setTitle] = useState("");
+  const [document_id, setDocumentId] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (show) {
+      setDocumentId(document.document_id || "");
+    }
+  }, [show, document]);
 
   const handleClose = () => setShow(false);
-  const handleShow = () => {
-    setTitle(document.title || "");
-    setShow(true);
-  };
+  const handleShow = () => setShow(true);
 
-  const isTitleValid = title.trim().length >= 2 && title.trim().length <= 40;
+  const handleSave = async () => {
+    if (!document_id.trim()) {
+      Swal.fire("Error", "Document ID is required", "error");
+      return;
+    }
 
-  const updateDocumentTitle = async () => {
+    setIsLoading(true);
     try {
       const currentHeaders = {
         ...headers,
@@ -47,75 +49,145 @@ export function EditDocumentTitleModal({ document, update_state }) {
       };
 
       const response = await axios.put(
-        `${UPDATE_DOCUMENT}${document.document_id}/`,
-        { title: title.trim() },
+        UPDATE_DOCUMENT + document.document_id + "/",
+        { document_id: document_id.trim() },
         { headers: currentHeaders }
       );
 
-      if (response.status === 200) {
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: "Document title updated successfully.",
-        });
-
-        handleClose();
-        update_state(response.data);
-      }
-    } catch (error) {
-      console.error("Error updating document title:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.response?.data?.error || "An error occurred while updating the document title.",
-      });
+      Swal.fire("Success", "Document ID updated successfully", "success");
+      if (update_state) update_state(response.data);
+      handleClose();
+    } catch (e) {
+      console.error('Error updating document ID:', e);
+      const apiMsg = e?.response?.data?.detail || e?.response?.data || "Failed to update document ID";
+      Swal.fire("Error", apiMsg, "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <>
-      <Button size="mini" color="blue" onClick={handleShow}>
-        <FiEdit style={{ color: "white", fontSize: "1em" }} />
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} />
+        Edit
       </Button>
 
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Document Title</Modal.Title>
+          <Modal.Title>Edit Document ID</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group>
-              <Form.Label>
-                Title *
-                {isTitleValid ? (
-                  <AiOutlineCheckCircle style={{ color: "green", marginLeft: "0.5em" }} />
-                ) : (
-                  <AiOutlineWarning style={{ color: "orange", marginLeft: "0.5em" }} />
-                )}
-              </Form.Label>
+              <Form.Label>Document ID *:</Form.Label>
               <Form.Control
                 type="text"
-                value={title}
-                onChange={(e) => setTitle(clampLen(e.target.value, 40))}
-                placeholder="Enter document title"
-                isInvalid={title.length > 0 && !isTitleValid}
+                value={document_id}
+                onChange={(e) => setDocumentId(e.target.value)}
+                placeholder="Enter document ID"
               />
-              <Form.Control.Feedback type="invalid">
-                Title must be 2-40 characters.
-              </Form.Control.Feedback>
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
           <Button
             color="green"
-            onClick={updateDocumentTitle}
-            disabled={!isTitleValid}
+            onClick={handleSave}
+            disabled={!document_id.trim() || isLoading}
           >
-            Update Title
+            {isLoading ? "Saving..." : "Save Changes"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+}
+
+// Edit Document Title Modal
+export function EditDocumentTitleModal({ document, update_state }) {
+  const [show, setShow] = useState(false);
+  const [title, setTitle] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (show) {
+      setTitle(document.title || "");
+    }
+  }, [show, document]);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
+  const handleSave = async () => {
+    if (!title.trim()) {
+      Swal.fire("Error", "Title is required", "error");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+
+      const response = await axios.put(
+        UPDATE_DOCUMENT + document.document_id + "/",
+        { title: title.trim() },
+        { headers: currentHeaders }
+      );
+
+      Swal.fire("Success", "Title updated successfully", "success");
+      if (update_state) update_state(response.data);
+      handleClose();
+    } catch (e) {
+      console.error('Error updating title:', e);
+      const apiMsg = e?.response?.data?.detail || e?.response?.data || "Failed to update title";
+      Swal.fire("Error", apiMsg, "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} />
+        Edit
+      </Button>
+
+      <Modal show={show} onHide={handleClose} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Title</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group>
+              <Form.Label>Title *:</Form.Label>
+              <Form.Control
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter title"
+                maxLength={40}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>
+            Cancel
+          </Button>
+          <Button
+            color="green"
+            onClick={handleSave}
+            disabled={!title.trim() || isLoading}
+          >
+            {isLoading ? "Saving..." : "Save Changes"}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -126,95 +198,81 @@ export function EditDocumentTitleModal({ document, update_state }) {
 // Edit Document Project Modal
 export function EditDocumentProjectModal({ document, update_state }) {
   const [show, setShow] = useState(false);
-  const [projectId, setProjectId] = useState("");
+  const [project, setProject] = useState("");
   const [projects, setProjects] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const currentHeaders = {
-          ...headers,
-          "Authorization": "Token " + localStorage.getItem("userToken")
-        };
-
-        const response = await axios.get(GET_PROJECTS, { headers: currentHeaders });
-        if (response.data && response.data.all_projects) {
-          setProjects(response.data.all_projects);
-        }
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-      }
-    };
-
     if (show) {
-      fetchProjects();
+      setProject(document.project?.project_id || "");
+      loadProjects();
     }
-  }, [show]);
+  }, [show, document]);
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => {
-    setProjectId(document.project?.project_id || "");
-    setShow(true);
+  const loadProjects = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/api/data_management/all_projects/");
+      const projectsData = response?.data?.all_projects || [];
+      setProjects(projectsData);
+    } catch (error) {
+      console.error('Error loading projects:', error);
+      setProjects([]);
+    }
   };
 
-  const updateDocumentProject = async () => {
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
+  const handleSave = async () => {
+    setIsLoading(true);
     try {
       const currentHeaders = {
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
-      const updateData = projectId ? { project_id: projectId } : { project: null };
-
       const response = await axios.put(
-        `${UPDATE_DOCUMENT}${document.document_id}/`,
-        updateData,
+        UPDATE_DOCUMENT + document.document_id + "/",
+        { project_id: project || null },
         { headers: currentHeaders }
       );
 
-      if (response.status === 200) {
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: "Document project updated successfully.",
-        });
-
-        handleClose();
-        update_state(response.data);
-      }
-    } catch (error) {
-      console.error("Error updating document project:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.response?.data?.error || "An error occurred while updating the document project.",
-      });
+      Swal.fire("Success", "Project updated successfully", "success");
+      if (update_state) update_state(response.data);
+      handleClose();
+    } catch (e) {
+      console.error('Error updating project:', e);
+      const apiMsg = e?.response?.data?.detail || e?.response?.data || "Failed to update project";
+      Swal.fire("Error", apiMsg, "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <>
-      <Button size="mini" color="blue" onClick={handleShow}>
-        <FiEdit style={{ color: "white", fontSize: "1em" }} />
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} />
+        Edit
       </Button>
 
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Document Project</Modal.Title>
+          <Modal.Title>Edit Project</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group>
-              <Form.Label>Project</Form.Label>
+              <Form.Label>Project:</Form.Label>
               <Form.Control
                 as="select"
-                value={projectId}
-                onChange={(e) => setProjectId(e.target.value)}
+                value={project}
+                onChange={(e) => setProject(e.target.value)}
               >
-                <option value="">No project (clear assignment)</option>
-                {projects.map((project) => (
-                  <option key={project.project_id} value={project.project_id}>
-                    {project.project_id} - {project.title}
+                <option value="">Select Project (Optional)</option>
+                {projects.map((proj) => (
+                  <option key={proj.project_id} value={proj.project_id}>
+                    {proj.title}
                   </option>
                 ))}
               </Form.Control>
@@ -222,11 +280,15 @@ export function EditDocumentProjectModal({ document, update_state }) {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
-          <Button color="green" onClick={updateDocumentProject}>
-            Update Project
+          <Button
+            color="green"
+            onClick={handleSave}
+            disabled={isLoading}
+          >
+            {isLoading ? "Saving..." : "Save Changes"}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -237,95 +299,81 @@ export function EditDocumentProjectModal({ document, update_state }) {
 // Edit Document Client Modal
 export function EditDocumentClientModal({ document, update_state }) {
   const [show, setShow] = useState(false);
-  const [clientId, setClientId] = useState("");
+  const [client, setClient] = useState("");
   const [clients, setClients] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const currentHeaders = {
-          ...headers,
-          "Authorization": "Token " + localStorage.getItem("userToken")
-        };
-
-        const response = await axios.get(GET_CLIENTS, { headers: currentHeaders });
-        if (response.data && response.data.all_clients) {
-          setClients(response.data.all_clients);
-        }
-      } catch (error) {
-        console.error('Error fetching clients:', error);
-      }
-    };
-
     if (show) {
-      fetchClients();
+      setClient(document.client?.client_id || "");
+      loadClients();
     }
-  }, [show]);
+  }, [show, document]);
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => {
-    setClientId(document.client?.client_id || "");
-    setShow(true);
+  const loadClients = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/api/data_management/all_clients/");
+      const clientsData = response?.data?.all_clients || [];
+      setClients(clientsData);
+    } catch (error) {
+      console.error('Error loading clients:', error);
+      setClients([]);
+    }
   };
 
-  const updateDocumentClient = async () => {
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
+  const handleSave = async () => {
+    setIsLoading(true);
     try {
       const currentHeaders = {
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
-      const updateData = clientId ? { client_id: clientId } : { client: null };
-
       const response = await axios.put(
-        `${UPDATE_DOCUMENT}${document.document_id}/`,
-        updateData,
+        UPDATE_DOCUMENT + document.document_id + "/",
+        { client_id: client || null },
         { headers: currentHeaders }
       );
 
-      if (response.status === 200) {
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: "Document client updated successfully.",
-        });
-
-        handleClose();
-        update_state(response.data);
-      }
-    } catch (error) {
-      console.error("Error updating document client:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.response?.data?.error || "An error occurred while updating the document client.",
-      });
+      Swal.fire("Success", "Client updated successfully", "success");
+      if (update_state) update_state(response.data);
+      handleClose();
+    } catch (e) {
+      console.error('Error updating client:', e);
+      const apiMsg = e?.response?.data?.detail || e?.response?.data || "Failed to update client";
+      Swal.fire("Error", apiMsg, "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <>
-      <Button size="mini" color="blue" onClick={handleShow}>
-        <FiEdit style={{ color: "white", fontSize: "1em" }} />
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} />
+        Edit
       </Button>
 
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Document Client</Modal.Title>
+          <Modal.Title>Edit Client</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group>
-              <Form.Label>Client</Form.Label>
+              <Form.Label>Client:</Form.Label>
               <Form.Control
                 as="select"
-                value={clientId}
-                onChange={(e) => setClientId(e.target.value)}
+                value={client}
+                onChange={(e) => setClient(e.target.value)}
               >
-                <option value="">No client (clear assignment)</option>
-                {clients.map((client) => (
-                  <option key={client.client_id} value={client.client_id}>
-                    {client.client_id} - {client.fullname}
+                <option value="">Select Client (Optional)</option>
+                {clients.map((cli) => (
+                  <option key={cli.client_id} value={cli.client_id}>
+                    {cli.surname} {cli.name}
                   </option>
                 ))}
               </Form.Control>
@@ -333,11 +381,15 @@ export function EditDocumentClientModal({ document, update_state }) {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
-          <Button color="green" onClick={updateDocumentClient}>
-            Update Client
+          <Button
+            color="green"
+            onClick={handleSave}
+            disabled={isLoading}
+          >
+            {isLoading ? "Saving..." : "Save Changes"}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -349,16 +401,24 @@ export function EditDocumentClientModal({ document, update_state }) {
 export function EditDocumentCreatedModal({ document, update_state }) {
   const [show, setShow] = useState(false);
   const [created, setCreated] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (show) {
+      setCreated(document.created || "");
+    }
+  }, [show, document]);
 
   const handleClose = () => setShow(false);
-  const handleShow = () => {
-    setCreated(document.created || "");
-    setShow(true);
-  };
+  const handleShow = () => setShow(true);
 
-  const isCreatedValid = created !== "";
+  const handleSave = async () => {
+    if (!created.trim()) {
+      Swal.fire("Error", "Created date is required", "error");
+      return;
+    }
 
-  const updateDocumentCreated = async () => {
+    setIsLoading(true);
     try {
       const currentHeaders = {
         ...headers,
@@ -366,74 +426,56 @@ export function EditDocumentCreatedModal({ document, update_state }) {
       };
 
       const response = await axios.put(
-        `${UPDATE_DOCUMENT}${document.document_id}/`,
+        UPDATE_DOCUMENT + document.document_id + "/",
         { created: created },
         { headers: currentHeaders }
       );
 
-      if (response.status === 200) {
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: "Document created date updated successfully.",
-        });
-
-        handleClose();
-        update_state(response.data);
-      }
-    } catch (error) {
-      console.error("Error updating document created date:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.response?.data?.error || "An error occurred while updating the document created date.",
-      });
+      Swal.fire("Success", "Created date updated successfully", "success");
+      if (update_state) update_state(response.data);
+      handleClose();
+    } catch (e) {
+      console.error('Error updating created date:', e);
+      const apiMsg = e?.response?.data?.detail || e?.response?.data || "Failed to update created date";
+      Swal.fire("Error", apiMsg, "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <>
-      <Button size="mini" color="blue" onClick={handleShow}>
-        <FiEdit style={{ color: "white", fontSize: "1em" }} />
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} />
+        Edit
       </Button>
 
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Document Created Date</Modal.Title>
+          <Modal.Title>Edit Created Date</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group>
-              <Form.Label>
-                Created Date *
-                {isCreatedValid ? (
-                  <AiOutlineCheckCircle style={{ color: "green", marginLeft: "0.5em" }} />
-                ) : (
-                  <AiOutlineWarning style={{ color: "orange", marginLeft: "0.5em" }} />
-                )}
-              </Form.Label>
+              <Form.Label>Created Date *:</Form.Label>
               <Form.Control
                 type="date"
                 value={created}
                 onChange={(e) => setCreated(e.target.value)}
-                isInvalid={created.length > 0 && !isCreatedValid}
               />
-              <Form.Control.Feedback type="invalid">
-                Created date is required.
-              </Form.Control.Feedback>
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
           <Button
             color="green"
-            onClick={updateDocumentCreated}
-            disabled={!isCreatedValid}
+            onClick={handleSave}
+            disabled={!created.trim() || isLoading}
           >
-            Update Created Date
+            {isLoading ? "Saving..." : "Save Changes"}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -444,17 +486,25 @@ export function EditDocumentCreatedModal({ document, update_state }) {
 // Edit Document Valid Until Modal
 export function EditDocumentValidUntilModal({ document, update_state }) {
   const [show, setShow] = useState(false);
-  const [validUntil, setValidUntil] = useState("");
+  const [validuntil, setValidUntil] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (show) {
+      setValidUntil(document.validuntil || "");
+    }
+  }, [show, document]);
 
   const handleClose = () => setShow(false);
-  const handleShow = () => {
-    setValidUntil(document.validuntil || "");
-    setShow(true);
-  };
+  const handleShow = () => setShow(true);
 
-  const isValidUntilValid = validUntil !== "";
+  const handleSave = async () => {
+    if (!validuntil.trim()) {
+      Swal.fire("Error", "Valid until date is required", "error");
+      return;
+    }
 
-  const updateDocumentValidUntil = async () => {
+    setIsLoading(true);
     try {
       const currentHeaders = {
         ...headers,
@@ -462,74 +512,56 @@ export function EditDocumentValidUntilModal({ document, update_state }) {
       };
 
       const response = await axios.put(
-        `${UPDATE_DOCUMENT}${document.document_id}/`,
-        { validuntil: validUntil },
+        UPDATE_DOCUMENT + document.document_id + "/",
+        { validuntil: validuntil },
         { headers: currentHeaders }
       );
 
-      if (response.status === 200) {
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: "Document valid until date updated successfully.",
-        });
-
-        handleClose();
-        update_state(response.data);
-      }
-    } catch (error) {
-      console.error("Error updating document valid until date:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.response?.data?.error || "An error occurred while updating the document valid until date.",
-      });
+      Swal.fire("Success", "Valid until date updated successfully", "success");
+      if (update_state) update_state(response.data);
+      handleClose();
+    } catch (e) {
+      console.error('Error updating valid until date:', e);
+      const apiMsg = e?.response?.data?.detail || e?.response?.data || "Failed to update valid until date";
+      Swal.fire("Error", apiMsg, "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <>
-      <Button size="mini" color="blue" onClick={handleShow}>
-        <FiEdit style={{ color: "white", fontSize: "1em" }} />
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} />
+        Edit
       </Button>
 
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Document Valid Until Date</Modal.Title>
+          <Modal.Title>Edit Valid Until Date</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group>
-              <Form.Label>
-                Valid Until Date *
-                {isValidUntilValid ? (
-                  <AiOutlineCheckCircle style={{ color: "green", marginLeft: "0.5em" }} />
-                ) : (
-                  <AiOutlineWarning style={{ color: "orange", marginLeft: "0.5em" }} />
-                )}
-              </Form.Label>
+              <Form.Label>Valid Until Date *:</Form.Label>
               <Form.Control
                 type="date"
-                value={validUntil}
+                value={validuntil}
                 onChange={(e) => setValidUntil(e.target.value)}
-                isInvalid={validUntil.length > 0 && !isValidUntilValid}
               />
-              <Form.Control.Feedback type="invalid">
-                Valid until date is required.
-              </Form.Control.Feedback>
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
           <Button
             color="green"
-            onClick={updateDocumentValidUntil}
-            disabled={!isValidUntilValid}
+            onClick={handleSave}
+            disabled={!validuntil.trim() || isLoading}
           >
-            Update Valid Until Date
+            {isLoading ? "Saving..." : "Save Changes"}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -537,20 +569,28 @@ export function EditDocumentValidUntilModal({ document, update_state }) {
   );
 }
 
-// Edit Document File Path Modal
-export function EditDocumentFilePathModal({ document, update_state }) {
+// Edit Document Filepath Modal
+export function EditDocumentFilepathModal({ document, update_state }) {
   const [show, setShow] = useState(false);
   const [filepath, setFilepath] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (show) {
+      setFilepath(document.filepath || "");
+    }
+  }, [show, document]);
 
   const handleClose = () => setShow(false);
-  const handleShow = () => {
-    setFilepath(document.filepath || "");
-    setShow(true);
-  };
+  const handleShow = () => setShow(true);
 
-  const isFilePathValid = filepath.trim().length >= 1 && filepath.trim().length <= 120;
+  const handleSave = async () => {
+    if (!filepath.trim()) {
+      Swal.fire("Error", "Filepath is required", "error");
+      return;
+    }
 
-  const updateDocumentFilePath = async () => {
+    setIsLoading(true);
     try {
       const currentHeaders = {
         ...headers,
@@ -558,75 +598,58 @@ export function EditDocumentFilePathModal({ document, update_state }) {
       };
 
       const response = await axios.put(
-        `${UPDATE_DOCUMENT}${document.document_id}/`,
+        UPDATE_DOCUMENT + document.document_id + "/",
         { filepath: filepath.trim() },
         { headers: currentHeaders }
       );
 
-      if (response.status === 200) {
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: "Document file path updated successfully.",
-        });
-
-        handleClose();
-        update_state(response.data);
-      }
-    } catch (error) {
-      console.error("Error updating document file path:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.response?.data?.error || "An error occurred while updating the document file path.",
-      });
+      Swal.fire("Success", "Filepath updated successfully", "success");
+      if (update_state) update_state(response.data);
+      handleClose();
+    } catch (e) {
+      console.error('Error updating filepath:', e);
+      const apiMsg = e?.response?.data?.detail || e?.response?.data || "Failed to update filepath";
+      Swal.fire("Error", apiMsg, "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <>
-      <Button size="mini" color="blue" onClick={handleShow}>
-        <FiEdit style={{ color: "white", fontSize: "1em" }} />
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} />
+        Edit
       </Button>
 
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Document File Path</Modal.Title>
+          <Modal.Title>Edit Filepath</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group>
-              <Form.Label>
-                File Path *
-                {isFilePathValid ? (
-                  <AiOutlineCheckCircle style={{ color: "green", marginLeft: "0.5em" }} />
-                ) : (
-                  <AiOutlineWarning style={{ color: "orange", marginLeft: "0.5em" }} />
-                )}
-              </Form.Label>
+              <Form.Label>Filepath *:</Form.Label>
               <Form.Control
                 type="text"
                 value={filepath}
-                onChange={(e) => setFilepath(clampLen(e.target.value, 120))}
-                placeholder="Enter file path"
-                isInvalid={filepath.length > 0 && !isFilePathValid}
+                onChange={(e) => setFilepath(e.target.value)}
+                placeholder="Enter filepath"
+                maxLength={120}
               />
-              <Form.Control.Feedback type="invalid">
-                File path must be 1-120 characters.
-              </Form.Control.Feedback>
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
           <Button
             color="green"
-            onClick={updateDocumentFilePath}
-            disabled={!isFilePathValid}
+            onClick={handleSave}
+            disabled={!filepath.trim() || isLoading}
           >
-            Update File Path
+            {isLoading ? "Saving..." : "Save Changes"}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -638,14 +661,19 @@ export function EditDocumentFilePathModal({ document, update_state }) {
 export function EditDocumentOriginalModal({ document, update_state }) {
   const [show, setShow] = useState(false);
   const [original, setOriginal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (show) {
+      setOriginal(document.original || false);
+    }
+  }, [show, document]);
 
   const handleClose = () => setShow(false);
-  const handleShow = () => {
-    setOriginal(document.original || false);
-    setShow(true);
-  };
+  const handleShow = () => setShow(true);
 
-  const updateDocumentOriginal = async () => {
+  const handleSave = async () => {
+    setIsLoading(true);
     try {
       const currentHeaders = {
         ...headers,
@@ -653,47 +681,40 @@ export function EditDocumentOriginalModal({ document, update_state }) {
       };
 
       const response = await axios.put(
-        `${UPDATE_DOCUMENT}${document.document_id}/`,
+        UPDATE_DOCUMENT + document.document_id + "/",
         { original: original },
         { headers: currentHeaders }
       );
 
-      if (response.status === 200) {
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: "Document original status updated successfully.",
-        });
-
-        handleClose();
-        update_state(response.data);
-      }
-    } catch (error) {
-      console.error("Error updating document original status:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.response?.data?.error || "An error occurred while updating the document original status.",
-      });
+      Swal.fire("Success", "Original status updated successfully", "success");
+      if (update_state) update_state(response.data);
+      handleClose();
+    } catch (e) {
+      console.error('Error updating original status:', e);
+      const apiMsg = e?.response?.data?.detail || e?.response?.data || "Failed to update original status";
+      Swal.fire("Error", apiMsg, "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <>
-      <Button size="mini" color="blue" onClick={handleShow}>
-        <FiEdit style={{ color: "white", fontSize: "1em" }} />
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} />
+        Edit
       </Button>
 
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Document Original Status</Modal.Title>
+          <Modal.Title>Edit Original Status</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group>
               <Form.Check
                 type="checkbox"
-                label="Original"
+                label="Is Original Document"
                 checked={original}
                 onChange={(e) => setOriginal(e.target.checked)}
               />
@@ -701,11 +722,15 @@ export function EditDocumentOriginalModal({ document, update_state }) {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
-          <Button color="green" onClick={updateDocumentOriginal}>
-            Update Original Status
+          <Button
+            color="green"
+            onClick={handleSave}
+            disabled={isLoading}
+          >
+            {isLoading ? "Saving..." : "Save Changes"}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -717,14 +742,19 @@ export function EditDocumentOriginalModal({ document, update_state }) {
 export function EditDocumentTrafficableModal({ document, update_state }) {
   const [show, setShow] = useState(false);
   const [trafficable, setTrafficable] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (show) {
+      setTrafficable(document.trafficable || false);
+    }
+  }, [show, document]);
 
   const handleClose = () => setShow(false);
-  const handleShow = () => {
-    setTrafficable(document.trafficable || false);
-    setShow(true);
-  };
+  const handleShow = () => setShow(true);
 
-  const updateDocumentTrafficable = async () => {
+  const handleSave = async () => {
+    setIsLoading(true);
     try {
       const currentHeaders = {
         ...headers,
@@ -732,47 +762,40 @@ export function EditDocumentTrafficableModal({ document, update_state }) {
       };
 
       const response = await axios.put(
-        `${UPDATE_DOCUMENT}${document.document_id}/`,
+        UPDATE_DOCUMENT + document.document_id + "/",
         { trafficable: trafficable },
         { headers: currentHeaders }
       );
 
-      if (response.status === 200) {
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: "Document trafficable status updated successfully.",
-        });
-
-        handleClose();
-        update_state(response.data);
-      }
-    } catch (error) {
-      console.error("Error updating document trafficable status:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.response?.data?.error || "An error occurred while updating the document trafficable status.",
-      });
+      Swal.fire("Success", "Trafficable status updated successfully", "success");
+      if (update_state) update_state(response.data);
+      handleClose();
+    } catch (e) {
+      console.error('Error updating trafficable status:', e);
+      const apiMsg = e?.response?.data?.detail || e?.response?.data || "Failed to update trafficable status";
+      Swal.fire("Error", apiMsg, "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <>
-      <Button size="mini" color="blue" onClick={handleShow}>
-        <FiEdit style={{ color: "white", fontSize: "1em" }} />
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} />
+        Edit
       </Button>
 
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Document Trafficable Status</Modal.Title>
+          <Modal.Title>Edit Trafficable Status</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group>
               <Form.Check
                 type="checkbox"
-                label="Trafficable"
+                label="Is Trafficable Document"
                 checked={trafficable}
                 onChange={(e) => setTrafficable(e.target.checked)}
               />
@@ -780,11 +803,15 @@ export function EditDocumentTrafficableModal({ document, update_state }) {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
-          <Button color="green" onClick={updateDocumentTrafficable}>
-            Update Trafficable Status
+          <Button
+            color="green"
+            onClick={handleSave}
+            disabled={isLoading}
+          >
+            {isLoading ? "Saving..." : "Save Changes"}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -796,14 +823,31 @@ export function EditDocumentTrafficableModal({ document, update_state }) {
 export function EditDocumentStatusModal({ document, update_state }) {
   const [show, setShow] = useState(false);
   const [status, setStatus] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const statusChoices = [
+    { value: "", label: "No Status" },
+    { value: "SENT_TO_ATHENS", label: "Αποστολή προς την Αθήνα" },
+    { value: "RECEIVED_IN_ATHENS", label: "Παραλήφθηκε από την Αθήνα" },
+    { value: "SENT_TO_TORONTO", label: "Αποστολή προς το Τορόντο" },
+    { value: "RECEIVED_IN_TORONTO", label: "Παραλήφθηκε από το Τορόντο" },
+    { value: "SENT_TO_MONTREAL", label: "Αποστολή προς το Μόντρεαλ" },
+    { value: "RECEIVED_IN_MONTREAL", label: "Παραλήφθηκε από το Μόντρεαλ" },
+    { value: "SENT_TO_CLIENT", label: "Αποστολή προς τον Πελάτη" },
+    { value: "RECEIVED_FROM_CLIENT", label: "Παραλήφθηκε από τον Πελάτη" },
+  ];
+
+  useEffect(() => {
+    if (show) {
+      setStatus(document.status || "");
+    }
+  }, [show, document]);
 
   const handleClose = () => setShow(false);
-  const handleShow = () => {
-    setStatus(document.status || "");
-    setShow(true);
-  };
+  const handleShow = () => setShow(true);
 
-  const updateDocumentStatus = async () => {
+  const handleSave = async () => {
+    setIsLoading(true);
     try {
       const currentHeaders = {
         ...headers,
@@ -811,69 +855,62 @@ export function EditDocumentStatusModal({ document, update_state }) {
       };
 
       const response = await axios.put(
-        `${UPDATE_DOCUMENT}${document.document_id}/`,
+        UPDATE_DOCUMENT + document.document_id + "/",
         { status: status || null },
         { headers: currentHeaders }
       );
 
-      if (response.status === 200) {
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: "Document status updated successfully.",
-        });
-
-        handleClose();
-        update_state(response.data);
-      }
-    } catch (error) {
-      console.error("Error updating document status:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.response?.data?.error || "An error occurred while updating the document status.",
-      });
+      Swal.fire("Success", "Status updated successfully", "success");
+      if (update_state) update_state(response.data);
+      handleClose();
+    } catch (e) {
+      console.error('Error updating status:', e);
+      const apiMsg = e?.response?.data?.detail || e?.response?.data || "Failed to update status";
+      Swal.fire("Error", apiMsg, "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <>
-      <Button size="mini" color="blue" onClick={handleShow}>
-        <FiEdit style={{ color: "white", fontSize: "1em" }} />
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} />
+        Edit
       </Button>
 
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Document Status</Modal.Title>
+          <Modal.Title>Edit Status</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group>
-              <Form.Label>Status</Form.Label>
+              <Form.Label>Status:</Form.Label>
               <Form.Control
                 as="select"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
               >
-                <option value="">No status (clear status)</option>
-                <option value="SENT_TO_ATHENS">Αποστολή προς την Αθήνα</option>
-                <option value="RECEIVED_IN_ATHENS">Παραλήφθηκε από την Αθήνα</option>
-                <option value="SENT_TO_TORONTO">Αποστολή προς το Τορόντο</option>
-                <option value="RECEIVED_IN_TORONTO">Παραλήφθηκε από το Τορόντο</option>
-                <option value="SENT_TO_MONTREAL">Αποστολή προς το Μόντρεαλ</option>
-                <option value="RECEIVED_IN_MONTREAL">Παραλήφθηκε από το Μόντρεαλ</option>
-                <option value="SENT_TO_CLIENT">Αποστολή προς τον Πελάτη</option>
-                <option value="RECEIVED_FROM_CLIENT">Παραλήφθηκε από τον Πελάτη</option>
+                {statusChoices.map((choice) => (
+                  <option key={choice.value} value={choice.value}>
+                    {choice.label}
+                  </option>
+                ))}
               </Form.Control>
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
-          <Button color="green" onClick={updateDocumentStatus}>
-            Update Status
+          <Button
+            color="green"
+            onClick={handleSave}
+            disabled={isLoading}
+          >
+            {isLoading ? "Saving..." : "Save Changes"}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -885,14 +922,19 @@ export function EditDocumentStatusModal({ document, update_state }) {
 export function EditDocumentNotesModal({ document, update_state }) {
   const [show, setShow] = useState(false);
   const [notes, setNotes] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (show) {
+      setNotes(document.notes || "");
+    }
+  }, [show, document]);
 
   const handleClose = () => setShow(false);
-  const handleShow = () => {
-    setNotes(document.notes || "");
-    setShow(true);
-  };
+  const handleShow = () => setShow(true);
 
-  const updateDocumentNotes = async () => {
+  const handleSave = async () => {
+    setIsLoading(true);
     try {
       const currentHeaders = {
         ...headers,
@@ -900,61 +942,58 @@ export function EditDocumentNotesModal({ document, update_state }) {
       };
 
       const response = await axios.put(
-        `${UPDATE_DOCUMENT}${document.document_id}/`,
+        UPDATE_DOCUMENT + document.document_id + "/",
         { notes: notes.trim() || null },
         { headers: currentHeaders }
       );
 
-      if (response.status === 200) {
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: "Document notes updated successfully.",
-        });
-
-        handleClose();
-        update_state(response.data);
-      }
-    } catch (error) {
-      console.error("Error updating document notes:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.response?.data?.error || "An error occurred while updating the document notes.",
-      });
+      Swal.fire("Success", "Notes updated successfully", "success");
+      if (update_state) update_state(response.data);
+      handleClose();
+    } catch (e) {
+      console.error('Error updating notes:', e);
+      const apiMsg = e?.response?.data?.detail || e?.response?.data || "Failed to update notes";
+      Swal.fire("Error", apiMsg, "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <>
-      <Button size="mini" color="blue" onClick={handleShow}>
-        <FiEdit style={{ color: "white", fontSize: "1em" }} />
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} />
+        Edit
       </Button>
 
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Document Notes</Modal.Title>
+          <Modal.Title>Edit Notes</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group>
-              <Form.Label>Notes</Form.Label>
+              <Form.Label>Notes:</Form.Label>
               <Form.Control
                 as="textarea"
-                rows={4}
+                rows={3}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Enter notes (optional)"
+                placeholder="Enter notes"
               />
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
-          <Button color="green" onClick={updateDocumentNotes}>
-            Update Notes
+          <Button
+            color="green"
+            onClick={handleSave}
+            disabled={isLoading}
+          >
+            {isLoading ? "Saving..." : "Save Changes"}
           </Button>
         </Modal.Footer>
       </Modal>

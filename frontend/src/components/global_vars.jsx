@@ -1,6 +1,6 @@
 // Modules / Functions
 import { Breadcrumb } from "react-bootstrap";
-import { apiPut } from "../utils/api";
+
 
 // Icons / Images
 import {
@@ -246,7 +246,205 @@ export function pageHeader(value, objName) {
         <hr />
       </>
     );
-  } else if (value === "all_cities") {
+  } else if (value === "all_client_contacts") {
+    return (
+      <>
+        <div className="page_header">
+          <h2>
+            <FaArrowRight style={iconStyle} /> All Client Contacts
+          </h2>
+          <Breadcrumb>
+            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href="/data_management/root">
+              Data Management
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>All Client Contacts</Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
+        <hr />
+      </>
+    );
+  } else if (value === "client_contact_overview") {
+    return (
+      <>
+        <div className="page_header">
+          <h2>
+            <FaArrowRight style={iconStyle} /> Client Contact Overview
+          </h2>
+          <Breadcrumb>
+            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href="/data_management/root">
+              Data Management
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
+        <hr />
+      </>
+    );
+  } else if (value === "all_bank_client_accounts") {
+    return (
+      <>
+        <div className="page_header">
+          <h2>
+            <FaArrowRight style={iconStyle} /> All Bank Client Accounts
+          </h2>
+          <Breadcrumb>
+            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href="/data_management/root">
+              Data Management
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>All Bank Client Accounts</Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
+        <hr />
+      </>
+    );
+                } else if (value === "bank_client_account_overview") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> Bank Client Account Overview
+                      </h2>
+                      <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/data_management/root">
+                          Data Management
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
+                      </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
+              } else if (value === "all_projects") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> All Projects
+                      </h2>
+                      <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/data_management/root">
+                          Data Management
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item active>All Projects</Breadcrumb.Item>
+                      </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
+              } else if (value === "project_overview") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> Project Overview
+                      </h2>
+                      <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/data_management/root">
+                          Data Management
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
+                      </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
+              } else if (value === "all_associated_clients") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> All Associated Clients
+                      </h2>
+                      <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/data_management/root">
+                          Data Management
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item active>Associated Clients</Breadcrumb.Item>
+                      </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
+              } else if (value === "associated_client_overview") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> Associated Client Overview
+                      </h2>
+                      <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/data_management/root">
+                          Data Management
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
+                      </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
+              } else if (value === "all_task_comments") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> All Task Comments
+                      </h2>
+                      <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/data_management/root">
+                          Data Management
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item active>Task Comments</Breadcrumb.Item>
+                      </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
+              } else if (value === "all_project_tasks") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> All Project Tasks
+                      </h2>
+                      <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/data_management/root">
+                          Data Management
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item active>Project Tasks</Breadcrumb.Item>
+                      </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
+              } else if (value === "task_comment_overview") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> Task Comment Overview
+                      </h2>
+                      <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/data_management/root">
+                          Data Management
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
+                      </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
+              } else if (value === "all_cities") {
     return (
       <>
         <div className="page_header">
@@ -576,19 +774,37 @@ export function pageHeader(value, objName) {
         <hr />
       </>
     );
-  } else if (value === "task_category_overview") {
+  } else if (value === "all_task_categories") {
     return (
       <>
         <div className="page_header">
           <h2>
-            <FaArrowRight style={iconStyle} /> Task Category Overview
+            <FaArrowRight style={iconStyle} /> All Task Categories
           </h2>
           <Breadcrumb>
             <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
             <Breadcrumb.Item href="/administration/root">
               Administration
             </Breadcrumb.Item>
-            <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
+            <Breadcrumb.Item active>All Task Categories</Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
+        <hr />
+      </>
+    );
+  } else if (value === "all_documents") {
+    return (
+      <>
+        <div className="page_header">
+          <h2>
+            <FaArrowRight style={iconStyle} /> All Documents
+          </h2>
+          <Breadcrumb>
+            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href="/administration/root">
+              Administration
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>All Documents</Breadcrumb.Item>
           </Breadcrumb>
         </div>
         <hr />
@@ -612,7 +828,7 @@ export function pageHeader(value, objName) {
         <hr />
       </>
     );
-           } else if (value === "documents") {
+  } else if (value === "documents") {
            return (
              <>
                <div className="page_header">
@@ -648,9 +864,194 @@ export function pageHeader(value, objName) {
                <hr />
              </>
            );
+         } else if (value === "cash_overview") {
+           return (
+             <>
+               <div className="page_header">
+                 <h2>
+                   <FaArrowRight style={iconStyle} /> Cash Overview
+                 </h2>
+                 <Breadcrumb>
+                   <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                   <Breadcrumb.Item href="/data_management/root">
+                     Data Management
+                   </Breadcrumb.Item>
+                   <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
+                 </Breadcrumb>
+               </div>
+               <hr />
+             </>
+           );
+         }
+         else if (value === "all_cash") {
+           return (
+             <>
+               <div className="page_header">
+                 <h2>
+                   <FaArrowRight style={iconStyle} /> All Cash
+                 </h2>
+                 <Breadcrumb>
+                   <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                   <Breadcrumb.Item href="/data_management/root">
+                     Data Management
+                   </Breadcrumb.Item>
+                   <Breadcrumb.Item active>All Cash</Breadcrumb.Item>
+                 </Breadcrumb>
+               </div>
+               <hr />
+             </>
+           );
+         }
+         else if (value === "bank_project_account_overview") {
+           return (
+             <>
+               <div className="page_header">
+                 <h2>
+                   <FaArrowRight style={iconStyle} /> Bank Project Account Overview {objName} 
+                 </h2>
+                 <Breadcrumb>
+                   <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                   <Breadcrumb.Item href="/data_management/root">
+                     Data Management
+                   </Breadcrumb.Item>
+                   <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
+                 </Breadcrumb>
+               </div>
+               <hr />
+             </>
+           );
+         }
+         else if (value === "all_bank_project_accounts") {  
+           return (
+             <>
+               <div className="page_header">
+                 <h2>
+                   <FaArrowRight style={iconStyle} /> All Bank Project Accounts
+                 </h2>
+                 <Breadcrumb>
+                   <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                   <Breadcrumb.Item href="/data_management/root">
+                     Data Management
+                   </Breadcrumb.Item>
+                   <Breadcrumb.Item active>All Bank Project Accounts</Breadcrumb.Item>
+                 </Breadcrumb>
+               </div>
+               <hr />
+             </>
+           );
+         }
+         else if (value === "all_properties") {
+           return (
+             <>
+               <div className="page_header">
+                 <h2>
+                   <FaArrowRight style={iconStyle} /> All Properties
+                 </h2>
+                 <Breadcrumb>
+                   <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                   <Breadcrumb.Item href="/data_management/root">
+                     Data Management
+                   </Breadcrumb.Item>
+                   <Breadcrumb.Item active>All Properties</Breadcrumb.Item>
+                 </Breadcrumb>
+               </div>
+               <hr />
+             </>
+           );
+         } else if (value === "all_taxation_projects") {
+           return (
+             <>
+               <div className="page_header">
+                 <h2>
+                   <FaArrowRight style={iconStyle} /> All Taxation Projects
+                 </h2>
+                 <Breadcrumb>
+                   <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                   <Breadcrumb.Item href="/data_management/root">
+                     Data Management
+                   </Breadcrumb.Item>
+                   <Breadcrumb.Item active>All Taxation Projects</Breadcrumb.Item>
+                 </Breadcrumb>
+               </div>
+               <hr />
+             </>
+           );
+         }
+         else if (value === "taxation_project_overview") {
+           return (
+             <>
+               <div className="page_header">
+                 <h2>
+                   <FaArrowRight style={iconStyle} /> Taxation Project Overview
+                 </h2>
+                 <Breadcrumb>
+                   <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                   <Breadcrumb.Item href="/data_management/root">
+                     Data Management
+                   </Breadcrumb.Item>
+                   <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
+                 </Breadcrumb>
+               </div>
+               <hr />
+             </>
+           );
+         }
+         else if (value === "all_professionals") {
+           return (
+             <>
+               <div className="page_header">
+                 <h2>
+                   <FaArrowRight style={iconStyle} /> All Professionals
+                 </h2>
+                 <Breadcrumb>
+                   <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                   <Breadcrumb.Item href="/data_management/root">
+                     Data Management
+                   </Breadcrumb.Item>
+                   <Breadcrumb.Item active>All Professionals</Breadcrumb.Item>
+                 </Breadcrumb>
+               </div>
+               <hr />
+             </>
+           );
+         }  
+         else if (value === "professional_overview") {
+           return (
+             <>
+               <div className="page_header">
+                 <h2>
+                   <FaArrowRight style={iconStyle} /> Professional Overview
+                 </h2>
+                 <Breadcrumb>
+                   <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                   <Breadcrumb.Item href="/data_management/root">
+                     Data Management
+                   </Breadcrumb.Item>
+                   <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
+                 </Breadcrumb>
+               </div>
+               <hr />
+             </>
+           );
+         }  
+         else if (value === "property_overview") {
+           return (
+             <>
+               <div className="page_header">
+                 <h2>
+                   <FaArrowRight style={iconStyle} /> Property Overview
+                 </h2>
+                 <Breadcrumb>
+                   <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                   <Breadcrumb.Item href="/data_management/root">
+                     Data Management
+                   </Breadcrumb.Item>
+                   <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
+                 </Breadcrumb>
+               </div>
+               <hr />
+             </>
+           );
          } 
   return <></>;
 }
-
-// Export apiPut for use in other components
-export { apiPut };

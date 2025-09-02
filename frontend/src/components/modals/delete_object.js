@@ -26,6 +26,12 @@ const DELETE_ENDPOINTS = {
   'TaskCategory': 'http://localhost:8000/api/administration/task_category/',
   'Document': 'http://localhost:8000/api/data_management/document/',
   'Client': 'http://localhost:8000/api/data_management/client/',
+  'ClientContact': 'http://localhost:8000/api/data_management/client_contact/',
+  'BankClientAccount': 'http://localhost:8000/api/data_management/bank_client_account/',
+  'Project': 'http://localhost:8000/api/data_management/project/',
+  'AssociatedClient': 'http://localhost:8000/api/data_management/associated_client/',
+  'TaskComment': 'http://localhost:8000/api/data_management/task_comment/',
+  'Property': 'http://localhost:8000/api/data_management/property/',
   // Add more object types as needed
 };
 
@@ -43,6 +49,12 @@ const REDIRECT_URLS = {
   'TaskCategory': '/administration/all_task_categories',
   'Document': '/data_management/documents',
   'Client': '/data_management/all_clients',
+  'ClientContact': '/data_management/all_client_contacts',
+  'BankClientAccount': '/data_management/all_bank_client_accounts',
+  'Project': '/data_management/all_projects',
+  'AssociatedClient': '/data_management/all_associated_clients',
+  'TaskComment': '/data_management/all_task_comments',
+  'Property': '/data_management/all_properties',
   // Add more redirect URLs as needed
 };
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ListGroup, Badge, Spinner } from 'react-bootstrap';
 import { FaUser, FaProjectDiagram, FaFileAlt, FaCalendarAlt, FaExclamationTriangle } from 'react-icons/fa';
-import { apiGet } from '../../utils/api';
+import axios from 'axios';
 
 const RecentActivities = () => {
   const [activities, setActivities] = useState([]);
@@ -13,9 +13,9 @@ const RecentActivities = () => {
 
   const loadRecentActivities = async () => {
     try {
-      const response = await apiGet('/api/dashboard/recent-activities/');
-      if (response.success) {
-        setActivities(response.data);
+      const response = await axios.get('http://localhost:8000/api/dashboard/recent-activities/');
+      if (response.data.success) {
+        setActivities(response.data.data);
       }
     } catch (error) {
       console.error('Error loading recent activities:', error);
