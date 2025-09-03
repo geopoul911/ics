@@ -23,11 +23,14 @@ const ADD_CLIENT_CONTACT = "http://localhost:8000/api/data_management/client_con
 
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);
+
 const validateEmail = (email) => {
-  if (!email) return false; // Required field
+  if (!email) return true; // Optional field
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
+// Phone format must match backend: optional leading +, then digits only, up to 16 total chars
+const phoneRegex = /^\+?[1-9]\d{0,15}$/;
 
 function AddClientContactModal({ refreshData }) {
   const [show, setShow] = useState(false);
@@ -85,13 +88,23 @@ function AddClientContactModal({ refreshData }) {
 
   const loadDropdownData = async () => {
     try {
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
       // Load projects
-      const projectsResponse = await axios.get("http://localhost:8000/api/data_management/all_projects/");
+      const projectsResponse = await axios.get(
+        "http://localhost:8000/api/data_management/all_projects/",
+        { headers: currentHeaders }
+      );
       const projectsData = projectsResponse?.data?.all_projects || [];
       setProjects(projectsData);
 
       // Load professionals
-      const professionalsResponse = await axios.get("http://localhost:8000/api/data_management/all_professionals/");
+      const professionalsResponse = await axios.get(
+        "http://localhost:8000/api/data_management/all_professionals/",
+        { headers: currentHeaders }
+      );
       const professionalsData = professionalsResponse?.data?.all_professionals || [];
       setProfessionals(professionalsData);
     } catch (error) {
@@ -109,18 +122,20 @@ function AddClientContactModal({ refreshData }) {
   // Validation
   const isClientcontIdValid = clientcontId.trim().length >= 2 && clientcontId.trim().length <= 10;
   const isFullnameValid = fullname.trim().length >= 2 && fullname.trim().length <= 40;
-  const isAddressValid = address.trim().length >= 2 && address.trim().length <= 80;
+  const isAddressValid = !address || (address.trim().length >= 2 && address.trim().length <= 80);
   const isEmailValid = validateEmail(email);
-  const isPhoneValid = phone.trim().length >= 7 && phone.trim().length <= 15;
-  const isMobileValid = mobile.trim().length >= 7 && mobile.trim().length <= 15;
-  const isProfessionValid = profession.trim().length >= 2 && profession.trim().length <= 40;
-  const isReliabilityValid = reliability !== "";
+  const normalizedPhone = (phone || '').replace(/\s+/g, '');
+  const normalizedMobile = (mobile || '').replace(/\s+/g, '');
+  const isPhoneValid = !phone || phoneRegex.test(normalizedPhone);
+  const isMobileValid = phoneRegex.test(normalizedMobile);
+  const isProfessionValid = !profession || (profession.trim().length >= 2 && profession.trim().length <= 40);
+  const isReliabilityValid = true; // optional
   const isCityValid = city.trim().length >= 2 && city.trim().length <= 40;
   const isProjectValid = projectId !== "";
 
   const isFormValid = isClientcontIdValid && isFullnameValid && isAddressValid && 
                      isEmailValid && isPhoneValid && isMobileValid && 
-                     isProfessionValid && isReliabilityValid && isCityValid && isProjectValid;
+                     isProfessionValid && isCityValid && isProjectValid;
 
   const handleSubmit = async () => {
     if (!isFormValid) {
@@ -138,12 +153,12 @@ function AddClientContactModal({ refreshData }) {
       fathername: fathername.trim() || null,
       mothername: mothername.trim() || null,
       connection: connection.trim() || null,
-      address: address.trim(),
-      email: email.trim(),
-      phone: phone.trim(),
-      mobile: mobile.trim(),
-      profession: profession.trim(),
-      reliability,
+      address: address.trim() || null,
+      email: email.trim() || null,
+      phone: normalizedPhone || null,
+      mobile: normalizedMobile,
+      profession: profession.trim() || null,
+      reliability: reliability || null,
       city: city.trim(),
       project_id: projectId,
       professional_id: professionalId || null,
@@ -355,12 +370,12 @@ function AddClientContactModal({ refreshData }) {
                       <Form.Control
                         type="tel"
                         value={phone}
-                        onChange={(e) => setPhone(clampLen(e.target.value, 15))}
-                        maxLength={15}
-                        placeholder="Enter phone number"
+                        onChange={(e) => setPhone(e.target.value)}
+                        maxLength={16}
+                        placeholder="e.g., +302101111111"
                       />
                       <Form.Text className="text-muted">
-                        {phone.length}/15 characters
+                        {phone.length}/16 characters
                       </Form.Text>
                     </Form.Group>
                   </Col>
@@ -370,12 +385,12 @@ function AddClientContactModal({ refreshData }) {
                       <Form.Control
                         type="tel"
                         value={mobile}
-                        onChange={(e) => setMobile(clampLen(e.target.value, 15))}
-                        maxLength={15}
-                        placeholder="Enter mobile number"
+                        onChange={(e) => setMobile(e.target.value)}
+                        maxLength={16}
+                        placeholder="e.g., +306900000000"
                       />
                       <Form.Text className="text-muted">
-                        {mobile.length}/15 characters
+                        {mobile.length}/16 characters
                       </Form.Text>
                     </Form.Group>
                   </Col>
@@ -384,7 +399,7 @@ function AddClientContactModal({ refreshData }) {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Reliability *</Form.Label>
+                      <Form.Label>Reliability</Form.Label>
                       <Form.Control
                         as="select"
                         value={reliability}

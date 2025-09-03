@@ -64,9 +64,13 @@ function AddAssociatedClientModal({ onClientCreated }) {
       console.log('Loading dropdown data...');
       
       // Load reference data for dropdowns using axios
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
       const [projectsRes, clientsRes] = await Promise.all([
-        axios.get("http://localhost:8000/api/data_management/all_projects/"),
-        axios.get("http://localhost:8000/api/data_management/all_clients/")
+        axios.get("http://localhost:8000/api/data_management/all_projects/", { headers: currentHeaders }),
+        axios.get("http://localhost:8000/api/data_management/all_clients/", { headers: currentHeaders })
       ]);
       
       console.log('Raw API responses:', {
@@ -105,7 +109,7 @@ function AddAssociatedClientModal({ onClientCreated }) {
   const isAssoclientIdValid = assoclientId.trim().length >= 2 && assoclientId.trim().length <= 10;
   const isProjectValid = project.length > 0;
   const isClientValid = client.length > 0;
-  const isOrderindexValid = orderindex.trim().length > 0;
+  const isOrderindexValid = /^-?\d+$/.test(String(orderindex).trim());
 
   const isFormValid = isAssoclientIdValid && isProjectValid && isClientValid && isOrderindexValid;
 
@@ -126,7 +130,7 @@ function AddAssociatedClientModal({ onClientCreated }) {
           assoclient_id: assoclientId.trim(),
           project_id: project,
           client_id: client,
-          orderindex: parseInt(orderindex),
+          orderindex: parseInt(orderindex, 10),
           
           // Optional fields
           notes: notes.trim() || null,
@@ -188,7 +192,7 @@ function AddAssociatedClientModal({ onClientCreated }) {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Associated Client ID *:</Form.Label>
+                      <Form.Label>Associated Client ID *</Form.Label>
                       <Form.Control
                         maxLength={10}
                         placeholder="e.g., AC001"
@@ -199,7 +203,7 @@ function AddAssociatedClientModal({ onClientCreated }) {
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Order Index *:</Form.Label>
+                      <Form.Label>Order Index *</Form.Label>
                       <Form.Control
                         type="number"
                         placeholder="e.g., 1"
@@ -213,7 +217,7 @@ function AddAssociatedClientModal({ onClientCreated }) {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Project *:</Form.Label>
+                      <Form.Label>Project *</Form.Label>
                       <Form.Control
                         as="select"
                         onChange={(e) => setProject(e.target.value)}
@@ -222,7 +226,7 @@ function AddAssociatedClientModal({ onClientCreated }) {
                         <option value="">Select Project</option>
                         {Array.isArray(projects) && projects.map((project) => (
                           <option key={project.project_id} value={project.project_id}>
-                            {project.title}
+                            {project.project_id} - {project.title}
                           </option>
                         ))}
                       </Form.Control>
@@ -230,7 +234,7 @@ function AddAssociatedClientModal({ onClientCreated }) {
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Client *:</Form.Label>
+                      <Form.Label>Client *</Form.Label>
                       <Form.Control
                         as="select"
                         onChange={(e) => setClient(e.target.value)}
@@ -239,7 +243,7 @@ function AddAssociatedClientModal({ onClientCreated }) {
                         <option value="">Select Client</option>
                         {Array.isArray(clients) && clients.map((client) => (
                           <option key={client.client_id} value={client.client_id}>
-                            {client.surname} {client.name}
+                            {client.client_id} - {client.fullname || `${client.surname} ${client.name}`}
                           </option>
                         ))}
                       </Form.Control>
@@ -290,7 +294,7 @@ function AddAssociatedClientModal({ onClientCreated }) {
                 {!isOrderindexValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Order Index is required.
+                    Order Index is required and must be an integer.
                   </li>
                 )}
               </ul>

@@ -153,8 +153,8 @@ export function EditCountryCurrencyModal({ country, update_state }) {
   const [value, setValue] = useState(country?.currency || "");
   const [busy, setBusy] = useState(false);
 
-  const upper = clampLen((value || "").toUpperCase(), 10);
-  const isValid = upper.length <= 10;
+  const upper = clampLen((value || "").toUpperCase(), 3);
+  const isValid = upper.length === 3; // exactly 3 chars
   const isChanged = (country?.currency || "") !== upper;
 
   const onOpen = () => {
@@ -165,7 +165,8 @@ export function EditCountryCurrencyModal({ country, update_state }) {
   const onSave = async () => {
     try {
       setBusy(true);
-      const payload = { currency: upper || null }; // allow clearing to null
+      if (!isValid || !isChanged) return;
+      const payload = { currency: upper }; // must be 3 chars
       const res = await patchCountry(country.country_id, payload);
       const updated = res || { ...country, currency: upper || null };
       update_state?.(updated);
@@ -192,15 +193,18 @@ export function EditCountryCurrencyModal({ country, update_state }) {
         <Modal.Header closeButton><Modal.Title>Edit Currency</Modal.Title></Modal.Header>
         <Modal.Body>
           <Form.Group>
-            <Form.Label>Currency (optional, ≤10)</Form.Label>
+            <Form.Label>Currency (exactly 3 chars)</Form.Label>
             <Form.Control
-              maxLength={10}
+              maxLength={3}
               value={value || ""}
-              onChange={(e) => setValue(clampLen(e.target.value, 10))}
+              onChange={(e) => setValue(clampLen(e.target.value, 3))}
               placeholder="e.g., EUR"
             />
           </Form.Group>
-          <small style={{ color: isValid ? "green" : "red" }}>
+
+        </Modal.Body>
+        <Modal.Footer>
+        <small className="mr-auto" style={{ color: isValid ? "green" : "red" }}>
             {isValid ? (
               <>
                 <AiOutlineCheckCircle style={{ marginRight: 6 }} />
@@ -209,12 +213,10 @@ export function EditCountryCurrencyModal({ country, update_state }) {
             ) : (
               <>
                 <AiOutlineWarning style={{ marginRight: 6 }} />
-                Max length is 10.
+                Currency must be exactly 3 characters.
               </>
             )}
           </small>
-        </Modal.Body>
-        <Modal.Footer>
           <Button color="red" onClick={() => setShow(false)} disabled={busy}>Close</Button>
           <Button color="green" onClick={onSave} disabled={!isValid || !isChanged || busy}>
             Save

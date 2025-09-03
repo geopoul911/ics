@@ -48,7 +48,7 @@ export default function AddProjectCategoryModal({ onProjectCategoryCreated }) {
 
   const isProjcateIdValid = projcate_id.trim().length === 1;
   const isTitleValid = title.trim().length >= 2 && title.trim().length <= 40;
-  const isOrderIndexValid = orderindex.trim().length === 0 || !isNaN(orderindex);
+  const isOrderIndexValid = orderindex.trim().length > 0 && !isNaN(orderindex);
 
   const createProjectCategory = async () => {
     if (!isProjcateIdValid || !isTitleValid || !isOrderIndexValid) {
@@ -69,7 +69,7 @@ export default function AddProjectCategoryModal({ onProjectCategoryCreated }) {
       const payload = {
         projcate_id: projcate_id.trim().toUpperCase(),
         title: title.trim(),
-        orderindex: orderindex.trim().length === 0 ? null : parseInt(orderindex),
+        orderindex: Number(orderindex),
         active: active,
       };
 
@@ -170,17 +170,14 @@ export default function AddProjectCategoryModal({ onProjectCategoryCreated }) {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Order Index:</Form.Label>
+              <Form.Label>Order Index *</Form.Label>
               <Form.Control
                 type="text"
                 value={orderindex}
                 onChange={(e) => setOrderIndex(validateOrderIndex(clampLen(e.target.value, 5)))}
-                placeholder="Optional: numeric"
-                isInvalid={orderindex !== "" && !isOrderIndexValid}
+                placeholder="Enter order index (numeric)"
+                isInvalid={!isOrderIndexValid}
               />
-              <Form.Control.Feedback type="invalid">
-                Order index must be a valid number when provided
-              </Form.Control.Feedback>
             </Form.Group>
 
             <Form.Group className="mb-3">
@@ -215,7 +212,7 @@ export default function AddProjectCategoryModal({ onProjectCategoryCreated }) {
                 {!isOrderIndexValid && (
                   <li>
                     <AiOutlineWarning style={{ marginRight: 5 }} />
-                    Order index must be a valid number when provided
+                    Order index is required and must be a valid number
                   </li>
                 )}
               </ul>

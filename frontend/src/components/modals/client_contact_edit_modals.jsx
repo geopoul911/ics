@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 
 // Icons / Images
 import { FiEdit } from "react-icons/fi";
+import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
 import axios from "axios";
 
 // Modules / Functions
@@ -37,15 +38,10 @@ export function EditClientContactFullnameModal({ clientContact, update_state }) 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const isFullnameValid = fullname.trim().length >= 2 && fullname.trim().length <= 40;
+
   const handleSave = async () => {
-    if (!fullname.trim()) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Full name cannot be empty.",
-      });
-      return;
-    }
+    if (!isFullnameValid) return;
 
     setIsLoading(true);
     const currentHeaders = {
@@ -83,7 +79,7 @@ export function EditClientContactFullnameModal({ clientContact, update_state }) 
     <>
       <Button size="tiny" basic onClick={handleShow}>
         <FiEdit style={{ marginRight: 6 }} />
-        Edit
+        Edit Full Name
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -91,7 +87,6 @@ export function EditClientContactFullnameModal({ clientContact, update_state }) 
           <Modal.Title>Edit Full Name</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Full Name</Form.Label>
               <Form.Control
@@ -101,17 +96,37 @@ export function EditClientContactFullnameModal({ clientContact, update_state }) 
                 maxLength={40}
                 placeholder="Enter full name"
               />
-              <Form.Text className="text-muted">
-                {fullname.length}/40 characters
-              </Form.Text>
+              {/* No character countdown */}
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button basic onClick={handleClose}>
+          <small className="mr-auto">
+            {!isFullnameValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                {fullname.trim().length < 2 && (
+                  <li>
+                    <AiOutlineWarning style={{ marginRight: 5 }} />
+                    Full name must be at least 2 characters
+                  </li>
+                )}
+                {fullname.trim().length > 40 && (
+                  <li>
+                    <AiOutlineWarning style={{ marginRight: 5 }} />
+                    Full name must be at most 40 characters
+                  </li>
+                )}
+              </ul>
+            ) : (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} />
+                Looks good.
+              </div>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button primary loading={isLoading} onClick={handleSave}>
+          <Button color="green" loading={isLoading} onClick={handleSave} disabled={!isFullnameValid}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -135,7 +150,10 @@ export function EditClientContactFathernameModal({ clientContact, update_state }
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const isFathernameValid = fathername.trim().length <= 80;
+
   const handleSave = async () => {
+    if (!isFathernameValid) return;
     setIsLoading(true);
     const currentHeaders = {
       ...headers,
@@ -172,7 +190,7 @@ export function EditClientContactFathernameModal({ clientContact, update_state }
     <>
       <Button size="tiny" basic onClick={handleShow}>
         <FiEdit style={{ marginRight: 6 }} />
-        Edit
+        Edit Father's Name
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -180,7 +198,6 @@ export function EditClientContactFathernameModal({ clientContact, update_state }
           <Modal.Title>Edit Father's Name</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Father's Name</Form.Label>
               <Form.Control
@@ -190,17 +207,29 @@ export function EditClientContactFathernameModal({ clientContact, update_state }
                 maxLength={80}
                 placeholder="Enter father's name"
               />
-              <Form.Text className="text-muted">
-                {fathername.length}/80 characters
-              </Form.Text>
+              {/* No character countdown */}
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button basic onClick={handleClose}>
+          <small className="mr-auto">
+            {!isFathernameValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ marginRight: 5 }} />
+                  Father's name must be at most 80 characters
+                </li>
+              </ul>
+            ) : (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} />
+                Looks good.
+              </div>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button primary loading={isLoading} onClick={handleSave}>
+          <Button color="green" loading={isLoading} onClick={handleSave} disabled={!isFathernameValid}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -224,7 +253,10 @@ export function EditClientContactMothernameModal({ clientContact, update_state }
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const isMothernameValid = mothername.trim().length <= 80;
+
   const handleSave = async () => {
+    if (!isMothernameValid) return;
     setIsLoading(true);
     const currentHeaders = {
       ...headers,
@@ -261,7 +293,7 @@ export function EditClientContactMothernameModal({ clientContact, update_state }
     <>
       <Button size="tiny" basic onClick={handleShow}>
         <FiEdit style={{ marginRight: 6 }} />
-        Edit
+        Edit Mother's Name
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -269,7 +301,6 @@ export function EditClientContactMothernameModal({ clientContact, update_state }
           <Modal.Title>Edit Mother's Name</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Mother's Name</Form.Label>
               <Form.Control
@@ -279,17 +310,29 @@ export function EditClientContactMothernameModal({ clientContact, update_state }
                 maxLength={80}
                 placeholder="Enter mother's name"
               />
-              <Form.Text className="text-muted">
-                {mothername.length}/80 characters
-              </Form.Text>
+              {/* No character countdown */}
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button basic onClick={handleClose}>
+          <small className="mr-auto">
+            {!isMothernameValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ marginRight: 5 }} />
+                  Mother's name must be at most 80 characters
+                </li>
+              </ul>
+            ) : (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} />
+                Looks good.
+              </div>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button primary loading={isLoading} onClick={handleSave}>
+          <Button color="green" loading={isLoading} onClick={handleSave} disabled={!isMothernameValid}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -313,7 +356,10 @@ export function EditClientContactConnectionModal({ clientContact, update_state }
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const isConnectionValid = connection.trim().length <= 40;
+
   const handleSave = async () => {
+    if (!isConnectionValid) return;
     setIsLoading(true);
     const currentHeaders = {
       ...headers,
@@ -350,7 +396,7 @@ export function EditClientContactConnectionModal({ clientContact, update_state }
     <>
       <Button size="tiny" basic onClick={handleShow}>
         <FiEdit style={{ marginRight: 6 }} />
-        Edit
+        Edit Connection
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -358,7 +404,6 @@ export function EditClientContactConnectionModal({ clientContact, update_state }
           <Modal.Title>Edit Connection</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Connection</Form.Label>
               <Form.Control
@@ -368,17 +413,29 @@ export function EditClientContactConnectionModal({ clientContact, update_state }
                 maxLength={40}
                 placeholder="Enter connection type"
               />
-              <Form.Text className="text-muted">
-                {connection.length}/40 characters
-              </Form.Text>
+              {/* No character countdown */}
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button basic onClick={handleClose}>
+          <small className="mr-auto">
+            {!isConnectionValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ marginRight: 5 }} />
+                  Connection must be at most 40 characters
+                </li>
+              </ul>
+            ) : (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} />
+                Looks good.
+              </div>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button primary loading={isLoading} onClick={handleSave}>
+          <Button color="green" loading={isLoading} onClick={handleSave} disabled={!isConnectionValid}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -402,15 +459,10 @@ export function EditClientContactAddressModal({ clientContact, update_state }) {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const isAddressValid = address.trim().length >= 2 && address.trim().length <= 80;
+
   const handleSave = async () => {
-    if (!address.trim()) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Address cannot be empty.",
-      });
-      return;
-    }
+    if (!isAddressValid) return;
 
     setIsLoading(true);
     const currentHeaders = {
@@ -448,7 +500,7 @@ export function EditClientContactAddressModal({ clientContact, update_state }) {
     <>
       <Button size="tiny" basic onClick={handleShow}>
         <FiEdit style={{ marginRight: 6 }} />
-        Edit
+        Edit Address
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -456,7 +508,6 @@ export function EditClientContactAddressModal({ clientContact, update_state }) {
           <Modal.Title>Edit Address</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Address</Form.Label>
               <Form.Control
@@ -466,17 +517,37 @@ export function EditClientContactAddressModal({ clientContact, update_state }) {
                 maxLength={80}
                 placeholder="Enter address"
               />
-              <Form.Text className="text-muted">
-                {address.length}/80 characters
-              </Form.Text>
+              {/* No character countdown */}
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button basic onClick={handleClose}>
+          <small className="mr-auto">
+            {!isAddressValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                {address.trim().length < 2 && (
+                  <li>
+                    <AiOutlineWarning style={{ marginRight: 5 }} />
+                    Address must be at least 2 characters
+                  </li>
+                )}
+                {address.trim().length > 80 && (
+                  <li>
+                    <AiOutlineWarning style={{ marginRight: 5 }} />
+                    Address must be at most 80 characters
+                  </li>
+                )}
+              </ul>
+            ) : (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} />
+                Looks good.
+              </div>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button primary loading={isLoading} onClick={handleSave}>
+          <Button color="green" loading={isLoading} onClick={handleSave} disabled={!isAddressValid}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -500,26 +571,11 @@ export function EditClientContactEmailModal({ clientContact, update_state }) {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const handleSave = async () => {
-    if (!email.trim()) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Email cannot be empty.",
-      });
-      return;
-    }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isEmailValid = email.trim().length > 0 && emailRegex.test(email.trim());
 
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Please enter a valid email address.",
-      });
-      return;
-    }
+  const handleSave = async () => {
+    if (!isEmailValid) return;
 
     setIsLoading(true);
     const currentHeaders = {
@@ -557,7 +613,7 @@ export function EditClientContactEmailModal({ clientContact, update_state }) {
     <>
       <Button size="tiny" basic onClick={handleShow}>
         <FiEdit style={{ marginRight: 6 }} />
-        Edit
+        Edit Email
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -565,7 +621,6 @@ export function EditClientContactEmailModal({ clientContact, update_state }) {
           <Modal.Title>Edit Email</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Email</Form.Label>
               <Form.Control
@@ -575,13 +630,35 @@ export function EditClientContactEmailModal({ clientContact, update_state }) {
                 placeholder="Enter email address"
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button basic onClick={handleClose}>
+          <small className="mr-auto">
+            {!isEmailValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                {email.trim().length === 0 && (
+                  <li>
+                    <AiOutlineWarning style={{ marginRight: 5 }} />
+                    Email is required
+                  </li>
+                )}
+                {email.trim().length > 0 && !emailRegex.test(email.trim()) && (
+                  <li>
+                    <AiOutlineWarning style={{ marginRight: 5 }} />
+                    Please enter a valid email address
+                  </li>
+                )}
+              </ul>
+            ) : (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} />
+                Looks good.
+              </div>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button primary loading={isLoading} onClick={handleSave}>
+          <Button color="green" loading={isLoading} onClick={handleSave} disabled={!isEmailValid}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -605,15 +682,10 @@ export function EditClientContactPhoneModal({ clientContact, update_state }) {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const isPhoneValid = phone.trim().length > 0 && phone.trim().length <= 15;
+
   const handleSave = async () => {
-    if (!phone.trim()) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Phone cannot be empty.",
-      });
-      return;
-    }
+    if (!isPhoneValid) return;
 
     setIsLoading(true);
     const currentHeaders = {
@@ -651,7 +723,7 @@ export function EditClientContactPhoneModal({ clientContact, update_state }) {
     <>
       <Button size="tiny" basic onClick={handleShow}>
         <FiEdit style={{ marginRight: 6 }} />
-        Edit
+        Edit Phone
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -659,7 +731,6 @@ export function EditClientContactPhoneModal({ clientContact, update_state }) {
           <Modal.Title>Edit Phone</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Phone</Form.Label>
               <Form.Control
@@ -669,17 +740,37 @@ export function EditClientContactPhoneModal({ clientContact, update_state }) {
                 maxLength={15}
                 placeholder="Enter phone number"
               />
-              <Form.Text className="text-muted">
-                {phone.length}/15 characters
-              </Form.Text>
+              {/* No character countdown */}
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button basic onClick={handleClose}>
+          <small className="mr-auto">
+            {!isPhoneValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                {phone.trim().length === 0 && (
+                  <li>
+                    <AiOutlineWarning style={{ marginRight: 5 }} />
+                    Phone is required
+                  </li>
+                )}
+                {phone.trim().length > 15 && (
+                  <li>
+                    <AiOutlineWarning style={{ marginRight: 5 }} />
+                    Phone must be at most 15 characters
+                  </li>
+                )}
+              </ul>
+            ) : (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} />
+                Looks good.
+              </div>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button primary loading={isLoading} onClick={handleSave}>
+          <Button color="green" loading={isLoading} onClick={handleSave} disabled={!isPhoneValid}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -703,15 +794,10 @@ export function EditClientContactMobileModal({ clientContact, update_state }) {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const isMobileValid = mobile.trim().length > 0 && mobile.trim().length <= 15;
+
   const handleSave = async () => {
-    if (!mobile.trim()) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Mobile cannot be empty.",
-      });
-      return;
-    }
+    if (!isMobileValid) return;
 
     setIsLoading(true);
     const currentHeaders = {
@@ -749,7 +835,7 @@ export function EditClientContactMobileModal({ clientContact, update_state }) {
     <>
       <Button size="tiny" basic onClick={handleShow}>
         <FiEdit style={{ marginRight: 6 }} />
-        Edit
+        Edit Mobile
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -757,7 +843,6 @@ export function EditClientContactMobileModal({ clientContact, update_state }) {
           <Modal.Title>Edit Mobile</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Mobile</Form.Label>
               <Form.Control
@@ -767,17 +852,37 @@ export function EditClientContactMobileModal({ clientContact, update_state }) {
                 maxLength={15}
                 placeholder="Enter mobile number"
               />
-              <Form.Text className="text-muted">
-                {mobile.length}/15 characters
-              </Form.Text>
+              {/* No character countdown */}
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button basic onClick={handleClose}>
+          <small className="mr-auto">
+            {!isMobileValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                {mobile.trim().length === 0 && (
+                  <li>
+                    <AiOutlineWarning style={{ marginRight: 5 }} />
+                    Mobile is required
+                  </li>
+                )}
+                {mobile.trim().length > 15 && (
+                  <li>
+                    <AiOutlineWarning style={{ marginRight: 5 }} />
+                    Mobile must be at most 15 characters
+                  </li>
+                )}
+              </ul>
+            ) : (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} />
+                Looks good.
+              </div>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button primary loading={isLoading} onClick={handleSave}>
+          <Button color="green" loading={isLoading} onClick={handleSave} disabled={!isMobileValid}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -801,15 +906,10 @@ export function EditClientContactProfessionModal({ clientContact, update_state }
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const isProfessionValid = profession.trim().length >= 2 && profession.trim().length <= 40;
+
   const handleSave = async () => {
-    if (!profession.trim()) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Profession cannot be empty.",
-      });
-      return;
-    }
+    if (!isProfessionValid) return;
 
     setIsLoading(true);
     const currentHeaders = {
@@ -847,7 +947,7 @@ export function EditClientContactProfessionModal({ clientContact, update_state }
     <>
       <Button size="tiny" basic onClick={handleShow}>
         <FiEdit style={{ marginRight: 6 }} />
-        Edit
+        Edit Profession
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -855,7 +955,6 @@ export function EditClientContactProfessionModal({ clientContact, update_state }
           <Modal.Title>Edit Profession</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Profession</Form.Label>
               <Form.Control
@@ -865,17 +964,37 @@ export function EditClientContactProfessionModal({ clientContact, update_state }
                 maxLength={40}
                 placeholder="Enter profession"
               />
-              <Form.Text className="text-muted">
-                {profession.length}/40 characters
-              </Form.Text>
+              {/* No character countdown */}
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button basic onClick={handleClose}>
+          <small className="mr-auto">
+            {!isProfessionValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                {profession.trim().length < 2 && (
+                  <li>
+                    <AiOutlineWarning style={{ marginRight: 5 }} />
+                    Profession must be at least 2 characters
+                  </li>
+                )}
+                {profession.trim().length > 40 && (
+                  <li>
+                    <AiOutlineWarning style={{ marginRight: 5 }} />
+                    Profession must be at most 40 characters
+                  </li>
+                )}
+              </ul>
+            ) : (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} />
+                Looks good.
+              </div>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button primary loading={isLoading} onClick={handleSave}>
+          <Button color="green" loading={isLoading} onClick={handleSave} disabled={!isProfessionValid}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -905,15 +1024,11 @@ export function EditClientContactReliabilityModal({ clientContact, update_state 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  // Optional: valid when empty or one of allowed values
+  const isReliabilityValid = reliability === "" || reliabilityOptions.some(o => o.value === reliability);
+
   const handleSave = async () => {
-    if (!reliability) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Please select a reliability level.",
-      });
-      return;
-    }
+    if (!isReliabilityValid) return;
 
     setIsLoading(true);
     const currentHeaders = {
@@ -924,7 +1039,7 @@ export function EditClientContactReliabilityModal({ clientContact, update_state 
     try {
       const response = await axios.patch(
         `${UPDATE_CLIENT_CONTACT}${clientContact.clientcont_id}/`,
-        { reliability },
+        { reliability: reliability || null },
         { headers: currentHeaders }
       );
 
@@ -951,7 +1066,7 @@ export function EditClientContactReliabilityModal({ clientContact, update_state 
     <>
       <Button size="tiny" basic onClick={handleShow}>
         <FiEdit style={{ marginRight: 6 }} />
-        Edit
+        Edit Reliability
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -959,10 +1074,10 @@ export function EditClientContactReliabilityModal({ clientContact, update_state 
           <Modal.Title>Edit Reliability</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Reliability</Form.Label>
-              <Form.Select
+              <Form.Control
+                as="select"
                 value={reliability}
                 onChange={(e) => setReliability(e.target.value)}
               >
@@ -972,15 +1087,29 @@ export function EditClientContactReliabilityModal({ clientContact, update_state 
                     {option.label}
                   </option>
                 ))}
-              </Form.Select>
+              </Form.Control>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button basic onClick={handleClose}>
+          <small className="mr-auto">
+            {isReliabilityValid ? (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} />
+                Looks good.
+              </div>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ marginRight: 5 }} />
+                  Invalid selection
+                </li>
+              </ul>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button primary loading={isLoading} onClick={handleSave}>
+          <Button color="green" loading={isLoading} onClick={handleSave} disabled={!isReliabilityValid}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -1004,15 +1133,10 @@ export function EditClientContactCityModal({ clientContact, update_state }) {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const isCityValid = city.trim().length >= 2 && city.trim().length <= 40;
+
   const handleSave = async () => {
-    if (!city.trim()) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "City cannot be empty.",
-      });
-      return;
-    }
+    if (!isCityValid) return;
 
     setIsLoading(true);
     const currentHeaders = {
@@ -1050,7 +1174,7 @@ export function EditClientContactCityModal({ clientContact, update_state }) {
     <>
       <Button size="tiny" basic onClick={handleShow}>
         <FiEdit style={{ marginRight: 6 }} />
-        Edit
+        Edit City
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -1058,7 +1182,6 @@ export function EditClientContactCityModal({ clientContact, update_state }) {
           <Modal.Title>Edit City</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>City</Form.Label>
               <Form.Control
@@ -1068,17 +1191,37 @@ export function EditClientContactCityModal({ clientContact, update_state }) {
                 maxLength={40}
                 placeholder="Enter city"
               />
-              <Form.Text className="text-muted">
-                {city.length}/40 characters
-              </Form.Text>
+              {/* No character countdown */}
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button basic onClick={handleClose}>
+          <small className="mr-auto">
+            {!isCityValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                {city.trim().length < 2 && (
+                  <li>
+                    <AiOutlineWarning style={{ marginRight: 5 }} />
+                    City must be at least 2 characters
+                  </li>
+                )}
+                {city.trim().length > 40 && (
+                  <li>
+                    <AiOutlineWarning style={{ marginRight: 5 }} />
+                    City must be at most 40 characters
+                  </li>
+                )}
+              </ul>
+            ) : (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} />
+                Looks good.
+              </div>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button primary loading={isLoading} onClick={handleSave}>
+          <Button color="green" loading={isLoading} onClick={handleSave} disabled={!isCityValid}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -1139,7 +1282,7 @@ export function EditClientContactActiveModal({ clientContact, update_state }) {
     <>
       <Button size="tiny" basic onClick={handleShow}>
         <FiEdit style={{ marginRight: 6 }} />
-        Edit
+        Edit Active Status
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -1147,7 +1290,6 @@ export function EditClientContactActiveModal({ clientContact, update_state }) {
           <Modal.Title>Edit Active Status</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Check
                 type="checkbox"
@@ -1159,13 +1301,13 @@ export function EditClientContactActiveModal({ clientContact, update_state }) {
                 {active ? "This contact is currently active" : "This contact is currently inactive"}
               </Form.Text>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button basic onClick={handleClose}>
+          <small className="mr-auto" />
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button primary loading={isLoading} onClick={handleSave}>
+          <Button color="green" loading={isLoading} onClick={handleSave}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -1226,7 +1368,7 @@ export function EditClientContactNotesModal({ clientContact, update_state }) {
     <>
       <Button size="tiny" basic onClick={handleShow}>
         <FiEdit style={{ marginRight: 6 }} />
-        Edit
+        Edit Notes
       </Button>
 
       <Modal show={show} onHide={handleClose} centered size="lg">
@@ -1234,7 +1376,6 @@ export function EditClientContactNotesModal({ clientContact, update_state }) {
           <Modal.Title>Edit Notes</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Notes</Form.Label>
               <Form.Control
@@ -1245,13 +1386,13 @@ export function EditClientContactNotesModal({ clientContact, update_state }) {
                 placeholder="Enter notes"
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button basic onClick={handleClose}>
+          <small className="mr-auto" />
+          <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button primary loading={isLoading} onClick={handleSave}>
+          <Button color="green" loading={isLoading} onClick={handleSave}>
             Save Changes
           </Button>
         </Modal.Footer>

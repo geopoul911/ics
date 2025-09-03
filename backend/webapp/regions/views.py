@@ -436,22 +436,31 @@ class CityView(generics.RetrieveUpdateDestroyAPIView):
             # Get detailed information about related objects
             related_objects = []
             
-            # Check clients
+            # Clients
             clients = Client.objects.filter(city=instance)
             if clients.exists():
                 related_objects.append(f"{clients.count()} client(s): {', '.join([f'{c.surname} {c.name}' for c in clients[:5]])}{'...' if clients.count() > 5 else ''}")
             
-            # Check properties
+            # Properties
             properties = Property.objects.filter(city=instance)
             if properties.exists():
                 related_objects.append(f"{properties.count()} propert(ies): {', '.join([p.description for p in properties[:5]])}{'...' if properties.count() > 5 else ''}")
+
+            # Professionals
+            from webapp.models import Professional
+            pros = Professional.objects.filter(city=instance)
+            if pros.exists():
+                related_objects.append(f"{pros.count()} professional(s): {', '.join([pr.fullname for pr in pros[:5]])}{'...' if pros.count() > 5 else ''}")
             
-            error_message = f"Cannot delete city '{instance.title}' because it is referenced by:\n\n"
-            error_message += "\n".join([f"• {obj}" for obj in related_objects])
-            error_message += "\n\nPlease remove or reassign these related objects before deleting the city."
+            errormsg = f"Cannot delete city '{instance.title}' because it is referenced by:\n\n"
+            if related_objects:
+                errormsg += "\n".join([f"• {obj}" for obj in related_objects])
+                errormsg += "\n\nPlease remove or reassign these related objects before deleting the city."
+            else:
+                errormsg += "• Related objects exist. Please remove or reassign them before deleting the city."
             
             return Response(
-                {"error": error_message, "related_objects": related_objects}, 
+                {"errormsg": errormsg, "related_objects": related_objects}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:

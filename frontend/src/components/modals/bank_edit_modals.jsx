@@ -125,7 +125,6 @@ export function EditBankNameModal({ bank, update_state }) {
           <Modal.Title>Edit Bank Name</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group as={Row}>
               <Form.Label column sm={3}>
                 Bank Name:
@@ -143,19 +142,25 @@ export function EditBankNameModal({ bank, update_state }) {
                 </Form.Control.Feedback>
               </Col>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={onSave}
-            disabled={!isBanknameValid}
-          >
-            Save Changes
-          </Button>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <small style={{ color: isBanknameValid ? "green" : "red" }}>
+              {isBanknameValid ? "Looks good." : "Bank name must be 2-40 characters."}
+            </small>
+            <div>
+              <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
+                Cancel
+              </Button>
+              <Button
+                color="green"
+                onClick={onSave}
+                disabled={!isBanknameValid}
+              >
+                Save Changes
+              </Button>
+            </div>
+          </div>
         </Modal.Footer>
       </Modal>
     </>
@@ -276,7 +281,6 @@ export function EditBankCountryModal({ bank, update_state }) {
           <Modal.Title>Edit Bank Country</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group as={Row}>
               <Form.Label column sm={3}>
                 Country:
@@ -300,19 +304,25 @@ export function EditBankCountryModal({ bank, update_state }) {
                 </Form.Control.Feedback>
               </Col>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={onSave}
-            disabled={!isCountryValid}
-          >
-            Save Changes
-          </Button>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <small style={{ color: isCountryValid ? "green" : "red" }}>
+              {isCountryValid ? "Looks good." : "Please select a country."}
+            </small>
+            <div>
+              <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
+                Cancel
+              </Button>
+              <Button
+                color="green"
+                onClick={onSave}
+                disabled={!isCountryValid}
+              >
+                Save Changes
+              </Button>
+            </div>
+          </div>
         </Modal.Footer>
       </Modal>
     </>
@@ -410,7 +420,6 @@ export function EditBankOrderIndexModal({ bank, update_state }) {
           <Modal.Title>Edit Bank Order Index</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group as={Row}>
               <Form.Label column sm={3}>
                 Order Index:
@@ -428,19 +437,25 @@ export function EditBankOrderIndexModal({ bank, update_state }) {
                 </Form.Control.Feedback>
               </Col>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={onSave}
-            disabled={!isOrderIndexValid}
-          >
-            Save Changes
-          </Button>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <small style={{ color: isOrderIndexValid ? "green" : "red" }}>
+              {isOrderIndexValid ? "Looks good." : "Order Index is required and must be an integer."}
+            </small>
+            <div>
+              <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
+                Cancel
+              </Button>
+              <Button
+                color="green"
+                onClick={onSave}
+                disabled={!isOrderIndexValid}
+              >
+                Save Changes
+              </Button>
+            </div>
+          </div>
         </Modal.Footer>
       </Modal>
     </>
@@ -538,7 +553,6 @@ export function EditBankInstitutionNumberModal({ bank, update_state }) {
           <Modal.Title>Edit Bank Institution Number</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group as={Row}>
               <Form.Label column sm={3}>
                 Institution Number:
@@ -556,19 +570,25 @@ export function EditBankInstitutionNumberModal({ bank, update_state }) {
                 </Form.Control.Feedback>
               </Col>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={onSave}
-            disabled={!isInstitutionNumberValid}
-          >
-            Save Changes
-          </Button>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <small style={{ color: isInstitutionNumberValid ? "green" : "red" }}>
+              {isInstitutionNumberValid ? "Looks good." : "Institution number must be exactly 3 digits."}
+            </small>
+            <div>
+              <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
+                Cancel
+              </Button>
+              <Button
+                color="green"
+                onClick={onSave}
+                disabled={!isInstitutionNumberValid}
+              >
+                Save Changes
+              </Button>
+            </div>
+          </div>
         </Modal.Footer>
       </Modal>
     </>
@@ -666,7 +686,6 @@ export function EditBankSwiftCodeModal({ bank, update_state }) {
           <Modal.Title>Edit Bank SWIFT Code</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group as={Row}>
               <Form.Label column sm={3}>
                 SWIFT Code:
@@ -684,19 +703,25 @@ export function EditBankSwiftCodeModal({ bank, update_state }) {
                 </Form.Control.Feedback>
               </Col>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={onSave}
-            disabled={!isSwiftCodeValid}
-          >
-            Save Changes
-          </Button>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <small style={{ color: isSwiftCodeValid ? "green" : "red" }}>
+              {isSwiftCodeValid ? "Looks good." : "SWIFT code must be 8-11 alphanumeric characters."}
+            </small>
+            <div>
+              <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
+                Cancel
+              </Button>
+              <Button
+                color="green"
+                onClick={onSave}
+                disabled={!isSwiftCodeValid}
+              >
+                Save Changes
+              </Button>
+            </div>
+          </div>
         </Modal.Footer>
       </Modal>
     </>
@@ -783,7 +808,6 @@ export function EditBankActiveModal({ bank, update_state }) {
           <Modal.Title>Edit Bank Active Status</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group as={Row}>
               <Form.Label column sm={3}>
                 Active:
@@ -797,18 +821,24 @@ export function EditBankActiveModal({ bank, update_state }) {
                 />
               </Col>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={onSave}
-          >
-            Save Changes
-          </Button>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <small style={{ color: "green" }}>
+              Ready to save.
+            </small>
+            <div>
+              <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
+                Cancel
+              </Button>
+              <Button
+                color="green"
+                onClick={onSave}
+              >
+                Save Changes
+              </Button>
+            </div>
+          </div>
         </Modal.Footer>
       </Modal>
     </>

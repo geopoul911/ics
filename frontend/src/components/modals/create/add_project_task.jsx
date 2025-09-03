@@ -33,11 +33,13 @@ function AddProjectTaskModal({ onCreated }) {
   const [title, setTitle] = useState("");
   const [details, setDetails] = useState("");
   const [taskcate_id, setTaskcateId] = useState("");
-  const [priority, setPriority] = useState("B");
+  const [priority, setPriority] = useState("A");
   const [assigner_id, setAssignerId] = useState("");
   const [assignee_id, setAssigneeId] = useState("");
   const [assigndate, setAssigndate] = useState("");
   const [deadline, setDeadline] = useState("");
+  const [weight, setWeight] = useState("");
+  const [efforttime, setEfforttime] = useState("");
 
   useEffect(() => {
     if (show) {
@@ -101,8 +103,13 @@ function AddProjectTaskModal({ onCreated }) {
   const isProjtaskIdValid = projtask_id.trim().length >= 2 && projtask_id.trim().length <= 10;
   const isProjectValid = !!project_id;
   const isTitleValid = title.trim().length >= 2 && title.trim().length <= 120;
+  const isDetailsValid = details.trim().length >= 1 && details.trim().length <= 1000;
+  const isTaskCategoryValid = !!taskcate_id;
+  const isAssignerValid = !!assigner_id;
   const isPriorityValid = ["A", "B", "C"].includes(priority);
-  const isFormValid = isProjtaskIdValid && isProjectValid && isTitleValid && isPriorityValid;
+  const isWeightValid = true;
+  const isEfforttimeValid = true;
+  const isFormValid = isProjtaskIdValid && isProjectValid && isTitleValid && isDetailsValid && isTaskCategoryValid && isAssignerValid && isPriorityValid && isWeightValid && isEfforttimeValid;
 
   const clamp = (value, max) => value.slice(0, max);
 
@@ -116,13 +123,14 @@ function AddProjectTaskModal({ onCreated }) {
         projtask_id: projtask_id.trim(),
         project_id,
         title: title.trim(),
-        details: details.trim() || undefined,
-        taskcate_id: taskcate_id || undefined,
+        details: details.trim(),
+        taskcate_id: taskcate_id,
         priority,
-        assigner_id: assigner_id || undefined,
+        assigner_id: assigner_id,
         assignee_id: assignee_id || undefined,
         assigndate: assigndate || undefined,
         deadline: deadline || undefined,
+        // weight and efforttime can be added later when fields are present in the UI
       };
 
       const currentHeaders = {
@@ -140,11 +148,13 @@ function AddProjectTaskModal({ onCreated }) {
       setTitle("");
       setDetails("");
       setTaskcateId("");
-      setPriority("B");
+      setPriority("A");
       setAssignerId("");
       setAssigneeId("");
       setAssigndate("");
       setDeadline("");
+      setWeight("");
+      setEfforttime("");
       setShow(false);
 
       if (onCreated) onCreated();
@@ -166,11 +176,13 @@ function AddProjectTaskModal({ onCreated }) {
     setTitle("");
     setDetails("");
     setTaskcateId("");
-    setPriority("B");
+    setPriority("A");
     setAssignerId("");
     setAssigneeId("");
     setAssigndate("");
     setDeadline("");
+    setWeight("");
+    setEfforttime("");
   };
 
   return (
@@ -213,6 +225,31 @@ function AddProjectTaskModal({ onCreated }) {
             </Row>
 
             <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Weight</Form.Label>
+                  <Form.Control
+                    type="number"
+                    value={weight}
+                    onChange={(e) => setWeight(e.target.value)}
+                    placeholder="e.g., 1"
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Effort Time (hours, 0.5 steps)</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={efforttime}
+                    onChange={(e) => setEfforttime(e.target.value)}
+                    placeholder="e.g., 1.5"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Row>
               <Col md={8}>
                 <Form.Group className="mb-3">
                   <Form.Label>Title *</Form.Label>
@@ -227,7 +264,7 @@ function AddProjectTaskModal({ onCreated }) {
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Priority *</Form.Label>
+                  <Form.Label>Priority</Form.Label>
                   <Form.Control as="select" value={priority} onChange={(e) => setPriority(e.target.value)}>
                     <option value="A">High</option>
                     <option value="B">Medium</option>
@@ -240,7 +277,7 @@ function AddProjectTaskModal({ onCreated }) {
             <Row>
               <Col md={12}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Details</Form.Label>
+                  <Form.Label>Details *</Form.Label>
                   <Form.Control as="textarea" rows={3} value={details} onChange={(e) => setDetails(clamp(e.target.value, 1000))} />
                 </Form.Group>
               </Col>
@@ -249,7 +286,7 @@ function AddProjectTaskModal({ onCreated }) {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Task Category</Form.Label>
+                  <Form.Label>Task Category *</Form.Label>
                   <Form.Control as="select" value={taskcate_id} onChange={(e) => setTaskcateId(e.target.value)}>
                     <option value="">Select category</option>
                     {taskCategories.map((c) => (
@@ -260,11 +297,11 @@ function AddProjectTaskModal({ onCreated }) {
               </Col>
               <Col md={3}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Assigner</Form.Label>
+                  <Form.Label>Assigner *</Form.Label>
                   <Form.Control as="select" value={assigner_id} onChange={(e) => setAssignerId(e.target.value)}>
                     <option value="">Select assigner</option>
                     {consultants.map((c) => (
-                      <option key={c.consultant_id} value={c.consultant_id}>{c.surname} {c.name}</option>
+                      <option key={c.consultant_id} value={c.consultant_id}> {c.consultant_id} - {c.fullname}</option>
                     ))}
                   </Form.Control>
                 </Form.Group>
@@ -275,7 +312,7 @@ function AddProjectTaskModal({ onCreated }) {
                   <Form.Control as="select" value={assignee_id} onChange={(e) => setAssigneeId(e.target.value)}>
                     <option value="">Select assignee</option>
                     {consultants.map((c) => (
-                      <option key={c.consultant_id} value={c.consultant_id}>{c.surname} {c.name}</option>
+                      <option key={c.consultant_id} value={c.consultant_id}>{c.consultant_id} - {c.fullname}</option>
                     ))}
                   </Form.Control>
                 </Form.Group>
@@ -317,6 +354,24 @@ function AddProjectTaskModal({ onCreated }) {
                     <li>
                       <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
                       Title is required (2–120 chars).
+                    </li>
+                  )}
+                  {!isDetailsValid && (
+                    <li>
+                      <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                      Details are required.
+                    </li>
+                  )}
+                  {!isTaskCategoryValid && (
+                    <li>
+                      <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                      Task Category is required.
+                    </li>
+                  )}
+                  {!isAssignerValid && (
+                    <li>
+                      <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                      Assigner is required.
                     </li>
                   )}
                 </ul>

@@ -179,9 +179,10 @@ function AddClientModal({ onClientCreated }) {
       console.log('Loading dropdown data...');
       
       // Load reference data for dropdowns using axios
+      const authHeaders = { headers: { ...headers, Authorization: "Token " + localStorage.getItem("userToken") } };
       const [countriesRes, insuranceCarriersRes] = await Promise.all([
-        axios.get("http://localhost:8000/api/data_management/all_countries/"),
-        axios.get("http://localhost:8000/api/data_management/all_insurance_carriers/")
+        axios.get("http://localhost:8000/api/regions/all_countries/", authHeaders),
+        axios.get("http://localhost:8000/api/administration/all_insurance_carriers/", authHeaders)
       ]);
       
       console.log('Raw API responses:', {
@@ -219,7 +220,9 @@ function AddClientModal({ onClientCreated }) {
   const loadProvinces = async (countryId) => {
     try {
       console.log('Loading provinces for country:', countryId);
-      const response = await axios.get(`http://localhost:8000/api/data_management/all_provinces/?country=${countryId}`);
+      const response = await axios.get(`http://localhost:8000/api/regions/all_provinces/?country=${countryId}`,
+        { headers: { ...headers, Authorization: "Token " + localStorage.getItem("userToken") } }
+      );
       console.log('Raw provinces response:', response);
       // Provinces API returns {"all_provinces": [...]}
       const provincesData = response?.data?.all_provinces || [];
@@ -239,7 +242,9 @@ function AddClientModal({ onClientCreated }) {
   const loadCities = async (provinceId) => {
     try {
       console.log('Loading cities for province:', provinceId);
-      const response = await axios.get(`http://localhost:8000/api/data_management/all_cities/?province=${provinceId}`);
+      const response = await axios.get(`http://localhost:8000/api/regions/all_cities/?province=${provinceId}`,
+        { headers: { ...headers, Authorization: "Token " + localStorage.getItem("userToken") } }
+      );
       console.log('Raw cities response:', response);
       // Cities API returns {"all_cities": [...]}
       const citiesData = response?.data?.all_cities || [];
@@ -256,12 +261,12 @@ function AddClientModal({ onClientCreated }) {
     }
   };
 
-  // Validation
+  // Validation (required per backend model)
   const isClientIdValid = clientId.trim().length >= 2 && clientId.trim().length <= 10;
-  const isSurnameValid = !surname.trim() || (surname.trim().length >= 2 && surname.trim().length <= 40);
-  const isNameValid = !name.trim() || (name.trim().length >= 2 && name.trim().length <= 40);
-  const isOnomaValid = !onoma.trim() || (onoma.trim().length >= 2 && onoma.trim().length <= 40);
-  const isEponymoValid = !eponymo.trim() || (eponymo.trim().length >= 2 && eponymo.trim().length <= 40);
+  const isSurnameValid = surname.trim().length >= 2 && surname.trim().length <= 40;
+  const isNameValid = name.trim().length >= 2 && name.trim().length <= 40;
+  const isOnomaValid = onoma.trim().length >= 2 && onoma.trim().length <= 40;
+  const isEponymoValid = eponymo.trim().length >= 2 && eponymo.trim().length <= 40;
   const isAddressValid = address.trim().length >= 2 && address.trim().length <= 120;
   const isPostalCodeValid = postalcode.trim().length >= 1 && postalcode.trim().length <= 10;
   const isEmailValid = validateEmail(email);
@@ -272,17 +277,27 @@ function AddClientModal({ onClientCreated }) {
   const isCountryValid = country.length > 0;
   const isProvinceValid = province.length > 0;
   const isCityValid = city.length > 0;
-  
-  // AFM, SIN, and AMKA validation - must be exactly the required digits if provided
+  // Personal required fields
+  const isBirthdateValid = !!birthdate;
+  const isBirthplaceValid = birthplace.trim().length >= 1 && birthplace.trim().length <= 60;
+  const isFathernameValid = fathername.trim().length >= 1 && fathername.trim().length <= 80;
+  const isMothernameValid = mothername.trim().length >= 1 && mothername.trim().length <= 80;
+  // AFM optional; SIN required; AMKA optional
   const isAfmValid = !afm || (afm.length === 9 && /^\d{9}$/.test(afm));
-  const isSinValid = !sin || (sin.length === 9 && /^\d{9}$/.test(sin));
+  const isSinValid = sin.length === 9 && /^\d{9}$/.test(sin);
   const isAmkaValid = !amka || (amka.length === 11 && /^\d{11}$/.test(amka));
+  // Passport required
+  const isPassportCountryValid = passportcountry.length > 0;
+  const isPassportNumberValid = passportnumber.trim().length >= 1 && passportnumber.trim().length <= 15;
+  const isPassportExpireValid = !!passportexpiredate;
 
-  const isFormValid = isClientIdValid && isSurnameValid && isNameValid && isOnomaValid && 
-                     isEponymoValid && isAddressValid && isPostalCodeValid && isEmailValid && 
+  const isFormValid = isClientIdValid && isSurnameValid && isNameValid && isOnomaValid &&
+                     isEponymoValid && isAddressValid && isPostalCodeValid && isEmailValid &&
                      isPhone1Valid && isPhone2Valid && isMobile1Valid && isMobile2Valid &&
                      isCountryValid && isProvinceValid && isCityValid &&
-                     isAfmValid && isSinValid && isAmkaValid;
+                     isBirthdateValid && isBirthplaceValid && isFathernameValid && isMothernameValid &&
+                     isAfmValid && isSinValid && isAmkaValid &&
+                     isPassportCountryValid && isPassportNumberValid && isPassportExpireValid;
 
   const createNewClient = async () => {
     try {
@@ -412,27 +427,28 @@ function AddClientModal({ onClientCreated }) {
                     </Form.Group>
                   </Col>
                   <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Surname:</Form.Label>
-                      <Form.Control
-                        maxLength={40}
-                        placeholder="e.g., Smith"
-                        onChange={(e) => setSurname(clampLen(e.target.value, 40))}
-                        value={surname}
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-
-                <Row>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
+                  <Form.Group className="mb-3">
                       <Form.Label>Name:</Form.Label>
                       <Form.Control
                         maxLength={40}
                         placeholder="e.g., John"
                         onChange={(e) => setName(clampLen(e.target.value, 40))}
                         value={name}
+                      />
+                    </Form.Group>
+
+                  </Col>
+                </Row>
+
+                <Row>
+                  <Col md={6}>
+                  <Form.Group className="mb-3">
+                      <Form.Label>Surname:</Form.Label>
+                      <Form.Control
+                        maxLength={40}
+                        placeholder="e.g., Smith"
+                        onChange={(e) => setSurname(clampLen(e.target.value, 40))}
+                        value={surname}
                       />
                     </Form.Group>
                   </Col>
@@ -482,7 +498,13 @@ function AddClientModal({ onClientCreated }) {
                       <Form.Label>Country *:</Form.Label>
                       <Form.Control
                         as="select"
-                        onChange={(e) => setCountry(e.target.value)}
+                        onChange={(e) => {
+                          const newCountry = e.target.value;
+                          setCountry(newCountry);
+                          // Reset dependent fields when country changes
+                          setProvince("");
+                          setCity("");
+                        }}
                         value={country}
                       >
                         <option value="">Select Country</option>
@@ -499,7 +521,12 @@ function AddClientModal({ onClientCreated }) {
                       <Form.Label>Province *:</Form.Label>
                       <Form.Control
                         as="select"
-                        onChange={(e) => setProvince(e.target.value)}
+                        onChange={(e) => {
+                          const newProvince = e.target.value;
+                          setProvince(newProvince);
+                          // Reset dependent field when province changes
+                          setCity("");
+                        }}
                         value={province}
                         disabled={!country}
                       >
@@ -910,7 +937,7 @@ function AddClientModal({ onClientCreated }) {
                         <option value="">Select Insurance Carrier</option>
                         {Array.isArray(insuranceCarriers) && insuranceCarriers.map((carrier) => (
                           <option key={carrier.insucarrier_id} value={carrier.insucarrier_id}>
-                            {carrier.title}
+                            {carrier.insucarrier_id} - {carrier.title}
                           </option>
                         ))}
                       </Form.Control>
@@ -958,7 +985,7 @@ function AddClientModal({ onClientCreated }) {
                         <option value="">Select Insurance Carrier</option>
                         {Array.isArray(insuranceCarriers) && insuranceCarriers.map((carrier) => (
                           <option key={carrier.insucarrier_id} value={carrier.insucarrier_id}>
-                            {carrier.title}
+                            {carrier.insucarrier_id} - {carrier.title}
                           </option>
                         ))}
                       </Form.Control>
@@ -1024,25 +1051,25 @@ function AddClientModal({ onClientCreated }) {
                 {!isSurnameValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Surname must be 2–40 chars if provided.
+                    Surname is required (2–40 chars).
                   </li>
                 )}
                 {!isNameValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Name must be 2–40 chars if provided.
+                    Name is required (2–40 chars).
                   </li>
                 )}
                 {!isOnomaValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Greek Name (Onoma) must be 2–40 chars if provided.
+                    Greek Name (Onoma) is required (2–40 chars).
                   </li>
                 )}
                 {!isEponymoValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Greek Surname (Eponymo) must be 2–40 chars if provided.
+                    Greek Surname (Eponymo) is required (2–40 chars).
                   </li>
                 )}
                 {!isAddressValid && (
@@ -1081,18 +1108,60 @@ function AddClientModal({ onClientCreated }) {
                     AFM must be exactly 9 digits.
                   </li>
                 )}
-                                 {!isSinValid && (
+                {!isSinValid && (
                    <li>
                      <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                     SIN must be exactly 9 digits.
+                     SIN is required and must be exactly 9 digits.
                    </li>
                  )}
-                 {!isAmkaValid && (
+                {!isAmkaValid && (
                    <li>
                      <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
                      AMKA must be exactly 11 digits.
                    </li>
-                 )}
+                )}
+                {!isBirthdateValid && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Birth date is required.
+                  </li>
+                )}
+                {!isBirthplaceValid && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Birth place is required (1–60 chars).
+                  </li>
+                )}
+                {!isFathernameValid && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Father's name is required (1–80 chars).
+                  </li>
+                )}
+                {!isMothernameValid && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Mother's name is required (1–80 chars).
+                  </li>
+                )}
+                {!isPassportCountryValid && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Passport Country is required.
+                  </li>
+                )}
+                {!isPassportNumberValid && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Passport Number is required (max 15 chars).
+                  </li>
+                )}
+                {!isPassportExpireValid && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Passport Expiry Date is required.
+                  </li>
+                )}
                  {!isEmailValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />

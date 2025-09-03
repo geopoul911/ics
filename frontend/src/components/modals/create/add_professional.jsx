@@ -72,10 +72,14 @@ function AddProfessionalModal({ onProfessionalCreated }) {
 
   const loadDropdownData = async () => {
     try {
-      const professionsRes = await axios.get(ALL_PROFESSIONS, { headers });
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      const professionsRes = await axios.get(ALL_PROFESSIONS, { headers: currentHeaders });
       setProfessions(professionsRes.data.all_professions || []);
 
-      const citiesRes = await axios.get(ALL_CITIES, { headers });
+      const citiesRes = await axios.get(ALL_CITIES, { headers: currentHeaders });
       setCities(citiesRes.data.all_cities || []);
     } catch (error) {
       console.error("Error fetching dropdown data:", error);
@@ -87,15 +91,34 @@ function AddProfessionalModal({ onProfessionalCreated }) {
   const isFullnameValid = fullname.trim().length >= 2 && fullname.trim().length <= 40;
   const isProfessionValid = profession_id !== "";
   const isCityValid = city_id !== "";
-  const isFormValid = isIdValid && isFullnameValid && isProfessionValid && isCityValid;
+  const isEmailValid = !email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isPhoneValid = !phone || phone.length <= 15;
+  const isMobileValid = mobile.trim().length > 0 && mobile.length <= 15;
+  const isFormValid = isIdValid && isFullnameValid && isProfessionValid && isCityValid && isMobileValid && isEmailValid && isPhoneValid;
 
   const createNewProfessional = async () => {
     if (!isFormValid) return;
     try {
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
       await axios.post(
         ADD_PROFESSIONAL,
-        { professional_id, fullname, profession_id, city_id, address, email, phone, mobile, reliability, active, notes },
-        { headers }
+        {
+          professional_id: professional_id.trim().toUpperCase(),
+          fullname: fullname.trim(),
+          profession_id,
+          city_id,
+          address: address.trim() || null,
+          email: email.trim() || null,
+          phone: phone.trim() || null,
+          mobile: mobile.trim(),
+          reliability: reliability || null,
+          active,
+          notes: notes.trim() || null
+        },
+        { headers: currentHeaders }
       );
 
       Swal.fire("Success", "Professional created successfully", "success");
@@ -103,8 +126,18 @@ function AddProfessionalModal({ onProfessionalCreated }) {
       handleClose();
     } catch (error) {
       console.error("Error creating professional:", error);
-      const errorMessage = error.response?.data?.error || "Failed to create professional";
-      Swal.fire("Error", errorMessage, "error");
+      let apiMsg = "Failed to create professional";
+      const data = error.response?.data;
+      if (data?.error) apiMsg = data.error;
+      else if (data?.professional_id) apiMsg = data.professional_id[0];
+      else if (data?.fullname) apiMsg = data.fullname[0];
+      else if (data?.profession_id) apiMsg = data.profession_id[0];
+      else if (data?.city_id) apiMsg = data.city_id[0];
+      else if (data?.mobile) apiMsg = data.mobile[0];
+      else if (data?.email) apiMsg = data.email[0];
+      else if (data?.phone) apiMsg = data.phone[0];
+      else if (data?.detail) apiMsg = data.detail;
+      Swal.fire("Error", apiMsg, "error");
     }
   };
 
@@ -115,7 +148,7 @@ function AddProfessionalModal({ onProfessionalCreated }) {
         Create new Professional
       </Button>
 
-      <Modal show={show} onHide={handleClose} size="xl" aria-labelledby="contained-modal-title-vcenter" centered>
+      <Modal show={show} onHide={handleClose} size="lg" aria-labelledby="contained-modal-title-vcenter" centered>
         <Modal.Header closeButton>
           <Modal.Title id="contained-modal-title-vcenter">Create new Professional</Modal.Title>
         </Modal.Header>
@@ -123,28 +156,39 @@ function AddProfessionalModal({ onProfessionalCreated }) {
           <Row className="justify-content-md-center">
             <Col>
               <Form>
-                <h6 className="mb-3">Basic Information</h6>
+                <h6 className="mb-2">Basic Information</h6>
                 <Row>
                   <Col md={6}>
-                    <Form.Group className="mb-3">
+                    <Form.Group className="mb-2">
                       <Form.Label>Professional ID *:</Form.Label>
-                      <Form.Control maxLength={10} onChange={(e) => setProfessional_id(e.target.value.toUpperCase())} value={professional_id} />
+                      <Form.Control
+                        maxLength={10}
+                        placeholder="e.g., PR001"
+                        onChange={(e) => setProfessional_id(e.target.value.toUpperCase())}
+                        value={professional_id}
+                      />
                     </Form.Group>
                   </Col>
                   <Col md={6}>
-                    <Form.Group className="mb-3">
+                    <Form.Group className="mb-2">
                       <Form.Label>Fullname *:</Form.Label>
-                      <Form.Control maxLength={40} onChange={(e) => setFullname(e.target.value)} value={fullname} />
+                      <Form.Control
+                        maxLength={40}
+                        placeholder="e.g., John Smith"
+                        onChange={(e) => setFullname(e.target.value)}
+                        value={fullname}
+                        isInvalid={fullname !== "" && !isFullnameValid}
+                      />
                     </Form.Group>
                   </Col>
                 </Row>
 
-                <h6 className="mb-3 mt-4">Links</h6>
+                <h6 className="mb-2 mt-3">Links</h6>
                 <Row>
                   <Col md={6}>
-                    <Form.Group className="mb-3">
+                    <Form.Group className="mb-2">
                       <Form.Label>Profession *:</Form.Label>
-                      <Form.Control as="select" onChange={(e) => setProfession_id(e.target.value)} value={profession_id}>
+                      <Form.Control as="select" onChange={(e) => setProfession_id(e.target.value)} value={profession_id} isInvalid={profession_id !== "" && !isProfessionValid}>
                         <option value="">Select Profession</option>
                         {Array.isArray(professions) && professions.map((p) => (
                           <option key={p.profession_id} value={p.profession_id}>{p.title}</option>
@@ -153,9 +197,9 @@ function AddProfessionalModal({ onProfessionalCreated }) {
                     </Form.Group>
                   </Col>
                   <Col md={6}>
-                    <Form.Group className="mb-3">
+                    <Form.Group className="mb-2">
                       <Form.Label>City *:</Form.Label>
-                      <Form.Control as="select" onChange={(e) => setCity_id(e.target.value)} value={city_id}>
+                      <Form.Control as="select" onChange={(e) => setCity_id(e.target.value)} value={city_id} isInvalid={city_id !== "" && !isCityValid}>
                         <option value="">Select City</option>
                         {Array.isArray(cities) && cities.map((c) => (
                           <option key={c.city_id} value={c.city_id}>{c.title}</option>
@@ -165,18 +209,18 @@ function AddProfessionalModal({ onProfessionalCreated }) {
                   </Col>
                 </Row>
 
-                <h6 className="mb-3 mt-4">Contact</h6>
+                <h6 className="mb-2 mt-3">Contact</h6>
                 <Row>
                   <Col md={6}>
-                    <Form.Group className="mb-3">
+                    <Form.Group className="mb-2">
                       <Form.Label>Address:</Form.Label>
                       <Form.Control onChange={(e) => setAddress(e.target.value)} value={address} />
                     </Form.Group>
                   </Col>
                   <Col md={6}>
-                    <Form.Group className="mb-3">
+                    <Form.Group className="mb-2">
                       <Form.Label>Email:</Form.Label>
-                      <Form.Control onChange={(e) => setEmail(e.target.value)} value={email} />
+                      <Form.Control type="email" placeholder="name@example.com" onChange={(e) => setEmail(e.target.value)} value={email} isInvalid={email !== "" && !isEmailValid} />
                     </Form.Group>
                   </Col>
                 </Row>
@@ -184,18 +228,18 @@ function AddProfessionalModal({ onProfessionalCreated }) {
                   <Col md={6}>
                     <Form.Group className="mb-3">
                       <Form.Label>Phone:</Form.Label>
-                      <Form.Control onChange={(e) => setPhone(e.target.value)} value={phone} />
+                      <Form.Control placeholder="Optional, max 15 chars" onChange={(e) => setPhone(e.target.value)} value={phone} isInvalid={phone !== "" && !isPhoneValid} />
                     </Form.Group>
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Mobile:</Form.Label>
-                      <Form.Control onChange={(e) => setMobile(e.target.value)} value={mobile} />
+                      <Form.Label>Mobile *:</Form.Label>
+                      <Form.Control placeholder="e.g., +30-697-1234567" onChange={(e) => setMobile(e.target.value)} value={mobile} isInvalid={!isMobileValid} />
                     </Form.Group>
                   </Col>
                 </Row>
 
-                <h6 className="mb-3 mt-4">Status</h6>
+                <h6 className="mb-2 mt-3">Status</h6>
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
@@ -215,14 +259,16 @@ function AddProfessionalModal({ onProfessionalCreated }) {
                   </Col>
                 </Row>
 
-                <h6 className="mb-3 mt-4">Notes</h6>
-                <Row>
-                  <Col md={12}>
-                    <Form.Group className="mb-3">
-                      <Form.Control as="textarea" rows={3} onChange={(e) => setNotes(e.target.value)} value={notes} />
-                    </Form.Group>
-                  </Col>
-                </Row>
+                <h6 className="mb-2 mt-3">Notes</h6>
+                <Form.Group className="mb-2">
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    placeholder="Optional notes about the professional"
+                    onChange={(e) => setNotes(e.target.value)}
+                    value={notes}
+                  />
+                </Form.Group>
               </Form>
             </Col>
           </Row>
@@ -242,6 +288,15 @@ function AddProfessionalModal({ onProfessionalCreated }) {
                 )}
                 {!isCityValid && (
                   <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> City is required.</li>
+                )}
+                {!isMobileValid && (
+                  <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> Mobile is required (max 15 chars).</li>
+                )}
+                {!isEmailValid && (
+                  <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> Email must be a valid email address.</li>
+                )}
+                {!isPhoneValid && (
+                  <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> Phone must be 15 characters or less.</li>
                 )}
               </ul>
             ) : (

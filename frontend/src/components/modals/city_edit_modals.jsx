@@ -125,7 +125,10 @@ export function EditCityTitleModal({ city, update_state }) {
               placeholder="e.g., ATHENS"
             />
           </Form.Group>
-          <small style={{ color: isValid ? "green" : "red" }}>
+
+        </Modal.Body>
+        <Modal.Footer>
+          <small className="mr-auto" style={{ color: isValid ? "green" : "red" }}>
             {isValid ? (
               <>
                 <AiOutlineCheckCircle style={{ marginRight: 6 }} />
@@ -138,8 +141,6 @@ export function EditCityTitleModal({ city, update_state }) {
               </>
             )}
           </small>
-        </Modal.Body>
-        <Modal.Footer>
           <Button color="red" onClick={() => setShow(false)} disabled={busy}>Close</Button>
           <Button color="green" onClick={onSave} disabled={!isValid || !isChanged || busy}>
             Save
@@ -270,7 +271,10 @@ export function EditCityCountryModal({ city, update_state }) {
               ))}
             </Form.Control>
           </Form.Group>
-          <small style={{ color: isValid ? "green" : "red" }}>
+
+        </Modal.Body>
+        <Modal.Footer>
+          <small className="mr-auto" style={{ color: isValid ? "green" : "red" }}>
             {isValid ? (
               <>
                 <AiOutlineCheckCircle style={{ marginRight: 6 }} />
@@ -283,8 +287,6 @@ export function EditCityCountryModal({ city, update_state }) {
               </>
             )}
           </small>
-        </Modal.Body>
-        <Modal.Footer>
           <Button color="red" onClick={() => setShow(false)} disabled={busy}>Close</Button>
           <Button color="green" onClick={onSave} disabled={!isValid || !isChanged || busy}>
             Save
@@ -481,7 +483,9 @@ export function EditCityOrderIndexModal({ city, update_state }) {
               placeholder="e.g., 1"
             />
           </Form.Group>
-          <small style={{ color: isValid ? "green" : "red" }}>
+        </Modal.Body>
+        <Modal.Footer>
+          <small className="mr-auto" style={{ color: isValid ? "green" : "red" }}>
             {isValid ? (
               <>
                 <AiOutlineCheckCircle style={{ marginRight: 6 }} />
@@ -494,8 +498,6 @@ export function EditCityOrderIndexModal({ city, update_state }) {
               </>
             )}
           </small>
-        </Modal.Body>
-        <Modal.Footer>
           <Button color="red" onClick={() => setShow(false)} disabled={busy}>Close</Button>
           <Button color="green" onClick={onSave} disabled={!isValid || !isChanged || busy}>
             Save
@@ -505,3 +507,138 @@ export function EditCityOrderIndexModal({ city, update_state }) {
     </>
   );
 } 
+
+/* ===========================
+   6) Edit Country & Province Together
+   =========================== */
+export function EditCityLocationModal({ city, update_state }) {
+  const [show, setShow] = useState(false);
+  const [countryId, setCountryId] = useState(city?.country?.country_id || "");
+  const [provinceId, setProvinceId] = useState(city?.province?.province_id || "");
+  const [countries, setCountries] = useState([]);
+  const [provinces, setProvinces] = useState([]);
+  const [busy, setBusy] = useState(false);
+
+  const originalCountry = city?.country?.country_id || "";
+  const originalProvince = city?.province?.province_id || "";
+
+  const isValid = countryId.length > 0 && provinceId.length > 0;
+  const isChanged = countryId !== originalCountry || provinceId !== originalProvince;
+
+  const onOpen = () => {
+    setCountryId(originalCountry);
+    setProvinceId(originalProvince);
+    setShow(true);
+  };
+
+  // Load countries when opening
+  useEffect(() => {
+    if (!show) return;
+    const currentHeaders = {
+      ...headers,
+      "Authorization": "Token " + localStorage.getItem("userToken")
+    };
+    axios.get(GET_COUNTRIES, { headers: currentHeaders })
+      .then((res) => {
+        const data = res.data?.all_countries || [];
+        setCountries(data);
+      })
+      .catch(() => setCountries([]));
+  }, [show]);
+
+  // Load provinces whenever country changes (and modal open)
+  useEffect(() => {
+    if (!show) return;
+    if (!countryId) {
+      setProvinces([]);
+      setProvinceId("");
+      return;
+    }
+    const currentHeaders = {
+      ...headers,
+      "Authorization": "Token " + localStorage.getItem("userToken")
+    };
+    axios.get(GET_PROVINCES, { headers: currentHeaders })
+      .then((res) => {
+        const all = res.data?.all_provinces || [];
+        const filtered = all.filter(p => p.country?.country_id === countryId);
+        setProvinces(filtered);
+        // If current province not in new list, reset
+        if (!filtered.find(p => p.province_id === provinceId)) {
+          setProvinceId("");
+        }
+      })
+      .catch(() => setProvinces([]));
+  }, [countryId, show, provinceId]);
+
+  const onSave = async () => {
+    if (!isValid || !isChanged) return;
+    try {
+      setBusy(true);
+      const res = await patchCity(city.city_id, { country_id: countryId, province_id: provinceId });
+      const updated = res || { ...city, country_id: countryId, province_id: provinceId };
+      update_state?.(updated);
+    } catch (e) {
+      const apiMsg = e?.response?.data?.error || e?.message || "Failed to update location.";
+      Swal.fire({ icon: "error", title: "Error", text: apiMsg });
+    } finally {
+      setBusy(false);
+      setShow(false);
+    }
+  };
+
+  return (
+    <>
+      <Button size="tiny" basic onClick={onOpen} title="Edit Country & Province">
+        <FiEdit style={{ marginRight: 6 }} />
+        Location
+      </Button>
+
+      <Modal show={show} onHide={() => setShow(false)} centered>
+        <Modal.Header closeButton><Modal.Title>Edit City Location</Modal.Title></Modal.Header>
+        <Modal.Body>
+          <Form.Group className="mb-3">
+            <Form.Label>Country *</Form.Label>
+            <Form.Control as="select" value={countryId} onChange={(e) => setCountryId(e.target.value)}>
+              <option value="">Select a country...</option>
+              {countries.map((c) => (
+                <option key={c.country_id} value={c.country_id}>
+                  {c.country_id} - {c.title}
+                </option>
+              ))}
+            </Form.Control>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Province *</Form.Label>
+            <Form.Control as="select" value={provinceId} onChange={(e) => setProvinceId(e.target.value)} disabled={!countryId}>
+              <option value="">Select a province...</option>
+              {provinces.map((p) => (
+                <option key={p.province_id} value={p.province_id}>
+                  {p.province_id} - {p.title}
+                </option>
+              ))}
+            </Form.Control>
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <small className="mr-auto" style={{ color: isValid ? "green" : "red" }}>
+            {isValid ? (
+              <>
+                <AiOutlineCheckCircle style={{ marginRight: 6 }} />
+                Validated
+              </>
+            ) : (
+              <>
+                <AiOutlineWarning style={{ marginRight: 6 }} />
+                Country and Province are required.
+              </>
+            )}
+          </small>
+          <Button color="red" onClick={() => setShow(false)} disabled={busy}>Close</Button>
+          <Button color="green" onClick={onSave} disabled={!isValid || !isChanged || busy}>Save</Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+}

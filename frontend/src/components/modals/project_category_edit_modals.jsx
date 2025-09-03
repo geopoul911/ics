@@ -115,25 +115,23 @@ export function EditProjectCategoryTitleModal({ project_category, onProjectCateg
           <Modal.Title>Edit Project Category Title</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Title:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(validateTitle(clampLen(e.target.value, 40)))}
-                  placeholder="Enter project category title (2-40 characters)"
-                  isInvalid={title !== "" && !isTitleValid}
-                />
-                <Form.Control.Feedback type="invalid">
-                  Title must be 2-40 characters
-                </Form.Control.Feedback>
-              </Col>
-            </Form.Group>
-          </Form>
+          <Form.Group as={Row}>
+            <Form.Label column sm={3}>
+              Title:
+            </Form.Label>
+            <Col sm={9}>
+              <Form.Control
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(validateTitle(clampLen(e.target.value, 40)))}
+                placeholder="Enter project category title (2-40 characters)"
+                isInvalid={title !== "" && !isTitleValid}
+              />
+              <Form.Control.Feedback type="invalid">
+                Title must be 2-40 characters
+              </Form.Control.Feedback>
+            </Col>
+          </Form.Group>
         </Modal.Body>
         <Modal.Footer>
           <small className="mr-auto">
@@ -155,7 +153,7 @@ export function EditProjectCategoryTitleModal({ project_category, onProjectCateg
               </ul>
             ) : (
               <div style={{ color: "green" }}>
-                Title is valid!
+                Looks good.
               </div>
             )}
           </small>
@@ -263,25 +261,23 @@ export function EditProjectCategoryOrderIndexModal({ project_category, onProject
           <Modal.Title>Edit Project Category Order Index</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Order Index:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  type="text"
-                  value={orderindex}
-                  onChange={(e) => setOrderIndex(validateOrderIndex(clampLen(e.target.value, 5)))}
-                  placeholder="Enter order index (numeric)"
-                  isInvalid={orderindex !== "" && !isOrderIndexValid}
-                />
-                <Form.Control.Feedback type="invalid">
-                  Order index must be a valid number
-                </Form.Control.Feedback>
-              </Col>
-            </Form.Group>
-          </Form>
+          <Form.Group as={Row}>
+            <Form.Label column sm={3}>
+              Order Index:
+            </Form.Label>
+            <Col sm={9}>
+              <Form.Control
+                type="text"
+                value={orderindex}
+                onChange={(e) => setOrderIndex(validateOrderIndex(clampLen(e.target.value, 5)))}
+                placeholder="Enter order index (numeric)"
+                isInvalid={orderindex !== "" && !isOrderIndexValid}
+              />
+              <Form.Control.Feedback type="invalid">
+                Order index must be a valid number
+              </Form.Control.Feedback>
+            </Col>
+          </Form.Group>
         </Modal.Body>
         <Modal.Footer>
           <small className="mr-auto">
@@ -303,7 +299,7 @@ export function EditProjectCategoryOrderIndexModal({ project_category, onProject
               </ul>
             ) : (
               <div style={{ color: "green" }}>
-                Order index is valid!
+                Looks good.
               </div>
             )}
           </small>
@@ -400,21 +396,19 @@ export function EditProjectCategoryActiveModal({ project_category, onProjectCate
           <Modal.Title>Edit Project Category Active Status</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Active:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Check
-                  type="checkbox"
-                  checked={active}
-                  onChange={(e) => setActive(e.target.checked)}
-                  label="Project category is active"
-                />
-              </Col>
-            </Form.Group>
-          </Form>
+          <Form.Group as={Row}>
+            <Form.Label column sm={3}>
+              Active:
+            </Form.Label>
+            <Col sm={9}>
+              <Form.Check
+                type="checkbox"
+                checked={active}
+                onChange={(e) => setActive(e.target.checked)}
+                label="Project category is active"
+              />
+            </Col>
+          </Form.Group>
         </Modal.Body>
         <Modal.Footer>
           <Button color="red" onClick={handleClose}>

@@ -44,19 +44,45 @@ function AddTaskCommentModal({ onClientCreated }) {
 
   const fetchProjectTasks = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/data_management/project_tasks/");
-      setProjectTasks(response.data.all_project_tasks || []);
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken"),
+      };
+      const res = await axios.get(
+        "http://localhost:8000/api/data_management/project_tasks/",
+        { headers: currentHeaders }
+      );
+      let tasks = [];
+      if (Array.isArray(res.data)) tasks = res.data;
+      else if (Array.isArray(res.data?.results)) tasks = res.data.results;
+      else if (Array.isArray(res.data?.data)) tasks = res.data.data;
+      else tasks = res.data?.all_project_tasks || [];
+      setProjectTasks(tasks);
     } catch (error) {
       console.error("Error fetching project tasks:", error);
+      setProjectTasks([]);
     }
   };
 
   const fetchConsultants = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/administration/all_consultants/");
-      setConsultants(response.data.all_consultants || []);
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken"),
+      };
+      const res = await axios.get(
+        "http://localhost:8000/api/administration/all_consultants/",
+        { headers: currentHeaders }
+      );
+      let list = [];
+      if (Array.isArray(res.data)) list = res.data;
+      else if (Array.isArray(res.data?.results)) list = res.data.results;
+      else if (Array.isArray(res.data?.data)) list = res.data.data;
+      else list = res.data?.all_consultants || [];
+      setConsultants(list);
     } catch (error) {
       console.error("Error fetching consultants:", error);
+      setConsultants([]);
     }
   };
 
@@ -80,8 +106,8 @@ function AddTaskCommentModal({ onClientCreated }) {
     try {
       const taskCommentData = {
         taskcomm_id: taskcomm_id.trim(),
-        projtask: projtask,
-        consultant: consultant,
+        projtask_id: projtask,
+        consultant_id: consultant,
         comment: comment.trim(),
       };
 
@@ -184,7 +210,7 @@ function AddTaskCommentModal({ onClientCreated }) {
                     <option value="">Select a project task</option>
                     {projectTasks.map((task) => (
                       <option key={task.projtask_id} value={task.projtask_id}>
-                        {task.title}
+                        {task.projtask_id} - {task.title}
                       </option>
                     ))}
                   </Form.Control>
@@ -202,9 +228,9 @@ function AddTaskCommentModal({ onClientCreated }) {
                     onChange={(e) => setConsultant(e.target.value)}
                   >
                     <option value="">Select a consultant</option>
-                    {consultants.map((consultant) => (
-                      <option key={consultant.consultant_id} value={consultant.consultant_id}>
-                        {consultant.surname} {consultant.name}
+                    {consultants.map((c) => (
+                      <option key={c.consultant_id} value={c.consultant_id}>
+                        {c.consultant_id} - {c.fullname || c.username || c.consultant_id}
                       </option>
                     ))}
                   </Form.Control>

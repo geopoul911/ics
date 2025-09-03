@@ -114,7 +114,6 @@ export function EditProfessionTitleModal({ profession, onProfessionUpdated }) {
           <Modal.Title>Edit Profession Title</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group as={Row}>
               <Form.Label column sm={3}>
                 Title:
@@ -132,7 +131,6 @@ export function EditProfessionTitleModal({ profession, onProfessionUpdated }) {
                 </Form.Control.Feedback>
               </Col>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
           <small className="mr-auto">
@@ -154,7 +152,7 @@ export function EditProfessionTitleModal({ profession, onProfessionUpdated }) {
               </ul>
             ) : (
               <div style={{ color: "green" }}>
-                Title is valid!
+                Looks good.
               </div>
             )}
           </small>

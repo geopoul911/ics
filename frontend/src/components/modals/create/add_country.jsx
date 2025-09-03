@@ -36,7 +36,7 @@ function AddCountryModal() {
   const [title, setTitle] = useState("");
   const [countryId, setCountryId] = useState(""); // maps to country_id
   const [currency, setCurrency] = useState("");   // optional
-  const [orderindex, setOrderindex] = useState(""); // required small int
+  const [orderindex, setOrderindex] = useState(""); // user must choose
 
   const resetForm = () => {
     setTitle("");
@@ -54,7 +54,8 @@ function AddCountryModal() {
   const isTitleValid = title.trim().length >= 2 && title.trim().length <= 40;
   const isCountryIdValid = countryId.length >= 2 && countryId.length <= 3; // ✅ allow 2 or 3 chars
   const isCurrencyValid = currency.length === 3;
-  const isFormValid = isTitleValid && isCountryIdValid && isCurrencyValid;
+  const isOrderIndexValid = orderindex !== "" && Number.isInteger(+orderindex);
+  const isFormValid = isTitleValid && isCountryIdValid && isCurrencyValid && isOrderIndexValid;
 
   const createNewCountry = async () => {
     try {
@@ -72,7 +73,7 @@ function AddCountryModal() {
           title: title.trim(),
           country_id: countryId,        // ✅ field name matches Django model
           currency: currency || null,   // optional
-          orderindex: orderindex,
+          orderindex: Number(orderindex),
         },
       });
 
@@ -176,7 +177,7 @@ function AddCountryModal() {
                 </Form.Group>
 
                 <Form.Group className="mb-3">
-                  <Form.Label>Order Index:</Form.Label>
+                  <Form.Label>Order Index* (default 0):</Form.Label>
                   <Form.Control
                     type="number"
                     placeholder="e.g., 1"
@@ -212,6 +213,12 @@ function AddCountryModal() {
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
                     Currency is required (3 chars).
+                  </li>
+                )}
+                {!isOrderIndexValid && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Order index is required.
                   </li>
                 )}
               </ul>

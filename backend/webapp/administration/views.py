@@ -5,6 +5,7 @@ from webapp.models import (
     Profession,
     ProjectCategory,
     TaskCategory,
+    BankProjectAccount,
 )
 from accounts.models import Consultant
 from webapp.serializers import (
@@ -214,64 +215,68 @@ class ConsultantView(generics.RetrieveUpdateDestroyAPIView):
             instance.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except ProtectedError as e:
-            # Get the related objects that are preventing deletion
-            related_objects = []
-            
-            # Check for related projects
+            # Build a detailed, user-friendly error message for the frontend modal
+            related_strings = []
+
+            # Projects owned by consultant
             related_projects = instance.project_set.all()
             if related_projects.exists():
-                related_objects.append({
-                    'model': 'Projects',
-                    'count': related_projects.count(),
-                    'items': list(related_projects.values_list('title', flat=True)[:5])  # First 5 project titles
-                })
-            
-            # Check for related cash transactions
+                titles = list(related_projects.values_list('title', flat=True)[:5])
+                more = '...' if related_projects.count() > 5 else ''
+                related_strings.append(f"{related_projects.count()} project(s): {', '.join(titles)}{more}")
+
+            # Tasks where consultant is the assigner
+            related_assigned_tasks = instance.assigned_tasks.all()
+            if related_assigned_tasks.exists():
+                task_titles = list(related_assigned_tasks.values_list('title', flat=True)[:5])
+                more = '...' if related_assigned_tasks.count() > 5 else ''
+                related_strings.append(f"{related_assigned_tasks.count()} task(s) as assigner: {', '.join(task_titles)}{more}")
+
+            # Tasks where consultant is the assignee
+            related_assignee_tasks = instance.tasks.all()
+            if related_assignee_tasks.exists():
+                task_titles = list(related_assignee_tasks.values_list('title', flat=True)[:5])
+                more = '...' if related_assignee_tasks.count() > 5 else ''
+                related_strings.append(f"{related_assignee_tasks.count()} task(s) as assignee: {', '.join(task_titles)}{more}")
+
+            # Task comments authored by consultant
+            related_comments = instance.task_comments.all() if hasattr(instance, 'task_comments') else []
+            try:
+                if related_comments and related_comments.exists():
+                    comment_snippets = [c[:30] + ('...' if len(c) > 30 else '') for c in list(related_comments.values_list('comment', flat=True)[:5])]
+                    more = '...' if related_comments.count() > 5 else ''
+                    related_strings.append(f"{related_comments.count()} task comment(s): {', '.join(comment_snippets)}{more}")
+            except Exception:
+                pass
+
+            # Cash transactions by consultant
             related_cash = instance.cash_set.all()
             if related_cash.exists():
-                related_objects.append({
-                    'model': 'Cash Transactions',
-                    'count': related_cash.count(),
-                    'items': list(related_cash.values_list('description', flat=True)[:5])  # First 5 descriptions
-                })
-            
-            # Check for related properties
-            related_properties = instance.property_set.all()
-            if related_properties.exists():
-                related_objects.append({
-                    'model': 'Properties',
-                    'count': related_properties.count(),
-                    'items': list(related_properties.values_list('title', flat=True)[:5])  # First 5 property titles
-                })
-            
-            # Check for related clients
-            related_clients = instance.client_set.all()
-            if related_clients.exists():
-                related_objects.append({
-                    'model': 'Clients',
-                    'count': related_clients.count(),
-                    'items': list(related_clients.values_list('fullname', flat=True)[:5])  # First 5 client names
-                })
-            
-            # Check for related banks
-            related_banks = instance.bank_set.all()
-            if related_banks.exists():
-                related_objects.append({
-                    'model': 'Banks',
-                    'count': related_banks.count(),
-                    'items': list(related_banks.values_list('title', flat=True)[:5])  # First 5 bank names
-                })
-            
-            error_message = f"Cannot delete Consultant '{instance.fullname}' because it is referenced by:"
-            for obj in related_objects:
-                error_message += f"\n- {obj['count']} {obj['model']}"
-                if obj['items']:
-                    error_message += f" (including: {', '.join(obj['items'])})"
-            
+                reasons = list(related_cash.values_list('reason', flat=True)[:5])
+                more = '...' if related_cash.count() > 5 else ''
+                related_strings.append(f"{related_cash.count()} cash transaction(s): {', '.join(reasons)}{more}")
+
+            # Taxation projects handled by consultant
+            related_tax = instance.taxationproject_set.all()
+            if related_tax.exists():
+                ids = list(related_tax.values_list('taxproj_id', flat=True)[:5])
+                more = '...' if related_tax.count() > 5 else ''
+                related_strings.append(f"{related_tax.count()} taxation project(s): {', '.join(ids)}{more}")
+
+            # Compose multi-line message consumable by DeleteObjectModal
+            err_lines = [
+                f"Cannot delete this consultant because it is referenced by the following objects:",
+            ]
+            for s in related_strings:
+                err_lines.append(f"• {s}")
+            err_lines.append("Please remove or reassign these related objects first, then try deleting this consultant again.")
+            errormsg = "\n".join(err_lines)
+
             return Response(
                 {
-                    "error": error_message,
-                    "related_objects": related_objects
+                    "error": "Protected Object",
+                    "errormsg": errormsg,
+                    "related_objects": related_strings,
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -378,8 +383,8 @@ class BankView(RetrieveUpdateDestroyAPIView):
                 if related_accounts.exists():
                     related_objects.append(f"{related_accounts.count()} bank client account(s): {', '.join([f'{acc.client.surname} {acc.client.name} - {acc.accountnumber}' for acc in related_accounts[:5]])}{'...' if related_accounts.count() > 5 else ''}")
                 
-                # Check for related bank project accounts
-                related_project_accounts = instance.bankprojectaccount_set.all()
+                # Check for related bank project accounts via BankClientAccount → Bank
+                related_project_accounts = BankProjectAccount.objects.filter(bankclientacco__bank=instance)
                 if related_project_accounts.exists():
                     related_objects.append(f"{related_project_accounts.count()} bank project account(s): {', '.join([f'{acc.project.title} - {acc.client.surname} {acc.client.name}' for acc in related_project_accounts[:5]])}{'...' if related_project_accounts.count() > 5 else ''}")
                 
@@ -633,21 +638,51 @@ class ProfessionView(RetrieveUpdateDestroyAPIView):
             )
 
     def delete(self, request, *args, **kwargs):
-        """Delete a profession"""
+        """Delete a profession with detailed protected info"""
         try:
             instance = self.get_object()
             with transaction.atomic():
-                instance.delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
+                try:
+                    instance.delete()
+                    return Response(status=status.HTTP_204_NO_CONTENT)
+                except ProtectedError:
+                    # Build detailed protected objects info
+                    related_strings = []
+
+                    # Professionals referencing this profession
+                    professionals = instance.professional_set.all()
+                    if professionals.exists():
+                        names = list(professionals.values_list('fullname', flat=True)[:5])
+                        more = '...' if professionals.count() > 5 else ''
+                        related_strings.append(f"{professionals.count()} professional(s): {', '.join(names)}{more}")
+
+                    # Client contacts referencing a professional (which references this profession)
+                    from webapp.models import ClientContact
+                    contacts = ClientContact.objects.filter(professional__profession=instance)
+                    if contacts.exists():
+                        cnames = list(contacts.values_list('fullname', flat=True)[:5])
+                        more = '...' if contacts.count() > 5 else ''
+                        related_strings.append(f"{contacts.count()} client contact(s): {', '.join(cnames)}{more}")
+
+                    err_lines = [
+                        "Cannot delete this profession because it is referenced by the following objects:",
+                    ]
+                    for s in related_strings:
+                        err_lines.append(f"• {s}")
+                    err_lines.append("Please remove or reassign these related objects first, then try deleting this profession again.")
+
+                    return Response(
+                        {
+                            "error": "Protected Object",
+                            "errormsg": "\n".join(err_lines),
+                            "related_objects": related_strings,
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
         except Profession.DoesNotExist:
             return Response(
                 {"error": "Profession not found"},
                 status=status.HTTP_404_NOT_FOUND
-            )
-        except ProtectedError:
-            return Response(
-                {"error": "Cannot delete profession as it is referenced by other records"},
-                status=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
             return Response(

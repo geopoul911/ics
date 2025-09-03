@@ -36,9 +36,8 @@ function AddDocumentModal({ onClientCreated }) {
   const [title, setTitle] = useState(""); // required
   const [projectId, setProjectId] = useState(""); // optional - this will store project_id
   const [clientId, setClientId] = useState(""); // optional - this will store client_id
-  const [created, setCreated] = useState(""); // required
   const [validUntil, setValidUntil] = useState(""); // required
-  const [filepath, setFilepath] = useState(""); // required
+  const [file, setFile] = useState(null); // optional file upload
   const [original, setOriginal] = useState(false); // optional, default false
   const [trafficable, setTrafficable] = useState(false); // optional, default false
   const [status, setStatus] = useState(""); // optional
@@ -77,9 +76,8 @@ function AddDocumentModal({ onClientCreated }) {
     setTitle("");
     setProjectId("");
     setClientId("");
-    setCreated("");
     setValidUntil("");
-    setFilepath("");
+    setFile(null);
     setOriginal(false);
     setTrafficable(false);
     setStatus("");
@@ -94,13 +92,8 @@ function AddDocumentModal({ onClientCreated }) {
 
   const isDocumentIdValid = documentId.length >= 2 && documentId.length <= 10;
   const isTitleValid = title.trim().length >= 2 && title.trim().length <= 40;
-  const isProjectOrClientValid = projectId !== "" || clientId !== "";
-  const isCreatedValid = created !== "";
-  const isValidUntilValid = validUntil !== "";
-  const isFilePathValid = filepath.trim().length >= 1 && filepath.trim().length <= 120;
-
-  const isFormValid = isDocumentIdValid && isTitleValid && isProjectOrClientValid && 
-                     isCreatedValid && isValidUntilValid && isFilePathValid;
+  const isProjectValid = projectId !== "";
+  const isFormValid = isDocumentIdValid && isTitleValid && isProjectValid;
 
   const createNewDocument = async () => {
     try {
@@ -110,33 +103,22 @@ function AddDocumentModal({ onClientCreated }) {
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
-      const documentData = {
-        document_id: documentId,
-        title: title.trim(),
-        created: created,
-        validuntil: validUntil,
-        filepath: filepath.trim(),
-        original: original,
-        trafficable: trafficable,
-        notes: notes.trim() || null,
-      };
+      // Ensure we don't force JSON content-type; allow multipart boundary
+      delete currentHeaders["Content-Type"]; 
 
-      // Add project_id if selected
-      if (projectId) {
-        documentData.project_id = projectId;
-      }
+      const formData = new FormData();
+      formData.append("document_id", documentId);
+      formData.append("title", title.trim());
+      if (validUntil) formData.append("validuntil", validUntil);
+      if (projectId) formData.append("project_id", projectId);
+      if (clientId) formData.append("client_id", clientId);
+      if (status) formData.append("status", status);
+      formData.append("original", original ? "true" : "false");
+      formData.append("trafficable", trafficable ? "true" : "false");
+      if (notes && notes.trim().length > 0) formData.append("notes", notes.trim());
+      if (file) formData.append("filepath", file);
 
-      // Add client_id if selected
-      if (clientId) {
-        documentData.client_id = clientId;
-      }
-
-      // Add status if selected
-      if (status) {
-        documentData.status = status;
-      }
-
-      const response = await axios.post(ADD_DOCUMENT, documentData, { headers: currentHeaders });
+      const response = await axios.post(ADD_DOCUMENT, formData, { headers: currentHeaders });
 
       if (response.status === 201) {
         Swal.fire({
@@ -192,14 +174,7 @@ function AddDocumentModal({ onClientCreated }) {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>
-                    Document ID *
-                    {isDocumentIdValid ? (
-                      <AiOutlineCheckCircle style={{ color: "green", marginLeft: "0.5em" }} />
-                    ) : (
-                      <AiOutlineWarning style={{ color: "orange", marginLeft: "0.5em" }} />
-                    )}
-                  </Form.Label>
+                  <Form.Label>Document ID *</Form.Label>
                   <Form.Control
                     type="text"
                     value={documentId}
@@ -214,14 +189,7 @@ function AddDocumentModal({ onClientCreated }) {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>
-                    Title *
-                    {isTitleValid ? (
-                      <AiOutlineCheckCircle style={{ color: "green", marginLeft: "0.5em" }} />
-                    ) : (
-                      <AiOutlineWarning style={{ color: "orange", marginLeft: "0.5em" }} />
-                    )}
-                  </Form.Label>
+                  <Form.Label>Title *</Form.Label>
                   <Form.Control
                     type="text"
                     value={title}
@@ -240,7 +208,7 @@ function AddDocumentModal({ onClientCreated }) {
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>
-                    Project
+                    Project *
                     {projectId !== "" ? (
                       <AiOutlineCheckCircle style={{ color: "green", marginLeft: "0.5em" }} />
                     ) : null}
@@ -286,69 +254,22 @@ function AddDocumentModal({ onClientCreated }) {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>
-                    Created Date *
-                    {isCreatedValid ? (
-                      <AiOutlineCheckCircle style={{ color: "green", marginLeft: "0.5em" }} />
-                    ) : (
-                      <AiOutlineWarning style={{ color: "orange", marginLeft: "0.5em" }} />
-                    )}
-                  </Form.Label>
-                  <Form.Control
-                    type="date"
-                    value={created}
-                    onChange={(e) => setCreated(e.target.value)}
-                    isInvalid={created.length > 0 && !isCreatedValid}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    Created date is required.
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>
-                    Valid Until *
-                    {isValidUntilValid ? (
-                      <AiOutlineCheckCircle style={{ color: "green", marginLeft: "0.5em" }} />
-                    ) : (
-                      <AiOutlineWarning style={{ color: "orange", marginLeft: "0.5em" }} />
-                    )}
-                  </Form.Label>
+                  <Form.Label>Valid Until</Form.Label>
                   <Form.Control
                     type="date"
                     value={validUntil}
                     onChange={(e) => setValidUntil(e.target.value)}
-                    isInvalid={validUntil.length > 0 && !isValidUntilValid}
                   />
-                  <Form.Control.Feedback type="invalid">
-                    Valid until date is required.
-                  </Form.Control.Feedback>
                 </Form.Group>
               </Col>
-            </Row>
-
-            <Row>
-              <Col md={12}>
+              <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>
-                    File Path *
-                    {isFilePathValid ? (
-                      <AiOutlineCheckCircle style={{ color: "green", marginLeft: "0.5em" }} />
-                    ) : (
-                      <AiOutlineWarning style={{ color: "orange", marginLeft: "0.5em" }} />
-                    )}
-                  </Form.Label>
+                  <Form.Label>File (optional)</Form.Label>
                   <Form.Control
-                    type="text"
-                    value={filepath}
-                    onChange={(e) => setFilepath(clampLen(e.target.value, 120))}
-                    placeholder="Enter file path"
-                    isInvalid={filepath.length > 0 && !isFilePathValid}
+                    type="file"
+                    onChange={(e) => setFile(e.target.files && e.target.files[0] ? e.target.files[0] : null)}
+                    accept=".pdf,.jpg,.jpeg,.png,.tif,.tiff,.txt,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
                   />
-                  <Form.Control.Feedback type="invalid">
-                    File path must be 1-120 characters.
-                  </Form.Control.Feedback>
                 </Form.Group>
               </Col>
             </Row>
@@ -411,24 +332,58 @@ function AddDocumentModal({ onClientCreated }) {
               </Col>
             </Row>
 
-            {!isProjectOrClientValid && (
-              <div className="alert alert-warning">
-                <AiOutlineWarning style={{ marginRight: "0.5em" }} />
-                At least one of Project or Client must be selected.
-              </div>
-            )}
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="grey" onClick={handleClose}>
-            Cancel
+          <small className="mr-auto">
+            {!isFormValid ? (
+              <ul
+                className="mr-auto"
+                style={{ margin: 0, padding: 0, color: "red" }}
+              >
+                {!isDocumentIdValid && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Document ID is required (2–10 alphanumeric chars).
+                  </li>
+                )}
+                {!isTitleValid && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Title is required (2–40 chars).
+                  </li>
+                )}
+                {!isProjectValid && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Project is required.
+                  </li>
+                )}
+              </ul>
+            ) : (
+              <ul
+                className="mr-auto"
+                style={{ margin: 0, padding: 0, color: "green" }}
+              >
+                <li>
+                  <AiOutlineCheckCircle
+                    style={{ fontSize: 18, marginRight: 6 }}
+                  />
+                  Validated
+                </li>
+              </ul>
+            )}
+          </small>
+
+          <Button color="red" onClick={handleClose}>
+            Close
           </Button>
           <Button
             color="green"
             onClick={createNewDocument}
             disabled={!isFormValid}
           >
-            Create Document
+            Save Changes
           </Button>
         </Modal.Footer>
       </Modal>

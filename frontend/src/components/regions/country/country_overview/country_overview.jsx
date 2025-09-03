@@ -177,11 +177,11 @@ class CountryOverview extends React.Component {
                     </Card.Body>
                     <Card.Footer>
                       <DeleteObjectModal
-                        object_id={country.country_id}
-                        object_name={country.title}
-                        object_type="Country"
+                        objectType="Country"
+                        objectId={country.country_id}
+                        objectName={country.title}
                         warningMessage="This will also delete all provinces and cities associated with this country."
-                        onDeleteSuccess={() => {
+                        onObjectDeleted={() => {
                           window.location.href = "/regions/all_countries";
                         }}
                       />

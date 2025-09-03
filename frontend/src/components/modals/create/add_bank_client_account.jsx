@@ -62,17 +62,21 @@ function AddBankClientAccountModal({ refreshData }) {
 
   const loadDropdownData = async () => {
     try {
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken"),
+      };
       // Fetch clients
       const clientsResponse = await axios.get(
         "http://localhost:8000/api/data_management/all_clients/",
-        { headers }
+        { headers: currentHeaders }
       );
       setClients(clientsResponse.data.all_clients || []);
 
       // Fetch banks
       const banksResponse = await axios.get(
         "http://localhost:8000/api/administration/all_banks/",
-        { headers }
+        { headers: currentHeaders }
       );
       setBanks(banksResponse.data.all_banks || []);
     } catch (error) {
@@ -84,9 +88,10 @@ function AddBankClientAccountModal({ refreshData }) {
   const isBankclientaccoIdValid = bankclientacco_id.trim().length >= 2 && bankclientacco_id.trim().length <= 10;
   const isClientValid = client_id !== "";
   const isBankValid = bank_id !== "";
+  const isTransitnumberValid = transitnumber.trim().length === 5 && /^\d{5}$/.test(transitnumber.trim());
   const isAccountnumberValid = accountnumber.trim().length >= 2 && accountnumber.trim().length <= 20;
 
-  const isFormValid = isBankclientaccoIdValid && isClientValid && isBankValid && isAccountnumberValid;
+  const isFormValid = isBankclientaccoIdValid && isClientValid && isBankValid && isTransitnumberValid && isAccountnumberValid;
 
   const createNewBankClientAccount = async () => {
     if (!isFormValid) {
@@ -94,6 +99,10 @@ function AddBankClientAccountModal({ refreshData }) {
     }
 
     try {
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken"),
+      };
       await axios.post(
         ADD_BANK_CLIENT_ACCOUNT,
         {
@@ -102,10 +111,10 @@ function AddBankClientAccountModal({ refreshData }) {
           bank_id,
           transitnumber: transitnumber.trim(),
           accountnumber: accountnumber.trim(),
-          iban: iban.trim(),
+          iban: iban.trim() || null,
           active
         },
-        { headers }
+        { headers: currentHeaders }
       );
 
       Swal.fire("Success", "Bank Client Account created successfully", "success");
@@ -182,7 +191,7 @@ function AddBankClientAccountModal({ refreshData }) {
                         <option value="">Select Client</option>
                         {Array.isArray(clients) && clients.map((client) => (
                           <option key={client.client_id} value={client.client_id}>
-                            {client.surname} {client.name}
+                            {client.client_id} - {client.fullname || `${client.surname} ${client.name}`}
                           </option>
                         ))}
                       </Form.Control>
@@ -199,7 +208,7 @@ function AddBankClientAccountModal({ refreshData }) {
                         <option value="">Select Bank</option>
                         {Array.isArray(banks) && banks.map((bank) => (
                           <option key={bank.bank_id} value={bank.bank_id}>
-                            {bank.bankname}
+                            {bank.bank_id} - {bank.bankname}
                           </option>
                         ))}
                       </Form.Control>
@@ -274,6 +283,12 @@ function AddBankClientAccountModal({ refreshData }) {
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
                     Bank is required.
+                  </li>
+                )}
+                {!isTransitnumberValid && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Transit Number is required and must be exactly 5 digits.
                   </li>
                 )}
                 {!isAccountnumberValid && (

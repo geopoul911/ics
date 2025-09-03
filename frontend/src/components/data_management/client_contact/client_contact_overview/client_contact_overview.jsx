@@ -4,7 +4,7 @@ import React from "react";
 // Icons / Images
 import { BsInfoSquare } from "react-icons/bs";
 import { FaHashtag, FaSort, FaStop } from "react-icons/fa";
-import { MdSecurity, MdCheckCircle, MdCancel } from "react-icons/md";
+import { MdCheckCircle, MdCancel } from "react-icons/md";
 
 // Modules / Functions
 import { Card } from "react-bootstrap";
@@ -317,6 +317,13 @@ class ClientContactOverview extends React.Component {
                       </span>
                     </div>
                   </Card.Body>
+                  <Card.Footer>
+                    <DeleteObjectModal
+                      object={clientContact}
+                      objectType="ClientContact"
+                      objectName={clientContact.fullname}
+                    />
+                  </Card.Footer>
                 </Card>
               </Grid.Column>
 
@@ -361,21 +368,7 @@ class ClientContactOverview extends React.Component {
                   </Card.Body>
                 </Card>
 
-                <Card style={{ marginTop: 20 }}>
-                  <Card.Header>
-                    <h4>
-                      <MdSecurity style={overviewIconStyle} />
-                      Actions
-                    </h4>
-                  </Card.Header>
-                  <Card.Body>
-                    <DeleteObjectModal
-                      object={clientContact}
-                      objectType="client_contact"
-                      objectName={clientContact.fullname}
-                    />
-                  </Card.Body>
-                </Card>
+                
               </Grid.Column>
             </Grid>
           </div>

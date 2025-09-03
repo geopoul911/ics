@@ -2,12 +2,14 @@
 import React from "react";
 
 // Modules / Functions
-import { Button, Form, Modal } from "react-bootstrap";
+import { Form, Modal } from "react-bootstrap";
+import { Button } from "semantic-ui-react";
 import axios from "axios";
 import Swal from "sweetalert2";
 
 // Icons
-import { BiEdit } from "react-icons/bi";
+import { FiEdit } from "react-icons/fi";
+import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
 
 // Global Variables
 import { headers } from "../global_vars";
@@ -16,7 +18,7 @@ import { headers } from "../global_vars";
 window.Swal = Swal;
 
 // Edit Bank Client Account ID Modal
-export function EditBankClientAccountIdModal({ bankClientAccount, refreshData }) {
+export function EditBankClientAccountIdModal({ bankClientAccount, refreshData, update_state }) {
   const [show, setShow] = React.useState(false);
   const [bankclientacco_id, setBankclientacco_id] = React.useState("");
   const [busy, setBusy] = React.useState(false);
@@ -30,22 +32,23 @@ export function EditBankClientAccountIdModal({ bankClientAccount, refreshData })
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const isValid = bankclientacco_id.trim().length >= 2 && bankclientacco_id.trim().length <= 20;
+
   const handleSubmit = async () => {
-    if (!bankclientacco_id.trim()) {
-      Swal.fire("Error", "Bank Client Account ID is required", "error");
-      return;
-    }
+    if (!isValid) return;
 
     setBusy(true);
     try {
-      await axios.put(
+      const currentHeaders = { ...headers, Authorization: "Token " + localStorage.getItem("userToken") };
+      const res = await axios.put(
         `http://localhost:8000/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
-        { bankclientacco_id },
-        { headers }
+        { bankclientacco_id: bankclientacco_id.trim() },
+        { headers: currentHeaders }
       );
 
       Swal.fire("Success", "Bank Client Account ID updated successfully", "success");
-      if (refreshData) refreshData();
+      if (update_state) update_state(res.data);
+      else if (refreshData) refreshData();
       handleClose();
     } catch (error) {
       console.error("Error updating bank client account ID:", error);
@@ -58,17 +61,16 @@ export function EditBankClientAccountIdModal({ bankClientAccount, refreshData })
 
   return (
     <>
-      <Button variant="outline-primary" size="sm" onClick={handleShow}>
-        <BiEdit /> Edit ID
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} /> Edit ID
       </Button>
 
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Bank Client Account ID</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3">
+            <Form.Group>
               <Form.Label>Bank Client Account ID *</Form.Label>
               <Form.Control
                 type="text"
@@ -77,14 +79,36 @@ export function EditBankClientAccountIdModal({ bankClientAccount, refreshData })
                 placeholder="Enter bank client account ID"
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
+          <small className="mr-auto">
+            {!isValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                {bankclientacco_id.trim().length < 2 && (
+                  <li>
+                    <AiOutlineWarning style={{ marginRight: 5 }} />
+                    ID must be at least 2 characters
+                  </li>
+                )}
+                {bankclientacco_id.trim().length > 20 && (
+                  <li>
+                    <AiOutlineWarning style={{ marginRight: 5 }} />
+                    ID must be at most 20 characters
+                  </li>
+                )}
+              </ul>
+            ) : (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} />
+                Looks good.
+              </div>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose} disabled={busy}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={busy}>
-            {busy ? "Updating..." : "Update"}
+          <Button color="green" onClick={handleSubmit} loading={busy} disabled={!isValid}>
+            Save Changes
           </Button>
         </Modal.Footer>
       </Modal>
@@ -93,7 +117,7 @@ export function EditBankClientAccountIdModal({ bankClientAccount, refreshData })
 }
 
 // Edit Bank Client Account Client Modal
-export function EditBankClientAccountClientModal({ bankClientAccount, refreshData }) {
+export function EditBankClientAccountClientModal({ bankClientAccount, refreshData, update_state }) {
   const [show, setShow] = React.useState(false);
   const [client_id, setClient_id] = React.useState("");
   const [clients, setClients] = React.useState([]);
@@ -108,9 +132,10 @@ export function EditBankClientAccountClientModal({ bankClientAccount, refreshDat
   React.useEffect(() => {
     const fetchClients = async () => {
       try {
+        const currentHeaders = { ...headers, Authorization: "Token " + localStorage.getItem("userToken") };
         const response = await axios.get(
           "http://localhost:8000/api/data_management/all_clients/",
-          { headers }
+          { headers: currentHeaders }
         );
         setClients(response.data.all_clients || []);
       } catch (error) {
@@ -123,22 +148,23 @@ export function EditBankClientAccountClientModal({ bankClientAccount, refreshDat
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const isValid = client_id && client_id.trim().length > 0;
+
   const handleSubmit = async () => {
-    if (!client_id) {
-      Swal.fire("Error", "Client is required", "error");
-      return;
-    }
+    if (!isValid) return;
 
     setBusy(true);
     try {
-      await axios.put(
+      const currentHeaders = { ...headers, Authorization: "Token " + localStorage.getItem("userToken") };
+      const res = await axios.put(
         `http://localhost:8000/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
         { client_id },
-        { headers }
+        { headers: currentHeaders }
       );
 
       Swal.fire("Success", "Client updated successfully", "success");
-      if (refreshData) refreshData();
+      if (update_state) update_state(res.data);
+      else if (refreshData) refreshData();
       handleClose();
     } catch (error) {
       console.error("Error updating client:", error);
@@ -151,17 +177,16 @@ export function EditBankClientAccountClientModal({ bankClientAccount, refreshDat
 
   return (
     <>
-      <Button variant="outline-primary" size="sm" onClick={handleShow}>
-        <BiEdit /> Edit Client
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} /> Edit Client
       </Button>
 
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Client</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3">
+            <Form.Group>
               <Form.Label>Client *</Form.Label>
               <Form.Control
                 as="select"
@@ -171,20 +196,30 @@ export function EditBankClientAccountClientModal({ bankClientAccount, refreshDat
                 <option value="">Select a client</option>
                 {clients.map((client) => (
                   <option key={client.client_id} value={client.client_id}>
-                    {client.surname} {client.name}
+                    {client.client_id} - {client.fullname}
                   </option>
                 ))}
               </Form.Control>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={busy}>
-            {busy ? "Updating..." : "Update"}
-          </Button>
+          <small className="mr-auto">
+            {!isValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ marginRight: 5 }} />
+                  Please select a client
+                </li>
+              </ul>
+            ) : (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} />
+                Looks good.
+              </div>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose} disabled={busy}>Cancel</Button>
+          <Button color="green" onClick={handleSubmit} loading={busy} disabled={!isValid}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -192,7 +227,7 @@ export function EditBankClientAccountClientModal({ bankClientAccount, refreshDat
 }
 
 // Edit Bank Client Account Bank Modal
-export function EditBankClientAccountBankModal({ bankClientAccount, refreshData }) {
+export function EditBankClientAccountBankModal({ bankClientAccount, refreshData, update_state }) {
   const [show, setShow] = React.useState(false);
   const [bank_id, setBank_id] = React.useState("");
   const [banks, setBanks] = React.useState([]);
@@ -207,9 +242,10 @@ export function EditBankClientAccountBankModal({ bankClientAccount, refreshData 
   React.useEffect(() => {
     const fetchBanks = async () => {
       try {
+        const currentHeaders = { ...headers, Authorization: "Token " + localStorage.getItem("userToken") };
         const response = await axios.get(
           "http://localhost:8000/api/administration/all_banks/",
-          { headers }
+          { headers: currentHeaders }
         );
         setBanks(response.data.all_banks || []);
       } catch (error) {
@@ -222,22 +258,23 @@ export function EditBankClientAccountBankModal({ bankClientAccount, refreshData 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const isValidBank = bank_id && bank_id.trim().length > 0;
+
   const handleSubmit = async () => {
-    if (!bank_id) {
-      Swal.fire("Error", "Bank is required", "error");
-      return;
-    }
+    if (!isValidBank) return;
 
     setBusy(true);
     try {
-      await axios.put(
+      const currentHeaders = { ...headers, Authorization: "Token " + localStorage.getItem("userToken") };
+      const res = await axios.put(
         `http://localhost:8000/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
         { bank_id },
-        { headers }
+        { headers: currentHeaders }
       );
 
       Swal.fire("Success", "Bank updated successfully", "success");
-      if (refreshData) refreshData();
+      if (update_state) update_state(res.data);
+      else if (refreshData) refreshData();
       handleClose();
     } catch (error) {
       console.error("Error updating bank:", error);
@@ -250,17 +287,16 @@ export function EditBankClientAccountBankModal({ bankClientAccount, refreshData 
 
   return (
     <>
-      <Button variant="outline-primary" size="sm" onClick={handleShow}>
-        <BiEdit /> Edit Bank
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} /> Edit Bank
       </Button>
 
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Bank</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3">
+            <Form.Group>
               <Form.Label>Bank *</Form.Label>
               <Form.Control
                 as="select"
@@ -270,20 +306,30 @@ export function EditBankClientAccountBankModal({ bankClientAccount, refreshData 
                 <option value="">Select a bank</option>
                 {banks.map((bank) => (
                   <option key={bank.bank_id} value={bank.bank_id}>
-                    {bank.title}
+                    {bank.bank_id} - {bank.bankname}
                   </option>
                 ))}
               </Form.Control>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={busy}>
-            {busy ? "Updating..." : "Update"}
-          </Button>
+          <small className="mr-auto">
+            {!isValidBank ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ marginRight: 5 }} />
+                  Please select a bank
+                </li>
+              </ul>
+            ) : (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} />
+                Looks good.
+              </div>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose} disabled={busy}>Cancel</Button>
+          <Button color="green" onClick={handleSubmit} loading={busy} disabled={!isValidBank}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -291,10 +337,11 @@ export function EditBankClientAccountBankModal({ bankClientAccount, refreshData 
 }
 
 // Edit Bank Client Account Transit Number Modal
-export function EditBankClientAccountTransitNumberModal({ bankClientAccount, refreshData }) {
+export function EditBankClientAccountTransitNumberModal({ bankClientAccount, refreshData, update_state }) {
   const [show, setShow] = React.useState(false);
   const [transitnumber, setTransitnumber] = React.useState("");
   const [busy, setBusy] = React.useState(false);
+  const isValid = true;
 
   React.useEffect(() => {
     if (bankClientAccount) {
@@ -308,14 +355,16 @@ export function EditBankClientAccountTransitNumberModal({ bankClientAccount, ref
   const handleSubmit = async () => {
     setBusy(true);
     try {
-      await axios.put(
+      const currentHeaders = { ...headers, Authorization: "Token " + localStorage.getItem("userToken") };
+      const res = await axios.put(
         `http://localhost:8000/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
         { transitnumber },
-        { headers }
+        { headers: currentHeaders }
       );
 
       Swal.fire("Success", "Transit number updated successfully", "success");
-      if (refreshData) refreshData();
+      if (update_state) update_state(res.data);
+      else if (refreshData) refreshData();
       handleClose();
     } catch (error) {
       console.error("Error updating transit number:", error);
@@ -328,17 +377,16 @@ export function EditBankClientAccountTransitNumberModal({ bankClientAccount, ref
 
   return (
     <>
-      <Button variant="outline-primary" size="sm" onClick={handleShow}>
-        <BiEdit /> Edit Transit Number
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} /> Edit Transit Number
       </Button>
 
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Transit Number</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3">
+            <Form.Group>
               <Form.Label>Transit Number</Form.Label>
               <Form.Control
                 type="text"
@@ -347,15 +395,18 @@ export function EditBankClientAccountTransitNumberModal({ bankClientAccount, ref
                 placeholder="Enter transit number"
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={busy}>
-            {busy ? "Updating..." : "Update"}
-          </Button>
+          <small className="mr-auto">
+            {isValid && (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} />
+                Looks good.
+              </div>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose} disabled={busy}>Cancel</Button>
+          <Button color="green" onClick={handleSubmit} loading={busy}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -363,7 +414,7 @@ export function EditBankClientAccountTransitNumberModal({ bankClientAccount, ref
 }
 
 // Edit Bank Client Account Account Number Modal
-export function EditBankClientAccountAccountNumberModal({ bankClientAccount, refreshData }) {
+export function EditBankClientAccountAccountNumberModal({ bankClientAccount, refreshData, update_state }) {
   const [show, setShow] = React.useState(false);
   const [accountnumber, setAccountnumber] = React.useState("");
   const [busy, setBusy] = React.useState(false);
@@ -385,14 +436,16 @@ export function EditBankClientAccountAccountNumberModal({ bankClientAccount, ref
 
     setBusy(true);
     try {
-      await axios.put(
+      const currentHeaders = { ...headers, Authorization: "Token " + localStorage.getItem("userToken") };
+      const res = await axios.put(
         `http://localhost:8000/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
         { accountnumber },
-        { headers }
+        { headers: currentHeaders }
       );
 
       Swal.fire("Success", "Account number updated successfully", "success");
-      if (refreshData) refreshData();
+      if (update_state) update_state(res.data);
+      else if (refreshData) refreshData();
       handleClose();
     } catch (error) {
       console.error("Error updating account number:", error);
@@ -405,17 +458,16 @@ export function EditBankClientAccountAccountNumberModal({ bankClientAccount, ref
 
   return (
     <>
-      <Button variant="outline-primary" size="sm" onClick={handleShow}>
-        <BiEdit /> Edit Account Number
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} /> Edit Account Number
       </Button>
 
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Account Number</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3">
+            <Form.Group>
               <Form.Label>Account Number *</Form.Label>
               <Form.Control
                 type="text"
@@ -424,15 +476,16 @@ export function EditBankClientAccountAccountNumberModal({ bankClientAccount, ref
                 placeholder="Enter account number"
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={busy}>
-            {busy ? "Updating..." : "Update"}
-          </Button>
+          <small className="mr-auto">
+            <div style={{ color: "green" }}>
+              <AiOutlineCheckCircle style={{ marginRight: 5 }} />
+              Looks good.
+            </div>
+          </small>
+          <Button color="red" onClick={handleClose} disabled={busy}>Cancel</Button>
+          <Button color="green" onClick={handleSubmit} loading={busy} disabled={!accountnumber.trim()}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -440,7 +493,7 @@ export function EditBankClientAccountAccountNumberModal({ bankClientAccount, ref
 }
 
 // Edit Bank Client Account IBAN Modal
-export function EditBankClientAccountIbanModal({ bankClientAccount, refreshData }) {
+export function EditBankClientAccountIbanModal({ bankClientAccount, refreshData, update_state }) {
   const [show, setShow] = React.useState(false);
   const [iban, setIban] = React.useState("");
   const [busy, setBusy] = React.useState(false);
@@ -457,14 +510,16 @@ export function EditBankClientAccountIbanModal({ bankClientAccount, refreshData 
   const handleSubmit = async () => {
     setBusy(true);
     try {
-      await axios.put(
+      const currentHeaders = { ...headers, Authorization: "Token " + localStorage.getItem("userToken") };
+      const res = await axios.put(
         `http://localhost:8000/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
         { iban },
-        { headers }
+        { headers: currentHeaders }
       );
 
       Swal.fire("Success", "IBAN updated successfully", "success");
-      if (refreshData) refreshData();
+      if (update_state) update_state(res.data);
+      else if (refreshData) refreshData();
       handleClose();
     } catch (error) {
       console.error("Error updating IBAN:", error);
@@ -477,17 +532,16 @@ export function EditBankClientAccountIbanModal({ bankClientAccount, refreshData 
 
   return (
     <>
-      <Button variant="outline-primary" size="sm" onClick={handleShow}>
-        <BiEdit /> Edit IBAN
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} /> Edit IBAN
       </Button>
 
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit IBAN</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3">
+            <Form.Group>
               <Form.Label>IBAN</Form.Label>
               <Form.Control
                 type="text"
@@ -496,15 +550,16 @@ export function EditBankClientAccountIbanModal({ bankClientAccount, refreshData 
                 placeholder="Enter IBAN"
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={busy}>
-            {busy ? "Updating..." : "Update"}
-          </Button>
+          <small className="mr-auto">
+            <div style={{ color: "green" }}>
+              <AiOutlineCheckCircle style={{ marginRight: 5 }} />
+              Looks good.
+            </div>
+          </small>
+          <Button color="red" onClick={handleClose} disabled={busy}>Cancel</Button>
+          <Button color="green" onClick={handleSubmit} loading={busy}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -512,7 +567,7 @@ export function EditBankClientAccountIbanModal({ bankClientAccount, refreshData 
 }
 
 // Edit Bank Client Account Active Modal
-export function EditBankClientAccountActiveModal({ bankClientAccount, refreshData }) {
+export function EditBankClientAccountActiveModal({ bankClientAccount, refreshData, update_state }) {
   const [show, setShow] = React.useState(false);
   const [active, setActive] = React.useState(true);
   const [busy, setBusy] = React.useState(false);
@@ -529,14 +584,16 @@ export function EditBankClientAccountActiveModal({ bankClientAccount, refreshDat
   const handleSubmit = async () => {
     setBusy(true);
     try {
-      await axios.put(
+      const currentHeaders = { ...headers, Authorization: "Token " + localStorage.getItem("userToken") };
+      const res = await axios.put(
         `http://localhost:8000/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
         { active },
-        { headers }
+        { headers: currentHeaders }
       );
 
       Swal.fire("Success", "Active status updated successfully", "success");
-      if (refreshData) refreshData();
+      if (update_state) update_state(res.data);
+      else if (refreshData) refreshData();
       handleClose();
     } catch (error) {
       console.error("Error updating active status:", error);
@@ -549,17 +606,16 @@ export function EditBankClientAccountActiveModal({ bankClientAccount, refreshDat
 
   return (
     <>
-      <Button variant="outline-primary" size="sm" onClick={handleShow}>
-        <BiEdit /> Edit Active Status
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} /> Edit Active Status
       </Button>
 
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Active Status</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3">
+            <Form.Group>
               <Form.Label>Active</Form.Label>
               <Form.Check
                 type="switch"
@@ -569,15 +625,16 @@ export function EditBankClientAccountActiveModal({ bankClientAccount, refreshDat
                 onChange={(e) => setActive(e.target.checked)}
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={busy}>
-            {busy ? "Updating..." : "Update"}
-          </Button>
+          <small className="mr-auto">
+            <div style={{ color: "green" }}>
+              <AiOutlineCheckCircle style={{ marginRight: 5 }} />
+              Looks good.
+            </div>
+          </small>
+          <Button color="red" onClick={handleClose} disabled={busy}>Cancel</Button>
+          <Button color="green" onClick={handleSubmit} loading={busy}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>

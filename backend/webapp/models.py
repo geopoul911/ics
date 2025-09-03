@@ -17,6 +17,7 @@ from django.db.models.fields.related import (
     # ManyToManyField,
     ForeignKey
 )
+from django.core.validators import FileExtensionValidator
 # from django.core.validators import MaxValueValidator, MinValueValidator
 import django.db.models as models
 from django.db.models.fields.files import ImageField
@@ -102,7 +103,7 @@ class Note(models.Model):
 # Create your models here.
 class Country(models.Model):
     country_id = models.CharField(max_length=3, primary_key=True)
-    orderindex = models.SmallIntegerField(unique=True, blank=True, null=True)
+    orderindex = models.SmallIntegerField(default=0)
     currency = models.CharField(max_length=10)
     title = models.CharField(max_length=40, unique=True)
 
@@ -111,7 +112,7 @@ class Country(models.Model):
 
 class Province(models.Model):
     province_id = models.CharField(max_length=10, primary_key=True)
-    orderindex = models.SmallIntegerField(unique=True, blank=True, null=True)
+    orderindex = models.SmallIntegerField(default=0)
     country = models.ForeignKey(Country, on_delete=models.PROTECT)
     title = models.CharField(max_length=40, unique=True)
 
@@ -120,7 +121,7 @@ class Province(models.Model):
 
 class City(models.Model):
     city_id = models.CharField(max_length=10, primary_key=True)
-    orderindex = models.SmallIntegerField(unique=True, blank=True, null=True)
+    orderindex = models.SmallIntegerField(default=0)
     country = models.ForeignKey(Country, on_delete=models.PROTECT)
     province = models.ForeignKey(Province, on_delete=models.PROTECT)
     title = models.CharField(max_length=40, unique=True)
@@ -130,7 +131,7 @@ class City(models.Model):
 
 class InsuranceCarrier(models.Model):
     insucarrier_id = models.CharField(max_length=10, primary_key=True)
-    orderindex = models.SmallIntegerField(unique=True, blank=True, null=True)
+    orderindex = models.SmallIntegerField(default=0)
     title = models.CharField(max_length=40, unique=True)
     active = models.BooleanField(default=True)
 
@@ -140,8 +141,8 @@ class InsuranceCarrier(models.Model):
 class Bank(models.Model):
     bank_id = models.CharField(max_length=10, primary_key=True)
     country = models.ForeignKey(Country, on_delete=models.PROTECT)
-    orderindex = models.SmallIntegerField(unique=True, blank=True, null=True)
-    bankname = models.CharField(max_length=40)
+    orderindex = models.SmallIntegerField(default=0)
+    bankname = models.CharField(max_length=40, unique=True)
     institutionnumber = models.CharField(max_length=3)
     swiftcode = models.CharField(max_length=11)
     active = models.BooleanField(default=True)
@@ -189,7 +190,7 @@ class Client(models.Model):
 
     afm = models.CharField(max_length=10, blank=True, null=True)
     sin = models.CharField(max_length=10)
-    amka = models.CharField(max_length=11, blank=True)
+    amka = models.CharField(max_length=11, blank=True, null=True)
 
     passportcountry = models.ForeignKey(Country, on_delete=models.PROTECT, related_name='clients_passportcountry')
     passportnumber = models.CharField(max_length=15)
@@ -240,12 +241,15 @@ class BankClientAccount(models.Model):
 
 class ProjectCategory(models.Model):
     projcate_id = models.CharField(max_length=1, primary_key=True)
-    orderindex = models.SmallIntegerField(blank=True, null=True)
+    orderindex = models.SmallIntegerField(default=0)
     active = models.BooleanField(default=True)
     title = models.CharField(max_length=40, unique=True)
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        ordering = ['orderindex', 'title']
 
 class Project(models.Model):
     STATUS_CHOICES = [
@@ -315,20 +319,17 @@ class Project(models.Model):
             self.abandondate = timezone.now().date()
             self.status = 'Abandoned'
 
-        # Validate taxation field
+        # Validate taxation/category constraints
         if self.taxation and self.categories.exists():
             raise ValidationError({
                 'taxation': 'Taxation projects cannot have categories'
             })
-        if not self.pk and not self.id:  # new object or use self._state.adding
-            pass
-        if not self.pk or self.pk:  # always validate
-            # require at least one category
-            if self.pk:
-                # when editing existing, we can't see pending M2M changes here;
-                # do this check in the form OR in admin form clean, too.
-                if not self.categories.exists():
-                    raise ValidationError({'categories': 'At least one category is required.'})
+
+        # On create (_state.adding True), M2M categories are not yet set; skip required-category check
+        if not self._state.adding:
+            # On update, require at least one category when not taxation
+            if not self.taxation and not self.categories.exists():
+                raise ValidationError({'categories': 'At least one category is required.'})
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -346,7 +347,7 @@ class AssociatedClient(models.Model):
     assoclient_id = models.CharField(max_length=10, primary_key=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='associated_clients')
     client = models.ForeignKey(Client, on_delete=models.PROTECT, related_name='associated_projects')
-    orderindex = models.SmallIntegerField(default=0, blank=True, null=True)
+    orderindex = models.SmallIntegerField(default=0)
     notes = models.TextField(blank=True, null=True)
 
     class Meta:
@@ -365,10 +366,12 @@ class AssociatedClient(models.Model):
         from django.core.exceptions import ValidationError
 
         # Ensure at least one client per project
-        if not self.project.associated_clients.exists() and self.orderindex != 0:
-            raise ValidationError({
-                'orderindex': 'First client must have orderindex 0'
-            })
+        if not self.project.associated_clients.exists():
+            # If first association and orderindex not provided, set to 0 automatically
+            if self.orderindex in (None, ""):
+                self.orderindex = 0
+            elif self.orderindex != 0:
+                raise ValidationError({'orderindex': 'First client must have orderindex 0'})
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -386,6 +389,11 @@ class AssociatedClient(models.Model):
     def get_secondary_clients(cls, project):
         """Returns all secondary clients (orderindex>0) for a project"""
         return cls.objects.filter(project=project, orderindex__gt=0).order_by('orderindex')
+
+def document_upload_to(instance, filename):
+    project_part = getattr(getattr(instance, 'project', None), 'project_id', None) or 'unassigned'
+    return os.path.join('documents', project_part, timezone.now().strftime('%Y/%m/%d'), filename)
+
 
 class Document(models.Model):
     STATUS_CHOICES = [
@@ -405,7 +413,19 @@ class Document(models.Model):
     created = models.DateField(auto_now_add=True)
     title = models.CharField(max_length=40)
     validuntil = models.DateField(blank=True, null=True)
-    filepath = models.CharField(max_length=120, blank=True, null=True)
+
+    filepath = models.FileField(
+        upload_to=document_upload_to,
+        max_length=255,
+        blank=True,                                # set to False if you want it required
+        null=True,
+        validators=[FileExtensionValidator([
+            'pdf', 'jpg', 'jpeg', 'png', 'tif', 'tiff', 'txt', 'doc', 'docx', 'xls', 'xlsx',
+            'ppt', 'pptx'
+        ])],
+    )
+
+
     original = models.BooleanField(default=False)
     trafficable = models.BooleanField(default=False)
     status = models.CharField(max_length=40, blank=True, null=True, choices=STATUS_CHOICES)
@@ -462,6 +482,8 @@ class Document(models.Model):
     @property
     def is_expired(self):
         """Checks if document is expired"""
+        if not self.validuntil:
+            return False
         return self.validuntil < timezone.now().date()
 
     @property
@@ -623,7 +645,7 @@ class BankProjectAccount(models.Model):
 class TaskCategory(models.Model):
     taskcate_id = models.CharField(max_length=10, primary_key=True)
     title = models.CharField(max_length=40, unique=True)
-    orderindex = models.SmallIntegerField(blank=True, null=True)
+    orderindex = models.SmallIntegerField(default=0)
     active = models.BooleanField(default=True)
 
     class Meta:

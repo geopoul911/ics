@@ -38,7 +38,7 @@ function AddPropertyModal({ onPropertyCreated }) {
   const [countryId, setCountryId] = useState(""); // required
   const [provinceId, setProvinceId] = useState(""); // required
   const [cityId, setCityId] = useState(""); // required
-  const [location, setLocation] = useState(""); // required
+  const [location, setLocation] = useState(""); // optional per model
   const [type, setType] = useState(""); // required
   const [constructYear, setConstructYear] = useState(""); // optional
   const [status, setStatus] = useState(""); // optional
@@ -99,11 +99,15 @@ function AddPropertyModal({ onPropertyCreated }) {
   const loadDropdownData = async () => {
     try {
       console.log('Loading dropdown data...');
-      
-      // Load reference data for dropdowns using axios
+      // Update headers with current token
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      // Load reference data for dropdowns using axios with auth
       const [projectsRes, countriesRes] = await Promise.all([
-        axios.get("http://localhost:8000/api/data_management/all_projects/"),
-        axios.get("http://localhost:8000/api/regions/all_countries/")
+        axios.get("http://localhost:8000/api/data_management/all_projects/", { headers: currentHeaders }),
+        axios.get("http://localhost:8000/api/regions/all_countries/", { headers: currentHeaders })
       ]);
       
       console.log('Raw API responses:', {
@@ -141,7 +145,11 @@ function AddPropertyModal({ onPropertyCreated }) {
   const loadProvinces = async (countryId) => {
     try {
       console.log('Loading provinces for country:', countryId);
-      const response = await axios.get(`http://localhost:8000/api/regions/all_provinces/?country=${countryId}`);
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      const response = await axios.get(`http://localhost:8000/api/regions/all_provinces/?country=${countryId}`,{ headers: currentHeaders });
       console.log('Raw provinces response:', response);
       // Provinces API returns {"all_provinces": [...]}
       const provincesData = response?.data?.all_provinces || [];
@@ -161,7 +169,11 @@ function AddPropertyModal({ onPropertyCreated }) {
   const loadCities = async (provinceId) => {
     try {
       console.log('Loading cities for province:', provinceId);
-      const response = await axios.get(`http://localhost:8000/api/regions/all_cities/?province=${provinceId}`);
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      const response = await axios.get(`http://localhost:8000/api/regions/all_cities/?province=${provinceId}`, { headers: currentHeaders });
       console.log('Raw cities response:', response);
       // Cities API returns {"all_cities": [...]}
       const citiesData = response?.data?.all_cities || [];
@@ -185,12 +197,11 @@ function AddPropertyModal({ onPropertyCreated }) {
   const isCountryValid = countryId !== "";
   const isProvinceValid = provinceId !== "";
   const isCityValid = cityId !== "";
-  const isLocationValid = location.trim().length >= 1 && location.trim().length <= 80;
   const isTypeValid = type !== "";
 
   const isFormValid = isPropertyIdValid && isDescriptionValid && isProjectValid && 
                      isCountryValid && isProvinceValid && isCityValid && 
-                     isLocationValid && isTypeValid;
+                     isTypeValid;
 
   const createNewProperty = async () => {
     try {
@@ -207,7 +218,7 @@ function AddPropertyModal({ onPropertyCreated }) {
         country_id: countryId,
         province_id: provinceId,
         city_id: cityId,
-        location: location.trim(),
+        location: location.trim() || null,
         type: type,
         constructyear: constructYear.trim() || null,
         status: status || null,
@@ -405,7 +416,7 @@ function AddPropertyModal({ onPropertyCreated }) {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Location *:</Form.Label>
+                      <Form.Label>Location :</Form.Label>
                       <Form.Control
                         maxLength={80}
                         placeholder="e.g., 123 Main Street"
@@ -548,12 +559,6 @@ function AddPropertyModal({ onPropertyCreated }) {
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
                     City is required.
-                  </li>
-                )}
-                {!isLocationValid && (
-                  <li>
-                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Location is required (1–80 chars).
                   </li>
                 )}
                 {!isTypeValid && (

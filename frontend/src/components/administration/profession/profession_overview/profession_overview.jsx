@@ -143,11 +143,11 @@ class ProfessionOverview extends React.Component {
                     </Card.Body>
                     <Card.Footer>
                       <DeleteObjectModal
-                        object_id={profession.profession_id}
-                        object_name={profession.title}
-                        object_type="Profession"
+                        objectId={profession.profession_id}
+                        objectName={profession.title}
+                        objectType="Profession"
                         warningMessage="This will also delete all professionals associated with this profession."
-                        onDeleteSuccess={() => {
+                        onObjectDeleted={() => {
                           window.location.href = "/administration/all_professions";
                         }}
                       />

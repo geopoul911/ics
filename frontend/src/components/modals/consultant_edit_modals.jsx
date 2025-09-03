@@ -55,6 +55,13 @@ const validatePassword = (password) => {
   return hasCapital && hasNumber && hasMinLength;
 };
 
+// Email format validation (required)
+const isValidEmail = (value) => {
+  if (!value) return false; // required
+  const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+  return emailRegex.test(value);
+};
+
 // Edit Consultant ID Modal (PK - Immutable)
 export function EditConsultantIdModal({ consultant, update_state }) {
   return (
@@ -91,7 +98,7 @@ export function EditConsultantFullnameModal({ consultant, update_state }) {
         { headers: currentHeaders }
       );
 
-      update_state(res);
+      update_state(res.data);
       setShow(false);
       Swal.fire({
         icon: "success",
@@ -132,41 +139,35 @@ export function EditConsultantFullnameModal({ consultant, update_state }) {
           <Modal.Title>Edit Full Name</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Full Name:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  type="text"
-                  value={fullname}
-                  onChange={(e) => setFullname(validateFullname(clampLen(e.target.value, 40)))}
-                  placeholder="Enter full name (2-40 characters)"
-                />
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Full Name</Form.Label>
+              <Form.Control
+                type="text"
+                value={fullname}
+                onChange={(e) => setFullname(validateFullname(clampLen(e.target.value, 40)))}
+                placeholder="Full name (2-40 characters)"
+                isInvalid={!isFullnameValid}
+              />
             </Form.Group>
-          </Form>
         </Modal.Body>
-                 <Modal.Footer>
-           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-             <small style={{ color: "red" }}>
-               <i className="fas fa-info-circle" style={{ marginRight: "5px" }}></i>
-               Must be 2-40 characters
-             </small>
-             <div>
-               <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
-                 Cancel
-               </Button>
-               <Button
-                 color="green"
-                 onClick={onSave}
-                 disabled={!isFullnameValid}
-               >
-                 Save
-               </Button>
-             </div>
-           </div>
+        <Modal.Footer>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <small style={{ color: isFullnameValid ? "green" : "red" }}>
+              {isFullnameValid ? "Looks good." : "Must be 2-40 characters."}
+            </small>
+            <div>
+              <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
+                Cancel
+              </Button>
+              <Button
+                color="green"
+                onClick={onSave}
+                disabled={!isFullnameValid}
+              >
+                Save
+              </Button>
+            </div>
+          </div>
         </Modal.Footer>
       </Modal>
     </>
@@ -184,7 +185,8 @@ export function EditConsultantEmailModal({ consultant, update_state }) {
     setShow(true);
   };
 
-  const isEmailValid = email === "" || (email.includes("@") && email.length >= 5);
+  const trimmedEmail = email.trim();
+  const isEmailValid = isValidEmail(trimmedEmail);
 
   const onSave = async () => {
     try {
@@ -195,11 +197,11 @@ export function EditConsultantEmailModal({ consultant, update_state }) {
 
       const res = await axios.patch(
         `${UPDATE_CONSULTANT}${consultant.consultant_id}/`,
-        { email: email || null },
+        { email: trimmedEmail },
         { headers: currentHeaders }
       );
 
-      update_state(res);
+      update_state(res.data);
       setShow(false);
       Swal.fire({
         icon: "success",
@@ -240,41 +242,35 @@ export function EditConsultantEmailModal({ consultant, update_state }) {
           <Modal.Title>Edit Email</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Email:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter email address (optional)"
-                />
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter email"
+                isInvalid={!isEmailValid}
+              />
             </Form.Group>
-          </Form>
         </Modal.Body>
-                 <Modal.Footer>
-           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-             <small style={{ color: "red" }}>
-               <i className="fas fa-info-circle" style={{ marginRight: "5px" }}></i>
-               Valid email format or empty
-             </small>
-             <div>
-               <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
-                 Cancel
-               </Button>
-               <Button
-                 color="green"
-                 onClick={onSave}
-                 disabled={!isEmailValid}
-               >
-                 Save
-               </Button>
-             </div>
-           </div>
+        <Modal.Footer>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <small style={{ color: isEmailValid ? "green" : "red" }}>
+              {isEmailValid ? "Looks good." : "Enter a valid email (required)."}
+            </small>
+            <div>
+              <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
+                Cancel
+              </Button>
+              <Button
+                color="green"
+                onClick={onSave}
+                disabled={!isEmailValid}
+              >
+                Save
+              </Button>
+            </div>
+          </div>
         </Modal.Footer>
       </Modal>
     </>
@@ -307,7 +303,7 @@ export function EditConsultantPhoneModal({ consultant, update_state }) {
         { headers: currentHeaders }
       );
 
-      update_state(res);
+      update_state(res.data);
       setShow(false);
       Swal.fire({
         icon: "success",
@@ -348,41 +344,35 @@ export function EditConsultantPhoneModal({ consultant, update_state }) {
           <Modal.Title>Edit Phone</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Phone:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  type="text"
-                  value={phone}
-                  onChange={(e) => setPhone(validatePhone(clampLen(e.target.value, 15)))}
-                  placeholder="Enter phone number (digits, spaces, -, (, ), +)"
-                />
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Phone</Form.Label>
+              <Form.Control
+                type="text"
+                value={phone}
+                onChange={(e) => setPhone(validatePhone(clampLen(e.target.value, 15)))}
+                placeholder="Digits, spaces, -, (, ), + (optional)"
+                isInvalid={!isPhoneValid}
+              />
             </Form.Group>
-          </Form>
         </Modal.Body>
-                 <Modal.Footer>
-           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-             <small style={{ color: "red" }}>
-               <i className="fas fa-info-circle" style={{ marginRight: "5px" }}></i>
-               Digits, spaces, dashes, parentheses, + (max 15)
-             </small>
-             <div>
-               <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
-                 Cancel
-               </Button>
-               <Button
-                 color="green"
-                 onClick={onSave}
-                 disabled={!isPhoneValid}
-               >
-                 Save
-               </Button>
-             </div>
-           </div>
+        <Modal.Footer>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <small style={{ color: isPhoneValid ? "green" : "red" }}>
+              {isPhoneValid ? "Looks good." : "Max 15 characters."}
+            </small>
+            <div>
+              <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
+                Cancel
+              </Button>
+              <Button
+                color="green"
+                onClick={onSave}
+                disabled={!isPhoneValid}
+              >
+                Save
+              </Button>
+            </div>
+          </div>
         </Modal.Footer>
       </Modal>
     </>
@@ -400,7 +390,7 @@ export function EditConsultantMobileModal({ consultant, update_state }) {
     setShow(true);
   };
 
-  const isMobileValid = mobile === "" || mobile.length <= 15;
+  const isMobileValid = mobile.trim().length > 0 && mobile.length <= 15;
 
   const onSave = async () => {
     try {
@@ -411,11 +401,11 @@ export function EditConsultantMobileModal({ consultant, update_state }) {
 
       const res = await axios.patch(
         `${UPDATE_CONSULTANT}${consultant.consultant_id}/`,
-        { mobile: mobile || null },
+        { mobile: mobile.trim() },
         { headers: currentHeaders }
       );
 
-      update_state(res);
+      update_state(res.data);
       setShow(false);
       Swal.fire({
         icon: "success",
@@ -456,41 +446,35 @@ export function EditConsultantMobileModal({ consultant, update_state }) {
           <Modal.Title>Edit Mobile</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Mobile:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  type="text"
-                  value={mobile}
-                  onChange={(e) => setMobile(validateMobile(clampLen(e.target.value, 15)))}
-                  placeholder="Enter mobile number (digits, spaces, -, (, ), +)"
-                />
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Mobile</Form.Label>
+              <Form.Control
+                type="text"
+                value={mobile}
+                onChange={(e) => setMobile(validateMobile(clampLen(e.target.value, 15)))}
+                placeholder="Digits, spaces, -, (, ), + (required)"
+                isInvalid={!isMobileValid}
+              />
             </Form.Group>
-          </Form>
         </Modal.Body>
-                 <Modal.Footer>
-           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-             <small style={{ color: "red" }}>
-               <i className="fas fa-info-circle" style={{ marginRight: "5px" }}></i>
-               Digits, spaces, dashes, parentheses, + (max 15)
-             </small>
-             <div>
-               <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
-                 Cancel
-               </Button>
-               <Button
-                 color="green"
-                 onClick={onSave}
-                 disabled={!isMobileValid}
-               >
-                 Save
-               </Button>
-             </div>
-           </div>
+        <Modal.Footer>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <small style={{ color: isMobileValid ? "green" : "red" }}>
+              {isMobileValid ? "Looks good." : "Required, max 15 characters."}
+            </small>
+            <div>
+              <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
+                Cancel
+              </Button>
+              <Button
+                color="green"
+                onClick={onSave}
+                disabled={!isMobileValid}
+              >
+                Save
+              </Button>
+            </div>
+          </div>
         </Modal.Footer>
       </Modal>
     </>
@@ -523,7 +507,7 @@ export function EditConsultantRoleModal({ consultant, update_state }) {
         { headers: currentHeaders }
       );
 
-      update_state(res);
+      update_state(res.data);
       setShow(false);
       Swal.fire({
         icon: "success",
@@ -564,46 +548,40 @@ export function EditConsultantRoleModal({ consultant, update_state }) {
           <Modal.Title>Edit Role</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Role:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  as="select"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                >
-                  <option value="">Select Role</option>
-                  <option value="A">Admin</option>
-                  <option value="S">Supervisor</option>
-                  <option value="U">Superuser</option>
-                  <option value="C">User</option>
-                </Form.Control>
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Role</Form.Label>
+              <Form.Control
+                as="select"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                isInvalid={!isRoleValid}
+              >
+                <option value="">Select role</option>
+                <option value="A">Admin</option>
+                <option value="S">Supervisor</option>
+                <option value="U">Superuser</option>
+                <option value="C">User</option>
+              </Form.Control>
             </Form.Group>
-          </Form>
         </Modal.Body>
-                 <Modal.Footer>
-           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-             <small style={{ color: "red" }}>
-               <i className="fas fa-info-circle" style={{ marginRight: "5px" }}></i>
-               Select a valid role
-             </small>
-             <div>
-               <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
-                 Cancel
-               </Button>
-               <Button
-                 color="green"
-                 onClick={onSave}
-                 disabled={!isRoleValid}
-               >
-                 Save
-               </Button>
-             </div>
-           </div>
+        <Modal.Footer>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <small style={{ color: isRoleValid ? "green" : "red" }}>
+              {isRoleValid ? "Looks good." : "Select a valid role."}
+            </small>
+            <div>
+              <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
+                Cancel
+              </Button>
+              <Button
+                color="green"
+                onClick={onSave}
+                disabled={!isRoleValid}
+              >
+                Save
+              </Button>
+            </div>
+          </div>
         </Modal.Footer>
       </Modal>
     </>
@@ -648,7 +626,7 @@ export function EditConsultantPasswordModal({ consultant, update_state }) {
         { headers: currentHeaders }
       );
 
-      update_state(res);
+      update_state(res.data);
       setShow(false);
       Swal.fire({
         icon: "success",
@@ -689,54 +667,45 @@ export function EditConsultantPasswordModal({ consultant, update_state }) {
           <Modal.Title>Edit Password</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                New Password:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter new password (min 6 chars, 1 capital, 1 number)"
-                />
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Label>New Password</Form.Label>
+              <Form.Control
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Min 6 chars, 1 capital, 1 number"
+                isInvalid={!isPasswordValid && (password || confirmPassword)}
+              />
             </Form.Group>
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Confirm Password:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm new password"
-                />
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Confirm Password</Form.Label>
+              <Form.Control
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Re-enter password"
+                isInvalid={!isPasswordValid && (password || confirmPassword)}
+              />
             </Form.Group>
-          </Form>
         </Modal.Body>
-                 <Modal.Footer>
-           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-             <small style={{ color: "red" }}>
-               <i className="fas fa-info-circle" style={{ marginRight: "5px" }}></i>
-               Min 6 chars, 1 capital, 1 number, both fields must match
-             </small>
-             <div>
-               <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
-                 Cancel
-               </Button>
-               <Button
-                 color="green"
-                 onClick={onSave}
-                 disabled={!isPasswordValid}
-               >
-                 Save
-               </Button>
-             </div>
-           </div>
+        <Modal.Footer>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <small style={{ color: isPasswordValid ? "green" : "red" }}>
+              {isPasswordValid ? "Looks good." : "Min 6 chars, 1 capital, 1 number, both fields must match."}
+            </small>
+            <div>
+              <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
+                Cancel
+              </Button>
+              <Button
+                color="green"
+                onClick={onSave}
+                disabled={!isPasswordValid}
+              >
+                Save
+              </Button>
+            </div>
+          </div>
         </Modal.Footer>
       </Modal>
     </>
@@ -767,7 +736,7 @@ export function EditConsultantCanAssignTaskModal({ consultant, update_state }) {
         { headers: currentHeaders }
       );
 
-      update_state(res);
+      update_state(res.data);
       setShow(false);
       Swal.fire({
         icon: "success",
@@ -808,37 +777,27 @@ export function EditConsultantCanAssignTaskModal({ consultant, update_state }) {
           <Modal.Title>Edit Can Assign Task</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Can Assign Task:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Check
-                  type="checkbox"
-                  checked={canAssignTask}
-                  onChange={(e) => setCanAssignTask(e.target.checked)}
-                  label="Allow this consultant to assign tasks"
-                />
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Check
+                type="checkbox"
+                checked={canAssignTask}
+                onChange={(e) => setCanAssignTask(e.target.checked)}
+                label="Allow this consultant to assign tasks"
+              />
             </Form.Group>
-          </Form>
         </Modal.Body>
-                 <Modal.Footer>
-           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-             <small style={{ color: "red" }}>
-               <i className="fas fa-info-circle" style={{ marginRight: "5px" }}></i>
-               Enable/disable task assignment
-             </small>
-             <div>
-               <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
-                 Cancel
-               </Button>
-               <Button color="green" onClick={onSave}>
-                 Save
-               </Button>
-             </div>
-           </div>
+        <Modal.Footer>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <small style={{ color: "green" }}>Ready to save.</small>
+            <div>
+              <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
+                Cancel
+              </Button>
+              <Button color="green" onClick={onSave}>
+                Save
+              </Button>
+            </div>
+          </div>
         </Modal.Footer>
       </Modal>
     </>
@@ -873,7 +832,7 @@ export function EditConsultantCashPassportModal({ consultant, update_state }) {
         { headers: currentHeaders }
       );
 
-      update_state(res);
+      update_state(res.data);
       setShow(false);
       Swal.fire({
         icon: "success",
@@ -914,41 +873,35 @@ export function EditConsultantCashPassportModal({ consultant, update_state }) {
           <Modal.Title>Edit Cash Passport Countries</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Countries:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  type="text"
-                  value={cashPassport}
-                  onChange={(e) => setCashPassport(clampLen(e.target.value, 120))}
-                  placeholder="Enter country codes (e.g., GRE, CAN, USA) - optional"
-                />
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Countries</Form.Label>
+              <Form.Control
+                type="text"
+                value={cashPassport}
+                onChange={(e) => setCashPassport(clampLen(e.target.value, 120))}
+                placeholder="GRE, CAN, USA (optional)"
+                isInvalid={!isCashPassportValid}
+              />
             </Form.Group>
-          </Form>
         </Modal.Body>
-                 <Modal.Footer>
-           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-             <small style={{ color: "red" }}>
-               <i className="fas fa-info-circle" style={{ marginRight: "5px" }}></i>
-               3 capital letters, comma + space (e.g., GRE, CAN, USA)
-             </small>
-             <div>
-               <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
-                 Cancel
-               </Button>
-               <Button
-                 color="green"
-                 onClick={onSave}
-                 disabled={!isCashPassportValid}
-               >
-                 Save
-               </Button>
-             </div>
-           </div>
+        <Modal.Footer>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <small style={{ color: isCashPassportValid ? "green" : "red" }}>
+              {isCashPassportValid ? "Looks good." : "3-letter codes, comma + space (e.g., GRE, CAN, USA)."}
+            </small>
+            <div>
+              <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
+                Cancel
+              </Button>
+              <Button
+                color="green"
+                onClick={onSave}
+                disabled={!isCashPassportValid}
+              >
+                Save
+              </Button>
+            </div>
+          </div>
         </Modal.Footer>
       </Modal>
     </>
@@ -979,7 +932,7 @@ export function EditConsultantActiveModal({ consultant, update_state }) {
         { headers: currentHeaders }
       );
 
-      update_state(res);
+      update_state(res.data);
       setShow(false);
       Swal.fire({
         icon: "success",
@@ -1020,37 +973,27 @@ export function EditConsultantActiveModal({ consultant, update_state }) {
           <Modal.Title>Edit Active Status</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Active:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Check
-                  type="checkbox"
-                  checked={active}
-                  onChange={(e) => setActive(e.target.checked)}
-                  label="Mark consultant as active"
-                />
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Check
+                type="checkbox"
+                checked={active}
+                onChange={(e) => setActive(e.target.checked)}
+                label="Mark consultant as active"
+              />
             </Form.Group>
-          </Form>
         </Modal.Body>
-                 <Modal.Footer>
-           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-             <small style={{ color: "red" }}>
-               <i className="fas fa-info-circle" style={{ marginRight: "5px" }}></i>
-               Activate/deactivate account
-             </small>
-             <div>
-               <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
-                 Cancel
-               </Button>
-               <Button color="green" onClick={onSave}>
-                 Save
-               </Button>
-             </div>
-           </div>
+        <Modal.Footer>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <small style={{ color: "green" }}>Ready to save.</small>
+            <div>
+              <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
+                Cancel
+              </Button>
+              <Button color="green" onClick={onSave}>
+                Save
+              </Button>
+            </div>
+          </div>
         </Modal.Footer>
       </Modal>
     </>
@@ -1083,7 +1026,7 @@ export function EditConsultantOrderIndexModal({ consultant, update_state }) {
         { headers: currentHeaders }
       );
 
-      update_state(res);
+      update_state(res.data);
       setShow(false);
       Swal.fire({
         icon: "success",
@@ -1124,41 +1067,35 @@ export function EditConsultantOrderIndexModal({ consultant, update_state }) {
           <Modal.Title>Edit Order Index</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group as={Row}>
-              <Form.Label column sm={3}>
-                Order Index:
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  type="number"
-                  value={orderindex}
-                  onChange={(e) => setOrderindex(toSmallInt(e.target.value))}
-                  placeholder="Enter order index"
-                />
-              </Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Order Index</Form.Label>
+              <Form.Control
+                type="number"
+                value={orderindex}
+                onChange={(e) => setOrderindex(toSmallInt(e.target.value))}
+                placeholder="Enter order index"
+                isInvalid={!isOrderIndexValid}
+              />
             </Form.Group>
-          </Form>
         </Modal.Body>
-                 <Modal.Footer>
-           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-             <small style={{ color: "red" }}>
-               <i className="fas fa-info-circle" style={{ marginRight: "5px" }}></i>
-               Must be a valid integer
-             </small>
-             <div>
-               <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
-                 Cancel
-               </Button>
-               <Button
-                 color="green"
-                 onClick={onSave}
-                 disabled={!isOrderIndexValid}
-               >
-                 Save
-               </Button>
-             </div>
-           </div>
+        <Modal.Footer>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <small style={{ color: isOrderIndexValid ? "green" : "red" }}>
+              {isOrderIndexValid ? "Looks good." : "Must be a valid integer."}
+            </small>
+            <div>
+              <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
+                Cancel
+              </Button>
+              <Button
+                color="green"
+                onClick={onSave}
+                disabled={!isOrderIndexValid}
+              >
+                Save
+              </Button>
+            </div>
+          </div>
         </Modal.Footer>
       </Modal>
     </>
@@ -1179,6 +1116,9 @@ export function EditConsultantPhotoModal({ consultant, update_state }) {
   };
 
   const handleShow = () => {
+    // Reset transient state on open
+    setSelectedFile(null);
+    setPreviewUrl(null);
     setShow(true);
   };
 
@@ -1253,6 +1193,9 @@ export function EditConsultantPhotoModal({ consultant, update_state }) {
 
       const res = await response.json();
       update_state(res);
+      // Clear local selection/preview after successful upload
+      setSelectedFile(null);
+      setPreviewUrl(null);
       setShow(false);
       Swal.fire({
         icon: "success",
@@ -1295,7 +1238,11 @@ export function EditConsultantPhotoModal({ consultant, update_state }) {
         { headers: currentHeaders }
       );
 
-      update_state(res);
+      // Use response data (not the axios response object)
+      update_state(res?.data || {});
+      // Clear local state and preview
+      setSelectedFile(null);
+      setPreviewUrl(null);
       setShow(false);
       Swal.fire({
         icon: "success",

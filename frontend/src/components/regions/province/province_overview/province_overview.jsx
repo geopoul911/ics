@@ -179,11 +179,11 @@ class ProvinceOverview extends React.Component {
                     </Card.Body>
                     <Card.Footer>
                       <DeleteObjectModal
-                        object_id={province.province_id}
-                        object_name={province.title}
-                        object_type="Province"
+                        objectType="Province"
+                        objectId={province.province_id}
+                        objectName={province.title}
                         warningMessage="This will also delete all cities associated with this province."
-                        onDeleteSuccess={() => {
+                        onObjectDeleted={() => {
                           window.location.href = "/regions/all_provinces";
                         }}
                       />

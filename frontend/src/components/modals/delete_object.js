@@ -35,6 +35,65 @@ const DELETE_ENDPOINTS = {
   // Add more object types as needed
 };
 
+// Normalize incoming object types from various casings/aliases to our keys
+function normalizeObjectType(rawType) {
+  if (!rawType) return null;
+  const t = String(rawType).trim();
+  const lower = t.toLowerCase();
+  const map = {
+    'country': 'Country',
+    'province': 'Province',
+    'city': 'City',
+    'user': 'User',
+    'consultant': 'Consultant',
+    'bank': 'Bank',
+    'insurancecarrier': 'InsuranceCarrier',
+    'insurance_carrier': 'InsuranceCarrier',
+    'profession': 'Profession',
+    'projectcategory': 'ProjectCategory',
+    'project_category': 'ProjectCategory',
+    'taskcategory': 'TaskCategory',
+    'task_category': 'TaskCategory',
+    'document': 'Document',
+    'client': 'Client',
+    'clientcontact': 'ClientContact',
+    'client_contact': 'ClientContact',
+    'bankclientaccount': 'BankClientAccount',
+    'bank_client_account': 'BankClientAccount',
+    'project': 'Project',
+    'associatedclient': 'AssociatedClient',
+    'associated_client': 'AssociatedClient',
+    'taskcomment': 'TaskComment',
+    'task_comment': 'TaskComment',
+    'property': 'Property',
+  };
+  const normalized = map[lower];
+  if (normalized) return normalized;
+  if (DELETE_ENDPOINTS[t]) return t;
+  return null;
+}
+
+// Map normalized object type to its ID field name for fallback extraction
+const TYPE_TO_ID_FIELD = {
+  Country: 'country_id',
+  Province: 'province_id',
+  City: 'city_id',
+  Consultant: 'consultant_id',
+  Bank: 'bank_id',
+  InsuranceCarrier: 'insucarrier_id',
+  Profession: 'profession_id',
+  ProjectCategory: 'projcate_id',
+  TaskCategory: 'taskcate_id',
+  Document: 'document_id',
+  Client: 'client_id',
+  ClientContact: 'clientcont_id',
+  BankClientAccount: 'bankclientacco_id',
+  Project: 'project_id',
+  AssociatedClient: 'assoclient_id',
+  TaskComment: 'taskcomm_id',
+  Property: 'property_id',
+};
+
 // Redirect URLs after successful deletion
 const REDIRECT_URLS = {
   'Country': '/regions/all_countries',
@@ -65,10 +124,14 @@ function DeleteObjectModal(props) {
   const deleteObject = async () => {
     setBusy(true);
     
+    // Support legacy prop names and normalize object type (scope for catch)
+    const rawType = props.objectType || props.object_type;
+    const objectType = normalizeObjectType(rawType);
+    const endpoint = objectType ? DELETE_ENDPOINTS[objectType] : null;
+
     try {
-      const endpoint = DELETE_ENDPOINTS[props.objectType];
       if (!endpoint) {
-        throw new Error(`No delete endpoint configured for object type: ${props.objectType}`);
+        throw new Error(`No delete endpoint configured for object type: ${rawType || 'undefined'}`);
       }
 
       // Update headers with current token
@@ -77,8 +140,22 @@ function DeleteObjectModal(props) {
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
-      // For the new data_management API, we use DELETE method with the ID in the URL
-      const deleteUrl = `${endpoint}${props.objectId}/`;
+      // Resolve object id from various sources
+      let objectId = props.objectId || props.object_id;
+      if (!objectId && props.object && TYPE_TO_ID_FIELD[objectType]) {
+        objectId = props.object[TYPE_TO_ID_FIELD[objectType]];
+      }
+      // Fallback: try last path segment if still missing
+      if (!objectId) {
+        const parts = window.location.pathname.split('/').filter(Boolean);
+        objectId = parts[parts.length - 1];
+      }
+      if (!objectId) {
+        throw new Error('Cannot determine object ID for deletion');
+      }
+
+      // Use DELETE with the ID in the URL
+      const deleteUrl = `${endpoint}${encodeURIComponent(objectId)}/`;
 
       const response = await axios({
         method: "delete",
@@ -90,14 +167,15 @@ function DeleteObjectModal(props) {
       Swal.fire({
         icon: "success",
         title: "Success!",
-        text: `${props.objectType} deleted successfully`,
+        text: `${objectType || rawType || 'Object'} deleted successfully`,
       });
 
       // Redirect if callback is provided, otherwise use default redirect
-      if (props.onObjectDeleted) {
-        props.onObjectDeleted(response.data);
+      const onSuccessCb = props.onObjectDeleted || props.onDeleteSuccess;
+      if (onSuccessCb) {
+        onSuccessCb(response.data);
       } else {
-        const redirectUrl = REDIRECT_URLS[props.objectType];
+        const redirectUrl = REDIRECT_URLS[objectType];
         if (redirectUrl) {
           window.location.href = redirectUrl;
         }
@@ -159,7 +237,7 @@ function DeleteObjectModal(props) {
                             error.response?.data?.error || 
                             error.response?.data?.detail || 
                             error.message || 
-                            `Failed to delete ${props.objectType}`;
+                            `Failed to delete ${rawType || 'object'}`;
         
         Swal.fire({
           icon: "error",

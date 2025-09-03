@@ -163,11 +163,11 @@ class InsuranceCarrierOverview extends React.Component {
                     </Card.Body>
                     <Card.Footer>
                       <DeleteObjectModal
-                        object_id={insurance_carrier.insucarrier_id}
-                        object_name={insurance_carrier.title}
-                        object_type="Insurance Carrier"
+                        objectId={insurance_carrier.insucarrier_id}
+                        objectName={insurance_carrier.title}
+                        objectType="InsuranceCarrier"
                         warningMessage="This will also delete all client insurance associations with this carrier."
-                        onDeleteSuccess={() => {
+                        onObjectDeleted={() => {
                           window.location.href = "/administration/all_insurance_carriers";
                         }}
                       />

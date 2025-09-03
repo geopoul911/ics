@@ -285,11 +285,11 @@ class ConsultantOverview extends React.Component {
                     </Card.Body>
                     <Card.Footer>
                       <DeleteObjectModal
-                        object_id={consultant.consultant_id}
-                        object_name={consultant.fullname}
-                        object_type="Consultant"
+                        objectId={consultant.consultant_id}
+                        objectName={consultant.fullname}
+                        objectType="Consultant"
                         warningMessage="This will also delete all projects, tasks, and other data associated with this consultant."
-                        onDeleteSuccess={() => {
+                        onObjectDeleted={() => {
                           window.location.href = "/administration/all_consultants";
                         }}
                       />

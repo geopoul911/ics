@@ -109,32 +109,17 @@ class CountrySerializer(serializers.ModelSerializer):
         model = Country
         fields = '__all__'
         extra_kwargs = {
-            'orderindex': {'required': False, 'allow_null': True}
+            'orderindex': {'required': True, 'allow_null': False}
         }
     
     def validate_orderindex(self, value):
         """
         Custom validation for orderindex to provide better error messages
         """
-        # Allow null/empty values (orderindex is optional now)
+        # Require a value, but do NOT enforce uniqueness
         if value in (None, ""):
-            return value
-        # Get the current instance (for updates) or None (for creates)
-        instance = getattr(self, 'instance', None)
-        
-        # Check if this orderindex is already taken by another country
-        try:
-            existing_country = Country.objects.get(orderindex=value)
-            # If this is an update and the existing country is the same as the current instance, it's OK
-            if instance and existing_country.country_id == instance.country_id:
-                return value
-            # Otherwise, it's a conflict
-            raise serializers.ValidationError(
-                f"Order index {value} is already taken by Country: {existing_country.title} (ID: {existing_country.country_id})"
-            )
-        except Country.DoesNotExist:
-            # No conflict, value is OK
-            return value
+            raise serializers.ValidationError("Order index is required.")
+        return value
 
     def validate_title(self, value):
         """Provide clearer error when title uniqueness is violated."""
@@ -186,26 +171,11 @@ class ProvinceSerializer(serializers.ModelSerializer):
     
     def validate_orderindex(self, value):
         """
-        Custom validation for orderindex to provide better error messages
+        Order index: required but not unique for Province
         """
         if value in (None, ""):
-            return value
-        # Get the current instance (for updates) or None (for creates)
-        instance = getattr(self, 'instance', None)
-        
-        # Check if this orderindex is already taken by another province
-        try:
-            existing_province = Province.objects.get(orderindex=value)
-            # If this is an update and the existing province is the same as the current instance, it's OK
-            if instance and existing_province.province_id == instance.province_id:
-                return value
-            # Otherwise, it's a conflict
-            raise serializers.ValidationError(
-                f"Order index {value} is already taken by Province: {existing_province.title} (ID: {existing_province.province_id})"
-            )
-        except Province.DoesNotExist:
-            # No conflict, value is OK
-            return value
+            raise serializers.ValidationError("Order index is required.")
+        return value
     
     def validate_title(self, value):
         value = (value or '').strip()
@@ -278,26 +248,11 @@ class CitySerializer(serializers.ModelSerializer):
     
     def validate_orderindex(self, value):
         """
-        Custom validation for orderindex to provide better error messages
+        Order index: required but not unique for City
         """
         if value in (None, ""):
-            return value
-        # Get the current instance (for updates) or None (for creates)
-        instance = getattr(self, 'instance', None)
-        
-        # Check if this orderindex is already taken by another city
-        try:
-            existing_city = City.objects.get(orderindex=value)
-            # If this is an update and the existing city is the same as the current instance, it's OK
-            if instance and existing_city.city_id == instance.city_id:
-                return value
-            # Otherwise, it's a conflict
-            raise serializers.ValidationError(
-                f"Order index {value} is already taken by City: {existing_city.title} (ID: {existing_city.city_id})"
-            )
-        except City.DoesNotExist:
-            # No conflict, value is OK
-            return value
+            raise serializers.ValidationError("Order index is required.")
+        return value
     
     def validate_title(self, value):
         value = (value or '').strip()
@@ -345,17 +300,17 @@ class CitySerializer(serializers.ModelSerializer):
             except Country.DoesNotExist:
                 raise serializers.ValidationError(f"Country with ID '{country_id}' does not exist.")
         
-        # Handle province_id - can be None to clear the province
-        if province_id is not None:  # Explicitly check for None to allow clearing
-            if province_id:  # If not empty string
-                try:
-                    province = Province.objects.get(province_id=province_id)
-                    validated_data['province'] = province
-                except Province.DoesNotExist:
-                    raise serializers.ValidationError(f"Province with ID '{province_id}' does not exist.")
-            else:
-                # Clear the province
-                validated_data['province'] = None
+        # Province is required for City
+        if not province_id:
+            raise serializers.ValidationError({"province_id": "Province is required."})
+        try:
+            province = Province.objects.get(province_id=province_id)
+        except Province.DoesNotExist:
+            raise serializers.ValidationError(f"Province with ID '{province_id}' does not exist.")
+        # If both provided, ensure province belongs to selected country (when country provided)
+        if country_id and province.country.country_id != country_id:
+            raise serializers.ValidationError({"province_id": "Selected province does not belong to selected country."})
+        validated_data['province'] = province
         
         return super().create(validated_data)
     
@@ -375,23 +330,24 @@ class CitySerializer(serializers.ModelSerializer):
             except Country.DoesNotExist:
                 raise serializers.ValidationError(f"Country with ID '{country_id}' does not exist.")
         
-        # If country is being changed, automatically clear the province
-        if country_changed:
-            validated_data['province'] = None
-            # Also clear province_id from the data since we're setting province to None
-            province_id = None
-        
-        # Handle province_id - can be None to clear the province
-        if province_id is not None:  # Explicitly check for None to allow clearing
-            if province_id:  # If not empty string
-                try:
-                    province = Province.objects.get(province_id=province_id)
-                    validated_data['province'] = province
-                except Province.DoesNotExist:
-                    raise serializers.ValidationError(f"Province with ID '{province_id}' does not exist.")
-            else:
-                # Clear the province
-                validated_data['province'] = None
+        # Province handling
+        if country_changed and not province_id:
+            # Cannot change country without supplying a valid province simultaneously
+            raise serializers.ValidationError({"province_id": "Province is required when changing country."})
+
+        if province_id is not None:
+            if province_id == "":
+                # Province cannot be cleared (non-nullable FK)
+                raise serializers.ValidationError({"province_id": "Province is required."})
+            try:
+                province = Province.objects.get(province_id=province_id)
+            except Province.DoesNotExist:
+                raise serializers.ValidationError(f"Province with ID '{province_id}' does not exist.")
+            # If country also changing/provided, validate province-country consistency
+            target_country_id = country_id or getattr(validated_data.get('country', instance.country), 'country_id', instance.country.country_id)
+            if province.country.country_id != target_country_id:
+                raise serializers.ValidationError({"province_id": "Selected province does not belong to selected country."})
+            validated_data['province'] = province
         
         return super().update(instance, validated_data)
 
@@ -401,7 +357,7 @@ class InsuranceCarrierSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {
             'active': {'required': False},  # Default to True
-            'orderindex': {'required': False, 'allow_null': True}
+            'orderindex': {'required': True, 'allow_null': False}
         }
 
     def validate_insucarrier_id(self, value):
@@ -424,25 +380,10 @@ class InsuranceCarrierSerializer(serializers.ModelSerializer):
             return value
 
     def validate_orderindex(self, value):
-        """Validate orderindex uniqueness"""
+        """Order index is required but not unique for InsuranceCarrier."""
         if value in (None, ""):
-            return value
-        # Get the current instance (for updates) or None (for creates)
-        instance = getattr(self, 'instance', None)
-        
-        # Check if this orderindex is already taken by another insurance carrier
-        try:
-            existing_carrier = InsuranceCarrier.objects.get(orderindex=value)
-            # If this is an update and the existing carrier is the same as the current instance, it's OK
-            if instance and existing_carrier.insucarrier_id == instance.insucarrier_id:
-                return value
-            # Otherwise, it's a conflict
-            raise serializers.ValidationError(
-                f"Order index {value} is already taken by Insurance Carrier: {existing_carrier.title} (ID: {existing_carrier.insucarrier_id})"
-            )
-        except InsuranceCarrier.DoesNotExist:
-            # No conflict, value is OK
-            return value
+            raise serializers.ValidationError("Order index is required.")
+        return value
 
     def validate_title(self, value):
         """Validate title format"""
@@ -479,7 +420,7 @@ class BankSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {
             'active': {'required': False},  # Default to True
-            'orderindex': {'required': False, 'allow_null': True}
+            'orderindex': {'required': True, 'allow_null': False}
         }
 
     def validate_bank_id(self, value):
@@ -501,26 +442,21 @@ class BankSerializer(serializers.ModelSerializer):
             # No conflict, value is OK
             return value
 
-    def validate_orderindex(self, value):
-        """Validate orderindex uniqueness"""
-        if value in (None, ""):
-            return value
-        # Get the current instance (for updates) or None (for creates)
+    def validate_bankname(self, value):
+        """Validate bankname case-insensitive uniqueness and return clear message"""
         instance = getattr(self, 'instance', None)
-        
-        # Check if this orderindex is already taken by another bank
-        try:
-            existing_bank = Bank.objects.get(orderindex=value)
-            # If this is an update and the existing bank is the same as the current instance, it's OK
-            if instance and existing_bank.bank_id == instance.bank_id:
-                return value
-            # Otherwise, it's a conflict
-            raise serializers.ValidationError(
-                f"Order index {value} is already taken by Bank: {existing_bank.bankname} (ID: {existing_bank.bank_id})"
-            )
-        except Bank.DoesNotExist:
-            # No conflict, value is OK
-            return value
+        queryset = Bank.objects.filter(bankname__iexact=value)
+        if instance:
+            queryset = queryset.exclude(pk=instance.pk)
+        if queryset.exists():
+            raise serializers.ValidationError(f"Bank name '{value}' already exists.")
+        return value
+
+    def validate_orderindex(self, value):
+        """Order index is required but not unique for Bank."""
+        if value in (None, ""):
+            raise serializers.ValidationError("Order index is required.")
+        return value
 
     def validate_institutionnumber(self, value):
         """Validate institution number format"""
@@ -720,37 +656,52 @@ class ClientSerializer(serializers.ModelSerializer):
             except Country.DoesNotExist:
                 raise serializers.ValidationError(f"Passport Country with ID '{passportcountry_id}' does not exist.")
         
-        pensioncountry1_id = validated_data.pop('pensioncountry1_id', None)
-        if pensioncountry1_id:
-            try:
-                pensioncountry1 = Country.objects.get(country_id=pensioncountry1_id)
-                validated_data['pensioncountry1'] = pensioncountry1
-            except Country.DoesNotExist:
-                raise serializers.ValidationError(f"Pension Country 1 with ID '{pensioncountry1_id}' does not exist.")
+        _missing = object()
+        pensioncountry1_id = validated_data.pop('pensioncountry1_id', _missing)
+        if pensioncountry1_id is not _missing:
+            if pensioncountry1_id:
+                try:
+                    pensioncountry1 = Country.objects.get(country_id=pensioncountry1_id)
+                    validated_data['pensioncountry1'] = pensioncountry1
+                except Country.DoesNotExist:
+                    raise serializers.ValidationError(f"Pension Country 1 with ID '{pensioncountry1_id}' does not exist.")
+            else:
+                # Explicitly clear when empty string or null provided
+                validated_data['pensioncountry1'] = None
         
-        pensioncountry2_id = validated_data.pop('pensioncountry2_id', None)
-        if pensioncountry2_id:
-            try:
-                pensioncountry2 = Country.objects.get(country_id=pensioncountry2_id)
-                validated_data['pensioncountry2'] = pensioncountry2
-            except Country.DoesNotExist:
-                raise serializers.ValidationError(f"Pension Country 2 with ID '{pensioncountry2_id}' does not exist.")
+        pensioncountry2_id = validated_data.pop('pensioncountry2_id', _missing)
+        if pensioncountry2_id is not _missing:
+            if pensioncountry2_id:
+                try:
+                    pensioncountry2 = Country.objects.get(country_id=pensioncountry2_id)
+                    validated_data['pensioncountry2'] = pensioncountry2
+                except Country.DoesNotExist:
+                    raise serializers.ValidationError(f"Pension Country 2 with ID '{pensioncountry2_id}' does not exist.")
+            else:
+                # Explicitly clear when empty string or null provided
+                validated_data['pensioncountry2'] = None
         
-        insucarrier1_id = validated_data.pop('insucarrier1_id', None)
-        if insucarrier1_id:
-            try:
-                insucarrier1 = InsuranceCarrier.objects.get(insucarrier_id=insucarrier1_id)
-                validated_data['insucarrier1'] = insucarrier1
-            except InsuranceCarrier.DoesNotExist:
-                raise serializers.ValidationError(f"Insurance Carrier 1 with ID '{insucarrier1_id}' does not exist.")
+        insucarrier1_id = validated_data.pop('insucarrier1_id', _missing)
+        if insucarrier1_id is not _missing:
+            if insucarrier1_id:
+                try:
+                    insucarrier1 = InsuranceCarrier.objects.get(insucarrier_id=insucarrier1_id)
+                    validated_data['insucarrier1'] = insucarrier1
+                except InsuranceCarrier.DoesNotExist:
+                    raise serializers.ValidationError(f"Insurance Carrier 1 with ID '{insucarrier1_id}' does not exist.")
+            else:
+                validated_data['insucarrier1'] = None
         
-        insucarrier2_id = validated_data.pop('insucarrier2_id', None)
-        if insucarrier2_id:
-            try:
-                insucarrier2 = InsuranceCarrier.objects.get(insucarrier_id=insucarrier2_id)
-                validated_data['insucarrier2'] = insucarrier2
-            except InsuranceCarrier.DoesNotExist:
-                raise serializers.ValidationError(f"Insurance Carrier 2 with ID '{insucarrier2_id}' does not exist.")
+        insucarrier2_id = validated_data.pop('insucarrier2_id', _missing)
+        if insucarrier2_id is not _missing:
+            if insucarrier2_id:
+                try:
+                    insucarrier2 = InsuranceCarrier.objects.get(insucarrier_id=insucarrier2_id)
+                    validated_data['insucarrier2'] = insucarrier2
+                except InsuranceCarrier.DoesNotExist:
+                    raise serializers.ValidationError(f"Insurance Carrier 2 with ID '{insucarrier2_id}' does not exist.")
+            else:
+                validated_data['insucarrier2'] = None
 
 class BankClientAccountSerializer(serializers.ModelSerializer):
     client = ClientReferenceSerializer(read_only=True)
@@ -885,23 +836,10 @@ class ConsultantSerializer(serializers.ModelSerializer):
             return value
 
     def validate_orderindex(self, value):
-        """Validate orderindex uniqueness"""
-        # Get the current instance (for updates) or None (for creates)
-        instance = getattr(self, 'instance', None)
-        
-        # Check if this orderindex is already taken by another consultant
-        try:
-            existing_consultant = Consultant.objects.get(orderindex=value)
-            # If this is an update and the existing consultant is the same as the current instance, it's OK
-            if instance and existing_consultant.consultant_id == instance.consultant_id:
-                return value
-            # Otherwise, it's a conflict
-            raise serializers.ValidationError(
-                f"Order index {value} is already taken by Consultant: {existing_consultant.fullname} (ID: {existing_consultant.consultant_id})"
-            )
-        except Consultant.DoesNotExist:
-            # No conflict, value is OK
-            return value
+        """Order index is required but not unique for Consultant."""
+        if value in (None, ""):
+            raise serializers.ValidationError("Order index is required.")
+        return value
 
     def validate_username(self, value):
         """Validate username uniqueness"""
@@ -976,7 +914,7 @@ class ProjectCategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {
             'active': {'required': False},  # Default to True
-            'orderindex': {'required': False, 'allow_null': True}
+            'orderindex': {'required': True, 'allow_null': False}
         }
 
     def validate_projcate_id(self, value):
@@ -995,25 +933,10 @@ class ProjectCategorySerializer(serializers.ModelSerializer):
             return value
 
     def validate_orderindex(self, value):
-        """Validate orderindex uniqueness"""
-        # Allow null/empty as optional
+        """Order index: required but not unique for ProjectCategory."""
         if value in (None, ""):
-            return value
-        # Get the current instance (for updates) or None (for creates)
-        instance = getattr(self, 'instance', None)
-        
-        # Check if this orderindex is already taken by another project category
-        try:
-            existing_category = ProjectCategory.objects.get(orderindex=value)
-            # If this is an update and the existing category is the same as the current instance, it's OK
-            if instance and existing_category.projcate_id == instance.projcate_id:
-                return value
-            raise serializers.ValidationError("This order index is already in use.")
-        except ProjectCategory.DoesNotExist:
-            return value
-        except ProjectCategory.MultipleObjectsReturned:
-            # Multiple rows share the same order index; treat as 'in use'
-            raise serializers.ValidationError("This order index is already in use.")
+            raise serializers.ValidationError("Order index is required.")
+        return value
 
     def validate_title(self, value):
         """Validate title format"""
@@ -1042,18 +965,182 @@ class ProjectCategorySerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     consultant = ConsultantSerializer(read_only=True)
     categories = ProjectCategorySerializer(many=True, read_only=True)
+    # Write-only field for foreign key
+    consultant_id = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
+    # Write-only list for many-to-many categories
+    category_ids = serializers.ListField(child=serializers.CharField(), write_only=True, required=False, allow_empty=True)
     
     class Meta:
         model = Project
         fields = '__all__'
 
+    def _assign_fk(self, validated_data, key, model, field_name):
+        obj_id = validated_data.pop(key, None)
+        if obj_id is None:
+            return
+        if obj_id == "":
+            validated_data[field_name] = None
+            return
+        try:
+            obj = model.objects.get(**{model._meta.pk.name: obj_id})
+            validated_data[field_name] = obj
+        except model.DoesNotExist:
+            raise serializers.ValidationError(f"{model.__name__} with ID '{obj_id}' does not exist.")
+
+    def create(self, validated_data):
+        from accounts.models import Consultant
+        from webapp.models import ProjectCategory
+        # Handle consultant
+        self._assign_fk(validated_data, 'consultant_id', Consultant, 'consultant')
+        # Handle categories
+        category_ids = validated_data.pop('category_ids', None)
+        if not category_ids:
+            raw = None
+            if hasattr(self, 'initial_data'):
+                raw = self.initial_data.get('category_ids') or \
+                      self.initial_data.get('category_ids[]') or \
+                      self.initial_data.get('categoryIds') or \
+                      self.initial_data.get('selectedCategories') or \
+                      self.initial_data.get('categories') or \
+                      self.initial_data.get('categories[]')
+            if isinstance(raw, str):
+                raw_str = raw.strip()
+                # Try JSON decode first
+                try:
+                    import json
+                    decoded = json.loads(raw_str)
+                    if isinstance(decoded, list):
+                        raw = decoded
+                    else:
+                        # Fallback to comma-separated parsing
+                        category_ids = [x.strip() for x in raw_str.split(',') if x.strip()]
+                except Exception:
+                    category_ids = [x.strip() for x in raw_str.split(',') if x.strip()]
+            if isinstance(raw, list):
+                # Could be list of ids or list of objects
+                if raw and isinstance(raw[0], dict):
+                    category_ids = [x.get('projcate_id') for x in raw if x.get('projcate_id')]
+                else:
+                    category_ids = raw
+            if category_ids is None:
+                category_ids = []
+        taxation = validated_data.get('taxation', False)
+        if taxation and category_ids:
+            raise serializers.ValidationError({'categories': 'Taxation projects cannot have categories.'})
+        project = super().create(validated_data)
+        if category_ids:
+            categories = list(ProjectCategory.objects.filter(projcate_id__in=category_ids))
+
+            print(len(categories))
+            print(len(set(category_ids)))
+            if len(categories) != len(set(category_ids)):
+                raise serializers.ValidationError({'categories': 'One or more category IDs are invalid.'})
+            project.categories.set(categories)
+        return project
+
+    def update(self, instance, validated_data):
+        from accounts.models import Consultant
+        from webapp.models import ProjectCategory
+        self._assign_fk(validated_data, 'consultant_id', Consultant, 'consultant')
+        category_ids = validated_data.pop('category_ids', None)
+        if category_ids is None and hasattr(self, 'initial_data'):
+            raw = self.initial_data.get('category_ids') or \
+                  self.initial_data.get('category_ids[]') or \
+                  self.initial_data.get('categoryIds') or \
+                  self.initial_data.get('selectedCategories') or \
+                  self.initial_data.get('categories') or \
+                  self.initial_data.get('categories[]')
+            if isinstance(raw, str):
+                raw_str = raw.strip()
+                try:
+                    import json
+                    decoded = json.loads(raw_str)
+                    if isinstance(decoded, list):
+                        raw = decoded
+                    else:
+                        category_ids = [x.strip() for x in raw_str.split(',') if x.strip()]
+                except Exception:
+                    category_ids = [x.strip() for x in raw_str.split(',') if x.strip()]
+            if isinstance(raw, list):
+                if raw and isinstance(raw[0], dict):
+                    category_ids = [x.get('projcate_id') for x in raw if x.get('projcate_id')]
+                else:
+                    category_ids = raw
+        taxation = validated_data.get('taxation', instance.taxation)
+
+        # Pre-resolve categories if provided
+        categories = None
+        if category_ids is not None:
+            categories = list(ProjectCategory.objects.filter(projcate_id__in=category_ids)) if category_ids else []
+            if category_ids and len(categories) != len(set(category_ids)):
+                raise serializers.ValidationError({'categories': 'One or more category IDs are invalid.'})
+
+        # If turning taxation on, ensure categories are cleared BEFORE saving to satisfy model clean()
+        if taxation:
+            instance.categories.set([])
+        # If taxation is false and categories were provided, set them BEFORE save so clean() sees them
+        elif categories is not None:
+            instance.categories.set(categories)
+
+        project = super().update(instance, validated_data)
+
+        # If caller explicitly provided categories (including empty), ensure final assignment matches request
+        if categories is not None:
+            project.categories.set(categories)
+        return project
+
 class AssociatedClientSerializer(serializers.ModelSerializer):
     project = ProjectSerializer(read_only=True)
     client = ClientSerializer(read_only=True)
+    # Write-only fields for foreign keys
+    project_id = serializers.CharField(write_only=True, required=False)
+    client_id = serializers.CharField(write_only=True, required=False)
     
     class Meta:
         model = AssociatedClient
         fields = '__all__'
+
+    def create(self, validated_data):
+        """Create a new associated client instance with FK mapping"""
+        project_id = validated_data.pop('project_id', None)
+        client_id = validated_data.pop('client_id', None)
+        if project_id:
+            try:
+                project = Project.objects.get(project_id=project_id)
+                validated_data['project'] = project
+            except Project.DoesNotExist:
+                raise serializers.ValidationError(f"Project with ID '{project_id}' does not exist.")
+        if client_id:
+            try:
+                client = Client.objects.get(client_id=client_id)
+                validated_data['client'] = client
+            except Client.DoesNotExist:
+                raise serializers.ValidationError(f"Client with ID '{client_id}' does not exist.")
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        """Update an existing associated client instance with FK mapping"""
+        project_id = validated_data.pop('project_id', None)
+        client_id = validated_data.pop('client_id', None)
+        if project_id is not None:
+            if project_id == "":
+                validated_data['project'] = None
+            else:
+                try:
+                    project = Project.objects.get(project_id=project_id)
+                    validated_data['project'] = project
+                except Project.DoesNotExist:
+                    raise serializers.ValidationError(f"Project with ID '{project_id}' does not exist.")
+        if client_id is not None:
+            if client_id == "":
+                validated_data['client'] = None
+            else:
+                try:
+                    client = Client.objects.get(client_id=client_id)
+                    validated_data['client'] = client
+                except Client.DoesNotExist:
+                    raise serializers.ValidationError(f"Client with ID '{client_id}' does not exist.")
+        return super().update(instance, validated_data)
 
 # Document serializers
 class DocumentSerializer(serializers.ModelSerializer):
@@ -1098,12 +1185,31 @@ class DocumentSerializer(serializers.ModelSerializer):
         return value.strip()
 
     def validate_filepath(self, value):
-        """Validate filepath format"""
-        if not value or len(value.strip()) < 1:
-            raise serializers.ValidationError("Filepath is required.")
-        if len(value.strip()) > 120:
-            raise serializers.ValidationError("Filepath must be at most 120 characters long.")
-        return value.strip()
+        """Validate uploaded file for FileField; allow empty (optional)."""
+        # File is optional
+        if value in (None, ""):
+            return None
+
+        # When uploading, DRF provides an UploadedFile instance
+        try:
+            from django.core.files.uploadedfile import UploadedFile
+        except Exception:
+            UploadedFile = None  # Fallback, should not happen
+
+        if UploadedFile is not None and isinstance(value, UploadedFile):
+            # Optionally, we could enforce name length to align with max_length
+            if hasattr(value, 'name') and len(value.name) > 255:
+                raise serializers.ValidationError("Filename must be at most 255 characters long.")
+            return value
+
+        # In some update cases DRF may pass a string path for existing files
+        if isinstance(value, str):
+            if len(value) > 255:
+                raise serializers.ValidationError("File path must be at most 255 characters long.")
+            return value
+
+        # Accept any other file-like object as-is
+        return value
 
     def validate(self, data):
         """Validate that at least one of project or client is set"""
@@ -1290,19 +1396,84 @@ class PropertySerializer(serializers.ModelSerializer):
     country = CountrySerializer(read_only=True)
     province = ProvinceSerializer(read_only=True)
     city = CitySerializer(read_only=True)
+    # Write-only fields for foreign keys
+    project_id = serializers.CharField(write_only=True, required=False)
+    country_id = serializers.CharField(write_only=True, required=False)
+    province_id = serializers.CharField(write_only=True, required=False)
+    city_id = serializers.CharField(write_only=True, required=False)
     
     class Meta:
         model = Property
         fields = '__all__'
 
+    def _assign_fk(self, validated_data, key, model, field_name):
+        obj_id = validated_data.pop(key, None)
+        if obj_id is None:
+            return
+        if obj_id == "":
+            validated_data[field_name] = None
+            return
+        try:
+            obj = model.objects.get(**{model._meta.pk.name: obj_id})
+            validated_data[field_name] = obj
+        except model.DoesNotExist:
+            raise serializers.ValidationError(f"{model.__name__} with ID '{obj_id}' does not exist.")
+
+    def create(self, validated_data):
+        from webapp.models import Project, Country, Province, City
+        self._assign_fk(validated_data, 'project_id', Project, 'project')
+        self._assign_fk(validated_data, 'country_id', Country, 'country')
+        self._assign_fk(validated_data, 'province_id', Province, 'province')
+        self._assign_fk(validated_data, 'city_id', City, 'city')
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        from webapp.models import Project, Country, Province, City
+        self._assign_fk(validated_data, 'project_id', Project, 'project')
+        self._assign_fk(validated_data, 'country_id', Country, 'country')
+        self._assign_fk(validated_data, 'province_id', Province, 'province')
+        self._assign_fk(validated_data, 'city_id', City, 'city')
+        return super().update(instance, validated_data)
+
 class BankProjectAccountSerializer(serializers.ModelSerializer):
     project = ProjectSerializer(read_only=True)
     client = ClientSerializer(read_only=True)
     bankclientacco = BankClientAccountSerializer(read_only=True)
+    # Write-only fields for foreign keys
+    project_id = serializers.CharField(write_only=True, required=False)
+    client_id = serializers.CharField(write_only=True, required=False)
+    bankclientacco_id = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
     
     class Meta:
         model = BankProjectAccount
         fields = '__all__'
+
+    def _assign_fk(self, validated_data, key, model, field_name):
+        obj_id = validated_data.pop(key, None)
+        if obj_id is None:
+            return
+        if obj_id == "":
+            validated_data[field_name] = None
+            return
+        try:
+            obj = model.objects.get(**{model._meta.pk.name: obj_id})
+            validated_data[field_name] = obj
+        except model.DoesNotExist:
+            raise serializers.ValidationError(f"{model.__name__} with ID '{obj_id}' does not exist.")
+
+    def create(self, validated_data):
+        from webapp.models import Project, Client, BankClientAccount
+        self._assign_fk(validated_data, 'project_id', Project, 'project')
+        self._assign_fk(validated_data, 'client_id', Client, 'client')
+        self._assign_fk(validated_data, 'bankclientacco_id', BankClientAccount, 'bankclientacco')
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        from webapp.models import Project, Client, BankClientAccount
+        self._assign_fk(validated_data, 'project_id', Project, 'project')
+        self._assign_fk(validated_data, 'client_id', Client, 'client')
+        self._assign_fk(validated_data, 'bankclientacco_id', BankClientAccount, 'bankclientacco')
+        return super().update(instance, validated_data)
 
 # Task related serializers
 class TaskCategorySerializer(serializers.ModelSerializer):
@@ -1311,7 +1482,7 @@ class TaskCategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {
             'active': {'required': False},  # Default to True
-            'orderindex': {'required': False, 'allow_null': True}
+            'orderindex': {'required': True, 'allow_null': False}
         }
 
     def validate_taskcate_id(self, value):
@@ -1330,29 +1501,25 @@ class TaskCategorySerializer(serializers.ModelSerializer):
             return value
 
     def validate_orderindex(self, value):
-        """Validate orderindex uniqueness"""
+        """Order index: required but not unique for TaskCategory."""
         if value in (None, ""):
-            return value
-        # Get the current instance (for updates) or None (for creates)
-        instance = getattr(self, 'instance', None)
-        
-        # Check if this orderindex is already taken by another task category
-        try:
-            existing_category = TaskCategory.objects.get(orderindex=value)
-            # If this is an update and the existing category is the same as the current instance, it's OK
-            if instance and existing_category.taskcate_id == instance.taskcate_id:
-                return value
-            raise serializers.ValidationError("This order index is already in use.")
-        except TaskCategory.DoesNotExist:
-            return value
+            raise serializers.ValidationError("Order index is required.")
+        return value
 
     def validate_title(self, value):
-        """Validate title format"""
+        """Validate title format and case-insensitive uniqueness"""
         if not value or len(value.strip()) < 2:
             raise serializers.ValidationError("Title must be at least 2 characters long.")
         if len(value.strip()) > 40:
             raise serializers.ValidationError("Title must be at most 40 characters long.")
-        return value.strip()
+        cleaned = value.strip()
+        instance = getattr(self, 'instance', None)
+        queryset = TaskCategory.objects.filter(title__iexact=cleaned)
+        if instance:
+            queryset = queryset.exclude(pk=instance.pk)
+        if queryset.exists():
+            raise serializers.ValidationError(f"Title '{cleaned}' already exists.")
+        return cleaned
 
     def create(self, validated_data):
         """Create a new task category with validation"""
@@ -1419,20 +1586,83 @@ class ProjectTaskSerializer(serializers.ModelSerializer):
 class TaskCommentSerializer(serializers.ModelSerializer):
     projtask = ProjectTaskSerializer(read_only=True)
     consultant = ConsultantSerializer(read_only=True)
+    # Write-only ID fields for creation/update
+    projtask_id = serializers.CharField(write_only=True, required=False)
+    consultant_id = serializers.CharField(write_only=True, required=False)
     
     class Meta:
         model = TaskComment
         fields = '__all__'
+
+    def _assign_fk(self, validated_data, key, model, field_name):
+        obj_id = validated_data.pop(key, None)
+        if obj_id is None:
+            return
+        if obj_id == "":
+            validated_data[field_name] = None
+            return
+        try:
+            obj = model.objects.get(**{model._meta.pk.name: obj_id})
+            validated_data[field_name] = obj
+        except model.DoesNotExist:
+            raise serializers.ValidationError(f"{model.__name__} with ID '{obj_id}' does not exist.")
+
+    def create(self, validated_data):
+        from webapp.models import ProjectTask
+        from accounts.models import Consultant
+        self._assign_fk(validated_data, 'projtask_id', ProjectTask, 'projtask')
+        self._assign_fk(validated_data, 'consultant_id', Consultant, 'consultant')
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        from webapp.models import ProjectTask
+        from accounts.models import Consultant
+        self._assign_fk(validated_data, 'projtask_id', ProjectTask, 'projtask')
+        self._assign_fk(validated_data, 'consultant_id', Consultant, 'consultant')
+        return super().update(instance, validated_data)
 
 # Cash and taxation serializers
 class CashSerializer(serializers.ModelSerializer):
     project = ProjectSerializer(read_only=True)
     country = CountrySerializer(read_only=True)
     consultant = ConsultantSerializer(read_only=True)
+    # Write-only fields for foreign keys
+    project_id = serializers.CharField(write_only=True, required=False)
+    country_id = serializers.CharField(write_only=True, required=False)
+    consultant_id = serializers.CharField(write_only=True, required=False)
     
     class Meta:
         model = Cash
         fields = '__all__'
+
+    def _assign_fk(self, validated_data, key, model, field_name):
+        obj_id = validated_data.pop(key, None)
+        if obj_id is None:
+            return
+        if obj_id == "":
+            validated_data[field_name] = None
+            return
+        try:
+            obj = model.objects.get(**{model._meta.pk.name: obj_id})
+            validated_data[field_name] = obj
+        except model.DoesNotExist:
+            raise serializers.ValidationError(f"{model.__name__} with ID '{obj_id}' does not exist.")
+
+    def create(self, validated_data):
+        from webapp.models import Project, Country
+        from accounts.models import Consultant
+        self._assign_fk(validated_data, 'project_id', Project, 'project')
+        self._assign_fk(validated_data, 'country_id', Country, 'country')
+        self._assign_fk(validated_data, 'consultant_id', Consultant, 'consultant')
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        from webapp.models import Project, Country
+        from accounts.models import Consultant
+        self._assign_fk(validated_data, 'project_id', Project, 'project')
+        self._assign_fk(validated_data, 'country_id', Country, 'country')
+        self._assign_fk(validated_data, 'consultant_id', Consultant, 'consultant')
+        return super().update(instance, validated_data)
 
 class TaxationProjectSerializer(serializers.ModelSerializer):
     client = ClientSerializer(read_only=True)

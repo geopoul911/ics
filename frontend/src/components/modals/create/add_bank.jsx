@@ -42,7 +42,7 @@ function AddBankModal() {
   const [bankId, setBankId] = useState(""); // maps to bank_id
   const [bankname, setBankname] = useState(""); // required
   const [country, setCountry] = useState(""); // required - this will store country_id
-  const [orderindex, setOrderindex] = useState(""); // required small int
+  const [orderindex, setOrderindex] = useState(""); // required
   const [institutionnumber, setInstitutionnumber] = useState(""); // required
   const [swiftcode, setSwiftcode] = useState(""); // required
   const [active, setActive] = useState(true); // optional, default true
@@ -72,7 +72,7 @@ function AddBankModal() {
     setBankId("");
     setBankname("");
     setCountry("");
-    setOrderindex("");
+    setOrderindex(0);
     setInstitutionnumber("");
     setSwiftcode("");
     setActive(true);
@@ -240,10 +240,10 @@ function AddBankModal() {
                     value={orderindex}
                     onChange={(e) => setOrderindex(toSmallInt(e.target.value))}
                     placeholder="Enter order index"
-                    isInvalid={orderindex !== "" && !isOrderIndexValid}
+                    isInvalid={!isOrderIndexValid}
                   />
                   <Form.Control.Feedback type="invalid">
-                    Please enter a valid order index
+                    Order Index is required and must be an integer
                   </Form.Control.Feedback>
                 </Form.Group>
               </Col>
@@ -324,7 +324,7 @@ function AddBankModal() {
                 {!isOrderIndexValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Order Index is required (valid number).
+                    Order Index is required and must be an integer.
                   </li>
                 )}
                 {!isInstitutionNumberValid && (

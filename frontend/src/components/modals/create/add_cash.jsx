@@ -68,15 +68,30 @@ function AddCashModal({ onCashCreated }) {
     }
   }, [show]);
 
+  // Clear the irrelevant amount field when kind changes
+  useEffect(() => {
+    if (kind === "E") {
+      setAmountpay("");
+    } else if (kind === "P") {
+      setAmountexp("");
+    }
+  }, [kind]);
+
   const loadDropdownData = async () => {
     try {
       console.log('Loading dropdown data...');
 
+      // Update headers with current token
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+
       // Load reference data for dropdowns using axios
       const [projectsRes, countriesRes, consultantsRes] = await Promise.all([
-        axios.get("http://localhost:8000/api/data_management/all_projects/"),
-        axios.get("http://localhost:8000/api/data_management/all_countries/"),
-        axios.get("http://localhost:8000/api/administration/all_consultants/")
+        axios.get("http://localhost:8000/api/data_management/all_projects/", { headers: currentHeaders }),
+        axios.get("http://localhost:8000/api/regions/all_countries/", { headers: currentHeaders }),
+        axios.get("http://localhost:8000/api/administration/all_consultants/", { headers: currentHeaders })
       ]);
 
       console.log('Raw API responses:', {
@@ -119,9 +134,9 @@ function AddCashModal({ onCashCreated }) {
   const isCountryValid = country.length > 0;
   const isTrandateValid = trandate.length > 0;
   const isConsultantValid = consultant.length > 0;
-  const isKindValid = kind.length > 0;
+  const isReasonValid = reason.trim().length >= 1 && reason.trim().length <= 120;
 
-  const isFormValid = isCashIdValid && isProjectValid && isCountryValid && isTrandateValid && isConsultantValid && isKindValid;
+  const isFormValid = isCashIdValid && isProjectValid && isCountryValid && isTrandateValid && isConsultantValid && isReasonValid;
 
   const createNewCash = async () => {
     try {
@@ -145,8 +160,8 @@ function AddCashModal({ onCashCreated }) {
           kind: kind,
 
           // Optional fields
-          amountexp: amountexp.trim() || null,
-          amountpay: amountpay.trim() || null,
+          amountexp: kind === 'E' ? (amountexp.trim() || null) : null,
+          amountpay: kind === 'P' ? (amountpay.trim() || null) : null,
           reason: reason.trim() || null,
         },
       });
@@ -284,7 +299,7 @@ function AddCashModal({ onCashCreated }) {
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Kind *:</Form.Label>
+                      <Form.Label>Kind:</Form.Label>
                       <Form.Control
                         as="select"
                         onChange={(e) => setKind(e.target.value)}
@@ -297,33 +312,39 @@ function AddCashModal({ onCashCreated }) {
                   </Col>
                 </Row>
 
-                <Row>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Amount Expense:</Form.Label>
-                      <Form.Control
-                        type="number"
-                        placeholder="e.g., 100.00"
-                        onChange={(e) => setAmountexp(e.target.value)}
-                        value={amountexp}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Amount Payment:</Form.Label>
-                      <Form.Control
-                        type="number"
-                        placeholder="e.g., 100.00"
-                        onChange={(e) => setAmountpay(e.target.value)}
-                        value={amountpay}
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
+                {kind === 'E' && (
+                  <Row>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Amount Expense:</Form.Label>
+                        <Form.Control
+                          type="number"
+                          placeholder="e.g., 100.00"
+                          onChange={(e) => setAmountexp(e.target.value)}
+                          value={amountexp}
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                )}
+                {kind === 'P' && (
+                  <Row>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Amount Payment:</Form.Label>
+                        <Form.Control
+                          type="number"
+                          placeholder="e.g., 100.00"
+                          onChange={(e) => setAmountpay(e.target.value)}
+                          value={amountpay}
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                )}
 
                 <Form.Group className="mb-3">
-                  <Form.Label>Reason:</Form.Label>
+                  <Form.Label>Reason *:</Form.Label>
                   <Form.Control
                     as="textarea"
                     rows={3}
@@ -374,10 +395,10 @@ function AddCashModal({ onCashCreated }) {
                     Consultant is required.
                   </li>
                 )}
-                {!isKindValid && (
+                {!isReasonValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Kind is required.
+                    Reason is required (1–120 chars).
                   </li>
                 )}
               </ul>

@@ -40,7 +40,7 @@ function AddCityModal() {
   const [cityId, setCityId] = useState(""); // maps to city_id
   const [countryId, setCountryId] = useState(""); // maps to country_id
   const [provinceId, setProvinceId] = useState(""); // maps to province_id
-  const [orderindex, setOrderindex] = useState(""); // optional small int
+  const [orderindex, setOrderindex] = useState(""); // required
 
   const resetForm = () => {
     setTitle("");
@@ -60,7 +60,7 @@ function AddCityModal() {
   const isCityIdValid = cityId.length >= 2 && cityId.length <= 10;
   const isCountryIdValid = countryId.length > 0;
   const isProvinceIdValid = provinceId.length > 0;
-  const isOrderIndexValid = orderindex === "" || Number.isInteger(+orderindex);
+  const isOrderIndexValid = orderindex !== "" && Number.isInteger(+orderindex);
 
   const isFormValid = isTitleValid && isCityIdValid && isCountryIdValid && isProvinceIdValid && isOrderIndexValid;
 
@@ -149,7 +149,7 @@ function AddCityModal() {
           city_id: cityId,
           country_id: countryId, // Use country_id instead of country
           province_id: provinceId, // Use province_id instead of province
-          orderindex: orderindex === "" ? null : Number(orderindex),
+          orderindex: Number(orderindex),
         },
       });
 
@@ -267,7 +267,7 @@ function AddCityModal() {
                 </Form.Group>
 
                 <Form.Group className="mb-3">
-                  <Form.Label>Order Index:</Form.Label>
+                  <Form.Label>Order Index*:</Form.Label>
                   <Form.Control
                     type="number"
                     placeholder="e.g., 1"
@@ -314,7 +314,7 @@ function AddCityModal() {
                 {!isOrderIndexValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Order Index must be an integer when provided.
+                    Order Index is required and must be an integer.
                   </li>
                 )}
               </ul>

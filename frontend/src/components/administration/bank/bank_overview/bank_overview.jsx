@@ -210,11 +210,11 @@ class BankOverview extends React.Component {
                     </Card.Body>
                     <Card.Footer>
                       <DeleteObjectModal
-                        object_id={bank.bank_id}
-                        object_name={bank.bankname}
-                        object_type="Bank"
+                        objectId={bank.bank_id}
+                        objectName={bank.bankname}
+                        objectType="Bank"
                         warningMessage="This will also delete all bank client accounts and bank project accounts associated with this bank."
-                        onDeleteSuccess={() => {
+                        onObjectDeleted={() => {
                           window.location.href = "/administration/all_banks";
                         }}
                       />

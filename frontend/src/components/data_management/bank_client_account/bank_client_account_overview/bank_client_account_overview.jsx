@@ -8,7 +8,7 @@ import Footer from "../../../core/footer/footer";
 // Icons / Images
 import { FaHashtag, FaSort, FaStop } from "react-icons/fa";
 import { BsInfoSquare } from "react-icons/bs";
-import { MdCheckCircle, MdCancel, MdSecurity } from "react-icons/md";
+import { MdCheckCircle, MdCancel } from "react-icons/md";
 
 // Modules / Functions
 import { Card } from "react-bootstrap";
@@ -231,6 +231,13 @@ class BankClientAccountOverview extends React.Component {
                       </span>
                     </div>
                   </Card.Body>
+                  <Card.Footer>
+                    <DeleteObjectModal
+                      object={bankClientAccount}
+                      objectType="BankClientAccount"
+                      objectName={bankClientAccount.accountnumber}
+                    />
+                  </Card.Footer>
                 </Card>
               </Grid.Column>
               <Grid.Column>
@@ -285,21 +292,7 @@ class BankClientAccountOverview extends React.Component {
                     </div>
                   </Card.Body>
                 </Card>
-                <Card style={{ marginTop: 20 }}>
-                  <Card.Header>
-                    <h4>
-                      <MdSecurity style={overviewIconStyle} />
-                      Actions
-                    </h4>
-                  </Card.Header>
-                  <Card.Body>
-                    <DeleteObjectModal
-                      object={bankClientAccount}
-                      objectType="BankClientAccount"
-                      objectName={bankClientAccount.accountnumber}
-                    />
-                  </Card.Body>
-                </Card>
+                
               </Grid.Column>
             </Grid>
           </div>

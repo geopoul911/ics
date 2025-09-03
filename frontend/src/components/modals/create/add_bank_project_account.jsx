@@ -1,5 +1,5 @@
 // Built-ins
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 // Icons / Images
 import { BiPlus } from "react-icons/bi";
@@ -18,30 +18,36 @@ import { headers } from "../../global_vars";
 // Variables
 window.Swal = Swal;
 
-// API endpoints
-const CREATE_BANK_PROJECT_ACCOUNT = "http://localhost:8000/api/data_management/bank_project_accounts/";
-const ALL_PROJECTS = "http://localhost:8000/api/data_management/all_projects/";
-const ALL_CLIENTS = "http://localhost:8000/api/data_management/all_clients/";
-const ALL_BANK_CLIENT_ACCOUNTS = "http://localhost:8000/api/data_management/bank_client_accounts/";
+// API endpoint
+const ADD_BANK_PROJECT_ACCOUNT = "http://localhost:8000/api/data_management/bank_project_accounts/";
+const GET_PROJECTS = "http://localhost:8000/api/data_management/all_projects/";
+const GET_CLIENTS = "http://localhost:8000/api/data_management/all_clients/";
+const GET_BANK_CLIENT_ACCOUNTS = "http://localhost:8000/api/data_management/all_bank_client_accounts/";
 
-function AddBankProjectAccountModal({ onBankProjectAccountCreated }) {
+// Helpers
+const onlyAlphanumeric = (value) => value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+const clampLen = (value, max) => value.slice(0, max);
+
+function AddBankProjectAccountModal({ onCreated }) {
   const [show, setShow] = useState(false);
 
-  // Form state
-  const [project_id, setProject_id] = useState("");
-  const [client_id, setClient_id] = useState("");
-  const [bankclientacco_id, setBankclientacco_id] = useState("");
-  const [notes, setNotes] = useState("");
-
-  // Dropdown data
+  // Dropdowns
   const [projects, setProjects] = useState([]);
   const [clients, setClients] = useState([]);
   const [bankClientAccounts, setBankClientAccounts] = useState([]);
 
+  // Form state
+  const [bankProjAccoId, setBankProjAccoId] = useState(""); // bankprojacco_id
+  const [projectId, setProjectId] = useState(""); // required
+  const [clientId, setClientId] = useState(""); // required
+  const [bankClientAccoId, setBankClientAccoId] = useState(""); // optional
+  const [notes, setNotes] = useState(""); // optional
+
   const resetForm = () => {
-    setProject_id("");
-    setClient_id("");
-    setBankclientacco_id("");
+    setBankProjAccoId("");
+    setProjectId("");
+    setClientId("");
+    setBankClientAccoId("");
     setNotes("");
   };
 
@@ -51,50 +57,75 @@ function AddBankProjectAccountModal({ onBankProjectAccountCreated }) {
     setShow(true);
   };
 
-  // Load dropdown data when modal opens
+  // Load dropdowns when modal opens
   useEffect(() => {
     if (show) {
-      loadDropdownData();
+      loadDropdowns();
     }
   }, [show]);
 
-  const loadDropdownData = async () => {
+  const loadDropdowns = async () => {
     try {
-      const projectsRes = await axios.get(ALL_PROJECTS, { headers });
-      setProjects(projectsRes.data.all_projects || []);
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken"),
+      };
+      const [projectsRes, clientsRes, bankClientAccosRes] = await Promise.all([
+        axios.get(GET_PROJECTS, { headers: currentHeaders }),
+        axios.get(GET_CLIENTS, { headers: currentHeaders }),
+        axios.get(GET_BANK_CLIENT_ACCOUNTS, { headers: currentHeaders }),
+      ]);
 
-      const clientsRes = await axios.get(ALL_CLIENTS, { headers });
-      setClients(clientsRes.data.all_clients || []);
-
-      const bankAccRes = await axios.get(ALL_BANK_CLIENT_ACCOUNTS, { headers });
-      setBankClientAccounts(bankAccRes.data.all_bank_client_accounts || []);
+      setProjects(projectsRes?.data?.all_projects || []);
+      setClients(clientsRes?.data?.all_clients || []);
+      setBankClientAccounts(bankClientAccosRes?.data?.all_bank_client_accounts || []);
     } catch (error) {
-      console.error("Error fetching dropdown data:", error);
+      console.error("Dropdowns load error:", error);
+      setProjects([]);
+      setClients([]);
+      setBankClientAccounts([]);
     }
   };
 
   // Validation
-  const isProjectValid = project_id !== "";
-  const isClientValid = client_id !== "";
-  const isBankClientAccountValid = bankclientacco_id !== "";
-  const isFormValid = isProjectValid && isClientValid && isBankClientAccountValid;
+  const isIdValid = bankProjAccoId.length >= 2 && bankProjAccoId.length <= 10;
+  const isProjectValid = projectId !== "";
+  const isClientValid = clientId !== "";
+  const isFormValid = isIdValid && isProjectValid && isClientValid;
 
-  const createNewBankProjectAccount = async () => {
-    if (!isFormValid) return;
+  const createNew = async () => {
     try {
-      await axios.post(
-        CREATE_BANK_PROJECT_ACCOUNT,
-        { project_id, client_id, bankclientacco_id, notes },
-        { headers }
-      );
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken"),
+      };
 
-      Swal.fire("Success", "Bank Project Account created successfully", "success");
-      if (onBankProjectAccountCreated) onBankProjectAccountCreated();
-      handleClose();
+      const payload = {
+        bankprojacco_id: bankProjAccoId,
+        project_id: projectId,
+        client_id: clientId,
+        bankclientacco_id: bankClientAccoId || "",
+        notes: notes.trim() || null,
+      };
+
+      const res = await axios.post(ADD_BANK_PROJECT_ACCOUNT, payload, { headers: currentHeaders });
+      if (res.status === 201) {
+        Swal.fire({ icon: "success", title: "Success!", text: "Bank project account created successfully." });
+        handleClose();
+        onCreated && onCreated();
+      }
     } catch (e) {
-      console.error("Error creating bank project account:", e);
-      const errorMessage = e.response?.data?.error || "Failed to create bank project account";
-      Swal.fire("Error", errorMessage, "error");
+      console.error("Create bank project account error:", e);
+      let errorMessage = "An error occurred while creating the bank project account.";
+      if (e.response?.data?.error) {
+        errorMessage = e.response.data.error;
+      } else if (e.response?.data) {
+        const errors = e.response.data;
+        errorMessage = Object.entries(errors)
+          .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
+          .join('\n');
+      }
+      Swal.fire({ icon: "error", title: "Error", text: errorMessage });
     }
   };
 
@@ -105,131 +136,95 @@ function AddBankProjectAccountModal({ onBankProjectAccountCreated }) {
         Create new Bank Project Account
       </Button>
 
-      <Modal
-        show={show}
-        onHide={handleClose}
-        size="xl"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-      >
+      <Modal show={show} onHide={handleClose} size="lg" centered>
         <Modal.Header closeButton>
-          <Modal.Title id="contained-modal-title-vcenter">
-            Create new Bank Project Account
-          </Modal.Title>
+          <Modal.Title>Create new Bank Project Account</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Row className="justify-content-md-center">
-            <Col>
-              <Form>
-                {/* Basic Information */}
-                <h6 className="mb-3">Basic Information</h6>
-                <Row>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Project *</Form.Label>
-                      <Form.Select
-                        onChange={(e) => setProject_id(e.target.value)}
-                        value={project_id}
-                      >
-                        <option value="">Select Project</option>
-                        {Array.isArray(projects) && projects.map((p) => (
-                          <option key={p.project_id} value={p.project_id}>
-                            {p.title}
-                          </option>
-                        ))}
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Client *</Form.Label>
-                      <Form.Select
-                        onChange={(e) => setClient_id(e.target.value)}
-                        value={client_id}
-                      >
-                        <option value="">Select Client</option>
-                        {Array.isArray(clients) && clients.map((c) => (
-                          <option key={c.client_id} value={c.client_id}>
-                            {c.fullname || `${c.surname} ${c.name}`}
-                          </option>
-                        ))}
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                </Row>
+          <Form>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Bank Project Account ID *:</Form.Label>
+                  <Form.Control
+                    maxLength={10}
+                    placeholder="e.g., BPA001"
+                    value={bankProjAccoId}
+                    onChange={(e) => setBankProjAccoId(clampLen(onlyAlphanumeric(e.target.value), 10))}
+                    isInvalid={bankProjAccoId.length > 0 && !isIdValid}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    ID must be 2–10 alphanumeric characters.
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Project *:</Form.Label>
+                  <Form.Control as="select" value={projectId} onChange={(e) => setProjectId(e.target.value)}>
+                    <option value="">Select Project</option>
+                    {Array.isArray(projects) && projects.map((p) => (
+                      <option key={p.project_id} value={p.project_id}>{p.project_id} - {p.title}</option>
+                    ))}
+                  </Form.Control>
+                </Form.Group>
+              </Col>
+            </Row>
 
-                <Row>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Bank Client Account *</Form.Label>
-                      <Form.Select
-                        onChange={(e) => setBankclientacco_id(e.target.value)}
-                        value={bankclientacco_id}
-                      >
-                        <option value="">Select Account</option>
-                        {Array.isArray(bankClientAccounts) && bankClientAccounts.map((a) => (
-                          <option key={a.bankclientacco_id} value={a.bankclientacco_id}>
-                            {a.bank?.bankname ? `${a.bank.bankname} - ${a.accountnumber}` : a.accountnumber}
-                          </option>
-                        ))}
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Notes</Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        rows={3}
-                        onChange={(e) => setNotes(e.target.value)}
-                        value={notes}
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-              </Form>
-            </Col>
-          </Row>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Client *:</Form.Label>
+                  <Form.Control as="select" value={clientId} onChange={(e) => setClientId(e.target.value)}>
+                    <option value="">Select Client</option>
+                    {Array.isArray(clients) && clients.map((c) => (
+                      <option key={c.client_id} value={c.client_id}>{c.client_id} - {c.fullname || `${c.surname || ''} ${c.name || ''}`.trim()}</option>
+                    ))}
+                  </Form.Control>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Bank Client Account:</Form.Label>
+                  <Form.Control as="select" value={bankClientAccoId} onChange={(e) => setBankClientAccoId(e.target.value)}>
+                    <option value="">Select Bank Client Account (optional)</option>
+                    {Array.isArray(bankClientAccounts) && bankClientAccounts.map((a) => (
+                      <option key={a.bankclientacco_id} value={a.bankclientacco_id}>{a.bankclientacco_id} - {a.bank?.bankname || ''} - {a.accountnumber}</option>
+                    ))}
+                  </Form.Control>
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Notes:</Form.Label>
+              <Form.Control as="textarea" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notes (optional)" />
+            </Form.Group>
+          </Form>
         </Modal.Body>
         <Modal.Footer>
           <small className="mr-auto">
             {!isFormValid ? (
               <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                {!isIdValid && (
+                  <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> ID is required (2–10 alphanumeric chars).</li>
+                )}
                 {!isProjectValid && (
-                  <li>
-                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Project is required.
-                  </li>
+                  <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> Project is required.</li>
                 )}
                 {!isClientValid && (
-                  <li>
-                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Client is required.
-                  </li>
-                )}
-                {!isBankClientAccountValid && (
-                  <li>
-                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Bank Client Account is required.
-                  </li>
+                  <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> Client is required.</li>
                 )}
               </ul>
             ) : (
               <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
-                <li>
-                  <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
-                  Validated
-                </li>
+                <li><AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} /> Validated</li>
               </ul>
             )}
           </small>
 
-          <Button color="red" onClick={handleClose}>
-            Close
-          </Button>
-          <Button color="green" onClick={createNewBankProjectAccount} disabled={!isFormValid}>
-            Save Changes
-          </Button>
+          <Button color="red" onClick={handleClose}>Close</Button>
+          <Button color="green" onClick={createNew} disabled={!isFormValid}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>

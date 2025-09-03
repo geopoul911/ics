@@ -48,7 +48,7 @@ export default function AddTaskCategoryModal({ onTaskCategoryCreated }) {
 
   const isTaskcateIdValid = taskcate_id.trim().length >= 2 && taskcate_id.trim().length <= 10;
   const isTitleValid = title.trim().length >= 2 && title.trim().length <= 40;
-  const isOrderIndexValid = orderindex.trim().length > 0 && !isNaN(orderindex);
+  const isOrderIndexValid = String(orderindex).trim().length > 0 && !isNaN(orderindex);
 
   const createTaskCategory = async () => {
     if (!isTaskcateIdValid || !isTitleValid || !isOrderIndexValid) {
@@ -69,7 +69,7 @@ export default function AddTaskCategoryModal({ onTaskCategoryCreated }) {
       const payload = {
         taskcate_id: taskcate_id.trim().toUpperCase(),
         title: title.trim(),
-        orderindex: parseInt(orderindex),
+        orderindex: Number(orderindex),
         active: active,
       };
 
@@ -173,7 +173,7 @@ export default function AddTaskCategoryModal({ onTaskCategoryCreated }) {
 
             <Form.Group as={Row}>
               <Form.Label column sm={3}>
-                Order Index:
+                Order Index *:
               </Form.Label>
               <Col sm={9}>
                 <Form.Control
@@ -181,11 +181,8 @@ export default function AddTaskCategoryModal({ onTaskCategoryCreated }) {
                   value={orderindex}
                   onChange={(e) => setOrderIndex(validateOrderIndex(clampLen(e.target.value, 5)))}
                   placeholder="Enter order index (numeric)"
-                  isInvalid={orderindex !== "" && !isOrderIndexValid}
+                  isInvalid={!isOrderIndexValid}
                 />
-                <Form.Control.Feedback type="invalid">
-                  Order index must be a valid number
-                </Form.Control.Feedback>
               </Col>
             </Form.Group>
 
@@ -226,7 +223,7 @@ export default function AddTaskCategoryModal({ onTaskCategoryCreated }) {
                 {!isOrderIndexValid && (
                   <li>
                     <AiOutlineWarning style={{ marginRight: 5 }} />
-                    Order index must be a valid number
+                    Order index must be a valid number when provided
                   </li>
                 )}
               </ul>

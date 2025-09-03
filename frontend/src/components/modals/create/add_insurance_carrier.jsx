@@ -67,7 +67,7 @@ export default function AddInsuranceCarrierModal({ onInsuranceCarrierCreated }) 
     formData.insucarrier_id.trim().length <= 10 &&
     formData.title.trim().length >= 2 &&
     formData.title.trim().length <= 40 &&
-    (formData.orderindex === "" || Number.isInteger(+formData.orderindex))
+    (formData.orderindex !== "" && Number.isInteger(+formData.orderindex))
   );
 
   const createNewInsuranceCarrier = async () => {
@@ -89,7 +89,7 @@ export default function AddInsuranceCarrierModal({ onInsuranceCarrierCreated }) 
       const payload = {
         insucarrier_id: formData.insucarrier_id.trim().toUpperCase(),
         title: formData.title.trim(),
-        orderindex: formData.orderindex === "" ? null : Number(formData.orderindex),
+        orderindex: Number(formData.orderindex),
         active: formData.active,
       };
 
@@ -195,7 +195,7 @@ export default function AddInsuranceCarrierModal({ onInsuranceCarrierCreated }) 
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Order Index:</Form.Label>
+              <Form.Label>Order Index *</Form.Label>
               <Form.Control
                 type="number"
                 name="orderindex"
@@ -204,14 +204,11 @@ export default function AddInsuranceCarrierModal({ onInsuranceCarrierCreated }) 
                   ...prev,
                   orderindex: toSmallInt(e.target.value)
                 }))}
-                placeholder="Optional: numeric"
-                isInvalid={
-                  formData.orderindex !== "" &&
-                  !Number.isInteger(+formData.orderindex)
-                }
+                placeholder="Enter order index (numeric)"
+                isInvalid={!Number.isInteger(+formData.orderindex)}
               />
               <Form.Control.Feedback type="invalid">
-                Please enter a valid order index when provided
+                Order index is required and must be a valid number
               </Form.Control.Feedback>
             </Form.Group>
 
@@ -257,10 +254,16 @@ export default function AddInsuranceCarrierModal({ onInsuranceCarrierCreated }) 
                     Title must be 2–40 chars.
                   </li>
                 )}
-                {formData.orderindex !== "" && !Number.isInteger(+formData.orderindex) && (
+                {!Number.isInteger(+formData.orderindex) && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Order Index must be a valid number.
+                    Order Index is required and must be a valid number.
+                  </li>
+                )}
+                {formData.orderindex === "" && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Order Index is required and must be a valid number.
                   </li>
                 )}
               </ul>

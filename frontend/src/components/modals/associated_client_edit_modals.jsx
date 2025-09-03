@@ -39,7 +39,11 @@ export function EditAssociatedClientProjectModal({ associatedClient, update_stat
 
   const loadProjects = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/data_management/all_projects/");
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      const response = await axios.get("http://localhost:8000/api/data_management/all_projects/", { headers: currentHeaders });
       const projectsData = response?.data?.all_projects || [];
       setProjects(projectsData);
     } catch (error) {
@@ -85,8 +89,7 @@ export function EditAssociatedClientProjectModal({ associatedClient, update_stat
   return (
     <>
       <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
+        <FiEdit style={{ marginRight: 6 }} /> Edit Project
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -94,7 +97,6 @@ export function EditAssociatedClientProjectModal({ associatedClient, update_stat
           <Modal.Title>Edit Project</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Project *:</Form.Label>
               <Form.Control
@@ -110,19 +112,19 @@ export function EditAssociatedClientProjectModal({ associatedClient, update_stat
                 ))}
               </Form.Control>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={!project.trim() || isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto">
+            {project.trim() ? (
+              <div style={{ color: "green" }}>Looks good.</div>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>Project is required</li>
+              </ul>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!project.trim() || isLoading}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -145,7 +147,11 @@ export function EditAssociatedClientClientModal({ associatedClient, update_state
 
   const loadClients = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/data_management/all_clients/");
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      const response = await axios.get("http://localhost:8000/api/data_management/all_clients/", { headers: currentHeaders });
       const clientsData = response?.data?.all_clients || [];
       setClients(clientsData);
     } catch (error) {
@@ -191,8 +197,7 @@ export function EditAssociatedClientClientModal({ associatedClient, update_state
   return (
     <>
       <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
+        <FiEdit style={{ marginRight: 6 }} /> Edit Client
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -200,7 +205,6 @@ export function EditAssociatedClientClientModal({ associatedClient, update_state
           <Modal.Title>Edit Client</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Client *:</Form.Label>
               <Form.Control
@@ -211,24 +215,24 @@ export function EditAssociatedClientClientModal({ associatedClient, update_state
                 <option value="">Select Client</option>
                 {clients.map((cli) => (
                   <option key={cli.client_id} value={cli.client_id}>
-                    {cli.surname} {cli.name}
+                    {cli.client_id} - {cli.fullname || `${cli.surname} ${cli.name}`}
                   </option>
                 ))}
               </Form.Control>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={!client.trim() || isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto">
+            {client.trim() ? (
+              <div style={{ color: "green" }}>Looks good.</div>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>Client is required</li>
+              </ul>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!client.trim() || isLoading}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -243,7 +247,11 @@ export function EditAssociatedClientOrderindexModal({ associatedClient, update_s
 
   useEffect(() => {
     if (show) {
-      setOrderindex(associatedClient.orderindex || "");
+      setOrderindex(
+        associatedClient.orderindex === 0 || associatedClient.orderindex
+          ? String(associatedClient.orderindex)
+          : ""
+      );
     }
   }, [show, associatedClient]);
 
@@ -251,12 +259,13 @@ export function EditAssociatedClientOrderindexModal({ associatedClient, update_s
   const handleShow = () => setShow(true);
 
   const handleSave = async () => {
-    if (!orderindex.trim()) {
+    const orderStr = String(orderindex).trim();
+    if (!orderStr) {
       Swal.fire("Error", "Order index is required", "error");
       return;
     }
 
-    const orderIndexNum = parseInt(orderindex);
+    const orderIndexNum = parseInt(orderStr, 10);
     if (isNaN(orderIndexNum) || orderIndexNum < 0) {
       Swal.fire("Error", "Order index must be a positive number", "error");
       return;
@@ -290,8 +299,7 @@ export function EditAssociatedClientOrderindexModal({ associatedClient, update_s
   return (
     <>
       <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
+        <FiEdit style={{ marginRight: 6 }} /> Edit Order Index
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -299,7 +307,6 @@ export function EditAssociatedClientOrderindexModal({ associatedClient, update_s
           <Modal.Title>Edit Order Index</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Order Index *:</Form.Label>
               <Form.Control
@@ -309,19 +316,22 @@ export function EditAssociatedClientOrderindexModal({ associatedClient, update_s
                 placeholder="Enter order index"
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={!orderindex.trim() || isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto">
+            {String(orderindex).trim() && !isNaN(parseInt(orderindex, 10)) && parseInt(orderindex, 10) >= 0 ? (
+              <div style={{ color: "green" }}>Looks good.</div>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                {!String(orderindex).trim() && (<li>Order index is required</li>)}
+                {(String(orderindex).trim() && (isNaN(parseInt(orderindex, 10)) || parseInt(orderindex, 10) < 0)) && (
+                  <li>Order index must be a positive number</li>
+                )}
+              </ul>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!String(orderindex).trim() || isLoading}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -372,8 +382,7 @@ export function EditAssociatedClientNotesModal({ associatedClient, update_state 
   return (
     <>
       <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
+        <FiEdit style={{ marginRight: 6 }} /> Edit Notes
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -381,7 +390,6 @@ export function EditAssociatedClientNotesModal({ associatedClient, update_state 
           <Modal.Title>Edit Notes</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Notes:</Form.Label>
               <Form.Control
@@ -392,7 +400,6 @@ export function EditAssociatedClientNotesModal({ associatedClient, update_state 
                 placeholder="Enter notes"
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
           <Button color="red" onClick={handleClose} disabled={isLoading}>

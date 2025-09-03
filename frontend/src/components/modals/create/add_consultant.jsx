@@ -128,18 +128,18 @@ function AddConsultantModal() {
 
   const isConsultantIdValid = consultantId.length >= 2 && consultantId.length <= 10;
   const isFullnameValid = fullname.trim().length >= 2 && fullname.trim().length <= 40;
-  const isEmailValid = email !== "" && email.includes("@") && email.length >= 5;
-  const isPhoneValid = phone !== "" && phone.length <= 15;
-  const isMobileValid = mobile !== "" && mobile.length <= 15;
+  const isEmailValid = email !== "" && email.includes("@") && email.length >= 5; // required
+  const isPhoneValid = !phone || phone.length <= 15; // optional
+  const isMobileValid = mobile !== "" && mobile.length <= 15; // required
   const isRoleValid = ["A", "S", "U", "C"].includes(role);
   const isUsernameValid = username.length >= 3 && username.length <= 15;
   const isPasswordValid = validatePassword(password) && password === confirmPassword;
-  const isCashPassportValid = cashPassport !== "" && cashPassport.length <= 120 && countryCodeRegex.test(cashPassport);
-  const isOrderIndexValid = orderindex !== "" && Number.isInteger(+orderindex);
+  const isCashPassportValid = !cashPassport || (cashPassport.length <= 120 && countryCodeRegex.test(cashPassport)); // optional
+  const isOrderIndexValid = orderindex !== "" && Number.isInteger(+orderindex); // required
 
-  const isFormValid = isConsultantIdValid && isFullnameValid && isEmailValid && 
-                     isPhoneValid && isMobileValid && isRoleValid && 
-                     isUsernameValid && isPasswordValid && isCashPassportValid && 
+  const isFormValid = isConsultantIdValid && isFullnameValid && isEmailValid &&
+                     isPhoneValid && isMobileValid && isRoleValid &&
+                     isUsernameValid && isPasswordValid && isCashPassportValid &&
                      isOrderIndexValid;
 
   const createNewConsultant = async () => {
@@ -156,15 +156,16 @@ function AddConsultantModal() {
       const formData = new FormData();
       formData.append('consultant_id', consultantId);
       formData.append('fullname', fullname.trim());
-      formData.append('email', email || '');
-      formData.append('phone', phone || '');
-      formData.append('mobile', mobile || '');
+      formData.append('email', email);
+      if (phone) formData.append('phone', phone);
+      formData.append('mobile', mobile);
       formData.append('role', role);
       formData.append('username', username);
       formData.append('password', password);
       formData.append('canassigntask', canAssignTask);
-      formData.append('cashpassport', cashPassport || '');
+      if (cashPassport) formData.append('cashpassport', cashPassport);
       formData.append('active', active);
+      // Order index is required
       formData.append('orderindex', Number(orderindex));
       
       // Add photo if selected
@@ -309,7 +310,7 @@ function AddConsultantModal() {
                </Col>
                <Col md={6}>
                  <Form.Group>
-                   <Form.Label>Phone *</Form.Label>
+                   <Form.Label>Phone</Form.Label>
                    <Form.Control
                      type="text"
                      value={phone}
@@ -318,7 +319,7 @@ function AddConsultantModal() {
                      isInvalid={phone !== "" && !isPhoneValid}
                    />
                    <Form.Control.Feedback type="invalid">
-                     Phone number must be 15 characters or less
+                     Phone must be 15 characters or less.
                    </Form.Control.Feedback>
                  </Form.Group>
                </Col>
@@ -419,10 +420,10 @@ function AddConsultantModal() {
                     value={orderindex}
                     onChange={(e) => setOrderindex(toSmallInt(e.target.value))}
                     placeholder="Enter order index"
-                    isInvalid={orderindex !== "" && !isOrderIndexValid}
+                    isInvalid={!isOrderIndexValid}
                   />
                   <Form.Control.Feedback type="invalid">
-                    Please enter a valid order index
+                    Order Index is required and must be an integer
                   </Form.Control.Feedback>
                 </Form.Group>
               </Col>
@@ -470,7 +471,7 @@ function AddConsultantModal() {
                          <Row>
                <Col md={12}>
                  <Form.Group>
-                   <Form.Label>Cash Passport Countries *</Form.Label>
+                   <Form.Label>Cash Passport Countries</Form.Label>
                    <Form.Control
                      type="text"
                      value={cashPassport}
@@ -537,7 +538,7 @@ function AddConsultantModal() {
                  {!isPhoneValid && (
                    <li>
                      <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                     Phone is required (max 15 chars).
+                     Phone must be 15 characters or less.
                    </li>
                  )}
                  {!isMobileValid && (
@@ -567,13 +568,13 @@ function AddConsultantModal() {
                  {!isCashPassportValid && (
                    <li>
                      <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                     Cash Passport Countries is required. Format: 3 capital letters separated by comma + space (e.g., GRE, CAN, USA).
+                     Cash Passport Countries format: 3 capital letters separated by comma + space (e.g., GRE, CAN, USA).
                    </li>
                  )}
                  {!isOrderIndexValid && (
                    <li>
                      <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                     Order Index is required (integer).
+                     Order Index is required and must be an integer.
                    </li>
                  )}
                </ul>

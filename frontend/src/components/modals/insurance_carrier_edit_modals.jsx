@@ -118,7 +118,6 @@ export function EditInsuranceCarrierTitleModal({ insurance_carrier, update_state
           <Modal.Title>Edit Insurance Carrier Title</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group as={Row}>
               <Form.Label column sm={3}>
                 Title:
@@ -136,19 +135,25 @@ export function EditInsuranceCarrierTitleModal({ insurance_carrier, update_state
                 </Form.Control.Feedback>
               </Col>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={onSave}
-            disabled={!isTitleValid}
-          >
-            Save Changes
-          </Button>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <small style={{ color: isTitleValid ? "green" : "red" }}>
+              {isTitleValid ? "Looks good." : "Title must be 2-40 characters."}
+            </small>
+            <div>
+              <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
+                Cancel
+              </Button>
+              <Button
+                color="green"
+                onClick={onSave}
+                disabled={!isTitleValid}
+              >
+                Save Changes
+              </Button>
+            </div>
+          </div>
         </Modal.Footer>
       </Modal>
     </>
@@ -243,7 +248,6 @@ export function EditInsuranceCarrierOrderIndexModal({ insurance_carrier, update_
           <Modal.Title>Edit Insurance Carrier Order Index</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group as={Row}>
               <Form.Label column sm={3}>
                 Order Index:
@@ -261,19 +265,25 @@ export function EditInsuranceCarrierOrderIndexModal({ insurance_carrier, update_
                 </Form.Control.Feedback>
               </Col>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={onSave}
-            disabled={!isOrderIndexValid}
-          >
-            Save Changes
-          </Button>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <small style={{ color: isOrderIndexValid ? "green" : "red" }}>
+              {isOrderIndexValid ? "Looks good." : "Order Index is required and must be an integer."}
+            </small>
+            <div>
+              <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
+                Cancel
+              </Button>
+              <Button
+                color="green"
+                onClick={onSave}
+                disabled={!isOrderIndexValid}
+              >
+                Save Changes
+              </Button>
+            </div>
+          </div>
         </Modal.Footer>
       </Modal>
     </>
@@ -357,7 +367,6 @@ export function EditInsuranceCarrierActiveModal({ insurance_carrier, update_stat
           <Modal.Title>Edit Insurance Carrier Active Status</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group as={Row}>
               <Form.Label column sm={3}>
                 Active:
@@ -371,18 +380,21 @@ export function EditInsuranceCarrierActiveModal({ insurance_carrier, update_stat
                 />
               </Col>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={onSave}
-          >
-            Save Changes
-          </Button>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <small style={{ color: "green" }}>
+              Ready to save.
+            </small>
+            <div>
+              <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
+                Cancel
+              </Button>
+              <Button color="green" onClick={onSave}>
+                Save Changes
+              </Button>
+            </div>
+          </div>
         </Modal.Footer>
       </Modal>
     </>

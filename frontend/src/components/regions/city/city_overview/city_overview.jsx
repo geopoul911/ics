@@ -7,7 +7,6 @@ import { FaHashtag } from "react-icons/fa";
 import { FiType } from "react-icons/fi";
 import { BiSort } from "react-icons/bi";
 import { FaGlobe } from "react-icons/fa";
-import { FaMapMarkerAlt } from "react-icons/fa";
 
 // Modules / Functions
 import { Card } from "react-bootstrap";
@@ -20,8 +19,7 @@ import {
   EditCityIdModal,
   EditCityTitleModal,
   EditCityOrderIndexModal,
-  EditCityCountryModal,
-  EditCityProvinceModal,
+  EditCityLocationModal,
 } from "../../../modals/city_edit_modals";
 import axios from "axios";
 
@@ -146,28 +144,14 @@ class CityOverview extends React.Component {
                         </span>
                       </div>
 
-                      {/* Country */}
+                      {/* Location (Country & Province) */}
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <FaGlobe style={overviewIconStyle} /> Country
+                        <FaGlobe style={overviewIconStyle} /> Country & Province
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
-                        {city.country?.title ? city.country.title : "N/A"}
+                        {(city.country?.title || "N/A")} {city.province?.title ? ` / ${city.province.title}` : ""}
                         <span style={{ position: "absolute", right: "0px", top: "50%", transform: "translateY(-50%)" }}>
-                          <EditCityCountryModal
-                            city={city}
-                            update_state={this.update_state}
-                          />
-                        </span>
-                      </div>
-
-                      {/* Province */}
-                      <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <FaMapMarkerAlt style={overviewIconStyle} /> Province
-                      </div>
-                      <div className={"info_span"} style={{ position: "relative" }}>
-                        {city.province?.title ? city.province.title : "N/A"}
-                        <span style={{ position: "absolute", right: "0px", top: "50%", transform: "translateY(-50%)" }}>
-                          <EditCityProvinceModal
+                          <EditCityLocationModal
                             city={city}
                             update_state={this.update_state}
                           />
@@ -193,11 +177,11 @@ class CityOverview extends React.Component {
                     </Card.Body>
                     <Card.Footer>
                       <DeleteObjectModal
-                        object_id={city.city_id}
-                        object_name={city.title}
-                        object_type="City"
+                        objectType="City"
+                        objectId={city.city_id}
+                        objectName={city.title}
                         warningMessage="This will delete the city and all associated data."
-                        onDeleteSuccess={() => {
+                        onObjectDeleted={() => {
                           window.location.href = "/regions/all_cities";
                         }}
                       />

@@ -109,7 +109,6 @@ export function EditTaskCategoryTitleModal({ task_category, onTaskCategoryUpdate
           <Modal.Title>Edit Task Category Title</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group as={Row}>
               <Form.Label column sm={3}>
                 Title:
@@ -127,7 +126,6 @@ export function EditTaskCategoryTitleModal({ task_category, onTaskCategoryUpdate
                 </Form.Control.Feedback>
               </Col>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
           <small className="mr-auto">
@@ -139,7 +137,7 @@ export function EditTaskCategoryTitleModal({ task_category, onTaskCategoryUpdate
             ) : (
               <div style={{ color: "green" }}>
                 <AiOutlineCheckCircle style={{ marginRight: 5 }} />
-                Title is valid!
+                Looks good.
               </div>
             )}
           </small>
@@ -241,7 +239,6 @@ export function EditTaskCategoryOrderIndexModal({ task_category, onTaskCategoryU
           <Modal.Title>Edit Task Category Order Index</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group as={Row}>
               <Form.Label column sm={3}>
                 Order Index:
@@ -259,7 +256,6 @@ export function EditTaskCategoryOrderIndexModal({ task_category, onTaskCategoryU
                 </Form.Control.Feedback>
               </Col>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
           <small className="mr-auto">
@@ -271,7 +267,7 @@ export function EditTaskCategoryOrderIndexModal({ task_category, onTaskCategoryU
             ) : (
               <div style={{ color: "green" }}>
                 <AiOutlineCheckCircle style={{ marginRight: 5 }} />
-                Order index is valid!
+                Looks good.
               </div>
             )}
           </small>
@@ -362,7 +358,6 @@ export function EditTaskCategoryActiveModal({ task_category, onTaskCategoryUpdat
           <Modal.Title>Edit Task Category Active Status</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group as={Row}>
               <Form.Label column sm={3}>
                 Active:
@@ -376,7 +371,6 @@ export function EditTaskCategoryActiveModal({ task_category, onTaskCategoryUpdat
                 />
               </Col>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
           <Button color="red" onClick={handleClose}>

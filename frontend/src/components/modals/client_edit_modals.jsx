@@ -80,7 +80,11 @@ export function EditClientLocationModal({ client, update_state }) {
 
   const loadProvinces = async (countryId) => {
     try {
-              const response = await axios.get(`http://localhost:8000/api/regions/all_provinces/?country=${countryId}`);
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      const response = await axios.get(`http://localhost:8000/api/regions/all_provinces/?country=${countryId}`, { headers: currentHeaders });
       const provincesData = response?.data?.all_provinces || [];
       setProvinces(provincesData);
     } catch (error) {
@@ -91,7 +95,11 @@ export function EditClientLocationModal({ client, update_state }) {
 
   const loadCities = async (provinceId) => {
     try {
-              const response = await axios.get(`http://localhost:8000/api/regions/all_cities/?province=${provinceId}`);
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      const response = await axios.get(`http://localhost:8000/api/regions/all_cities/?province=${provinceId}`, { headers: currentHeaders });
       const citiesData = response?.data?.all_cities || [];
       setCities(citiesData);
     } catch (error) {
@@ -155,7 +163,7 @@ export function EditClientLocationModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Location
       </Button>
-      <Modal show={show} onHide={handleClose} size="lg">
+      <Modal show={show} onHide={handleClose} size="lg" centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Location Information</Modal.Title>
         </Modal.Header>
@@ -165,7 +173,13 @@ export function EditClientLocationModal({ client, update_state }) {
             <Form.Control
               as="select"
               value={country}
-              onChange={(e) => setCountry(e.target.value)}
+              onChange={(e) => {
+                const newCountry = e.target.value;
+                setCountry(newCountry);
+                // Reset dependent selections when country changes
+                setProvince("");
+                setCity("");
+              }}
             >
               <option value="">Select Country</option>
               {countries.map((countryItem) => (
@@ -181,7 +195,12 @@ export function EditClientLocationModal({ client, update_state }) {
             <Form.Control
               as="select"
               value={province}
-              onChange={(e) => setProvince(e.target.value)}
+              onChange={(e) => {
+                const newProvince = e.target.value;
+                setProvince(newProvince);
+                // Reset dependent selection when province changes
+                setCity("");
+              }}
               disabled={!country}
             >
               <option value="">Select Province</option>
@@ -211,10 +230,27 @@ export function EditClientLocationModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            {(!country || !province || !city) ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                  Country, Province and City are required.
+                </li>
+              </ul>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+                <li>
+                  <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                  Validated
+                </li>
+              </ul>
+            )}
+          </small>
           <Button color="red" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
-          <Button color="green" onClick={handleSave} loading={isLoading}>
+          <Button color="green" onClick={handleSave} disabled={!country || !province || !city || isLoading}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -227,6 +263,7 @@ export function EditClientLocationModal({ client, update_state }) {
 export function EditClientSurnameModal({ client, update_state }) {
   const [show, setShow] = useState(false);
   const [surname, setSurname] = useState("");
+  const isSurnameValid = surname.trim().length >= 2 && surname.trim().length <= 40;
 
   useEffect(() => {
     if (show) {
@@ -273,7 +310,7 @@ export function EditClientSurnameModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Surname
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Surname</Modal.Title>
         </Modal.Header>
@@ -283,19 +320,45 @@ export function EditClientSurnameModal({ client, update_state }) {
             <Form.Control
               type="text"
               value={surname}
-              onChange={(e) => setSurname(clampLen(e.target.value, 50))}
+              onChange={(e) => setSurname(clampLen(e.target.value, 40))}
               placeholder="Enter surname"
+              isInvalid={surname.length > 0 && !isSurnameValid}
             />
-            <Form.Text className="text-muted">
-              Leave empty if not applicable
-            </Form.Text>
+            <Form.Control.Feedback type="invalid">
+              Surname must be between 2 and 40 characters.
+            </Form.Control.Feedback>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            {!isSurnameValid ? (
+              <ul
+                className="mr-auto"
+                style={{ margin: 0, padding: 0, color: "red" }}
+              >
+                <li>
+                  <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                  Surname must be 2–40 characters.
+                </li>
+              </ul>
+            ) : (
+              <ul
+                className="mr-auto"
+                style={{ margin: 0, padding: 0, color: "green" }}
+              >
+                <li>
+                  <AiOutlineCheckCircle
+                    style={{ fontSize: 18, marginRight: 6 }}
+                  />
+                  Validated
+                </li>
+              </ul>
+            )}
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button color="green" onClick={handleSave}>
+          <Button color="green" onClick={handleSave} disabled={!isSurnameValid}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -308,6 +371,7 @@ export function EditClientSurnameModal({ client, update_state }) {
 export function EditClientNameModal({ client, update_state }) {
   const [show, setShow] = useState(false);
   const [name, setName] = useState("");
+  const isNameValid = name.trim().length >= 2 && name.trim().length <= 40;
 
   useEffect(() => {
     if (show) {
@@ -354,7 +418,7 @@ export function EditClientNameModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Name
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Name</Modal.Title>
         </Modal.Header>
@@ -364,19 +428,37 @@ export function EditClientNameModal({ client, update_state }) {
             <Form.Control
               type="text"
               value={name}
-              onChange={(e) => setName(clampLen(e.target.value, 50))}
+              onChange={(e) => setName(clampLen(e.target.value, 40))}
               placeholder="Enter name"
+              isInvalid={name.length > 0 && !isNameValid}
             />
-            <Form.Text className="text-muted">
-              Leave empty if not applicable
-            </Form.Text>
+            <Form.Control.Feedback type="invalid">
+              Name must be between 2 and 40 characters.
+            </Form.Control.Feedback>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            {!isNameValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                  Name must be 2–40 characters.
+                </li>
+              </ul>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+                <li>
+                  <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                  Validated
+                </li>
+              </ul>
+            )}
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button color="green" onClick={handleSave}>
+          <Button color="green" onClick={handleSave} disabled={!isNameValid}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -389,6 +471,7 @@ export function EditClientNameModal({ client, update_state }) {
 export function EditClientOnomaModal({ client, update_state }) {
   const [show, setShow] = useState(false);
   const [onoma, setOnoma] = useState("");
+  const isOnomaValid = onoma.trim().length >= 2 && onoma.trim().length <= 40;
 
   useEffect(() => {
     if (show) {
@@ -435,7 +518,7 @@ export function EditClientOnomaModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Onoma
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Onoma (Greek Name)</Modal.Title>
         </Modal.Header>
@@ -445,19 +528,37 @@ export function EditClientOnomaModal({ client, update_state }) {
             <Form.Control
               type="text"
               value={onoma}
-              onChange={(e) => setOnoma(clampLen(e.target.value, 50))}
+              onChange={(e) => setOnoma(clampLen(e.target.value, 40))}
               placeholder="Enter Greek name"
+              isInvalid={onoma.length > 0 && !isOnomaValid}
             />
-            <Form.Text className="text-muted">
-              Leave empty if not applicable
-            </Form.Text>
+            <Form.Control.Feedback type="invalid">
+              Greek name must be between 2 and 40 characters.
+            </Form.Control.Feedback>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            {!isOnomaValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                  Greek name must be 2–40 characters.
+                </li>
+              </ul>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+                <li>
+                  <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                  Validated
+                </li>
+              </ul>
+            )}
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button color="green" onClick={handleSave}>
+          <Button color="green" onClick={handleSave} disabled={!isOnomaValid}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -470,6 +571,7 @@ export function EditClientOnomaModal({ client, update_state }) {
 export function EditClientEponymoModal({ client, update_state }) {
   const [show, setShow] = useState(false);
   const [eponymo, setEponymo] = useState("");
+  const isEponymoValid = eponymo.trim().length >= 2 && eponymo.trim().length <= 40;
 
   useEffect(() => {
     if (show) {
@@ -516,7 +618,7 @@ export function EditClientEponymoModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Eponymo
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Eponymo (Greek Surname)</Modal.Title>
         </Modal.Header>
@@ -526,19 +628,37 @@ export function EditClientEponymoModal({ client, update_state }) {
             <Form.Control
               type="text"
               value={eponymo}
-              onChange={(e) => setEponymo(clampLen(e.target.value, 50))}
+              onChange={(e) => setEponymo(clampLen(e.target.value, 40))}
               placeholder="Enter Greek surname"
+              isInvalid={eponymo.length > 0 && !isEponymoValid}
             />
-            <Form.Text className="text-muted">
-              Leave empty if not applicable
-            </Form.Text>
+            <Form.Control.Feedback type="invalid">
+              Greek surname must be between 2 and 40 characters.
+            </Form.Control.Feedback>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            {!isEponymoValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                  Greek surname must be 2–40 characters.
+                </li>
+              </ul>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+                <li>
+                  <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                  Validated
+                </li>
+              </ul>
+            )}
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button color="green" onClick={handleSave}>
+          <Button color="green" onClick={handleSave} disabled={!isEponymoValid}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -553,6 +673,7 @@ export function EditClientEmailModal({ client, update_state }) {
   const [email, setEmail] = useState("");
   // eslint-disable-next-line
   const [isValid, setIsValid] = useState(true);
+  const isEmailValid = !email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   useEffect(() => {
     if (show) {
@@ -610,7 +731,7 @@ export function EditClientEmailModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Email
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Email</Modal.Title>
         </Modal.Header>
@@ -631,7 +752,7 @@ export function EditClientEmailModal({ client, update_state }) {
                 setEmail(clampLen(e.target.value, 100));
                 setIsValid(true);
               }}
-              isInvalid={email && !validateEmail(email)}
+              isInvalid={email && !isEmailValid}
             />
             <Form.Control.Feedback type="invalid">
               Please enter a valid email address.
@@ -639,10 +760,27 @@ export function EditClientEmailModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            {!isEmailValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                  Email must be a valid email address.
+                </li>
+              </ul>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+                <li>
+                  <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                  Validated
+                </li>
+              </ul>
+            )}
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button color="green" onClick={handleSave}>
+          <Button color="green" onClick={handleSave} disabled={!isEmailValid}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -655,6 +793,7 @@ export function EditClientEmailModal({ client, update_state }) {
 export function EditClientPhone1Modal({ client, update_state }) {
   const [show, setShow] = useState(false);
   const [phone1, setPhone1] = useState("");
+  const isPhoneValid = (v) => !v || v.replace(/\s+/g, '').length >= 7;
 
   useEffect(() => {
     if (show) {
@@ -701,7 +840,7 @@ export function EditClientPhone1Modal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Phone 1
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Phone 1</Modal.Title>
         </Modal.Header>
@@ -713,17 +852,35 @@ export function EditClientPhone1Modal({ client, update_state }) {
               value={phone1}
               onChange={(e) => setPhone1(clampLen(e.target.value, 20))}
               placeholder="Enter phone number"
+              isInvalid={!!phone1 && !isPhoneValid(phone1)}
             />
-            <Form.Text className="text-muted">
-              Leave empty if not applicable
-            </Form.Text>
+            <Form.Control.Feedback type="invalid">
+              Phone must be at least 7 digits (spaces ignored).
+            </Form.Control.Feedback>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            {!!phone1 && !isPhoneValid(phone1) ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                  Phone must be at least 7 digits.
+                </li>
+              </ul>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+                <li>
+                  <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                  Validated
+                </li>
+              </ul>
+            )}
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button color="green" onClick={handleSave}>
+          <Button color="green" onClick={handleSave} disabled={!!phone1 && !isPhoneValid(phone1)}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -736,6 +893,7 @@ export function EditClientPhone1Modal({ client, update_state }) {
 export function EditClientMobile1Modal({ client, update_state }) {
   const [show, setShow] = useState(false);
   const [mobile1, setMobile1] = useState("");
+  const isPhoneValid = (v) => !v || v.replace(/\s+/g, '').length >= 7;
 
   useEffect(() => {
     if (show) {
@@ -782,7 +940,7 @@ export function EditClientMobile1Modal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Mobile 1
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Mobile 1</Modal.Title>
         </Modal.Header>
@@ -794,17 +952,35 @@ export function EditClientMobile1Modal({ client, update_state }) {
               value={mobile1}
               onChange={(e) => setMobile1(clampLen(e.target.value, 20))}
               placeholder="Enter mobile number"
+              isInvalid={!!mobile1 && !isPhoneValid(mobile1)}
             />
-            <Form.Text className="text-muted">
-              Leave empty if not applicable
-            </Form.Text>
+            <Form.Control.Feedback type="invalid">
+              Mobile must be at least 7 digits (spaces ignored).
+            </Form.Control.Feedback>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            {!!mobile1 && !isPhoneValid(mobile1) ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                  Mobile must be at least 7 digits.
+                </li>
+              </ul>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+                <li>
+                  <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                  Validated
+                </li>
+              </ul>
+            )}
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button color="green" onClick={handleSave}>
+          <Button color="green" onClick={handleSave} disabled={!!mobile1 && !isPhoneValid(mobile1)}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -817,6 +993,7 @@ export function EditClientMobile1Modal({ client, update_state }) {
 export function EditClientPhone2Modal({ client, update_state }) {
   const [show, setShow] = useState(false);
   const [phone2, setPhone2] = useState("");
+  const isPhoneValid = (v) => !v || v.replace(/\s+/g, '').length >= 7;
 
   useEffect(() => {
     if (show) {
@@ -863,7 +1040,7 @@ export function EditClientPhone2Modal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Phone 2
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Phone 2</Modal.Title>
         </Modal.Header>
@@ -875,17 +1052,35 @@ export function EditClientPhone2Modal({ client, update_state }) {
               value={phone2}
               onChange={(e) => setPhone2(clampLen(e.target.value, 20))}
               placeholder="Enter phone number"
+              isInvalid={!!phone2 && !isPhoneValid(phone2)}
             />
-            <Form.Text className="text-muted">
-              Leave empty if not applicable
-            </Form.Text>
+            <Form.Control.Feedback type="invalid">
+              Phone must be at least 7 digits (spaces ignored).
+            </Form.Control.Feedback>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            {!!phone2 && !isPhoneValid(phone2) ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                  Phone must be at least 7 digits.
+                </li>
+              </ul>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+                <li>
+                  <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                  Validated
+                </li>
+              </ul>
+            )}
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button color="green" onClick={handleSave}>
+          <Button color="green" onClick={handleSave} disabled={!!phone2 && !isPhoneValid(phone2)}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -898,6 +1093,7 @@ export function EditClientPhone2Modal({ client, update_state }) {
 export function EditClientMobile2Modal({ client, update_state }) {
   const [show, setShow] = useState(false);
   const [mobile2, setMobile2] = useState("");
+  const isPhoneValid = (v) => !v || v.replace(/\s+/g, '').length >= 7;
 
   useEffect(() => {
     if (show) {
@@ -944,7 +1140,7 @@ export function EditClientMobile2Modal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Mobile 2
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Mobile 2</Modal.Title>
         </Modal.Header>
@@ -956,17 +1152,35 @@ export function EditClientMobile2Modal({ client, update_state }) {
               value={mobile2}
               onChange={(e) => setMobile2(clampLen(e.target.value, 20))}
               placeholder="Enter mobile number"
+              isInvalid={!!mobile2 && !isPhoneValid(mobile2)}
             />
-            <Form.Text className="text-muted">
-              Leave empty if not applicable
-            </Form.Text>
+            <Form.Control.Feedback type="invalid">
+              Mobile must be at least 7 digits (spaces ignored).
+            </Form.Control.Feedback>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            {!!mobile2 && !isPhoneValid(mobile2) ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                  Mobile must be at least 7 digits.
+                </li>
+              </ul>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+                <li>
+                  <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                  Validated
+                </li>
+              </ul>
+            )}
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button color="green" onClick={handleSave}>
+          <Button color="green" onClick={handleSave} disabled={!!mobile2 && !isPhoneValid(mobile2)}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -979,6 +1193,7 @@ export function EditClientMobile2Modal({ client, update_state }) {
 export function EditClientAddressModal({ client, update_state }) {
   const [show, setShow] = useState(false);
   const [address, setAddress] = useState("");
+  const isAddressValid = address.trim().length >= 2 && address.trim().length <= 200;
 
   useEffect(() => {
     if (show) {
@@ -1025,7 +1240,7 @@ export function EditClientAddressModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Address
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Address</Modal.Title>
         </Modal.Header>
@@ -1037,14 +1252,32 @@ export function EditClientAddressModal({ client, update_state }) {
               value={address}
               onChange={(e) => setAddress(clampLen(e.target.value, 200))}
               placeholder="Enter address"
+              isInvalid={address.length > 0 && !isAddressValid}
             />
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            {!isAddressValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                  Address must be 2–200 characters.
+                </li>
+              </ul>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+                <li>
+                  <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                  Validated
+                </li>
+              </ul>
+            )}
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button color="green" onClick={handleSave}>
+          <Button color="green" onClick={handleSave} disabled={!isAddressValid}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -1057,6 +1290,7 @@ export function EditClientAddressModal({ client, update_state }) {
 export function EditClientPostalcodeModal({ client, update_state }) {
   const [show, setShow] = useState(false);
   const [postalcode, setPostalcode] = useState("");
+  const isPostalValid = postalcode.trim().length >= 1 && postalcode.trim().length <= 10;
 
   useEffect(() => {
     if (show) {
@@ -1103,7 +1337,7 @@ export function EditClientPostalcodeModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Postal Code
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Postal Code</Modal.Title>
         </Modal.Header>
@@ -1115,14 +1349,32 @@ export function EditClientPostalcodeModal({ client, update_state }) {
               value={postalcode}
               onChange={(e) => setPostalcode(clampLen(e.target.value, 10))}
               placeholder="Enter postal code"
+              isInvalid={postalcode.length > 0 && !isPostalValid}
             />
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            {!isPostalValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                  Postal code must be 1–10 characters.
+                </li>
+              </ul>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+                <li>
+                  <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                  Validated
+                </li>
+              </ul>
+            )}
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button color="green" onClick={handleSave}>
+          <Button color="green" onClick={handleSave} disabled={!isPostalValid}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -1181,7 +1433,7 @@ export function EditClientActiveModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Active
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Active Status</Modal.Title>
         </Modal.Header>
@@ -1196,6 +1448,14 @@ export function EditClientActiveModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+              <li>
+                <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                Validated
+              </li>
+            </ul>
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
@@ -1258,7 +1518,7 @@ export function EditClientNotesModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Notes
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Notes</Modal.Title>
         </Modal.Header>
@@ -1275,6 +1535,14 @@ export function EditClientNotesModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+              <li>
+                <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                Validated
+              </li>
+            </ul>
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
@@ -1353,7 +1621,7 @@ export function EditClientBirthdateModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Birth Date
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Birth Date</Modal.Title>
         </Modal.Header>
@@ -1372,6 +1640,14 @@ export function EditClientBirthdateModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+              <li>
+                <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                Validated
+              </li>
+            </ul>
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
@@ -1433,7 +1709,7 @@ export function EditClientBirthplaceModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Birth Place
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Birth Place</Modal.Title>
         </Modal.Header>
@@ -1453,10 +1729,27 @@ export function EditClientBirthplaceModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            {(!birthplace || birthplace.trim().length < 2 || birthplace.trim().length > 60) ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                  Birth place is required and must be 2–60 characters.
+                </li>
+              </ul>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+                <li>
+                  <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                  Validated
+                </li>
+              </ul>
+            )}
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button color="green" onClick={handleSave}>
+          <Button color="green" onClick={handleSave} disabled={!birthplace || birthplace.trim().length < 2 || birthplace.trim().length > 60}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -1514,7 +1807,7 @@ export function EditClientFathernameModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Father's Name
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Father's Name</Modal.Title>
         </Modal.Header>
@@ -1534,10 +1827,27 @@ export function EditClientFathernameModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            {(fathername && fathername.trim().length > 80) ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                  Father's name must be up to 80 characters.
+                </li>
+              </ul>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+                <li>
+                  <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                  Validated
+                </li>
+              </ul>
+            )}
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button color="green" onClick={handleSave}>
+          <Button color="green" onClick={handleSave} disabled={fathername && fathername.trim().length > 80}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -1595,7 +1905,7 @@ export function EditClientMothernameModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Mother's Name
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Mother's Name</Modal.Title>
         </Modal.Header>
@@ -1615,10 +1925,27 @@ export function EditClientMothernameModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            {(mothername && mothername.trim().length > 80) ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                  Mother's name must be up to 80 characters.
+                </li>
+              </ul>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+                <li>
+                  <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                  Validated
+                </li>
+              </ul>
+            )}
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button color="green" onClick={handleSave}>
+          <Button color="green" onClick={handleSave} disabled={mothername && mothername.trim().length > 80}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -1684,7 +2011,7 @@ export function EditClientMaritalstatusModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Marital Status
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Marital Status</Modal.Title>
         </Modal.Header>
@@ -1709,6 +2036,15 @@ export function EditClientMaritalstatusModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            {/* Optional date; show validated state */}
+            <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+              <li>
+                <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                Validated
+              </li>
+            </ul>
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
@@ -1770,7 +2106,7 @@ export function EditClientDeceasedModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Deceased
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Deceased Status</Modal.Title>
         </Modal.Header>
@@ -1788,6 +2124,14 @@ export function EditClientDeceasedModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+              <li>
+                <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                Validated
+              </li>
+            </ul>
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
@@ -1849,7 +2193,7 @@ export function EditClientDeceasedateModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Deceased Date
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Deceased Date</Modal.Title>
         </Modal.Header>
@@ -1868,6 +2212,14 @@ export function EditClientDeceasedateModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+              <li>
+                <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                Validated
+              </li>
+            </ul>
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
@@ -1936,7 +2288,7 @@ export function EditClientAfmModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         AFM
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit AFM (Greek Tax Number)</Modal.Title>
         </Modal.Header>
@@ -1944,11 +2296,6 @@ export function EditClientAfmModal({ client, update_state }) {
           <Form.Group>
             <Form.Label>
               AFM
-              {afm && afm.length === 9 && /^\d{9}$/.test(afm) ? (
-                <AiOutlineCheckCircle style={{ color: "green", marginLeft: "0.5em" }} />
-              ) : afm ? (
-                <AiOutlineWarning style={{ color: "orange", marginLeft: "0.5em" }} />
-              ) : null}
             </Form.Label>
             <Form.Control
               type="text"
@@ -1961,21 +2308,31 @@ export function EditClientAfmModal({ client, update_state }) {
               maxLength={9}
               isInvalid={!isValid}
             />
-            <Form.Text className="text-muted">
-              Must be exactly 9 digits (leave empty if not applicable)
-            </Form.Text>
-            {!isValid && (
-              <Form.Control.Feedback type="invalid">
-                AFM must be exactly 9 digits.
-              </Form.Control.Feedback>
-            )}
+
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            {(afm && (afm.length !== 9 || !/^\d{9}$/.test(afm))) ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                  AFM must be exactly 9 digits.
+                </li>
+              </ul>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+                <li>
+                  <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                  Validated
+                </li>
+              </ul>
+            )}
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button color="green" onClick={handleSave}>
+          <Button color="green" onClick={handleSave} disabled={afm && (afm.length !== 9 || !/^\d{9}$/.test(afm))}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -1999,8 +2356,8 @@ export function EditClientSinModal({ client, update_state }) {
   const handleShow = () => setShow(true);
 
   const handleSave = async () => {
-    // Validate SIN - must be exactly 9 digits if provided
-    if (sin && (sin.length !== 9 || !/^\d{9}$/.test(sin))) {
+    // Validate SIN - required and must be exactly 9 digits
+    if (!sin || sin.length !== 9 || !/^\d{9}$/.test(sin)) {
       setIsValid(false);
       return;
     }
@@ -2013,7 +2370,7 @@ export function EditClientSinModal({ client, update_state }) {
 
       const response = await axios.patch(
         `${UPDATE_CLIENT}${client.client_id}/`,
-        { sin: sin.trim() || null },
+        { sin: sin.trim() },
         { headers: currentHeaders }
       );
 
@@ -2040,7 +2397,7 @@ export function EditClientSinModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         SIN
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit SIN (Canadian Tax Number)</Modal.Title>
         </Modal.Header>
@@ -2076,10 +2433,27 @@ export function EditClientSinModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            {(!sin || sin.length !== 9 || !/^\d{9}$/.test(sin)) ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                  SIN is required and must be exactly 9 digits.
+                </li>
+              </ul>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+                <li>
+                  <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                  Validated
+                </li>
+              </ul>
+            )}
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button color="green" onClick={handleSave}>
+          <Button color="green" onClick={handleSave} disabled={!sin || sin.length !== 9 || !/^\d{9}$/.test(sin)}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -2144,7 +2518,7 @@ export function EditClientAmkaModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         AMKA
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit AMKA</Modal.Title>
         </Modal.Header>
@@ -2180,10 +2554,27 @@ export function EditClientAmkaModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            {(amka && (amka.length !== 11 || !/^\d{11}$/.test(amka))) ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                  AMKA must be exactly 11 digits.
+                </li>
+              </ul>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+                <li>
+                  <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                  Validated
+                </li>
+              </ul>
+            )}
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button color="green" onClick={handleSave}>
+          <Button color="green" onClick={handleSave} disabled={amka && (amka.length !== 11 || !/^\d{11}$/.test(amka))}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -2206,7 +2597,13 @@ export function EditClientPassportcountryModal({ client, update_state }) {
 
   const loadCountries = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/regions/all_countries/");
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      const response = await axios.get("http://localhost:8000/api/regions/all_countries/", {
+        headers: currentHeaders
+      });
       const countriesData = response?.data?.all_countries || [];
       setCountries(countriesData);
     } catch (error) {
@@ -2254,7 +2651,7 @@ export function EditClientPassportcountryModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Passport Country
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Passport Country</Modal.Title>
         </Modal.Header>
@@ -2279,10 +2676,27 @@ export function EditClientPassportcountryModal({ client, update_state }) {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
+          <small className="mr-auto">
+            {(!passportcountry) ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>
+                  <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                  Passport country is required.
+                </li>
+              </ul>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
+                <li>
+                  <AiOutlineCheckCircle style={{ fontSize: 18, marginRight: 6 }} />
+                  Validated
+                </li>
+              </ul>
+            )}
+          </small>
           <Button color="red" onClick={handleClose}>
             Cancel
           </Button>
-          <Button color="green" onClick={handleSave}>
+          <Button color="green" onClick={handleSave} disabled={!passportcountry}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -2340,7 +2754,7 @@ export function EditClientPassportnumberModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Passport Number
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Passport Number</Modal.Title>
         </Modal.Header>
@@ -2421,7 +2835,7 @@ export function EditClientPassportexpiredateModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Passport Expire Date
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Passport Expire Date</Modal.Title>
         </Modal.Header>
@@ -2501,7 +2915,7 @@ export function EditClientPoliceidModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Police ID
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Police ID</Modal.Title>
         </Modal.Header>
@@ -2582,7 +2996,7 @@ export function EditClientProfessionModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Profession
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Profession</Modal.Title>
         </Modal.Header>
@@ -2663,7 +3077,7 @@ export function EditClientTaxmanagementModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Tax Management
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Tax Management</Modal.Title>
         </Modal.Header>
@@ -2742,7 +3156,7 @@ export function EditClientTaxrepresentationModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Tax Representation
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Tax Representation</Modal.Title>
         </Modal.Header>
@@ -2821,7 +3235,7 @@ export function EditClientTaxrepresentativeModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Tax Representative
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Tax Representative</Modal.Title>
         </Modal.Header>
@@ -2902,7 +3316,7 @@ export function EditClientRetiredModal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Retired
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Retired Status</Modal.Title>
         </Modal.Header>
@@ -2946,7 +3360,13 @@ export function EditClientPensioncountry1Modal({ client, update_state }) {
 
   const loadCountries = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/regions/all_countries/");
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      const response = await axios.get("http://localhost:8000/api/regions/all_countries/", {
+        headers: currentHeaders
+      });
       const countriesData = response?.data?.all_countries || [];
       setCountries(countriesData);
     } catch (error) {
@@ -2994,7 +3414,7 @@ export function EditClientPensioncountry1Modal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Pension Country 1
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Pension Country 1</Modal.Title>
         </Modal.Header>
@@ -3045,7 +3465,13 @@ export function EditClientInsucarrier1Modal({ client, update_state }) {
 
   const loadInsuranceCarriers = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/data_management/all_insurance_carriers/");
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      const response = await axios.get("http://localhost:8000/api/administration/all_insurance_carriers/", {
+        headers: currentHeaders
+      });
       const carriersData = response?.data?.all_insurance_carriers || [];
       setInsuranceCarriers(carriersData);
     } catch (error) {
@@ -3093,7 +3519,7 @@ export function EditClientInsucarrier1Modal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Insurance Carrier 1
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Insurance Carrier 1</Modal.Title>
         </Modal.Header>
@@ -3179,7 +3605,7 @@ export function EditClientPensioninfo1Modal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Pension Info 1
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Pension Info 1</Modal.Title>
         </Modal.Header>
@@ -3225,7 +3651,13 @@ export function EditClientPensioncountry2Modal({ client, update_state }) {
 
   const loadCountries = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/regions/all_countries/");
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      const response = await axios.get("http://localhost:8000/api/regions/all_countries/", {
+        headers: currentHeaders
+      });
       const countriesData = response?.data?.all_countries || [];
       setCountries(countriesData);
     } catch (error) {
@@ -3273,7 +3705,7 @@ export function EditClientPensioncountry2Modal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Pension Country 2
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Pension Country 2</Modal.Title>
         </Modal.Header>
@@ -3324,7 +3756,13 @@ export function EditClientInsucarrier2Modal({ client, update_state }) {
 
   const loadInsuranceCarriers = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/data_management/all_insurance_carriers/");
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      const response = await axios.get("http://localhost:8000/api/administration/all_insurance_carriers/", {
+        headers: currentHeaders
+      });
       const carriersData = response?.data?.all_insurance_carriers || [];
       setInsuranceCarriers(carriersData);
     } catch (error) {
@@ -3372,7 +3810,7 @@ export function EditClientInsucarrier2Modal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Insurance Carrier 2
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Insurance Carrier 2</Modal.Title>
         </Modal.Header>
@@ -3458,7 +3896,7 @@ export function EditClientPensioninfo2Modal({ client, update_state }) {
         <FiEdit style={{ marginRight: 6 }} />
         Pension Info 2
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Pension Info 2</Modal.Title>
         </Modal.Header>

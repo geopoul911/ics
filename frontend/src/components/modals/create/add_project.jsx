@@ -40,6 +40,8 @@ function AddProjectModal({ onProjectCreated }) {
 
   // Dropdown Data
   const [consultants, setConsultants] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
   const resetForm = () => {
     setProjectId("");
@@ -71,16 +73,35 @@ function AddProjectModal({ onProjectCreated }) {
       console.log('Loading dropdown data...');
       
       // Load consultants for dropdown
-      const consultantsRes = await axios.get("http://localhost:8000/api/administration/all_consultants/");
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      const consultantsRes = await axios.get(
+        "http://localhost:8000/api/administration/all_consultants/",
+        { headers: currentHeaders }
+      );
       
       console.log('Raw consultants response:', consultantsRes);
       
-      // Consultants API returns {"all_consultants": [...]}
-      const consultantsData = consultantsRes?.data?.all_consultants || [];
+      // Handle possible response structures
+      let consultantsData = [];
+      if (Array.isArray(consultantsRes?.data)) consultantsData = consultantsRes.data;
+      else if (Array.isArray(consultantsRes?.data?.results)) consultantsData = consultantsRes.data.results;
+      else if (Array.isArray(consultantsRes?.data?.data)) consultantsData = consultantsRes.data.data;
+      else consultantsData = consultantsRes?.data?.all_consultants || [];
       
       console.log('Processed consultants data:', consultantsData);
       
       setConsultants(consultantsData);
+
+      // Load project categories
+      const categoriesRes = await axios.get(
+        "http://localhost:8000/api/administration/all_project_categories/",
+        { headers: currentHeaders }
+      );
+      const categoriesData = categoriesRes?.data?.all_project_categories || categoriesRes?.data?.results || categoriesRes?.data?.data || [];
+      setCategories(Array.isArray(categoriesData) ? categoriesData : []);
     } catch (error) {
       console.error('Error loading dropdown data:', error);
       console.error('Error details:', {
@@ -96,12 +117,15 @@ function AddProjectModal({ onProjectCreated }) {
   // Validation
   const isProjectIdValid = projectId.trim().length >= 2 && projectId.trim().length <= 10;
   const isTitleValid = title.trim().length >= 2 && title.trim().length <= 120;
-  const isFilecodeValid = filecode.trim().length >= 1 && filecode.trim().length <= 20;
-  const isDetailsValid = !details.trim() || details.trim().length <= 1000;
+  const filecodePattern = /^[A-Z]{3}\/\d{6}\/\d{2}-\d{4}$/;
+  const isFilecodeValid = filecodePattern.test(filecode.trim());
+  const isConsultantValid = consultant.length > 0; // required by model
+  const isDetailsValid = details.trim().length >= 1 && details.trim().length <= 1000; // required by model
   const isNotesValid = !notes.trim() || notes.trim().length <= 1000;
 
-  const isFormValid = isProjectIdValid && isTitleValid && isFilecodeValid && 
-                     isDetailsValid && isNotesValid;
+  const isCategoriesValid = taxation ? true : selectedCategories.length > 0;
+  const isFormValid = isProjectIdValid && isTitleValid && isFilecodeValid &&
+                      isConsultantValid && isDetailsValid && isCategoriesValid && isNotesValid;
 
   const createNewProject = async () => {
     try {
@@ -111,7 +135,7 @@ function AddProjectModal({ onProjectCreated }) {
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
-      await axios({
+      const res = await axios({
         method: "post",
         url: ADD_PROJECT,
         headers: currentHeaders,
@@ -126,24 +150,20 @@ function AddProjectModal({ onProjectCreated }) {
           taxation: taxation,
           
           // Optional fields
-          consultant_id: consultant || null,
+          consultant_id: consultant || "",
           deadline: deadline || null,
           details: details.trim() || null,
           notes: notes.trim() || null,
+          category_ids: taxation ? [] : selectedCategories,
         },
       });
 
-      // Show success message
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "Project created successfully!",
-      });
+      const newId = res?.data?.project_id || projectId.trim();
 
-      // Refresh the parent component if callback provided
-      if (onProjectCreated) {
-        onProjectCreated();
-      }
+      Swal.fire({ icon: "success", title: "Success", text: "Project created successfully!" });
+      handleClose();
+      if (onProjectCreated) onProjectCreated();
+      if (newId) window.location.href = `/data_management/project/${encodeURIComponent(newId)}`;
     } catch (e) {
       console.error('Project creation error:', e.response?.data);
       const apiMsg =
@@ -170,7 +190,7 @@ function AddProjectModal({ onProjectCreated }) {
 
       <Modal
         show={show}
-        size="xl"
+        size="lg"
         onHide={handleClose}
         aria-labelledby="contained-modal-title-vcenter"
         centered
@@ -184,10 +204,10 @@ function AddProjectModal({ onProjectCreated }) {
             <Col>
               <Form>
                 {/* Basic Information */}
-                <h6 className="mb-3">Basic Information</h6>
+                <h6 className="mb-2">Basic Information</h6>
                 <Row>
                   <Col md={6}>
-                    <Form.Group className="mb-3">
+                    <Form.Group className="mb-2">
                       <Form.Label>Project ID *:</Form.Label>
                       <Form.Control
                         maxLength={10}
@@ -198,7 +218,7 @@ function AddProjectModal({ onProjectCreated }) {
                     </Form.Group>
                   </Col>
                   <Col md={6}>
-                    <Form.Group className="mb-3">
+                    <Form.Group className="mb-2">
                       <Form.Label>Title *:</Form.Label>
                       <Form.Control
                         maxLength={120}
@@ -212,7 +232,7 @@ function AddProjectModal({ onProjectCreated }) {
 
                 <Row>
                   <Col md={6}>
-                    <Form.Group className="mb-3">
+                    <Form.Group className="mb-2">
                       <Form.Label>File Code *:</Form.Label>
                       <Form.Control
                         maxLength={20}
@@ -221,12 +241,12 @@ function AddProjectModal({ onProjectCreated }) {
                         value={filecode}
                       />
                       <Form.Text className="text-muted">
-                        Format: 3 chars for office city/UniqueNumber(6)/Month(2)-Year(4)
+                        Format: 3 uppercase letters/6 digits/2 digits-4 digits (e.g., TOR/000256/05-2019)
                       </Form.Text>
                     </Form.Group>
                   </Col>
                   <Col md={6}>
-                    <Form.Group className="mb-3">
+                    <Form.Group className="mb-2">
                       <Form.Label>Status:</Form.Label>
                       <Form.Control
                         as="select"
@@ -245,27 +265,28 @@ function AddProjectModal({ onProjectCreated }) {
                 </Row>
 
                 {/* Project Details */}
-                <h6 className="mb-3 mt-4">Project Details</h6>
+                <h6 className="mb-2 mt-3">Project Details</h6>
                 <Row>
                   <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Consultant:</Form.Label>
+                    <Form.Group className="mb-2">
+                      <Form.Label>Consultant *:</Form.Label>
                       <Form.Control
                         as="select"
                         onChange={(e) => setConsultant(e.target.value)}
                         value={consultant}
+                        isInvalid={consultant !== "" && !isConsultantValid}
                       >
                         <option value="">Select Consultant</option>
                         {Array.isArray(consultants) && consultants.map((consultant) => (
                           <option key={consultant.consultant_id} value={consultant.consultant_id}>
-                            {consultant.surname} {consultant.name}
+                            {consultant.fullname || consultant.username || consultant.consultant_id}
                           </option>
                         ))}
                       </Form.Control>
                     </Form.Group>
                   </Col>
                   <Col md={6}>
-                    <Form.Group className="mb-3">
+                    <Form.Group className="mb-2">
                       <Form.Label>Deadline:</Form.Label>
                       <Form.Control
                         type="date"
@@ -276,9 +297,73 @@ function AddProjectModal({ onProjectCreated }) {
                   </Col>
                 </Row>
 
+                {!taxation && (
+                  <>
+                    <h6 className="mb-2 mt-3">Categories</h6>
+                    <Form.Group className="mb-2">
+                      <Form.Label>Select Categories *:</Form.Label>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                        {Array.isArray(categories) && categories.map((cat) => {
+                          const isSelected = selectedCategories.includes(cat.projcate_id);
+                          return (
+                            <Button
+                              key={cat.projcate_id}
+                              type="button"
+                              size="tiny"
+                              color={isSelected ? 'green' : 'grey'}
+                              onClick={() => {
+                                setSelectedCategories((prev) => {
+                                  if (prev.includes(cat.projcate_id)) {
+                                    return prev.filter((id) => id !== cat.projcate_id);
+                                  }
+                                  return [...prev, cat.projcate_id];
+                                });
+                              }}
+                            >
+                              {cat.title}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                      {!isCategoriesValid && (
+                        <div style={{ color: 'red', marginTop: 6 }}>Please select at least one category.</div>
+                      )}
+                    </Form.Group>
+
+                    <Form.Group className="mb-2">
+                      <Form.Label>Selected Categories:</Form.Label>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                        {selectedCategories.map((id) => {
+                          const cat = (categories || []).find((c) => c.projcate_id === id);
+                          if (!cat) return null;
+                          return (
+                            <span
+                              key={id}
+                              onClick={() => setSelectedCategories((prev) => prev.filter((x) => x !== id))}
+                              style={{
+                                display: 'inline-block',
+                                padding: '4px 8px',
+                                background: '#e9ecef',
+                                borderRadius: 12,
+                                cursor: 'pointer',
+                              }}
+                              title="Click to remove"
+                            >
+                              {cat.title} ×
+                            </span>
+                          );
+                        })}
+                        {selectedCategories.length === 0 && (
+                          <span style={{ color: '#6c757d' }}>None selected</span>
+                        )}
+                      </div>
+                    </Form.Group>
+                  </>
+                )}
+
                 <Row>
                   <Col md={6}>
-                    <Form.Group className="mb-3">
+                    <Form.Group className="mb-2">
                       <Form.Check
                         type="switch"
                         id="taxation-switch"
@@ -294,8 +379,8 @@ function AddProjectModal({ onProjectCreated }) {
                 </Row>
 
                 {/* Additional Information */}
-                <h6 className="mb-3 mt-4">Additional Information</h6>
-                <Form.Group className="mb-3">
+                <h6 className="mb-2 mt-3">Additional Information</h6>
+                <Form.Group className="mb-2">
                   <Form.Label>Details:</Form.Label>
                   <Form.Control
                     as="textarea"
@@ -304,10 +389,11 @@ function AddProjectModal({ onProjectCreated }) {
                     placeholder="Project details and description"
                     onChange={(e) => setDetails(clampLen(e.target.value, 1000))}
                     value={details}
+                    isInvalid={!isDetailsValid}
                   />
                 </Form.Group>
 
-                <Form.Group className="mb-3">
+                <Form.Group className="mb-2">
                   <Form.Label>Notes:</Form.Label>
                   <Form.Control
                     as="textarea"
@@ -348,16 +434,28 @@ function AddProjectModal({ onProjectCreated }) {
                     File Code is required (1–20 chars).
                   </li>
                 )}
+                {!isConsultantValid && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Consultant is required.
+                  </li>
+                )}
                 {!isDetailsValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Details must be 1000 chars or less.
+                    Details are required and must be 1000 chars or less.
                   </li>
                 )}
                 {!isNotesValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
                     Notes must be 1000 chars or less.
+                  </li>
+                )}
+                {!isCategoriesValid && !taxation && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Please select at least one category.
                   </li>
                 )}
               </ul>

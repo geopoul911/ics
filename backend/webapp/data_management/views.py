@@ -250,10 +250,65 @@ class ProjectView(RetrieveUpdateDestroyAPIView):
         """Delete a project"""
         instance = self.get_object()
         try:
-            self.perform_destroy(instance)
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except ProtectedError:
-            return Response({"error": "Cannot delete project as it is referenced by other objects"}, status=status.HTTP_400_BAD_REQUEST)
+            with transaction.atomic():
+                try:
+                    self.perform_destroy(instance)
+                    return Response(status=status.HTTP_204_NO_CONTENT)
+                except ProtectedError:
+                    # Build detailed protected info
+                    related_info = []
+                    # Associated clients
+                    from webapp.models import AssociatedClient, Document, ProjectTask, Cash, BankProjectAccount, Property, ClientContact
+                    assocs = AssociatedClient.objects.filter(project=instance)
+                    if assocs.exists():
+                        names = list(assocs.values_list('client__surname', flat=True)[:5])
+                        more = '...' if assocs.count() > 5 else ''
+                        related_info.append(f"{assocs.count()} associated client(s): {', '.join(names)}{more}")
+                    # Documents
+                    docs = Document.objects.filter(project=instance)
+                    if docs.exists():
+                        titles = list(docs.values_list('title', flat=True)[:5])
+                        more = '...' if docs.count() > 5 else ''
+                        related_info.append(f"{docs.count()} document(s): {', '.join(titles)}{more}")
+                    # Tasks
+                    tasks = ProjectTask.objects.filter(project=instance)
+                    if tasks.exists():
+                        tnames = list(tasks.values_list('title', flat=True)[:5])
+                        more = '...' if tasks.count() > 5 else ''
+                        related_info.append(f"{tasks.count()} task(s): {', '.join(tnames)}{more}")
+                    # Cash
+                    cash = Cash.objects.filter(project=instance)
+                    if cash.exists():
+                        related_info.append(f"{cash.count()} cash record(s)")
+                    # Bank project accounts
+                    bpas = BankProjectAccount.objects.filter(project=instance)
+                    if bpas.exists():
+                        related_info.append(f"{bpas.count()} bank project account(s)")
+                    # Note: TaxationProject is not linked to Project, so we skip it here
+                    # Properties
+                    props = Property.objects.filter(project=instance)
+                    if props.exists():
+                        related_info.append(f"{props.count()} propert(y/ies)")
+                    # Client contacts
+                    contacts = ClientContact.objects.filter(project=instance)
+                    if contacts.exists():
+                        related_info.append(f"{contacts.count()} client contact(s)")
+
+                    err_lines = [
+                        "Cannot delete this project because it is referenced by the following objects:",
+                    ]
+                    for s in related_info:
+                        err_lines.append(f"• {s}")
+                    err_lines.append("Please remove or reassign these related objects first, then try deleting this project again.")
+
+                    return Response(
+                        {
+                            "error": "Protected Object",
+                            "errormsg": "\n".join(err_lines),
+                            "related_objects": related_info,
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
         except Exception as e:
             return Response({"error": f"Failed to delete project: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -623,20 +678,57 @@ class ClientView(RetrieveUpdateDestroyAPIView):
         try:
             with transaction.atomic():
                 related_objects = []
-                
-                # Check for related objects that would prevent deletion
-                if instance.associated_projects.exists():
-                    related_objects.append("Associated Projects")
-                if instance.documents.exists():
-                    related_objects.append("Documents")
-                if instance.bankclientaccount_set.exists():
-                    related_objects.append("Bank Accounts")
-                if instance.taxationproject_set.exists():
-                    related_objects.append("Taxation Projects")
-                
+                # Build detailed related info similar to Regions delete responses
+                # Associated Projects (via AssociatedClient)
+                try:
+                    assoc_qs = instance.associated_projects.select_related('project')
+                except Exception:
+                    assoc_qs = instance.associated_projects.all()
+                if assoc_qs.exists():
+                    titles = []
+                    for ac in assoc_qs[:5]:
+                        try:
+                            titles.append(getattr(ac.project, 'title', str(ac.project)))
+                        except Exception:
+                            titles.append(str(ac))
+                    more_suffix = '...' if assoc_qs.count() > 5 else ''
+                    related_objects.append(f"{assoc_qs.count()} associated project(s): {', '.join(titles)}{more_suffix}")
+
+                # Documents
+                docs_qs = instance.documents.all()
+                if docs_qs.exists():
+                    titles = [d.title for d in docs_qs[:5]]
+                    more_suffix = '...' if docs_qs.count() > 5 else ''
+                    related_objects.append(f"{docs_qs.count()} document(s): {', '.join(titles)}{more_suffix}")
+
+                # Bank Client Accounts
+                bca_qs = instance.bankclientaccount_set.all()
+                if bca_qs.exists():
+                    accts = [getattr(b, 'accountnumber', str(b)) for b in bca_qs[:5]]
+                    more_suffix = '...' if bca_qs.count() > 5 else ''
+                    related_objects.append(f"{bca_qs.count()} bank account(s): {', '.join(accts)}{more_suffix}")
+
+                # Taxation Projects
+                tax_qs = instance.taxationproject_set.all()
+                if tax_qs.exists():
+                    ids_list = [getattr(t, 'taxproj_id', str(t)) for t in tax_qs[:5]]
+                    more_suffix = '...' if tax_qs.count() > 5 else ''
+                    related_objects.append(f"{tax_qs.count()} taxation project(s): {', '.join(ids_list)}{more_suffix}")
+
                 if related_objects:
+                    # Compose multiline human-friendly message
+                    err_lines = [
+                        f"Cannot delete client '{instance.surname} {instance.name}' because it is referenced by:",
+                        "",
+                    ]
+                    for ro in related_objects:
+                        err_lines.append(f"• {ro}")
+                    err_lines += [
+                        "",
+                        "Please remove or reassign these related objects before deleting the client.",
+                    ]
                     return Response(
-                        {"error": f"Cannot delete client. It is referenced by: {', '.join(related_objects)}"},
+                        {"errormsg": "\n".join(err_lines), "related_objects": related_objects},
                         status=status.HTTP_400_BAD_REQUEST
                     )
                 
@@ -645,7 +737,8 @@ class ClientView(RetrieveUpdateDestroyAPIView):
                 
         except ProtectedError as e:
             return Response(
-                {"error": f"Cannot delete client. It is referenced by other objects."},
+                {"errormsg": f"Cannot delete client '{instance.surname} {instance.name}' because it is referenced by other objects.",
+                 "related_objects": []},
                 status=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:

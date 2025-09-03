@@ -122,7 +122,10 @@ export function EditProvinceTitleModal({ province, update_state }) {
               placeholder="e.g., ATTICA"
             />
           </Form.Group>
-          <small style={{ color: isValid ? "green" : "red" }}>
+
+        </Modal.Body>
+        <Modal.Footer>
+          <small className="mr-auto" style={{ color: isValid ? "green" : "red" }}>
             {isValid ? (
               <>
                 <AiOutlineCheckCircle style={{ marginRight: 6 }} />
@@ -135,8 +138,6 @@ export function EditProvinceTitleModal({ province, update_state }) {
               </>
             )}
           </small>
-        </Modal.Body>
-        <Modal.Footer>
           <Button color="red" onClick={() => setShow(false)} disabled={busy}>Close</Button>
           <Button color="green" onClick={onSave} disabled={!isValid || !isChanged || busy}>
             Save
@@ -242,7 +243,10 @@ export function EditProvinceCountryModal({ province, update_state }) {
               ))}
             </Form.Control>
           </Form.Group>
-          <small style={{ color: isValid ? "green" : "red" }}>
+
+        </Modal.Body>
+        <Modal.Footer>
+          <small className="mr-auto" style={{ color: isValid ? "green" : "red" }}>
             {isValid ? (
               <>
                 <AiOutlineCheckCircle style={{ marginRight: 6 }} />
@@ -255,8 +259,6 @@ export function EditProvinceCountryModal({ province, update_state }) {
               </>
             )}
           </small>
-        </Modal.Body>
-        <Modal.Footer>
           <Button color="red" onClick={() => setShow(false)} disabled={busy}>Close</Button>
           <Button color="green" onClick={onSave} disabled={!isValid || !isChanged || busy}>
             Save
@@ -284,7 +286,7 @@ export function EditProvinceOrderIndexModal({ province, update_state }) {
   };
 
   const onSave = async () => {
-    if (!isValid || !isChanged) return;
+    if (!isValid) return;
     try {
       setBusy(true);
       const res = await patchProvince(province.province_id, { orderindex: Number(value) });
@@ -339,7 +341,10 @@ export function EditProvinceOrderIndexModal({ province, update_state }) {
               placeholder="e.g., 1"
             />
           </Form.Group>
-          <small style={{ color: isValid ? "green" : "red" }}>
+
+        </Modal.Body>
+        <Modal.Footer>
+          <small className="mr-auto" style={{ color: isValid ? "green" : "red" }}>
             {isValid ? (
               <>
                 <AiOutlineCheckCircle style={{ marginRight: 6 }} />
@@ -352,8 +357,6 @@ export function EditProvinceOrderIndexModal({ province, update_state }) {
               </>
             )}
           </small>
-        </Modal.Body>
-        <Modal.Footer>
           <Button color="red" onClick={() => setShow(false)} disabled={busy}>Close</Button>
           <Button color="green" onClick={onSave} disabled={!isValid || !isChanged || busy}>
             Save

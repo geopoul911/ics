@@ -36,6 +36,7 @@ urlpatterns = [
 
     # Bank Client Accounts
     path('bank_client_accounts/', views.AllBankClientAccounts.as_view()),
+    path('all_bank_client_accounts/', views.AllBankClientAccountsReference.as_view()),
     path("bank_client_account/<str:bankclientacco_id>/", views.BankClientAccountView.as_view(), name="bank-client-account-detail"),
 
     # Bank Project Accounts

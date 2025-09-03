@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 
 // Icons / Images
 import { FiEdit } from "react-icons/fi";
+import { AiOutlineCheckCircle } from "react-icons/ai";
 import axios from "axios";
 
 // Modules / Functions
@@ -36,13 +37,11 @@ export function EditProjectIdModal({ project, refreshData }) {
   }, [show, project]);
 
   const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+
+  const isValid = projectId.trim().length >= 2 && projectId.trim().length <= 10;
 
   const handleSave = async () => {
-    if (!projectId.trim()) {
-      Swal.fire("Error", "Project ID is required", "error");
-      return;
-    }
+    if (!isValid) return;
 
     setIsLoading(true);
     try {
@@ -71,16 +70,15 @@ export function EditProjectIdModal({ project, refreshData }) {
 
   return (
     <>
-      <Button size="mini" color="blue" onClick={handleShow}>
-        <FiEdit />
+      <Button size="tiny" basic disabled title="Project ID is immutable">
+        <FiEdit style={{ marginRight: 6 }} /> ID
       </Button>
 
-      <Modal show={show} onHide={handleClose} centered>
+      <Modal show={false} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Project ID</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Project ID:</Form.Label>
               <Form.Control
@@ -91,15 +89,26 @@ export function EditProjectIdModal({ project, refreshData }) {
                 placeholder="Enter project ID"
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button color="green" onClick={handleSave} loading={isLoading}>
-            Save
-          </Button>
+          <small className="mr-auto">
+            {!isValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                {projectId.trim().length < 2 && (
+                  <li>Project ID must be at least 2 characters</li>
+                )}
+                {projectId.trim().length > 10 && (
+                  <li>Project ID must be at most 10 characters</li>
+                )}
+              </ul>
+            ) : (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} /> Looks good.
+              </div>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} loading={isLoading} disabled={!isValid}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -121,11 +130,10 @@ export function EditProjectTitleModal({ project, refreshData }) {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const isValid = title.trim().length >= 2 && title.trim().length <= 120;
+
   const handleSave = async () => {
-    if (!title.trim()) {
-      Swal.fire("Error", "Title is required", "error");
-      return;
-    }
+    if (!isValid) return;
 
     setIsLoading(true);
     try {
@@ -154,8 +162,8 @@ export function EditProjectTitleModal({ project, refreshData }) {
 
   return (
     <>
-      <Button size="mini" color="blue" onClick={handleShow}>
-        <FiEdit />
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} /> Edit Title
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -163,7 +171,6 @@ export function EditProjectTitleModal({ project, refreshData }) {
           <Modal.Title>Edit Project Title</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Title:</Form.Label>
               <Form.Control
@@ -174,15 +181,22 @@ export function EditProjectTitleModal({ project, refreshData }) {
                 placeholder="Enter project title"
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button color="green" onClick={handleSave} loading={isLoading}>
-            Save
-          </Button>
+          <small className="mr-auto">
+            {!isValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                {title.trim().length < 2 && (<li>Title must be at least 2 characters</li>)}
+                {title.trim().length > 120 && (<li>Title must be at most 120 characters</li>)}
+              </ul>
+            ) : (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} /> Looks good.
+              </div>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} loading={isLoading} disabled={!isValid}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -204,11 +218,11 @@ export function EditProjectFilecodeModal({ project, refreshData }) {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const filecodePattern = /^[A-Z]{3}\/\d{6}\/\d{2}-\d{4}$/;
+  const isValid = filecodePattern.test(filecode.trim());
+
   const handleSave = async () => {
-    if (!filecode.trim()) {
-      Swal.fire("Error", "File code is required", "error");
-      return;
-    }
+    if (!isValid) return;
 
     setIsLoading(true);
     try {
@@ -237,8 +251,8 @@ export function EditProjectFilecodeModal({ project, refreshData }) {
 
   return (
     <>
-      <Button size="mini" color="blue" onClick={handleShow}>
-        <FiEdit />
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} /> Edit File Code
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -246,7 +260,6 @@ export function EditProjectFilecodeModal({ project, refreshData }) {
           <Modal.Title>Edit File Code</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>File Code:</Form.Label>
               <Form.Control
@@ -257,18 +270,30 @@ export function EditProjectFilecodeModal({ project, refreshData }) {
                 placeholder="Enter file code"
               />
               <Form.Text className="text-muted">
-                Format: 3 chars for office city/UniqueNumber(6)/Month(2)-Year(4)
+                Format: 3 uppercase letters/6 digits/2 digits-4 digits (e.g., TOR/000256/05-2019)
               </Form.Text>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button color="green" onClick={handleSave} loading={isLoading}>
-            Save
-          </Button>
+          <small className="mr-auto">
+            {!isValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                {filecode.trim().length === 0 ? (
+                  <li>File code is required</li>
+                ) : (
+                  <li>
+                    Format: 3 uppercase letters/6 digits/2 digits-4 digits (e.g., TOR/000256/05-2019)
+                  </li>
+                )}
+              </ul>
+            ) : (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} /> Looks good.
+              </div>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} loading={isLoading} disabled={!isValid}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -281,6 +306,7 @@ export function EditProjectConsultantModal({ project, refreshData }) {
   const [consultant, setConsultant] = useState("");
   const [consultants, setConsultants] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const isValid = (consultant || "").trim().length > 0;
 
   useEffect(() => {
     if (show) {
@@ -291,7 +317,11 @@ export function EditProjectConsultantModal({ project, refreshData }) {
 
   const loadConsultants = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/administration/all_consultants/");
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      const response = await axios.get("http://localhost:8000/api/administration/all_consultants/", { headers: currentHeaders });
       const consultantsData = response?.data?.all_consultants || [];
       setConsultants(consultantsData);
     } catch (error) {
@@ -331,8 +361,8 @@ export function EditProjectConsultantModal({ project, refreshData }) {
 
   return (
     <>
-      <Button size="mini" color="blue" onClick={handleShow}>
-        <FiEdit />
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} /> Edit Consultant
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -340,7 +370,6 @@ export function EditProjectConsultantModal({ project, refreshData }) {
           <Modal.Title>Edit Consultant</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Consultant:</Form.Label>
               <Form.Control
@@ -351,20 +380,26 @@ export function EditProjectConsultantModal({ project, refreshData }) {
                 <option value="">Select Consultant</option>
                 {Array.isArray(consultants) && consultants.map((consultant) => (
                   <option key={consultant.consultant_id} value={consultant.consultant_id}>
-                    {consultant.surname} {consultant.name}
+                    {consultant.consultant_id} - {consultant.fullname}
                   </option>
                 ))}
               </Form.Control>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button color="green" onClick={handleSave} loading={isLoading}>
-            Save
-          </Button>
+          <small className="mr-auto">
+            {!isValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>Consultant is required</li>
+              </ul>
+            ) : (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} /> Looks good.
+              </div>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} loading={isLoading} disabled={!isValid}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -386,11 +421,10 @@ export function EditProjectStatusModal({ project, refreshData }) {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const isValid = !!status;
+
   const handleSave = async () => {
-    if (!status) {
-      Swal.fire("Error", "Status is required", "error");
-      return;
-    }
+    if (!isValid) return;
 
     setIsLoading(true);
     try {
@@ -419,8 +453,8 @@ export function EditProjectStatusModal({ project, refreshData }) {
 
   return (
     <>
-      <Button size="mini" color="blue" onClick={handleShow}>
-        <FiEdit />
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} /> Edit Status
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -428,7 +462,6 @@ export function EditProjectStatusModal({ project, refreshData }) {
           <Modal.Title>Edit Status</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Status:</Form.Label>
               <Form.Control
@@ -445,15 +478,21 @@ export function EditProjectStatusModal({ project, refreshData }) {
                 <option value="Abandoned">Abandoned</option>
               </Form.Control>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button color="green" onClick={handleSave} loading={isLoading}>
-            Save
-          </Button>
+          <small className="mr-auto">
+            {!isValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>Status is required</li>
+              </ul>
+            ) : (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} /> Looks good.
+              </div>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} loading={isLoading} disabled={!isValid}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -465,15 +504,35 @@ export function EditProjectTaxationModal({ project, refreshData }) {
   const [show, setShow] = useState(false);
   const [taxation, setTaxation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [allCategories, setAllCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
   useEffect(() => {
     if (show) {
       setTaxation(project.taxation || false);
+      // Initialize categories
+      const existing = (project.categories || []).map(c => c.projcate_id).filter(Boolean);
+      setSelectedCategories(existing);
+      loadCategories();
     }
   }, [show, project]);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+
+  const loadCategories = async () => {
+    try {
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      const res = await axios.get("http://localhost:8000/api/administration/all_project_categories/", { headers: currentHeaders });
+      const data = res?.data?.all_project_categories || [];
+      setAllCategories(Array.isArray(data) ? data : []);
+    } catch (e) {
+      setAllCategories([]);
+    }
+  };
 
   const handleSave = async () => {
     setIsLoading(true);
@@ -483,9 +542,13 @@ export function EditProjectTaxationModal({ project, refreshData }) {
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
+      const payload = taxation
+        ? { taxation: true, category_ids: [] }
+        : { taxation: false, category_ids: selectedCategories };
+
       await axios.put(
         UPDATE_PROJECT + project.project_id + "/",
-        { taxation: taxation },
+        payload,
         { headers: currentHeaders }
       );
 
@@ -503,8 +566,8 @@ export function EditProjectTaxationModal({ project, refreshData }) {
 
   return (
     <>
-      <Button size="mini" color="blue" onClick={handleShow}>
-        <FiEdit />
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} /> Edit Taxation / Categories
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -512,7 +575,6 @@ export function EditProjectTaxationModal({ project, refreshData }) {
           <Modal.Title>Edit Taxation Status</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Check
                 type="switch"
@@ -522,15 +584,46 @@ export function EditProjectTaxationModal({ project, refreshData }) {
                 onChange={(e) => setTaxation(e.target.checked)}
               />
             </Form.Group>
-          </Form>
+            {!taxation && (
+              <Form.Group style={{ marginTop: 12 }}>
+                <Form.Label>Categories</Form.Label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {allCategories.map(cat => {
+                    const isSelected = selectedCategories.includes(cat.projcate_id);
+                    return (
+                      <Button
+                        key={cat.projcate_id}
+                        type="button"
+                        size="tiny"
+                        color={isSelected ? 'green' : 'grey'}
+                        onClick={() => setSelectedCategories(prev => (
+                          prev.includes(cat.projcate_id)
+                            ? prev.filter(id => id !== cat.projcate_id)
+                            : [...prev, cat.projcate_id]
+                        ))}
+                      >
+                        {cat.title}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </Form.Group>
+            )}
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button color="green" onClick={handleSave} loading={isLoading}>
-            Save
-          </Button>
+          <small className="mr-auto">
+            {taxation || selectedCategories.length > 0 ? (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} /> Looks good.
+              </div>
+            ) : (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                <li>Please select at least one category</li>
+              </ul>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} loading={isLoading} disabled={!taxation && selectedCategories.length === 0}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -580,8 +673,8 @@ export function EditProjectDeadlineModal({ project, refreshData }) {
 
   return (
     <>
-      <Button size="mini" color="blue" onClick={handleShow}>
-        <FiEdit />
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} /> Edit Deadline
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
@@ -589,7 +682,6 @@ export function EditProjectDeadlineModal({ project, refreshData }) {
           <Modal.Title>Edit Deadline</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Deadline:</Form.Label>
               <Form.Control
@@ -598,15 +690,15 @@ export function EditProjectDeadlineModal({ project, refreshData }) {
                 onChange={(e) => setDeadline(e.target.value)}
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button color="green" onClick={handleSave} loading={isLoading}>
-            Save
-          </Button>
+          <small className="mr-auto">
+            <div style={{ color: "green" }}>
+              <AiOutlineCheckCircle style={{ marginRight: 5 }} /> Looks good.
+            </div>
+          </small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} loading={isLoading}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -618,6 +710,7 @@ export function EditProjectDetailsModal({ project, refreshData }) {
   const [show, setShow] = useState(false);
   const [details, setDetails] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const isValid = details.trim().length > 0 && details.trim().length <= 1000;
 
   useEffect(() => {
     if (show) {
@@ -629,6 +722,7 @@ export function EditProjectDetailsModal({ project, refreshData }) {
   const handleShow = () => setShow(true);
 
   const handleSave = async () => {
+    if (!isValid) return;
     setIsLoading(true);
     try {
       const currentHeaders = {
@@ -638,7 +732,7 @@ export function EditProjectDetailsModal({ project, refreshData }) {
 
       await axios.put(
         UPDATE_PROJECT + project.project_id + "/",
-        { details: details.trim() || null },
+        { details: details.trim() },
         { headers: currentHeaders }
       );
 
@@ -656,8 +750,8 @@ export function EditProjectDetailsModal({ project, refreshData }) {
 
   return (
     <>
-      <Button size="mini" color="blue" onClick={handleShow}>
-        <FiEdit />
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} /> Edit Details
       </Button>
 
       <Modal show={show} onHide={handleClose} size="lg" centered>
@@ -665,7 +759,6 @@ export function EditProjectDetailsModal({ project, refreshData }) {
           <Modal.Title>Edit Details</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Details:</Form.Label>
               <Form.Control
@@ -677,15 +770,22 @@ export function EditProjectDetailsModal({ project, refreshData }) {
                 placeholder="Enter project details"
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button color="green" onClick={handleSave} loading={isLoading}>
-            Save
-          </Button>
+          <small className="mr-auto">
+            {!isValid ? (
+              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
+                {details.trim().length === 0 && (<li>Details are required</li>)}
+                {details.trim().length > 1000 && (<li>Details must be at most 1000 characters</li>)}
+              </ul>
+            ) : (
+              <div style={{ color: "green" }}>
+                <AiOutlineCheckCircle style={{ marginRight: 5 }} /> Looks good.
+              </div>
+            )}
+          </small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} loading={isLoading} disabled={!isValid}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -735,8 +835,8 @@ export function EditProjectNotesModal({ project, refreshData }) {
 
   return (
     <>
-      <Button size="mini" color="blue" onClick={handleShow}>
-        <FiEdit />
+      <Button size="tiny" basic onClick={handleShow}>
+        <FiEdit style={{ marginRight: 6 }} /> Edit Notes
       </Button>
 
       <Modal show={show} onHide={handleClose} size="lg" centered>
@@ -744,7 +844,6 @@ export function EditProjectNotesModal({ project, refreshData }) {
           <Modal.Title>Edit Notes</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Notes:</Form.Label>
               <Form.Control
@@ -756,15 +855,15 @@ export function EditProjectNotesModal({ project, refreshData }) {
                 placeholder="Enter project notes"
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button color="green" onClick={handleSave} loading={isLoading}>
-            Save
-          </Button>
+          <small className="mr-auto">
+            <div style={{ color: "green" }}>
+              <AiOutlineCheckCircle style={{ marginRight: 5 }} /> Looks good.
+            </div>
+          </small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} loading={isLoading}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>
