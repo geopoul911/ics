@@ -9,7 +9,22 @@ import axios from "axios";
 
 // Modules / Functions
 import Swal from "sweetalert2";
-import { Container, Row, Col } from "react-bootstrap";
+import { Card } from "react-bootstrap";
+import { Grid, Button } from "semantic-ui-react";
+import DeleteObjectModal from "../../../modals/delete_object";
+import { pageHeader } from "../../../global_vars";
+import {
+  EditProfessionalFullnameModal,
+  EditProfessionalProfessionModal,
+  EditProfessionalCityModal,
+  EditProfessionalAddressModal,
+  EditProfessionalEmailModal,
+  EditProfessionalPhoneModal,
+  EditProfessionalMobileModal,
+  EditProfessionalReliabilityModal,
+  EditProfessionalActiveModal,
+  EditProfessionalNotesModal,
+} from "../../../modals/professional_edit_modals";
 
 // Global Variables
 import { headers } from "../../../global_vars";
@@ -61,33 +76,123 @@ function ProfessionalOverview() {
   return (
     <>
       <NavigationBar />
-      <Container className="mainContainer">
-        <h1>Professional Overview</h1>
-        <Row>
-          <Col md={6}>
-            <h5>Basic Information</h5>
-            <p><strong>ID:</strong> {professional.professional_id}</p>
-            <p><strong>Fullname:</strong> {professional.fullname}</p>
-            <p><strong>Profession:</strong> {professional.profession?.title}</p>
-            <p><strong>City:</strong> {professional.city?.title}</p>
-            <p><strong>Reliability:</strong> {professional.reliability || 'N/A'}</p>
-          </Col>
-          <Col md={6}>
-            <h5>Contact</h5>
-            <p><strong>Address:</strong> {professional.address || 'N/A'}</p>
-            <p><strong>Email:</strong> {professional.email || 'N/A'}</p>
-            <p><strong>Phone:</strong> {professional.phone || 'N/A'}</p>
-            <p><strong>Mobile:</strong> {professional.mobile || 'N/A'}</p>
-            <p><strong>Active:</strong> {professional.active ? 'Yes' : 'No'}</p>
-          </Col>
-        </Row>
-        <Row>
-          <Col md={12}>
-            <h5>Notes</h5>
-            <p>{professional.notes || '—'}</p>
-          </Col>
-        </Row>
-      </Container>
+      <div className="mainContainer">
+        {pageHeader("professional_overview", `Professional: ${professional.professional_id}`)}
+        <div className="contentContainer">
+          <div className="contentBody">
+            <Grid stackable columns={2} divided>
+              <Grid.Column>
+                <Card>
+                  <Card.Header>Basic Information</Card.Header>
+                  <Card.Body>
+                    <div className={"info_descr"}>ID</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {professional.professional_id}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <Button size="tiny" basic disabled title="ID is immutable">ID</Button>
+                      </span>
+                    </div>
+
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>Fullname</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {professional.fullname || 'N/A'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditProfessionalFullnameModal professional={professional} update_state={setProfessional} />
+                      </span>
+                    </div>
+
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>Profession</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {professional.profession?.title || 'N/A'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditProfessionalProfessionModal professional={professional} update_state={setProfessional} />
+                      </span>
+                    </div>
+
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>City</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {professional.city?.title || 'N/A'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditProfessionalCityModal professional={professional} update_state={setProfessional} />
+                      </span>
+                    </div>
+
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>Reliability</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {professional.reliability || 'N/A'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditProfessionalReliabilityModal professional={professional} update_state={setProfessional} />
+                      </span>
+                    </div>
+                  </Card.Body>
+                  <Card.Footer>
+                    <DeleteObjectModal objectType="Professional" objectId={professional.professional_id} objectName={professional.professional_id} />
+                  </Card.Footer>
+                </Card>
+              </Grid.Column>
+
+              <Grid.Column>
+                <Card>
+                  <Card.Header>Contact</Card.Header>
+                  <Card.Body>
+                    <div className={"info_descr"}>Address</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {professional.address || 'N/A'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditProfessionalAddressModal professional={professional} update_state={setProfessional} />
+                      </span>
+                    </div>
+
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>Email</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {professional.email || 'N/A'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditProfessionalEmailModal professional={professional} update_state={setProfessional} />
+                      </span>
+                    </div>
+
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>Phone</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {professional.phone || 'N/A'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditProfessionalPhoneModal professional={professional} update_state={setProfessional} />
+                      </span>
+                    </div>
+
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>Mobile</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {professional.mobile || 'N/A'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditProfessionalMobileModal professional={professional} update_state={setProfessional} />
+                      </span>
+                    </div>
+
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>Active</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {professional.active ? 'Yes' : 'No'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditProfessionalActiveModal professional={professional} update_state={setProfessional} />
+                      </span>
+                    </div>
+                  </Card.Body>
+                </Card>
+                <Card style={{ marginTop: 16 }}>
+                  <Card.Header>Notes</Card.Header>
+                  <Card.Body>
+                    <div className={"info_descr"}>Notes</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {professional.notes || 'N/A'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditProfessionalNotesModal professional={professional} update_state={setProfessional} />
+                      </span>
+                    </div>
+                  </Card.Body>
+                </Card>
+              </Grid.Column>
+            </Grid>
+          </div>
+        </div>
+      </div>
       <Footer />
     </>
   );

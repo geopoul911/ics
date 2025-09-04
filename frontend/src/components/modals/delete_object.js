@@ -28,11 +28,15 @@ const DELETE_ENDPOINTS = {
   'Client': 'http://localhost:8000/api/data_management/client/',
   'ClientContact': 'http://localhost:8000/api/data_management/client_contact/',
   'BankClientAccount': 'http://localhost:8000/api/data_management/bank_client_account/',
+  'BankProjectAccount': 'http://localhost:8000/api/data_management/bank_project_account/',
   'Project': 'http://localhost:8000/api/data_management/project/',
   'AssociatedClient': 'http://localhost:8000/api/data_management/associated_client/',
   'TaskComment': 'http://localhost:8000/api/data_management/task_comment/',
   'Property': 'http://localhost:8000/api/data_management/property/',
   'ProjectTask': 'http://localhost:8000/api/data_management/project_task/',
+  'Cash': 'http://localhost:8000/api/data_management/cash/',
+  'Professional': 'http://localhost:8000/api/data_management/professional/',
+  'TaxationProject': 'http://localhost:8000/api/data_management/taxation_project/',
   // Add more object types as needed
 };
 
@@ -69,6 +73,9 @@ function normalizeObjectType(rawType) {
     'property': 'Property',
     'projecttask': 'ProjectTask',
     'project_task': 'ProjectTask',
+    'professional': 'Professional',
+    'taxationproject': 'TaxationProject',
+    'taxation_project': 'TaxationProject',
   };
   const normalized = map[lower];
   if (normalized) return normalized;
@@ -95,6 +102,8 @@ const TYPE_TO_ID_FIELD = {
   AssociatedClient: 'assoclient_id',
   TaskComment: 'taskcomm_id',
   Property: 'property_id',
+  Professional: 'professional_id',
+  TaxationProject: 'taxproj_id',
 };
 
 // Redirect URLs after successful deletion
@@ -113,11 +122,15 @@ const REDIRECT_URLS = {
   'Client': '/data_management/all_clients',
   'ClientContact': '/data_management/all_client_contacts',
   'BankClientAccount': '/data_management/all_bank_client_accounts',
+  'BankProjectAccount': '/data_management/all_bank_project_accounts',
   'Project': '/data_management/all_projects',
   'AssociatedClient': '/data_management/all_associated_clients',
   'TaskComment': '/data_management/all_task_comments',
   'Property': '/data_management/all_properties',
   'ProjectTask': '/data_management/all_project_tasks',
+  'Cash': '/data_management/all_cash',
+  'Professional': '/data_management/all_professionals',
+  'TaxationProject': '/data_management/all_taxation_projects',
   // Add more redirect URLs as needed
 };
 

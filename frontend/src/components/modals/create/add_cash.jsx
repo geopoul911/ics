@@ -166,17 +166,9 @@ function AddCashModal({ onCashCreated }) {
         },
       });
 
-      // Show success message
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "Cash entry created successfully!",
-      });
-
-      // Refresh the parent component if callback provided
-      if (onCashCreated) {
-        onCashCreated();
-      }
+      // Navigate to the new cash entry overview
+      const newId = cashId.trim();
+      window.location.href = `/data_management/cash/${newId}`;
     } catch (e) {
       console.error('Cash creation error:', e.response?.data);
       const apiMsg =

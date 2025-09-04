@@ -591,6 +591,7 @@ function AddPropertyModal({ onPropertyCreated }) {
                     style={{ fontSize: 18, marginRight: 6 }}
                   />
                   Validated
+                  
                 </li>
               </ul>
             )}

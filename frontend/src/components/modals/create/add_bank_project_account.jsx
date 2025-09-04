@@ -110,9 +110,9 @@ function AddBankProjectAccountModal({ onCreated }) {
 
       const res = await axios.post(ADD_BANK_PROJECT_ACCOUNT, payload, { headers: currentHeaders });
       if (res.status === 201) {
-        Swal.fire({ icon: "success", title: "Success!", text: "Bank project account created successfully." });
-        handleClose();
-        onCreated && onCreated();
+        // Navigate to overview
+        const newId = bankProjAccoId;
+        window.location.href = `/data_management/bank_project_account/${newId}`;
       }
     } catch (e) {
       console.error("Create bank project account error:", e);

@@ -121,9 +121,9 @@ function AddProfessionalModal({ onProfessionalCreated }) {
         { headers: currentHeaders }
       );
 
-      Swal.fire("Success", "Professional created successfully", "success");
-      if (onProfessionalCreated) onProfessionalCreated();
-      handleClose();
+      // Navigate to overview
+      const newId = professional_id.trim().toUpperCase();
+      window.location.href = `/data_management/professional/${newId}`;
     } catch (error) {
       console.error("Error creating professional:", error);
       let apiMsg = "Failed to create professional";

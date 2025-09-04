@@ -9,7 +9,11 @@ import axios from "axios";
 
 // Modules / Functions
 import Swal from "sweetalert2";
-import { Container, Row, Col } from "react-bootstrap";
+import { Card } from "react-bootstrap";
+import { Grid, Button } from "semantic-ui-react";
+import DeleteObjectModal from "../../modals/delete_object";
+import { pageHeader } from "../../global_vars";
+import { EditBPAProjectModal, EditBPAClientModal, EditBPABankClientAccountModal, EditBPANotesModal } from "../../modals/bank_project_account_edit_modals";
 
 // Global Variables
 import { headers } from "../../global_vars";
@@ -18,7 +22,7 @@ import { headers } from "../../global_vars";
 const VIEW_BANK_PROJECT_ACCOUNT = "http://localhost:8000/api/data_management/bank_project_account/";
 
 function BankProjectAccountOverview() {
-  const { bankprojacco_id } = useParams();
+  const { id } = useParams();
   const [bankProjectAccount, setBankProjectAccount] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -30,7 +34,7 @@ function BankProjectAccountOverview() {
           "Authorization": "Token " + localStorage.getItem("userToken")
         };
 
-        const response = await axios.get(`${VIEW_BANK_PROJECT_ACCOUNT}${bankprojacco_id}/`, {
+        const response = await axios.get(`${VIEW_BANK_PROJECT_ACCOUNT}${id}/`, {
           headers: currentHeaders,
         });
 
@@ -48,7 +52,7 @@ function BankProjectAccountOverview() {
     };
 
     fetchBankProjectAccount();
-  }, [bankprojacco_id]);
+  }, [id]);
 
   if (!isLoaded) {
     return <div>Loading...</div>;
@@ -61,22 +65,71 @@ function BankProjectAccountOverview() {
   return (
     <>
       <NavigationBar />
-      <Container className="mainContainer">
-        <h1>Bank Project Account Overview</h1>
-        <Row>
-          <Col md={6}>
-            <h5>Basic Information</h5>
-            <p><strong>Bank Project Account ID:</strong> {bankProjectAccount.bankprojacco_id}</p>
-            <p><strong>Project:</strong> {bankProjectAccount.project?.title}</p>
-            <p><strong>Client:</strong> {bankProjectAccount.client?.name}</p>
-            <p><strong>Account Number:</strong> {bankProjectAccount.bankclientacco?.accountnumber}</p>
-          </Col>
-          <Col md={6}>
-            <h5>Additional Details</h5>
-            <p><strong>Notes:</strong> {bankProjectAccount.notes || 'N/A'}</p>
-          </Col>
-        </Row>
-      </Container>
+      <div className="mainContainer">
+        {pageHeader("bank_project_account_overview", `Bank Project Account: ${bankProjectAccount.bankprojacco_id}`)}
+        <div className="contentContainer">
+          <div className="contentBody">
+            <Grid stackable columns={2} divided>
+              <Grid.Column>
+                <Card>
+                  <Card.Header>Basic Information</Card.Header>
+                  <Card.Body>
+                    <div className={"info_descr"}>Bank Project Account ID</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {bankProjectAccount.bankprojacco_id}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <Button size="tiny" basic disabled title="ID is immutable">ID</Button>
+                      </span>
+                    </div>
+
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>Project</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {bankProjectAccount.project?.title || 'N/A'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditBPAProjectModal bpa={bankProjectAccount} update_state={setBankProjectAccount} />
+                      </span>
+                    </div>
+
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>Client</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {bankProjectAccount.client?.name || bankProjectAccount.client?.fullname || 'N/A'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditBPAClientModal bpa={bankProjectAccount} update_state={setBankProjectAccount} />
+                      </span>
+                    </div>
+
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>Account Number</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {bankProjectAccount.bankclientacco?.accountnumber || 'N/A'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditBPABankClientAccountModal bpa={bankProjectAccount} update_state={setBankProjectAccount} />
+                      </span>
+                    </div>
+                  </Card.Body>
+                  <Card.Footer>
+                    <DeleteObjectModal objectType="BankProjectAccount" objectId={bankProjectAccount.bankprojacco_id} objectName={bankProjectAccount.bankprojacco_id} />
+                  </Card.Footer>
+                </Card>
+              </Grid.Column>
+
+              <Grid.Column>
+                <Card>
+                  <Card.Header>Additional Details</Card.Header>
+                  <Card.Body>
+                    <div className={"info_descr"}>Notes</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {bankProjectAccount.notes || 'N/A'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditBPANotesModal bpa={bankProjectAccount} update_state={setBankProjectAccount} />
+                      </span>
+                    </div>
+                  </Card.Body>
+                </Card>
+              </Grid.Column>
+            </Grid>
+          </div>
+        </div>
+      </div>
       <Footer />
     </>
   );

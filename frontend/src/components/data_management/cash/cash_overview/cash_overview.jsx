@@ -6,10 +6,22 @@ import { useParams } from "react-router-dom";
 import NavigationBar from "../../../core/navigation_bar/navigation_bar";
 import Footer from "../../../core/footer/footer";
 import axios from "axios";
+import { Card } from "react-bootstrap";
+import { Grid, Button } from "semantic-ui-react";
+import DeleteObjectModal from "../../../modals/delete_object";
+import {
+  EditCashCountryModal,
+  EditCashTrandateModal,
+  EditCashConsultantModal,
+  EditCashKindModal,
+  EditCashAmountExpenseModal,
+  EditCashAmountPaymentModal,
+  EditCashReasonModal,
+} from "../../../modals/cash_edit_modals";
+import { pageHeader } from "../../../global_vars";
 
 // Modules / Functions
 import Swal from "sweetalert2";
-import { Container, Row, Col } from "react-bootstrap";
 
 // Global Variables
 import { headers } from "../../../global_vars";
@@ -18,7 +30,7 @@ import { headers } from "../../../global_vars";
 const VIEW_CASH = "http://localhost:8000/api/data_management/cash/";
 
 function CashOverview() {
-  const { cash_id } = useParams();
+  const { id } = useParams();
   const [cash, setCash] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -30,7 +42,7 @@ function CashOverview() {
           "Authorization": "Token " + localStorage.getItem("userToken")
         };
 
-        const response = await axios.get(`${VIEW_CASH}${cash_id}/`, {
+        const response = await axios.get(`${VIEW_CASH}${id}/`, {
           headers: currentHeaders,
         });
 
@@ -48,7 +60,7 @@ function CashOverview() {
     };
 
     fetchCash();
-  }, [cash_id]);
+  }, [id]);
 
   if (!isLoaded) {
     return <div>Loading...</div>;
@@ -61,26 +73,105 @@ function CashOverview() {
   return (
     <>
       <NavigationBar />
-      <Container className="mainContainer">
-        <h1>Cash Overview</h1>
-        <Row>
-          <Col md={6}>
-            <h5>Basic Information</h5>
-            <p><strong>Cash ID:</strong> {cash.cash_id}</p>
-            <p><strong>Project:</strong> {cash.project?.title}</p>
-            <p><strong>Country:</strong> {cash.country?.title}</p>
-            <p><strong>Transaction Date:</strong> {new Date(cash.trandate).toLocaleDateString()}</p>
-            <p><strong>Consultant:</strong> {cash.consultant?.fullname}</p>
-            <p><strong>Kind:</strong> {cash.kind === 'E' ? 'Expense' : 'Payment'}</p>
-          </Col>
-          <Col md={6}>
-            <h5>Financial Details</h5>
-            <p><strong>Amount Expense:</strong> {cash.amountexp || 'N/A'}</p>
-            <p><strong>Amount Payment:</strong> {cash.amountpay || 'N/A'}</p>
-            <p><strong>Reason:</strong> {cash.reason || 'N/A'}</p>
-          </Col>
-        </Row>
-      </Container>
+      <div className="mainContainer">
+        {pageHeader("cash_overview", `Cash: ${cash.cash_id}`)}
+        <div className="contentContainer">
+          <div className="contentBody">
+            <Grid stackable columns={2} divided>
+              <Grid.Column>
+                <Card>
+                  <Card.Header>Basic Information</Card.Header>
+                  <Card.Body>
+                    <div className={"info_descr"}>Cash ID</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {cash.cash_id}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <Button size="tiny" basic disabled title="ID is immutable">ID</Button>
+                      </span>
+                    </div>
+
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>Project</div>
+                    <div className={"info_span"}>{cash.project?.title || 'N/A'}</div>
+
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>Country</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {cash.country?.title || 'N/A'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditCashCountryModal cash={cash} update_state={setCash} />
+                      </span>
+                    </div>
+
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>Transaction Date</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {cash.trandate ? new Date(cash.trandate).toLocaleDateString() : 'N/A'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditCashTrandateModal cash={cash} update_state={setCash} />
+                      </span>
+                    </div>
+
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>Consultant</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {cash.consultant?.fullname || 'N/A'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditCashConsultantModal cash={cash} update_state={setCash} />
+                      </span>
+                    </div>
+
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>Kind</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {cash.kind === 'E' ? 'Expense' : 'Payment'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditCashKindModal cash={cash} update_state={setCash} />
+                      </span>
+                    </div>
+                  </Card.Body>
+                  <Card.Footer>
+                    <DeleteObjectModal objectType="Cash" objectId={cash.cash_id} objectName={cash.cash_id} />
+                  </Card.Footer>
+                </Card>
+              </Grid.Column>
+
+              <Grid.Column>
+                <Card>
+                  <Card.Header>Financial Details</Card.Header>
+                  <Card.Body>
+                    {cash.kind === 'E' && (
+                    <>
+                      <div className={"info_descr"}>Amount Expense</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {cash.amountexp ?? 'N/A'}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditCashAmountExpenseModal cash={cash} update_state={setCash} />
+                        </span>
+                      </div>
+                    </>
+                    )}
+                    {cash.kind === 'P' && (
+                    <>
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Amount Payment</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {cash.amountpay ?? 'N/A'}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditCashAmountPaymentModal cash={cash} update_state={setCash} />
+                        </span>
+                      </div>
+                    </>
+                    )}
+
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>Reason</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {cash.reason || 'N/A'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditCashReasonModal cash={cash} update_state={setCash} />
+                      </span>
+                    </div>
+                  </Card.Body>
+                </Card>
+              </Grid.Column>
+            </Grid>
+          </div>
+        </div>
+      </div>
       <Footer />
     </>
   );

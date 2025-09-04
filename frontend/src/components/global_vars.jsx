@@ -925,7 +925,7 @@ export function pageHeader(value, objName) {
              <>
                <div className="page_header">
                  <h2>
-                   <FaArrowRight style={iconStyle} /> Bank Project Account Overview {objName} 
+                   <FaArrowRight style={iconStyle} /> Bank Project Account Overview
                  </h2>
                  <Breadcrumb>
                    <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
