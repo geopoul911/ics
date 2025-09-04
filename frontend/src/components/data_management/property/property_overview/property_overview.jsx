@@ -16,12 +16,9 @@ import axios from "axios";
 // Global Variables
 import { headers, pageHeader } from "../../../global_vars";
 import {
-  EditPropertyIdModal,
   EditPropertyDescriptionModal,
   EditPropertyProjectModal,
-  EditPropertyCountryModal,
-  EditPropertyProvinceModal,
-  EditPropertyCityModal,
+  EditPropertyGeoLocationModal,
   EditPropertyLocationModal,
   EditPropertyTypeModal,
   EditPropertyConstructYearModal,
@@ -110,175 +107,126 @@ class PropertyOverview extends React.Component {
       <>
         <NavigationBar />
         <div className="mainContainer">
-          {pageHeader("property_overview", property.property_id || "Not set")}
+          {pageHeader("property_overview", `Property: ${property.property_id || "Loading..."}`)}
           <div className="contentContainer">
             <div className="contentBody">
-              <Grid>
-                <Grid.Row>
-                  <Grid.Column width={16}>
-                    <Card>
-                      <Card.Header>
-                        <BsInfoSquare style={overviewIconStyle} />
-                        Property Information
-                      </Card.Header>
-                      <Card.Body>
-                        <Grid>
-                          <Grid.Row>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Property ID:</strong> {property.property_id || "Not set"}
-                                <EditPropertyIdModal
-                                  property={property}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Description:</strong> {property.description || "Not set"}
-                                <EditPropertyDescriptionModal
-                                  property={property}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                          </Grid.Row>
-                          <Grid.Row>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Project:</strong> {property.project?.title || "Not set"}
-                                <EditPropertyProjectModal
-                                  property={property}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Type:</strong> {property.type || "Not set"}
-                                <EditPropertyTypeModal
-                                  property={property}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                          </Grid.Row>
-                          <Grid.Row>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Location:</strong> {property.location || "Not set"}
-                                <EditPropertyLocationModal
-                                  property={property}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Construction Year:</strong> {property.constructyear || "Not set"}
-                                <EditPropertyConstructYearModal
-                                  property={property}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                          </Grid.Row>
-                          <Grid.Row>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Country:</strong> {property.country?.name || "Not set"}
-                                <EditPropertyCountryModal
-                                  property={property}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Province:</strong> {property.province?.name || "Not set"}
-                                <EditPropertyProvinceModal
-                                  property={property}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                          </Grid.Row>
-                          <Grid.Row>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>City:</strong> {property.city?.name || "Not set"}
-                                <EditPropertyCityModal
-                                  property={property}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Status:</strong> {property.status || "Not set"}
-                                <EditPropertyStatusModal
-                                  property={property}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                          </Grid.Row>
-                          <Grid.Row>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Market:</strong> {property.market || "Not set"}
-                                <EditPropertyMarketModal
-                                  property={property}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Active:</strong> {property.active ? "Yes" : "No"}
-                                <EditPropertyActiveModal
-                                  property={property}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                          </Grid.Row>
-                          <Grid.Row>
-                            <Grid.Column width={16}>
-                              <p>
-                                <strong>Broker:</strong> {property.broker || "Not set"}
-                                <EditPropertyBrokerModal
-                                  property={property}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                          </Grid.Row>
-                          <Grid.Row>
-                            <Grid.Column width={16}>
-                              <p>
-                                <strong>Notes:</strong> {property.notes || "Not set"}
-                                <EditPropertyNotesModal
-                                  property={property}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                          </Grid.Row>
-                        </Grid>
-                      </Card.Body>
-                    </Card>
-                  </Grid.Column>
-                </Grid.Row>
-                <Grid.Row>
-                  <Grid.Column width={16}>
-                    <DeleteObjectModal
-                      objectType="property"
-                      objectId={property.property_id}
-                      objectName={property.property_id}
-                    />
-                  </Grid.Column>
-                </Grid.Row>
+              <Grid stackable columns={2} divided>
+                <Grid.Column>
+                  <Card>
+                    <Card.Header>
+                      <BsInfoSquare style={overviewIconStyle} /> Basic Information
+                    </Card.Header>
+                    <Card.Body>
+                      <div className={"info_descr"}>Property ID</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {property.property_id || "N/A"}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <button className="ui button tiny basic" disabled title="ID is immutable">ID</button>
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Description</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {property.description || "N/A"}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditPropertyDescriptionModal property={property} update_state={this.update_state} />
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Project</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {property.project?.title || "N/A"}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditPropertyProjectModal property={property} update_state={this.update_state} />
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Type</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {property.type || "N/A"}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditPropertyTypeModal property={property} update_state={this.update_state} />
+                        </span>
+                      </div>
+                    </Card.Body>
+                    <Card.Footer>
+                      <DeleteObjectModal objectType="Property" objectId={property.property_id} objectName={property.property_id} />
+                    </Card.Footer>
+                  </Card>
+                </Grid.Column>
+
+                <Grid.Column>
+                  <Card>
+                    <Card.Header>
+                      <BsInfoSquare style={overviewIconStyle} /> Details
+                    </Card.Header>
+                    <Card.Body>
+                      <div className={"info_descr"}>Location</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {property.location || "N/A"}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditPropertyLocationModal property={property} update_state={this.update_state} />
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Construction Year</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {property.constructyear || "N/A"}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditPropertyConstructYearModal property={property} update_state={this.update_state} />
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Location</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {(property.country?.title || property.country?.name || "N/A") + " / " + (property.province?.title || property.province?.name || "N/A") + " / " + (property.city?.title || property.city?.name || "N/A")}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditPropertyGeoLocationModal property={property} update_state={this.update_state} />
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Status</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {property.status || "N/A"}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditPropertyStatusModal property={property} update_state={this.update_state} />
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Market</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {property.market || "N/A"}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditPropertyMarketModal property={property} update_state={this.update_state} />
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Active</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {property.active ? 'Yes' : 'No'}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditPropertyActiveModal property={property} update_state={this.update_state} />
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Broker</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {property.broker || "N/A"}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditPropertyBrokerModal property={property} update_state={this.update_state} />
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Notes</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {property.notes || "N/A"}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditPropertyNotesModal property={property} update_state={this.update_state} />
+                        </span>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </Grid.Column>
               </Grid>
             </div>
           </div>

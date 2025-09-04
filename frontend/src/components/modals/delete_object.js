@@ -32,6 +32,7 @@ const DELETE_ENDPOINTS = {
   'AssociatedClient': 'http://localhost:8000/api/data_management/associated_client/',
   'TaskComment': 'http://localhost:8000/api/data_management/task_comment/',
   'Property': 'http://localhost:8000/api/data_management/property/',
+  'ProjectTask': 'http://localhost:8000/api/data_management/project_task/',
   // Add more object types as needed
 };
 
@@ -66,6 +67,8 @@ function normalizeObjectType(rawType) {
     'taskcomment': 'TaskComment',
     'task_comment': 'TaskComment',
     'property': 'Property',
+    'projecttask': 'ProjectTask',
+    'project_task': 'ProjectTask',
   };
   const normalized = map[lower];
   if (normalized) return normalized;
@@ -106,7 +109,7 @@ const REDIRECT_URLS = {
   'Profession': '/administration/all_professions',
   'ProjectCategory': '/administration/all_project_categories',
   'TaskCategory': '/administration/all_task_categories',
-  'Document': '/data_management/documents',
+  'Document': '/data_management/all_documents',
   'Client': '/data_management/all_clients',
   'ClientContact': '/data_management/all_client_contacts',
   'BankClientAccount': '/data_management/all_bank_client_accounts',
@@ -114,6 +117,7 @@ const REDIRECT_URLS = {
   'AssociatedClient': '/data_management/all_associated_clients',
   'TaskComment': '/data_management/all_task_comments',
   'Property': '/data_management/all_properties',
+  'ProjectTask': '/data_management/all_project_tasks',
   // Add more redirect URLs as needed
 };
 

@@ -36,7 +36,7 @@ function AddProjectTaskModal({ onCreated }) {
   const [priority, setPriority] = useState("A");
   const [assigner_id, setAssignerId] = useState("");
   const [assignee_id, setAssigneeId] = useState("");
-  const [assigndate, setAssigndate] = useState("");
+  // Assign date will be auto-filled on backend; remove from UI
   const [deadline, setDeadline] = useState("");
   const [weight, setWeight] = useState("");
   const [efforttime, setEfforttime] = useState("");
@@ -128,7 +128,9 @@ function AddProjectTaskModal({ onCreated }) {
         priority,
         assigner_id: assigner_id,
         assignee_id: assignee_id || undefined,
-        assigndate: assigndate || undefined,
+        // parse weight and effort time if provided
+        ...(String(weight).trim() !== "" ? { weight: parseInt(weight, 10) } : {}),
+        ...(String(efforttime).trim() !== "" ? { efforttime: parseFloat(String(efforttime).replace(',', '.')) } : {}),
         deadline: deadline || undefined,
         // weight and efforttime can be added later when fields are present in the UI
       };
@@ -151,7 +153,7 @@ function AddProjectTaskModal({ onCreated }) {
       setPriority("A");
       setAssignerId("");
       setAssigneeId("");
-      setAssigndate("");
+      
       setDeadline("");
       setWeight("");
       setEfforttime("");
@@ -179,7 +181,7 @@ function AddProjectTaskModal({ onCreated }) {
     setPriority("A");
     setAssignerId("");
     setAssigneeId("");
-    setAssigndate("");
+    
     setDeadline("");
     setWeight("");
     setEfforttime("");
@@ -320,12 +322,7 @@ function AddProjectTaskModal({ onCreated }) {
             </Row>
 
             <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Assign Date</Form.Label>
-                  <Form.Control type="date" value={assigndate} onChange={(e) => setAssigndate(e.target.value)} />
-                </Form.Group>
-              </Col>
+              
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>Deadline</Form.Label>

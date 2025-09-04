@@ -199,9 +199,15 @@ function AddPropertyModal({ onPropertyCreated }) {
   const isCityValid = cityId !== "";
   const isTypeValid = type !== "";
 
+  const isConstructYearValid = () => {
+    if (String(constructYear).trim() === "") return true; // optional
+    const y = parseInt(constructYear, 10);
+    return Number.isInteger(y) && y >= 1800 && y <= 2100;
+  };
+
   const isFormValid = isPropertyIdValid && isDescriptionValid && isProjectValid && 
                      isCountryValid && isProvinceValid && isCityValid && 
-                     isTypeValid;
+                     isTypeValid && isConstructYearValid();
 
   const createNewProperty = async () => {
     try {
@@ -237,10 +243,9 @@ function AddPropertyModal({ onPropertyCreated }) {
           text: "Property created successfully.",
         });
 
-        handleClose();
-        if (onPropertyCreated) {
-          onPropertyCreated();
-        }
+        // Navigate to the newly created property's overview
+        const newId = propertyId;
+        window.location.href = `/data_management/property/${newId}`;
       }
     } catch (error) {
       console.error("Error creating property:", error);
@@ -429,10 +434,12 @@ function AddPropertyModal({ onPropertyCreated }) {
                     <Form.Group className="mb-3">
                       <Form.Label>Construction Year:</Form.Label>
                       <Form.Control
-                        type="text"
-                        maxLength={4}
-                        placeholder="e.g., 2020"
-                        onChange={(e) => setConstructYear(clampLen(e.target.value, 4))}
+                        type="number"
+                        min={1800}
+                        max={2100}
+                        step={1}
+                        placeholder="Enter year"
+                        onChange={(e) => setConstructYear(e.target.value)}
                         value={constructYear}
                       />
                     </Form.Group>
@@ -565,6 +572,12 @@ function AddPropertyModal({ onPropertyCreated }) {
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
                     Type is required.
+                  </li>
+                )}
+                {String(constructYear).trim() !== "" && !isConstructYearValid() && (
+                  <li>
+                    <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
+                    Enter a valid Construction Year.
                   </li>
                 )}
               </ul>

@@ -127,10 +127,9 @@ function AddDocumentModal({ onClientCreated }) {
           text: "Document created successfully.",
         });
 
-        handleClose();
-        if (onClientCreated) {
-          onClientCreated();
-        }
+        // Navigate to document overview
+        const newId = documentId;
+        window.location.href = `/data_management/document/${newId}`;
       }
     } catch (error) {
       console.error("Error creating document:", error);

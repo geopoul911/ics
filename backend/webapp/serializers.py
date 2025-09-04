@@ -10,6 +10,13 @@ from django.contrib.auth.hashers import make_password
 from accounts.models import Consultant
 
 User = get_user_model()
+# Custom field that allows clearing a FileField by sending empty string/null
+class ClearableFileField(serializers.FileField):
+    def to_internal_value(self, data):
+        if data in ("", None):
+            return None
+        return super().to_internal_value(data)
+
 
 # Reference data serializers for dropdowns (must be defined first)
 class CountryReferenceSerializer(serializers.ModelSerializer):
@@ -1148,6 +1155,8 @@ class DocumentSerializer(serializers.ModelSerializer):
     client = ClientSerializer(read_only=True)
     project_id = serializers.CharField(write_only=True, required=False)
     client_id = serializers.CharField(write_only=True, required=False)
+    remove_filepath = serializers.BooleanField(write_only=True, required=False, default=False)
+    filepath = ClearableFileField(required=False, allow_null=True)
     
     class Meta:
         model = Document
@@ -1155,6 +1164,7 @@ class DocumentSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'original': {'required': False},  # Default to False
             'trafficable': {'required': False},  # Default to False
+            'filepath': {'required': False, 'allow_null': True},
         }
 
     def validate_document_id(self, value):
@@ -1185,8 +1195,8 @@ class DocumentSerializer(serializers.ModelSerializer):
         return value.strip()
 
     def validate_filepath(self, value):
-        """Validate uploaded file for FileField; allow empty (optional)."""
-        # File is optional
+        """Validate uploaded file for FileField; allow clearing by empty string/null."""
+        # Allow clearing the file by sending empty string or null
         if value in (None, ""):
             return None
 
@@ -1202,8 +1212,10 @@ class DocumentSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Filename must be at most 255 characters long.")
             return value
 
-        # In some update cases DRF may pass a string path for existing files
+        # If a string is provided during updates, treat empty as clear and non-empty as keep-as-is
         if isinstance(value, str):
+            if value == "":
+                return None
             if len(value) > 255:
                 raise serializers.ValidationError("File path must be at most 255 characters long.")
             return value
@@ -1262,6 +1274,25 @@ class DocumentSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         """Update an existing document instance"""
+        # Handle explicit file removal flag, bypassing FileField parsing
+        remove_fp = False
+        try:
+            remove_fp = bool(self.initial_data.get('remove_filepath'))
+        except Exception:
+            remove_fp = validated_data.pop('remove_filepath', False) or False
+
+        if remove_fp:
+            try:
+                current_file = getattr(instance, 'filepath', None)
+                if current_file:
+                    storage = current_file.storage
+                    name = current_file.name
+                    if storage and name and storage.exists(name):
+                        storage.delete(name)
+                instance.filepath = None
+            except Exception:
+                pass
+
         # Handle project_id conversion
         project_id = validated_data.pop('project_id', None)
         if project_id:
@@ -1272,13 +1303,33 @@ class DocumentSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(f"Project with ID '{project_id}' does not exist.")
         
         # Handle client_id conversion
-        client_id = validated_data.pop('client_id', None)
-        if client_id:
-            try:
-                client = Client.objects.get(client_id=client_id)
-                validated_data['client'] = client
-            except Client.DoesNotExist:
-                raise serializers.ValidationError(f"Client with ID '{client_id}' does not exist.")
+        _missing = object()
+        client_id = validated_data.pop('client_id', _missing)
+        if client_id is not _missing:
+            if client_id in (None, ""):
+                # Explicitly clear the client when null/empty is provided
+                validated_data['client'] = None
+            else:
+                try:
+                    client = Client.objects.get(client_id=client_id)
+                    validated_data['client'] = client
+                except Client.DoesNotExist:
+                    raise serializers.ValidationError(f"Client with ID '{client_id}' does not exist.")
+
+        # Handle filepath removal via payload (legacy path)
+        if 'filepath' in validated_data:
+            fp_val = validated_data.get('filepath')
+            if fp_val in (None, ""):
+                try:
+                    current_file = getattr(instance, 'filepath', None)
+                    if current_file:
+                        storage = current_file.storage
+                        name = current_file.name
+                        if storage and name and storage.exists(name):
+                            storage.delete(name)
+                except Exception:
+                    pass
+                validated_data['filepath'] = None
         
         # Prevent primary key updates - document_id is immutable
         if 'document_id' in validated_data and validated_data['document_id'] != instance.document_id:
@@ -1286,7 +1337,14 @@ class DocumentSerializer(serializers.ModelSerializer):
                 "Document ID cannot be changed once created"
             )
         
-        return super().update(instance, validated_data)
+        # Persist other updates
+        instance = super().update(instance, validated_data)
+        
+        # Ensure file removal persists when using remove_filepath flag
+        if remove_fp and getattr(instance, 'filepath', None):
+            instance.filepath = None
+            instance.save(update_fields=['filepath'])
+        return instance
 
 # Professional serializers
 class ProfessionSerializer(serializers.ModelSerializer):

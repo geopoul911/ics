@@ -23,6 +23,7 @@ import django.db.models as models
 from django.db.models.fields.files import ImageField
 
 from django.core.files.base import ContentFile
+from decimal import Decimal
 import os.path
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -470,6 +471,27 @@ class Document(models.Model):
     def __str__(self):
         return self.title
 
+    def delete(self, *args, **kwargs):
+        """Delete the Document and remove the stored file (if present)."""
+        file_name = None
+        file_storage = None
+        try:
+            if self.filepath:
+                file_name = self.filepath.name
+                file_storage = self.filepath.storage
+        except Exception:
+            file_name = None
+            file_storage = None
+
+        super().delete(*args, **kwargs)
+
+        try:
+            if file_storage and file_name and file_storage.exists(file_name):
+                file_storage.delete(file_name)
+        except Exception:
+            # Swallow storage errors to avoid breaking delete flow
+            pass
+
     def update_status(self, new_status, date=None):
         """Updates document status and logs the change"""
         if new_status not in dict(self.STATUS_CHOICES):
@@ -732,16 +754,26 @@ class ProjectTask(models.Model):
         from django.core.exceptions import ValidationError
 
         # Validate effort time step
-        if self.efforttime and self.efforttime % 0.5 != 0:
+        if self.efforttime is not None and (self.efforttime % Decimal('0.5')) != 0:
             raise ValidationError({
                 'efforttime': 'Effort time must be in 0.5 hour steps'
             })
+
+        # Auto-assign assign date on create
+        if getattr(self._state, 'adding', False) and not self.assigndate:
+            self.assigndate = timezone.now().date()
 
         # Update status based on dates
         if self.completiondate and not self.status == 'Completed':
             self.status = 'Completed'
         elif self.assigndate and not self.status in ['Assigned', 'Inprogress', 'Completed']:
             self.status = 'Assigned'
+
+        # Sync completion date with status
+        if self.status == 'Completed' and not self.completiondate:
+            self.completiondate = timezone.now().date()
+        elif self.status != 'Completed' and self.completiondate:
+            self.completiondate = None
 
     def save(self, *args, **kwargs):
         self.full_clean()

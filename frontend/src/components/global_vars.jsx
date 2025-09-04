@@ -426,6 +426,24 @@ export function pageHeader(value, objName) {
                     <hr />
                   </>
                 );
+              } else if (value === "project_task_overview") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> Project Task Overview
+                      </h2>
+                      <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/data_management/root">
+                          Data Management
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item active>Overview of {objName}</Breadcrumb.Item>
+                      </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
               } else if (value === "task_comment_overview") {
                 return (
                   <>

@@ -16,7 +16,6 @@ import axios from "axios";
 // Global Variables
 import { headers, pageHeader } from "../../../global_vars";
 import {
-  EditTaskCommentIdModal,
   EditTaskCommentProjectTaskModal,
   EditTaskCommentConsultantModal,
   EditTaskCommentCommentModal,
@@ -100,84 +99,67 @@ class TaskCommentOverview extends React.Component {
       <>
         <NavigationBar />
         <div className="mainContainer">
-          {pageHeader("task_comment_overview", taskComment.taskcomm_id || "Not set")}
+          {pageHeader("task_comment_overview", `Task Comment: ${taskComment.taskcomm_id || "Loading..."}`)}
           <div className="contentContainer">
             <div className="contentBody">
-              <Grid>
-                <Grid.Row>
-                  <Grid.Column width={16}>
-                    <Card>
-                      <Card.Header>
-                        <BsInfoSquare style={overviewIconStyle} />
-                        Task Comment Information
-                      </Card.Header>
-                      <Card.Body>
-                        <Grid>
-                          <Grid.Row>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Task Comment ID:</strong> {taskComment.taskcomm_id || "Not set"}
-                                <EditTaskCommentIdModal
-                                  taskComment={taskComment}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Project Task:</strong> {taskComment.projtask?.title || "Not set"}
-                                <EditTaskCommentProjectTaskModal
-                                  taskComment={taskComment}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                          </Grid.Row>
-                          <Grid.Row>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Registration Date:</strong>{" "}
-                                {taskComment.commentregistration
-                                  ? new Date(taskComment.commentregistration).toLocaleString()
-                                  : "Not set"}
-                              </p>
-                            </Grid.Column>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Consultant:</strong>{" "}
-                                {taskComment.consultant?.surname || "Not set"} {taskComment.consultant?.name || ""}
-                                <EditTaskCommentConsultantModal
-                                  taskComment={taskComment}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                          </Grid.Row>
-                          <Grid.Row>
-                            <Grid.Column width={16}>
-                              <p>
-                                <strong>Comment:</strong> {taskComment.comment || "Not set"}
-                                <EditTaskCommentCommentModal
-                                  taskComment={taskComment}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                          </Grid.Row>
-                        </Grid>
-                      </Card.Body>
-                    </Card>
-                  </Grid.Column>
-                </Grid.Row>
-                <Grid.Row>
-                  <Grid.Column width={16}>
-                    <DeleteObjectModal
-                      objectType="task_comment"
-                      objectId={taskComment.taskcomm_id}
-                      objectName={taskComment.taskcomm_id}
-                    />
-                  </Grid.Column>
-                </Grid.Row>
+              <Grid stackable columns={2} divided>
+                <Grid.Column>
+                  <Card>
+                    <Card.Header>
+                      <BsInfoSquare style={overviewIconStyle} /> Basic Information
+                    </Card.Header>
+                    <Card.Body>
+                      <div className={"info_descr"}>Task Comment ID</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {taskComment.taskcomm_id || "N/A"}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <button className="ui button tiny basic" disabled title="ID is immutable">ID</button>
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Project Task</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {taskComment.projtask?.title || "N/A"}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditTaskCommentProjectTaskModal taskComment={taskComment} update_state={this.update_state} />
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Registration Date</div>
+                      <div className={"info_span"}>
+                        {taskComment.commentregistration ? new Date(taskComment.commentregistration).toLocaleString() : "N/A"}
+                      </div>
+                    </Card.Body>
+                    <Card.Footer>
+                      <DeleteObjectModal objectType="TaskComment" objectId={taskComment.taskcomm_id} objectName={taskComment.taskcomm_id} />
+                    </Card.Footer>
+                  </Card>
+                </Grid.Column>
+
+                <Grid.Column>
+                  <Card>
+                    <Card.Header>
+                      <BsInfoSquare style={overviewIconStyle} /> Details
+                    </Card.Header>
+                    <Card.Body>
+                      <div className={"info_descr"}>Consultant</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {(taskComment.consultant && (taskComment.consultant.fullname || `${taskComment.consultant.surname || ''} ${taskComment.consultant.name || ''}`.trim())) || "N/A"}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditTaskCommentConsultantModal taskComment={taskComment} update_state={this.update_state} />
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Comment</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {taskComment.comment || "N/A"}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditTaskCommentCommentModal taskComment={taskComment} update_state={this.update_state} />
+                        </span>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </Grid.Column>
               </Grid>
             </div>
           </div>

@@ -30,6 +30,8 @@ import AssociatedClientOverview from "./components/data_management/associated_cl
 import AllTaskComments from "./components/data_management/all_task_comments/all_task_comments";
 import TaskCommentOverview from "./components/data_management/task_comment/task_comment_overview/task_comment_overview";
 import AllProjectTasks from "./components/data_management/all_project_tasks/all_project_tasks";
+import ProjectTaskOverview from "./components/data_management/project_task/project_task_overview/project_task_overview";
+
 import AllProperties from "./components/data_management/all_properties/all_properties";
 import PropertyOverview from "./components/data_management/property/property_overview/property_overview";
 import AllCash from "./components/data_management/all_cash/all_cash";
@@ -311,6 +313,14 @@ function App() {
               path="/data_management/all_project_tasks"
               render={(props) => (
                 <AllProjectTasks {...props} setUserToken={setUserToken} />
+              )}
+            />
+            <ProtectedRoute
+              isLoggedIn={!!userToken}
+              exact={true}
+              path="/data_management/project_task/:id"
+              render={(props) => (
+                <ProjectTaskOverview {...props} setUserToken={setUserToken} />
               )}
             />
             <ProtectedRoute

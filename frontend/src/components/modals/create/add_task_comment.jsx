@@ -22,7 +22,7 @@ const CREATE_TASK_COMMENT = "http://localhost:8000/api/data_management/task_comm
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);
 
-function AddTaskCommentModal({ onClientCreated }) {
+function AddTaskCommentModal({ onTaskCommentCreated }) {
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const [projectTasks, setProjectTasks] = useState([]);
@@ -87,7 +87,7 @@ function AddTaskCommentModal({ onClientCreated }) {
   };
 
   // Validation
-  const isTaskcommIdValid = taskcomm_id.trim().length >= 2 && taskcomm_id.trim().length <= 50;
+  const isTaskcommIdValid = taskcomm_id.trim().length >= 2 && taskcomm_id.trim().length <= 10;
   const isProjtaskValid = projtask !== "";
   const isConsultantValid = consultant !== "";
   const isCommentValid = comment.trim().length >= 2 && comment.trim().length <= 1000;
@@ -122,23 +122,11 @@ function AddTaskCommentModal({ onClientCreated }) {
         { headers: currentHeaders }
       );
 
-      Swal.fire({
-        icon: "success",
-        title: "Success!",
-        text: "Task Comment created successfully",
-      });
+      Swal.fire({ icon: "success", title: "Success!", text: "Task Comment created successfully" });
 
-      // Reset form
-      setTaskcommId("");
-      setProjtask("");
-      setConsultant("");
-      setComment("");
-      setShow(false);
-
-      // Refresh parent component
-      if (onClientCreated) {
-        onClientCreated();
-      }
+      // Navigate to the created task comment overview
+      const newId = taskcomm_id.trim();
+      window.location.href = `/data_management/task_comment/${newId}`;
     } catch (error) {
       console.error("Error creating task comment:", error);
       
@@ -193,9 +181,9 @@ function AddTaskCommentModal({ onClientCreated }) {
                   <Form.Control
                     type="text"
                     value={taskcomm_id}
-                    onChange={(e) => setTaskcommId(clampLen(e.target.value, 50))}
-                    maxLength={50}
-                    placeholder="Enter task comment ID"
+                    onChange={(e) => setTaskcommId(clampLen(e.target.value, 10))}
+                    maxLength={10}
+                    placeholder="Enter task comment ID (max 10)"
                   />
                 </Form.Group>
               </Col>
@@ -264,7 +252,7 @@ function AddTaskCommentModal({ onClientCreated }) {
                   {!isTaskcommIdValid && (
                     <li>
                       <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                      Task Comment ID is required (2–50 chars).
+                      Task Comment ID is required (2–10 chars).
                     </li>
                   )}
                   {!isProjtaskValid && (

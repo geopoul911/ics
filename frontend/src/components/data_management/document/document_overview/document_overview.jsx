@@ -16,17 +16,15 @@ import axios from "axios";
 // Global Variables
 import { headers, pageHeader } from "../../../global_vars";
 import {
-  EditDocumentIdModal,
   EditDocumentTitleModal,
-  EditDocumentProjectModal,
   EditDocumentClientModal,
-  EditDocumentCreatedModal,
   EditDocumentValidUntilModal,
-  EditDocumentFilepathModal,
   EditDocumentOriginalModal,
   EditDocumentTrafficableModal,
   EditDocumentStatusModal,
   EditDocumentNotesModal,
+  UploadDocumentFileModal,
+  DeleteDocumentFileModal,
 } from "../../../modals/document_edit_modals";
 import DeleteObjectModal from "../../../modals/delete_object";
 
@@ -107,151 +105,137 @@ class DocumentOverview extends React.Component {
       <>
         <NavigationBar />
         <div className="mainContainer">
-          {pageHeader("document_overview", document.document_id || "Not set")}
+          {pageHeader("document_overview", `Document: ${document.document_id || "Loading..."}`)}
           <div className="contentContainer">
             <div className="contentBody">
-              <Grid>
-                <Grid.Row>
-                  <Grid.Column width={16}>
-                    <Card>
-                      <Card.Header>
-                        <BsInfoSquare style={overviewIconStyle} />
-                        Document Information
-                      </Card.Header>
-                      <Card.Body>
-                        <Grid>
-                          <Grid.Row>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Document ID:</strong> {document.document_id || "Not set"}
-                                <EditDocumentIdModal
-                                  document={document}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Title:</strong> {document.title || "Not set"}
-                                <EditDocumentTitleModal
-                                  document={document}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                          </Grid.Row>
-                          <Grid.Row>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Project:</strong> {document.project?.title || "Not set"}
-                                <EditDocumentProjectModal
-                                  document={document}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Client:</strong>{" "}
-                                {document.client?.surname || "Not set"} {document.client?.name || ""}
-                                <EditDocumentClientModal
-                                  document={document}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                          </Grid.Row>
-                          <Grid.Row>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Created Date:</strong>{" "}
-                                {document.created
-                                  ? new Date(document.created).toLocaleDateString()
-                                  : "Not set"}
-                                <EditDocumentCreatedModal
-                                  document={document}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Valid Until:</strong>{" "}
-                                {document.validuntil
-                                  ? new Date(document.validuntil).toLocaleDateString()
-                                  : "Not set"}
-                                <EditDocumentValidUntilModal
-                                  document={document}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                          </Grid.Row>
-                          <Grid.Row>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Filepath:</strong> {document.filepath || "Not set"}
-                                <EditDocumentFilepathModal
-                                  document={document}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Status:</strong> {document.status || "Not set"}
-                                <EditDocumentStatusModal
-                                  document={document}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                          </Grid.Row>
-                          <Grid.Row>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Original:</strong> {document.original ? "Yes" : "No"}
-                                <EditDocumentOriginalModal
-                                  document={document}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                            <Grid.Column width={8}>
-                              <p>
-                                <strong>Trafficable:</strong> {document.trafficable ? "Yes" : "No"}
-                                <EditDocumentTrafficableModal
-                                  document={document}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                          </Grid.Row>
-                          <Grid.Row>
-                            <Grid.Column width={16}>
-                              <p>
-                                <strong>Notes:</strong> {document.notes || "Not set"}
-                                <EditDocumentNotesModal
-                                  document={document}
-                                  update_state={this.update_state}
-                                />
-                              </p>
-                            </Grid.Column>
-                          </Grid.Row>
-                        </Grid>
-                      </Card.Body>
-                    </Card>
-                  </Grid.Column>
-                </Grid.Row>
-                <Grid.Row>
-                  <Grid.Column width={16}>
-                    <DeleteObjectModal
-                      objectType="document"
-                      objectId={document.document_id}
-                      objectName={document.document_id}
-                    />
-                  </Grid.Column>
-                </Grid.Row>
+              <Grid stackable columns={2} divided>
+                <Grid.Column>
+                  <Card>
+                    <Card.Header>
+                      <BsInfoSquare style={overviewIconStyle} /> Basic Information
+                    </Card.Header>
+                    <Card.Body>
+                      <div className={"info_descr"}>Document ID</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {document.document_id || "N/A"}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <button className="ui button tiny basic" disabled title="ID is immutable">ID</button>
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Title</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {document.title || "N/A"}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditDocumentTitleModal document={document} update_state={this.update_state} />
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Project</div>
+                      <div className={"info_span"}>{document.project?.title || "N/A"}</div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Client</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {(document.client && (document.client.fullname || `${document.client.surname || ''} ${document.client.name || ''}`.trim())) || 'N/A'}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditDocumentClientModal document={document} update_state={this.update_state} />
+                        </span>
+                      </div>
+                    </Card.Body>
+                    <Card.Footer>
+                      <DeleteObjectModal objectType="Document" objectId={document.document_id} objectName={document.document_id} />
+                    </Card.Footer>
+                  </Card>
+                </Grid.Column>
+
+                <Grid.Column>
+                  <Card>
+                    <Card.Header>
+                      <BsInfoSquare style={overviewIconStyle} /> Details
+                    </Card.Header>
+                    <Card.Body>
+                      <div className={"info_descr"}>Created</div>
+                      <div className={"info_span"}>{document.created ? new Date(document.created).toLocaleDateString() : "N/A"}</div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Valid Until</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {document.validuntil ? new Date(document.validuntil).toLocaleDateString() : "N/A"}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditDocumentValidUntilModal document={document} update_state={this.update_state} />
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Filepath</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        <div
+                          style={{
+                            whiteSpace: "normal",
+                            wordBreak: "break-all",
+                            overflow: "hidden",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            paddingRight: 140,
+                          }}
+                        >
+                          {document.filepath ? (
+                            <a
+                              href={(document.filepath.startsWith('http') ? document.filepath : `${window.location.origin}${document.filepath.startsWith('/') ? '' : '/'}${document.filepath}`)}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              {document.filepath}
+                            </a>
+                          ) : (
+                            "N/A"
+                          )}
+                        </div>
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          {document.filepath ? (
+                            <DeleteDocumentFileModal document={document} update_state={this.update_state} />
+                          ) : (
+                            <UploadDocumentFileModal document={document} update_state={this.update_state} />
+                          )}
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Status</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {document.status || "N/A"}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditDocumentStatusModal document={document} update_state={this.update_state} />
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Status Date</div>
+                      <div className={"info_span"}>{document.statusdate ? new Date(document.statusdate).toLocaleDateString() : "N/A"}</div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Original</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {document.original ? 'Yes' : 'No'}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditDocumentOriginalModal document={document} update_state={this.update_state} />
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Trafficable</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {document.trafficable ? 'Yes' : 'No'}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditDocumentTrafficableModal document={document} update_state={this.update_state} />
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>Notes</div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {document.notes || "N/A"}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditDocumentNotesModal document={document} update_state={this.update_state} />
+                        </span>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </Grid.Column>
               </Grid>
             </div>
           </div>

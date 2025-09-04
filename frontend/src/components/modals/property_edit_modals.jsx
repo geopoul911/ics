@@ -67,17 +67,13 @@ export function EditPropertyIdModal({ property, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit ID</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Property ID</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Property ID *:</Form.Label>
               <Form.Control
@@ -88,19 +84,11 @@ export function EditPropertyIdModal({ property, update_state }) {
                 maxLength={10}
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={!property_id.trim() || isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: property_id.trim() ? "green" : "red" }}>{property_id.trim() ? "Looks good." : "Property ID is required."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!property_id.trim() || isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -155,17 +143,13 @@ export function EditPropertyDescriptionModal({ property, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Description</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Description</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Description *:</Form.Label>
               <Form.Control
@@ -176,19 +160,11 @@ export function EditPropertyDescriptionModal({ property, update_state }) {
                 maxLength={80}
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={!description.trim() || isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: description.trim() ? "green" : "red" }}>{description.trim() ? "Looks good." : "Description is required."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!description.trim() || isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -262,17 +238,13 @@ export function EditPropertyProjectModal({ property, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Project</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Project</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Project *:</Form.Label>
               <Form.Control
@@ -288,19 +260,11 @@ export function EditPropertyProjectModal({ property, update_state }) {
                 ))}
               </Form.Control>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={!project.trim() || isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: project.trim() ? "green" : "red" }}>{project.trim() ? "Looks good." : "Project is required."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!project.trim() || isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -374,17 +338,13 @@ export function EditPropertyCountryModal({ property, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Country</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Country</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          <Form>
+        <Modal.Body>  
             <Form.Group>
               <Form.Label>Country *:</Form.Label>
               <Form.Control
@@ -395,24 +355,16 @@ export function EditPropertyCountryModal({ property, update_state }) {
                 <option value="">Select Country</option>
                 {countries.map((cntry) => (
                   <option key={cntry.country_id} value={cntry.country_id}>
-                    {cntry.name}
+                    {cntry.country_id} - {cntry.title}
                   </option>
                 ))}
               </Form.Control>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={!country.trim() || isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: country.trim() ? "green" : "red" }}>{country.trim() ? "Looks good." : "Country is required."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!country.trim() || isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -486,17 +438,13 @@ export function EditPropertyProvinceModal({ property, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Province</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Province</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Province *:</Form.Label>
               <Form.Control
@@ -507,24 +455,16 @@ export function EditPropertyProvinceModal({ property, update_state }) {
                 <option value="">Select Province</option>
                 {provinces.map((prov) => (
                   <option key={prov.province_id} value={prov.province_id}>
-                    {prov.name}
+                    {prov.province_id} - {prov.title}
                   </option>
                 ))}
               </Form.Control>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={!province.trim() || isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: province.trim() ? "green" : "red" }}>{province.trim() ? "Looks good." : "Province is required."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!province.trim() || isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -598,17 +538,13 @@ export function EditPropertyCityModal({ property, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit City</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit City</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>City *:</Form.Label>
               <Form.Control
@@ -619,7 +555,207 @@ export function EditPropertyCityModal({ property, update_state }) {
                 <option value="">Select City</option>
                 {cities.map((cty) => (
                   <option key={cty.city_id} value={cty.city_id}>
-                    {cty.name}
+                    {cty.city_id} - {cty.title}
+                  </option>
+                ))}
+              </Form.Control>
+            </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <small className="mr-auto"><div style={{ color: city.trim() ? "green" : "red" }}>{city.trim() ? "Looks good." : "City is required."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!city.trim() || isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+}
+
+// Edit Property Geo Location (Country + Province + City) Modal
+export function EditPropertyGeoLocationModal({ property, update_state }) {
+  const [show, setShow] = useState(false);
+  const [country, setCountry] = useState("");
+  const [province, setProvince] = useState("");
+  const [city, setCity] = useState("");
+  const [countries, setCountries] = useState([]);
+  const [provinces, setProvinces] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
+  useEffect(() => {
+    if (show) {
+      // Prefill from current property
+      const currentCountry = property.country?.country_id || property.country?.country_id || property.country?.id || "";
+      const currentProvince = property.province?.province_id || property.province?.id || "";
+      const currentCity = property.city?.city_id || property.city?.id || "";
+      setCountry(currentCountry);
+      setProvince(currentProvince);
+      setCity(currentCity);
+      loadCountries().then(() => {
+        if (currentCountry) {
+          loadProvinces(currentCountry).then(() => {
+            if (currentProvince) {
+              loadCities(currentProvince);
+            }
+          });
+        }
+      });
+    } else {
+      // reset when closing
+      setCountries([]);
+      setProvinces([]);
+      setCities([]);
+      setCountry("");
+      setProvince("");
+      setCity("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [show]);
+
+  const loadCountries = async () => {
+    try {
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      const response = await axios.get("http://localhost:8000/api/regions/all_countries/", { headers: currentHeaders });
+      const countriesData = response?.data?.all_countries || [];
+      setCountries(countriesData);
+    } catch (error) {
+      console.error('Error loading countries:', error);
+      setCountries([]);
+    }
+  };
+
+  const loadProvinces = async (countryId) => {
+    try {
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      const response = await axios.get(`http://localhost:8000/api/regions/all_provinces/?country=${countryId}`, { headers: currentHeaders });
+      const provincesData = response?.data?.all_provinces || [];
+      setProvinces(provincesData);
+    } catch (error) {
+      console.error('Error loading provinces:', error);
+      setProvinces([]);
+    }
+  };
+
+  const loadCities = async (provinceId) => {
+    try {
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+      const response = await axios.get(`http://localhost:8000/api/regions/all_cities/?province=${provinceId}`, { headers: currentHeaders });
+      const citiesData = response?.data?.all_cities || [];
+      setCities(citiesData);
+    } catch (error) {
+      console.error('Error loading cities:', error);
+      setCities([]);
+    }
+  };
+
+  // Cascading resets/fetches
+  useEffect(() => {
+    if (!show) return;
+    if (country) {
+      setProvince("");
+      setCity("");
+      loadProvinces(country);
+    } else {
+      setProvinces([]);
+      setCities([]);
+      setProvince("");
+      setCity("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [country]);
+
+  useEffect(() => {
+    if (!show) return;
+    if (province) {
+      setCity("");
+      loadCities(province);
+    } else {
+      setCities([]);
+      setCity("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [province]);
+
+  const isValid = Boolean(country && province && city);
+
+  const handleSave = async () => {
+    if (!isValid) return;
+    setIsLoading(true);
+    try {
+      const currentHeaders = {
+        ...headers,
+        "Authorization": "Token " + localStorage.getItem("userToken")
+      };
+
+      const response = await axios.put(
+        UPDATE_PROPERTY + property.property_id + "/",
+        { country_id: country, province_id: province, city_id: city },
+        { headers: currentHeaders }
+      );
+
+      Swal.fire("Success", "Location updated successfully", "success");
+      if (update_state) update_state(response.data);
+      handleClose();
+    } catch (e) {
+      console.error('Error updating location (C/P/C):', e);
+      const apiMsg = e?.response?.data?.detail || e?.response?.data || "Failed to update location";
+      Swal.fire("Error", apiMsg, "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Location</Button>
+
+      <Modal show={show} onHide={handleClose} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Location</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group>
+              <Form.Label>Country *:</Form.Label>
+              <Form.Control as="select" value={country} onChange={(e) => setCountry(e.target.value)}>
+                <option value="">Select Country</option>
+                {countries.map((cntry) => (
+                  <option key={cntry.country_id} value={cntry.country_id}>
+                    {cntry.name || cntry.title}
+                  </option>
+                ))}
+              </Form.Control>
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Province *:</Form.Label>
+              <Form.Control as="select" value={province} onChange={(e) => setProvince(e.target.value)} disabled={!country}>
+                <option value="">Select Province</option>
+                {provinces.map((prov) => (
+                  <option key={prov.province_id} value={prov.province_id}>
+                    {prov.name || prov.title}
+                  </option>
+                ))}
+              </Form.Control>
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>City *:</Form.Label>
+              <Form.Control as="select" value={city} onChange={(e) => setCity(e.target.value)} disabled={!province}>
+                <option value="">Select City</option>
+                {cities.map((cty) => (
+                  <option key={cty.city_id} value={cty.city_id}>
+                    {cty.name || cty.title}
                   </option>
                 ))}
               </Form.Control>
@@ -627,16 +763,9 @@ export function EditPropertyCityModal({ property, update_state }) {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={!city.trim() || isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: isValid ? "green" : "red" }}>{isValid ? "Looks good." : "Country, Province and City are required."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!isValid || isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -691,17 +820,13 @@ export function EditPropertyLocationModal({ property, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Location</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Location</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Location *:</Form.Label>
               <Form.Control
@@ -712,19 +837,11 @@ export function EditPropertyLocationModal({ property, update_state }) {
                 maxLength={80}
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={!location.trim() || isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: location.trim() ? "green" : "red" }}>{location.trim() ? "Looks good." : "Location is required."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!location.trim() || isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -788,17 +905,13 @@ export function EditPropertyTypeModal({ property, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Type</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Type</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Type *:</Form.Label>
               <Form.Control
@@ -814,19 +927,11 @@ export function EditPropertyTypeModal({ property, update_state }) {
                 ))}
               </Form.Control>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={!type.trim() || isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: type.trim() ? "green" : "red" }}>{type.trim() ? "Looks good." : "Type is required."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!type.trim() || isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -848,6 +953,12 @@ export function EditPropertyConstructYearModal({ property, update_state }) {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const isValidYear = () => {
+    if (String(constructyear).trim() === "") return true; // optional
+    const y = parseInt(constructyear, 10);
+    return Number.isInteger(y) && y >= 1800 && y <= 2100;
+  };
+
   const handleSave = async () => {
     setIsLoading(true);
     try {
@@ -858,7 +969,7 @@ export function EditPropertyConstructYearModal({ property, update_state }) {
 
       const response = await axios.put(
         UPDATE_PROPERTY + property.property_id + "/",
-        { constructyear: constructyear.trim() || null },
+        { constructyear: (String(constructyear).trim() === "" ? null : String(constructyear).trim()) },
         { headers: currentHeaders }
       );
 
@@ -876,40 +987,30 @@ export function EditPropertyConstructYearModal({ property, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Construction Year</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Construction Year</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Construction Year:</Form.Label>
               <Form.Control
-                type="text"
+                type="number"
                 value={constructyear}
                 onChange={(e) => setConstructYear(e.target.value)}
-                placeholder="Enter construction year (e.g., 2020)"
-                maxLength={4}
+                placeholder="Enter year (1800 - 2100)"
+                min={1800}
+                max={2100}
+                step={1}
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: isValidYear() ? "green" : "red" }}>{isValidYear() ? "Looks good." : "Please enter a valid year."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!isValidYear() || isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -966,17 +1067,13 @@ export function EditPropertyStatusModal({ property, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Status</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Status</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Status:</Form.Label>
               <Form.Control
@@ -991,19 +1088,11 @@ export function EditPropertyStatusModal({ property, update_state }) {
                 ))}
               </Form.Control>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: "green" }}>Looks good.</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -1062,17 +1151,13 @@ export function EditPropertyMarketModal({ property, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Market</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Market</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Market:</Form.Label>
               <Form.Control
@@ -1087,19 +1172,11 @@ export function EditPropertyMarketModal({ property, update_state }) {
                 ))}
               </Form.Control>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: "green" }}>Looks good.</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -1149,17 +1226,13 @@ export function EditPropertyBrokerModal({ property, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Broker</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Broker</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Broker:</Form.Label>
               <Form.Control
@@ -1170,19 +1243,11 @@ export function EditPropertyBrokerModal({ property, update_state }) {
                 maxLength={120}
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: "green" }}>Looks good.</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -1232,17 +1297,13 @@ export function EditPropertyActiveModal({ property, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Active</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Active Status</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Check
                 type="checkbox"
@@ -1251,19 +1312,11 @@ export function EditPropertyActiveModal({ property, update_state }) {
                 onChange={(e) => setActive(e.target.checked)}
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: "green" }}>Looks good.</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -1313,17 +1366,13 @@ export function EditPropertyNotesModal({ property, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Notes</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Notes</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Notes:</Form.Label>
               <Form.Control
@@ -1334,19 +1383,11 @@ export function EditPropertyNotesModal({ property, update_state }) {
                 placeholder="Enter notes"
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: "green" }}>Looks good.</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>

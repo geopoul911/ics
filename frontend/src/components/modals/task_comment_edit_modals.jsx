@@ -20,93 +20,6 @@ window.Swal = Swal;
 // API endpoints
 const UPDATE_TASK_COMMENT = "http://localhost:8000/api/data_management/task_comment/";
 
-// Edit Task Comment ID Modal
-export function EditTaskCommentIdModal({ taskComment, update_state }) {
-  const [show, setShow] = useState(false);
-  const [taskcomm_id, setTaskcommId] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (show) {
-      setTaskcommId(taskComment.taskcomm_id || "");
-    }
-  }, [show, taskComment]);
-
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-
-  const handleSave = async () => {
-    if (!taskcomm_id.trim()) {
-      Swal.fire("Error", "Task Comment ID is required", "error");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const currentHeaders = {
-        ...headers,
-        "Authorization": "Token " + localStorage.getItem("userToken")
-      };
-
-      const response = await axios.put(
-        UPDATE_TASK_COMMENT + taskComment.taskcomm_id + "/",
-        { taskcomm_id: taskcomm_id.trim() },
-        { headers: currentHeaders }
-      );
-
-      Swal.fire("Success", "Task Comment ID updated successfully", "success");
-      if (update_state) update_state(response.data);
-      handleClose();
-    } catch (e) {
-      console.error('Error updating task comment ID:', e);
-      const apiMsg = e?.response?.data?.detail || e?.response?.data || "Failed to update task comment ID";
-      Swal.fire("Error", apiMsg, "error");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
-
-      <Modal show={show} onHide={handleClose} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Task Comment ID</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group>
-              <Form.Label>Task Comment ID *:</Form.Label>
-              <Form.Control
-                type="text"
-                value={taskcomm_id}
-                onChange={(e) => setTaskcommId(e.target.value)}
-                placeholder="Enter task comment ID"
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={!taskcomm_id.trim() || isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </>
-  );
-}
-
 // Edit Task Comment Project Task Modal
 export function EditTaskCommentProjectTaskModal({ taskComment, update_state }) {
   const [show, setShow] = useState(false);
@@ -123,9 +36,10 @@ export function EditTaskCommentProjectTaskModal({ taskComment, update_state }) {
 
   const loadProjectTasks = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/data_management/project_tasks/");
-      const projectTasksData = response?.data?.all_project_tasks || [];
-      setProjectTasks(projectTasksData);
+      const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
+      const response = await axios.get("http://localhost:8000/api/data_management/project_tasks/", { headers: currentHeaders });
+      const projectTasksData = response?.data?.all_project_tasks || response?.data?.results || response?.data?.data || response?.data || [];
+      setProjectTasks(Array.isArray(projectTasksData) ? projectTasksData : []);
     } catch (error) {
       console.error('Error loading project tasks:', error);
       setProjectTasks([]);
@@ -150,7 +64,7 @@ export function EditTaskCommentProjectTaskModal({ taskComment, update_state }) {
 
       const response = await axios.put(
         UPDATE_TASK_COMMENT + taskComment.taskcomm_id + "/",
-        { projtask: projtask },
+        { projtask_id: projtask },
         { headers: currentHeaders }
       );
 
@@ -168,17 +82,13 @@ export function EditTaskCommentProjectTaskModal({ taskComment, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Project Task</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Project Task</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Project Task *:</Form.Label>
               <Form.Control
@@ -194,19 +104,11 @@ export function EditTaskCommentProjectTaskModal({ taskComment, update_state }) {
                 ))}
               </Form.Control>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={!projtask.trim() || isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: projtask.trim() ? "green" : "red" }}>{projtask.trim() ? "Looks good." : "Project Task is required."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!projtask.trim() || isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -229,9 +131,10 @@ export function EditTaskCommentConsultantModal({ taskComment, update_state }) {
 
   const loadConsultants = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/administration/all_consultants/");
-      const consultantsData = response?.data?.all_consultants || [];
-      setConsultants(consultantsData);
+      const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
+      const response = await axios.get("http://localhost:8000/api/administration/all_consultants/", { headers: currentHeaders });
+      const list = response?.data?.all_consultants || response?.data?.results || response?.data?.data || response?.data || [];
+      setConsultants(Array.isArray(list) ? list : []);
     } catch (error) {
       console.error('Error loading consultants:', error);
       setConsultants([]);
@@ -256,7 +159,7 @@ export function EditTaskCommentConsultantModal({ taskComment, update_state }) {
 
       const response = await axios.put(
         UPDATE_TASK_COMMENT + taskComment.taskcomm_id + "/",
-        { consultant: consultant },
+        { consultant_id: consultant },
         { headers: currentHeaders }
       );
 
@@ -274,17 +177,13 @@ export function EditTaskCommentConsultantModal({ taskComment, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Consultant</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Consultant</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Consultant *:</Form.Label>
               <Form.Control
@@ -295,24 +194,16 @@ export function EditTaskCommentConsultantModal({ taskComment, update_state }) {
                 <option value="">Select Consultant</option>
                 {consultants.map((cons) => (
                   <option key={cons.consultant_id} value={cons.consultant_id}>
-                    {cons.surname} {cons.name}
+                    {cons.consultant_id} - {cons.fullname}
                   </option>
                 ))}
               </Form.Control>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={!consultant.trim() || isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: consultant.trim() ? "green" : "red" }}>{consultant.trim() ? "Looks good." : "Consultant is required."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!consultant.trim() || isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -377,7 +268,6 @@ export function EditTaskCommentCommentModal({ taskComment, update_state }) {
           <Modal.Title>Edit Comment</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Comment *:</Form.Label>
               <Form.Control
@@ -388,19 +278,11 @@ export function EditTaskCommentCommentModal({ taskComment, update_state }) {
                 placeholder="Enter comment"
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={!comment.trim() || isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: comment.trim() ? "green" : "red" }}>{comment.trim() ? "Looks good." : "Comment is required."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!comment.trim() || isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>

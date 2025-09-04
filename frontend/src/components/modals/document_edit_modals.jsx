@@ -68,17 +68,13 @@ export function EditDocumentIdModal({ document, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit ID</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Document ID</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Document ID *:</Form.Label>
               <Form.Control
@@ -88,19 +84,11 @@ export function EditDocumentIdModal({ document, update_state }) {
                 placeholder="Enter document ID"
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={!document_id.trim() || isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: document_id.trim() ? "green" : "red" }}>{document_id.trim() ? "Looks good." : "ID is required."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!document_id.trim() || isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -112,6 +100,7 @@ export function EditDocumentTitleModal({ document, update_state }) {
   const [show, setShow] = useState(false);
   const [title, setTitle] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const isValid = title.trim().length >= 2 && title.trim().length <= 40;
 
   useEffect(() => {
     if (show) {
@@ -123,8 +112,8 @@ export function EditDocumentTitleModal({ document, update_state }) {
   const handleShow = () => setShow(true);
 
   const handleSave = async () => {
-    if (!title.trim()) {
-      Swal.fire("Error", "Title is required", "error");
+    if (!isValid) {
+      Swal.fire("Error", "Title must be between 2 and 40 characters.", "error");
       return;
     }
 
@@ -155,17 +144,13 @@ export function EditDocumentTitleModal({ document, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Title</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Title</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Title *:</Form.Label>
               <Form.Control
@@ -176,19 +161,11 @@ export function EditDocumentTitleModal({ document, update_state }) {
                 maxLength={40}
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={!title.trim() || isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: isValid ? "green" : "red" }}>{isValid ? "Looks good." : "Title must be 2–40 characters."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!isValid || isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -211,9 +188,10 @@ export function EditDocumentProjectModal({ document, update_state }) {
 
   const loadProjects = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/data_management/all_projects/");
-      const projectsData = response?.data?.all_projects || [];
-      setProjects(projectsData);
+      const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
+      const response = await axios.get("http://localhost:8000/api/data_management/all_projects/", { headers: currentHeaders });
+      const projectsData = response?.data?.all_projects || response?.data?.results || response?.data?.data || response?.data || [];
+      setProjects(Array.isArray(projectsData) ? projectsData : []);
     } catch (error) {
       console.error('Error loading projects:', error);
       setProjects([]);
@@ -251,17 +229,13 @@ export function EditDocumentProjectModal({ document, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Project</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Project</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Project:</Form.Label>
               <Form.Control
@@ -272,24 +246,16 @@ export function EditDocumentProjectModal({ document, update_state }) {
                 <option value="">Select Project (Optional)</option>
                 {projects.map((proj) => (
                   <option key={proj.project_id} value={proj.project_id}>
-                    {proj.title}
+                    {proj.project_id} - {proj.title}
                   </option>
                 ))}
               </Form.Control>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: project ? "green" : "red" }}>{project ? "Looks good." : "Project is required."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!project || isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -312,9 +278,10 @@ export function EditDocumentClientModal({ document, update_state }) {
 
   const loadClients = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/data_management/all_clients/");
-      const clientsData = response?.data?.all_clients || [];
-      setClients(clientsData);
+      const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
+      const response = await axios.get("http://localhost:8000/api/data_management/all_clients/", { headers: currentHeaders });
+      const clientsData = response?.data?.all_clients || response?.data?.results || response?.data?.data || response?.data || [];
+      setClients(Array.isArray(clientsData) ? clientsData : []);
     } catch (error) {
       console.error('Error loading clients:', error);
       setClients([]);
@@ -352,17 +319,13 @@ export function EditDocumentClientModal({ document, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Client</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Client</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Client:</Form.Label>
               <Form.Control
@@ -373,24 +336,16 @@ export function EditDocumentClientModal({ document, update_state }) {
                 <option value="">Select Client (Optional)</option>
                 {clients.map((cli) => (
                   <option key={cli.client_id} value={cli.client_id}>
-                    {cli.surname} {cli.name}
+                    {cli.client_id} - {cli.fullname || `${cli.surname} ${cli.name}`}
                   </option>
                 ))}
               </Form.Control>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: "green" }}>{client ? "Looks good." : "No client selected: will clear this field."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -445,17 +400,13 @@ export function EditDocumentCreatedModal({ document, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Created</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Created Date</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Created Date *:</Form.Label>
               <Form.Control
@@ -464,19 +415,11 @@ export function EditDocumentCreatedModal({ document, update_state }) {
                 onChange={(e) => setCreated(e.target.value)}
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={!created.trim() || isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: created.trim() ? "green" : "red" }}>{created.trim() ? "Looks good." : "Created date is required."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!created.trim() || isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -531,17 +474,13 @@ export function EditDocumentValidUntilModal({ document, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Valid Until</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Valid Until Date</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Valid Until Date *:</Form.Label>
               <Form.Control
@@ -550,19 +489,11 @@ export function EditDocumentValidUntilModal({ document, update_state }) {
                 onChange={(e) => setValidUntil(e.target.value)}
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={!validuntil.trim() || isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: validuntil.trim() ? "green" : "red" }}>{validuntil.trim() ? "Looks good." : "Valid until date is required."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!validuntil.trim() || isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -617,17 +548,13 @@ export function EditDocumentFilepathModal({ document, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Filepath</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Filepath</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Filepath *:</Form.Label>
               <Form.Control
@@ -638,19 +565,115 @@ export function EditDocumentFilepathModal({ document, update_state }) {
                 maxLength={120}
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={handleSave}
-            disabled={!filepath.trim() || isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+          <small className="mr-auto"><div style={{ color: filepath.trim() ? "green" : "red" }}>{filepath.trim() ? "Looks good." : "Filepath is required."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!filepath.trim() || isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+}
+
+// Upload/Replace document file
+export function UploadDocumentFileModal({ document, update_state }) {
+  const [show, setShow] = useState(false);
+  const [file, setFile] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleClose = () => { setShow(false); setFile(null); };
+  const handleShow = () => setShow(true);
+
+  const handleSave = async () => {
+    if (!file) return;
+    setIsLoading(true);
+    try {
+      const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
+      delete currentHeaders["Content-Type"]; // allow browser to set multipart boundary
+      const formData = new FormData();
+      formData.append("filepath", file);
+      const response = await axios.put(
+        UPDATE_DOCUMENT + document.document_id + "/",
+        formData,
+        { headers: currentHeaders }
+      );
+      Swal.fire("Success", "File uploaded successfully", "success");
+      update_state && update_state(response.data);
+      handleClose();
+    } catch (e) {
+      const apiMsg = e?.response?.data?.detail || e?.response?.data?.error || "Failed to upload file";
+      Swal.fire("Error", apiMsg, "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Upload File</Button>
+      <Modal show={show} onHide={handleClose} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Upload Document File</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+            <Form.Group>
+              <Form.Label>Select file *</Form.Label>
+              <Form.Control type="file" onChange={(e) => setFile(e.target.files && e.target.files[0] ? e.target.files[0] : null)} />
+            </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <small className="mr-auto"><div style={{ color: file ? "green" : "red" }}>{file ? "Looks good." : "Please select a file."}</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={!file || isLoading}>{isLoading ? "Uploading..." : "Save Changes"}</Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+}
+
+// Delete current file (clear filepath)
+export function DeleteDocumentFileModal({ document, update_state }) {
+  const [show, setShow] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
+  const handleSave = async () => {
+    setIsLoading(true);
+    try {
+      const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
+      const response = await axios.put(
+        UPDATE_DOCUMENT + document.document_id + "/",
+        { filepath: "" },
+        { headers: currentHeaders }
+      );
+      Swal.fire("Success", "File removed successfully", "success");
+      update_state && update_state(response.data);
+      handleClose();
+    } catch (e) {
+      const apiMsg = e?.response?.data?.detail || e?.response?.data?.error || "Failed to remove file";
+      Swal.fire("Error", apiMsg, "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Delete File</Button>
+      <Modal show={show} onHide={handleClose} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Delete File</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to remove the stored file for this document?
+        </Modal.Body>
+        <Modal.Footer>
+          <small className="mr-auto"><div style={{ color: "red" }}>This will remove the file reference.</div></small>
+          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={isLoading}>{isLoading ? "Removing..." : "Confirm"}</Button>
         </Modal.Footer>
       </Modal>
     </>
@@ -700,17 +723,13 @@ export function EditDocumentOriginalModal({ document, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Original</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Original Status</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Check
                 type="checkbox"
@@ -719,7 +738,6 @@ export function EditDocumentOriginalModal({ document, update_state }) {
                 onChange={(e) => setOriginal(e.target.checked)}
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
           <Button color="red" onClick={handleClose} disabled={isLoading}>
@@ -781,17 +799,13 @@ export function EditDocumentTrafficableModal({ document, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Trafficable</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Trafficable Status</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Check
                 type="checkbox"
@@ -800,7 +814,6 @@ export function EditDocumentTrafficableModal({ document, update_state }) {
                 onChange={(e) => setTrafficable(e.target.checked)}
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
           <Button color="red" onClick={handleClose} disabled={isLoading}>
@@ -874,17 +887,13 @@ export function EditDocumentStatusModal({ document, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Status</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Status</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Status:</Form.Label>
               <Form.Control
@@ -899,7 +908,6 @@ export function EditDocumentStatusModal({ document, update_state }) {
                 ))}
               </Form.Control>
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
           <Button color="red" onClick={handleClose} disabled={isLoading}>
@@ -961,17 +969,13 @@ export function EditDocumentNotesModal({ document, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} />
-        Edit
-      </Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Notes</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Notes</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
             <Form.Group>
               <Form.Label>Notes:</Form.Label>
               <Form.Control
@@ -982,7 +986,6 @@ export function EditDocumentNotesModal({ document, update_state }) {
                 placeholder="Enter notes"
               />
             </Form.Group>
-          </Form>
         </Modal.Body>
         <Modal.Footer>
           <Button color="red" onClick={handleClose} disabled={isLoading}>
