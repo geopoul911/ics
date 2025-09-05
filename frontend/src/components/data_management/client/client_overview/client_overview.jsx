@@ -2,9 +2,9 @@
 import React from "react";
 
 // Icons / Images
-import { BsInfoSquare } from "react-icons/bs";
-import { FaHashtag, FaSort, FaStop } from "react-icons/fa";
-import { MdSecurity, MdCheckCircle, MdCancel } from "react-icons/md";
+import { FaStop } from "react-icons/fa";
+import { MdCheckCircle, MdCancel } from "react-icons/md";
+import { FaIdBadge, FaMapMarkerAlt, FaUser, FaFileInvoiceDollar, FaPassport, FaMoneyCheckAlt, FaStickyNote } from "react-icons/fa";
 
 // Modules / Functions
 import { Card } from "react-bootstrap";
@@ -77,7 +77,7 @@ function getClientIdFromPath() {
   return id ? decodeURIComponent(id) : null;
 }
 
-let overviewIconStyle = { color: "#2a9fd9", marginRight: "0.5em" };
+let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
 
 class ClientOverview extends React.Component {
   constructor(props) {
@@ -146,14 +146,14 @@ class ClientOverview extends React.Component {
                 <Card>
                   <Card.Header>
                     <h4>
-                      <FaHashtag style={overviewIconStyle} />
+                      <FaIdBadge style={overviewIconStyle} />
                       Basic Information
                     </h4>
                   </Card.Header>
                   <Card.Body>
                     {/* Client ID */}
                     <div className={"info_descr"}>
-                      <FaHashtag style={overviewIconStyle} /> Client ID
+                      <FaIdBadge style={overviewIconStyle} /> Client ID
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.client_id || "N/A"}
@@ -165,23 +165,10 @@ class ClientOverview extends React.Component {
                       </span>
                     </div>
 
-                    {/* Surname */}
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Surname
-                    </div>
-                    <div className={"info_span"} style={{ position: "relative" }}>
-                      {client.surname || "Not set"}
-                      <span style={{ position: "absolute", right: "0px", top: "50%", transform: "translateY(-50%)" }}>
-                        <EditClientSurnameModal
-                          client={client}
-                          update_state={this.update_state}
-                        />
-                      </span>
-                    </div>
 
                     {/* Name */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Name
+                      <FaIdBadge style={overviewIconStyle} /> Name
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.name || "Not set"}
@@ -193,9 +180,23 @@ class ClientOverview extends React.Component {
                       </span>
                     </div>
 
+                    {/* Surname */}
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>
+                      <FaIdBadge style={overviewIconStyle} /> Surname
+                    </div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {client.surname || "Not set"}
+                      <span style={{ position: "absolute", right: "0px", top: "50%", transform: "translateY(-50%)" }}>
+                        <EditClientSurnameModal
+                          client={client}
+                          update_state={this.update_state}
+                        />
+                      </span>
+                    </div>
+
                     {/* Onoma (Greek Name) */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Onoma (Greek Name)
+                      <FaIdBadge style={overviewIconStyle} /> GrName
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.onoma || "Not set"}
@@ -209,7 +210,7 @@ class ClientOverview extends React.Component {
 
                     {/* Eponymo (Greek Surname) */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Eponymo (Greek Surname)
+                      <FaIdBadge style={overviewIconStyle} /> GrSurname
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.eponymo || "Not set"}
@@ -223,7 +224,7 @@ class ClientOverview extends React.Component {
 
                     {/* Email */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Email
+                      <FaIdBadge style={overviewIconStyle} /> E-mail
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.email || "Not set"}
@@ -237,7 +238,7 @@ class ClientOverview extends React.Component {
 
                     {/* Phone 1 */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Phone 1
+                      <FaIdBadge style={overviewIconStyle} /> Telephone 1
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.phone1 || "Not set"}
@@ -251,7 +252,7 @@ class ClientOverview extends React.Component {
 
                     {/* Mobile 1 */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Mobile 1
+                      <FaIdBadge style={overviewIconStyle} /> Cell Phone 1
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.mobile1 || "Not set"}
@@ -265,7 +266,7 @@ class ClientOverview extends React.Component {
 
                     {/* Phone 2 */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Phone 2
+                      <FaIdBadge style={overviewIconStyle} /> Telephone 2
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.phone2 || "Not set"}
@@ -279,7 +280,7 @@ class ClientOverview extends React.Component {
 
                     {/* Mobile 2 */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Mobile 2
+                      <FaIdBadge style={overviewIconStyle} /> Cell Phone 2
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.mobile2 || "Not set"}
@@ -293,7 +294,7 @@ class ClientOverview extends React.Component {
 
                     {/* Address */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Address
+                      <FaIdBadge style={overviewIconStyle} /> Address
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.address || "N/A"}
@@ -307,7 +308,7 @@ class ClientOverview extends React.Component {
 
                     {/* Postal Code */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Postal Code
+                      <FaIdBadge style={overviewIconStyle} /> ZIP / PC
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.postalcode || "N/A"}
@@ -337,14 +338,14 @@ class ClientOverview extends React.Component {
                 <Card>
                   <Card.Header>
                     <h4>
-                      <MdSecurity style={overviewIconStyle} />
+                      <FaMapMarkerAlt style={overviewIconStyle} />
                       Location Information
                     </h4>
                   </Card.Header>
                   <Card.Body>
                     {/* Country */}
                     <div className={"info_descr"}>
-                      <BsInfoSquare style={overviewIconStyle} /> Country
+                      <FaMapMarkerAlt style={overviewIconStyle} /> Country
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.country?.title || "Not set"}
@@ -352,7 +353,7 @@ class ClientOverview extends React.Component {
 
                     {/* Province */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Province
+                      <FaMapMarkerAlt style={overviewIconStyle} /> Province
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.province?.title || "Not set"}
@@ -360,7 +361,7 @@ class ClientOverview extends React.Component {
 
                     {/* City */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> City
+                      <FaMapMarkerAlt style={overviewIconStyle} /> City
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.city?.title || "Not set"}
@@ -374,15 +375,15 @@ class ClientOverview extends React.Component {
 
                     {/* Registration Date */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Registration Date
+                      <FaMapMarkerAlt style={overviewIconStyle} /> Entered
                     </div>
                     <div className={"info_span"}>
                       {client.registrationdate ? new Date(client.registrationdate).toLocaleDateString() : "Not set"}
                     </div>
 
-                    {/* Registration User */}
+                    {/* User */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Registration User
+                      <FaMapMarkerAlt style={overviewIconStyle} /> User
                     </div>
                     <div className={"info_span"}>
                       {client.registrationuser || "Not set"}
@@ -390,7 +391,7 @@ class ClientOverview extends React.Component {
 
                     {/* Active */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Active
+                      <FaMapMarkerAlt style={overviewIconStyle} /> Active
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.active ? (
@@ -416,14 +417,14 @@ class ClientOverview extends React.Component {
                 <Card>
                   <Card.Header>
                     <h4>
-                      <FaSort style={overviewIconStyle} />
+                      <FaUser style={overviewIconStyle} />
                       Personal Information
                     </h4>
                   </Card.Header>
                   <Card.Body>
-                    {/* Birth Date */}
+                    {/* Birthdate */}
                     <div className={"info_descr"}>
-                      <BsInfoSquare style={overviewIconStyle} /> Birth Date
+                      <FaUser style={overviewIconStyle} /> Birthdate
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.birthdate ? new Date(client.birthdate).toLocaleDateString() : "Not set"}
@@ -435,9 +436,9 @@ class ClientOverview extends React.Component {
                       </span>
                     </div>
 
-                    {/* Birth Place */}
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Birth Place
+                    {/* Birthplace */}
+                    <div className={"info_descr"}>
+                      <FaUser style={overviewIconStyle} /> Birthplace
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.birthplace || "Not set"}
@@ -449,9 +450,9 @@ class ClientOverview extends React.Component {
                       </span>
                     </div>
 
-                    {/* Father's Name */}
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Father's Name
+                    {/* Father fullname */}
+                    <div className={"info_descr"}>
+                      <FaUser style={overviewIconStyle} /> Father fullname
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.fathername || "Not set"}
@@ -463,9 +464,9 @@ class ClientOverview extends React.Component {
                       </span>
                     </div>
 
-                    {/* Mother's Name */}
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Mother's Name
+                    {/* Mother fullname */}
+                    <div className={"info_descr"}>
+                      <FaUser style={overviewIconStyle} /> Mother fullname
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.mothername || "Not set"}
@@ -478,8 +479,8 @@ class ClientOverview extends React.Component {
                     </div>
 
                     {/* Marital Status */}
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Marital Status
+                    <div className={"info_descr"}>
+                      <FaUser style={overviewIconStyle} /> Marital Status
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.maritalstatus || "Not set"}
@@ -492,8 +493,8 @@ class ClientOverview extends React.Component {
                     </div>
 
                     {/* Profession */}
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Profession
+                    <div className={"info_descr"}>
+                      <FaUser style={overviewIconStyle} /> Profession
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.profession || "Not set"}
@@ -506,8 +507,8 @@ class ClientOverview extends React.Component {
                     </div>
 
                     {/* Deceased */}
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Deceased
+                    <div className={"info_descr"}>
+                      <FaUser style={overviewIconStyle} /> Deceased
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.deceased ? (
@@ -526,9 +527,9 @@ class ClientOverview extends React.Component {
 
                     {client.deceased && (
                       <>
-                        {/* Deceased Date */}
-                        <div className={"info_descr"} style={{ marginTop: 16 }}>
-                          <BsInfoSquare style={overviewIconStyle} /> Deceased Date
+                        {/* Decease date */}
+                        <div className={"info_descr"}>
+                          <FaUser style={overviewIconStyle} /> Decease date
                         </div>
                         <div className={"info_span"} style={{ position: "relative" }}>
                           {client.deceasedate ? new Date(client.deceasedate).toLocaleDateString() : "Not set"}
@@ -548,14 +549,14 @@ class ClientOverview extends React.Component {
                 <Card>
                   <Card.Header>
                     <h4>
-                      <FaHashtag style={overviewIconStyle} />
+                      <FaFileInvoiceDollar style={overviewIconStyle} />
                       Tax & Identification
                     </h4>
                   </Card.Header>
                   <Card.Body>
                     {/* AFM */}
                     <div className={"info_descr"}>
-                      <BsInfoSquare style={overviewIconStyle} /> AFM
+                      <FaFileInvoiceDollar style={overviewIconStyle} /> TIN-GR
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.afm || "Not set"}
@@ -568,8 +569,8 @@ class ClientOverview extends React.Component {
                     </div>
 
                     {/* SIN */}
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> SIN
+                    <div className={"info_descr"}>
+                      <FaFileInvoiceDollar style={overviewIconStyle} /> TIN
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.sin || "Not set"}
@@ -582,8 +583,8 @@ class ClientOverview extends React.Component {
                     </div>
 
                     {/* AMKA */}
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> AMKA
+                    <div className={"info_descr"}>
+                      <FaFileInvoiceDollar style={overviewIconStyle} /> AMKA
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.amka || "Not set"}
@@ -597,7 +598,7 @@ class ClientOverview extends React.Component {
 
                     {/* Tax Management */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Tax Management
+                      <FaFileInvoiceDollar style={overviewIconStyle} /> Tax Management
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.taxmanagement ? (
@@ -616,7 +617,7 @@ class ClientOverview extends React.Component {
 
                     {/* Tax Representation */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Tax Representation
+                      <FaFileInvoiceDollar style={overviewIconStyle} /> Tax Representation
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.taxrepresentation ? (
@@ -637,7 +638,7 @@ class ClientOverview extends React.Component {
                       <>
                         {/* Tax Representative */}
                         <div className={"info_descr"} style={{ marginTop: 16 }}>
-                          <BsInfoSquare style={overviewIconStyle} /> Tax Representative
+                          <FaFileInvoiceDollar style={overviewIconStyle} /> Tax Representative
                         </div>
                         <div className={"info_span"} style={{ position: "relative" }}>
                           {client.taxrepresentative || "Not set"}
@@ -653,7 +654,7 @@ class ClientOverview extends React.Component {
 
                     {/* Retired */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Retired
+                      <FaFileInvoiceDollar style={overviewIconStyle} /> Retired
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.retired ? (
@@ -679,14 +680,14 @@ class ClientOverview extends React.Component {
                 <Card>
                   <Card.Header>
                     <h4>
-                      <MdSecurity style={overviewIconStyle} />
+                      <FaPassport style={overviewIconStyle} />
                       Passport Information
                     </h4>
                   </Card.Header>
                   <Card.Body>
                     {/* Passport Country */}
                     <div className={"info_descr"}>
-                      <BsInfoSquare style={overviewIconStyle} /> Passport Country
+                      <FaPassport style={overviewIconStyle} /> Passport Country
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.passportcountry?.title || "Not set"}
@@ -700,7 +701,7 @@ class ClientOverview extends React.Component {
 
                     {/* Passport Number */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Passport Number
+                      <FaPassport style={overviewIconStyle} /> Passport Number
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.passportnumber || "Not set"}
@@ -712,9 +713,9 @@ class ClientOverview extends React.Component {
                       </span>
                     </div>
 
-                    {/* Passport Expire Date */}
+                    {/* Expiration */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Passport Expire Date
+                      <FaPassport style={overviewIconStyle} /> Expiration
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.passportexpiredate ? new Date(client.passportexpiredate).toLocaleDateString() : "Not set"}
@@ -727,8 +728,8 @@ class ClientOverview extends React.Component {
                     </div>
 
                     {/* Police ID */}
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Police ID
+                    <div className={"info_descr"}>
+                      <FaPassport style={overviewIconStyle} /> GR ID Number
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.policeid || "Not set"}
@@ -746,14 +747,14 @@ class ClientOverview extends React.Component {
                 <Card>
                   <Card.Header>
                     <h4>
-                      <FaSort style={overviewIconStyle} />
+                      <FaMoneyCheckAlt style={overviewIconStyle} />
                       Pension Information
                     </h4>
                   </Card.Header>
                   <Card.Body>
                     {/* Pension Country 1 */}
                     <div className={"info_descr"}>
-                      <BsInfoSquare style={overviewIconStyle} /> Pension Country 1
+                      <FaMoneyCheckAlt style={overviewIconStyle} /> Country
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.pensioncountry1?.title || "Not set"}
@@ -767,7 +768,7 @@ class ClientOverview extends React.Component {
 
                     {/* Insurance Carrier 1 */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Insurance Carrier 1
+                      <FaMoneyCheckAlt style={overviewIconStyle} /> Public Insurance 1
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.insucarrier1?.title || "Not set"}
@@ -781,7 +782,7 @@ class ClientOverview extends React.Component {
 
                     {/* Pension Info 1 */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Pension Info 1
+                      <FaMoneyCheckAlt style={overviewIconStyle} /> Pension Info 1
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.pensioninfo1 || "Not set"}
@@ -795,7 +796,7 @@ class ClientOverview extends React.Component {
 
                     {/* Pension Country 2 */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Pension Country 2
+                      <FaMoneyCheckAlt style={overviewIconStyle} /> Country 2
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.pensioncountry2?.title || "Not set"}
@@ -809,7 +810,7 @@ class ClientOverview extends React.Component {
 
                     {/* Insurance Carrier 2 */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Insurance Carrier 2
+                      <FaMoneyCheckAlt style={overviewIconStyle} /> Public Insurance 2
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.insucarrier2?.title || "Not set"}
@@ -823,7 +824,7 @@ class ClientOverview extends React.Component {
 
                     {/* Pension Info 2 */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Pension Info 2
+                      <FaMoneyCheckAlt style={overviewIconStyle} /> Pension Info 2
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.pensioninfo2 || "Not set"}
@@ -844,14 +845,14 @@ class ClientOverview extends React.Component {
                 <Card>
                   <Card.Header>
                     <h4>
-                      <FaSort style={overviewIconStyle} />
+                      <FaStickyNote style={overviewIconStyle} />
                       Additional Information
                     </h4>
                   </Card.Header>
                   <Card.Body>
                     {/* Notes */}
                     <div className={"info_descr"}>
-                      <BsInfoSquare style={overviewIconStyle} /> Notes
+                      <FaStickyNote style={overviewIconStyle} /> Notes
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {client.notes || "No notes"}

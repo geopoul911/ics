@@ -159,6 +159,7 @@ class Client(models.Model):
     surname = models.CharField(max_length=40)
     onoma = models.CharField(max_length=40)
     eponymo = models.CharField(max_length=40)
+
     address = models.CharField(max_length=120)
     postalcode = models.CharField(max_length=10)
 
@@ -264,7 +265,7 @@ class Project(models.Model):
 
     project_id = models.CharField(max_length=10, primary_key=True)
     registrationdate = models.DateField(auto_now_add=True)
-    registrationuser = models.CharField(max_length=10)
+    registrationuser = models.CharField(max_length=15)
 
     consultant = models.ForeignKey(Consultant, on_delete=models.PROTECT)
 
@@ -398,14 +399,14 @@ def document_upload_to(instance, filename):
 
 class Document(models.Model):
     STATUS_CHOICES = [
-        ('SENT_TO_ATHENS', 'Αποστολή προς την Αθήνα'),
-        ('RECEIVED_IN_ATHENS', 'Παραλήφθηκε από την Αθήνα'),
-        ('SENT_TO_TORONTO', 'Αποστολή προς το Τορόντο'),
-        ('RECEIVED_IN_TORONTO', 'Παραλήφθηκε από το Τορόντο'),
-        ('SENT_TO_MONTREAL', 'Αποστολή προς το Μόντρεαλ'),
-        ('RECEIVED_IN_MONTREAL', 'Παραλήφθηκε από το Μόντρεαλ'),
-        ('SENT_TO_CLIENT', 'Αποστολή προς τον Πελάτη'),
-        ('RECEIVED_FROM_CLIENT', 'Παραλήφθηκε από τον Πελάτη'),
+        ('SENT_TO_ATHENS', 'Sent To Athens'),
+        ('RECEIVED_IN_ATHENS', 'Received In Athens'),
+        ('SENT_TO_TORONTO', 'Sent To Toronto'),
+        ('RECEIVED_IN_TORONTO', 'Received In Toronto'),
+        ('SENT_TO_MONTREAL', 'Sent To Montreal'),
+        ('RECEIVED_IN_MONTREAL', 'Received In Montreal'),
+        ('SENT_TO_CLIENT', 'Sent To Client'),
+        ('RECEIVED_FROM_CLIENT', 'Received From Client'),
     ]
 
     document_id = models.CharField(max_length=10, primary_key=True)
@@ -532,9 +533,9 @@ class Professional(models.Model):
     mobile = models.CharField(max_length=15)
     city = models.ForeignKey(City, on_delete=models.PROTECT)
     reliability = models.CharField(max_length=10, blank=True, null=True, choices=[
-        ('High', 'Μεγάλη'),
-        ('Medium', 'Μέτρια'),
-        ('Low', 'Μικρή'),
+        ('High', 'High'),
+        ('Medium', 'Medium'),
+        ('Low', 'Low'),
     ])
     active = models.BooleanField(default=True)
     notes = models.TextField(blank=True, null=True)
@@ -544,9 +545,9 @@ class Professional(models.Model):
 
 class ClientContact(models.Model):
     RELIABILITY_CHOICES = [
-        ('High', 'Μεγάλη'),
-        ('Medium', 'Μέτρια'),
-        ('Low', 'Μικρή'),
+        ('High', 'High'),
+        ('Medium', 'Medium'),
+        ('Low', 'Low'),
     ]
 
     clientcont_id = models.CharField(max_length=10, primary_key=True)
@@ -627,25 +628,25 @@ class Property(models.Model):
     description = models.CharField(max_length=80)
     location = models.CharField(max_length=80, blank=True, null=True)
     type = models.CharField(max_length=40, choices=[
-        ('Plot', 'Αγροτεμάχιο'),
-        ('Land', 'Οικόπεδο'),
-        ('House', 'Μονοκατοικία'),
-        ('Apartment', 'Διαμέρισμα'),
-        ('Store', 'Κατάστημα'),
-        ('Other', 'Άλλο'),
+        ('Plot', 'Plot'),
+        ('Land', 'Land'),
+        ('House', 'House'),
+        ('Apartment', 'Apartment'),
+        ('Store', 'Store'),
+        ('Other', 'Other'),
     ])
     constructyear = models.CharField(max_length=4, blank=True, null=True)
     status = models.CharField(max_length=40, blank=True, null=True, choices=[
-        ('Empty', 'Άδειο'),
-        ('Rented', 'Ενοικιασμένο'),
-        ('Unfinished', 'Ημιτελές'),
+        ('Empty', 'Empty'),
+        ('Rented', 'Rented'),
+        ('Unfinished', 'Unfinished'),
     ])
     market = models.CharField(max_length=40, blank=True, null=True, choices=[
-        ('ShortTerm', 'Βραχυπρόθεσμη Ενοικίαση'),
-        ('LongTerm', 'Μακροπρόθεσμη Ενοικίαση'),
-        ('Sale', 'Πώληση'),
-        ('Wait', 'Αναμονή'),
-        ('Own', 'Ιδιοκατοίκηση'),
+        ('ShortTerm', 'ShortTerm'),
+        ('LongTerm', 'LongTerm'),
+        ('Sale', 'Sale'),
+        ('Wait', 'Wait'),
+        ('Own', 'Own'),
     ])
     broker = models.CharField(max_length=120, blank=True, null=True)
     active = models.BooleanField(default=True)

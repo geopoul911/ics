@@ -14,7 +14,7 @@ import { Link } from "react-router-dom";
 import { pageHeader } from "../../global_vars";
 
 // Variables
-let iconStyle = { color: "#2a9fd9", fontSize: "1.5em", marginRight: 20 };
+let iconStyle = { color: "#93ab3c", fontSize: "1.5em", marginRight: 20 };
 
 class RegionRoot extends React.Component {
   render() {
@@ -27,7 +27,7 @@ class RegionRoot extends React.Component {
             <Grid.Column>
                              <div style={{ 
                  backgroundColor: "black", 
-                 color: "#2a9fd9", 
+                 color: "#93ab3c", 
                  padding: "10px 15px", 
                  borderRadius: "5px", 
                  marginBottom: "20px",
@@ -37,7 +37,7 @@ class RegionRoot extends React.Component {
                  marginRight: "15%"
                }}>
                  <h3 style={{ 
-                   color: "#2a9fd9", 
+                   color: "#93ab3c", 
                    margin: "0", 
                    fontSize: "1.2em", 
                    fontWeight: "bold" 

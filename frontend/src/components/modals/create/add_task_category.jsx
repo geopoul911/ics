@@ -173,14 +173,14 @@ export default function AddTaskCategoryModal({ onTaskCategoryCreated }) {
 
             <Form.Group as={Row}>
               <Form.Label column sm={3}>
-                Order Index *:
+                Order by *:
               </Form.Label>
               <Col sm={9}>
                 <Form.Control
                   type="text"
                   value={orderindex}
                   onChange={(e) => setOrderIndex(validateOrderIndex(clampLen(e.target.value, 5)))}
-                  placeholder="Enter order index (numeric)"
+                  placeholder="Enter order by (numeric)"
                   isInvalid={!isOrderIndexValid}
                 />
               </Col>

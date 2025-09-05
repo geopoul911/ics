@@ -166,7 +166,7 @@ function AddBankClientAccountModal({ refreshData }) {
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Account Number *:</Form.Label>
+                      <Form.Label>Account number *:</Form.Label>
                       <Form.Control
                         maxLength={20}
                         placeholder="e.g., 1234567890"
@@ -219,7 +219,7 @@ function AddBankClientAccountModal({ refreshData }) {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Transit Number:</Form.Label>
+                      <Form.Label>Branch number:</Form.Label>
                       <Form.Control
                         maxLength={5}
                         placeholder="e.g., 12345"

@@ -23,6 +23,15 @@ const UPDATE_PROJECT = "http://localhost:8000/api/data_management/project/";
 
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);
+const today = () => new Date().toISOString().slice(0, 10);
+const computeStatus = (p) => {
+  if (p.abandoned) return 'Abandoned';
+  if (p.settled) return 'Settled';
+  if (p.completed) return 'Completed';
+  if (p.inprogress) return 'Inprogress';
+  if (p.assigned) return 'Assigned';
+  return 'Created';
+};
 
 // Edit Project ID Modal
 export function EditProjectIdModal({ project, refreshData }) {
@@ -407,97 +416,7 @@ export function EditProjectConsultantModal({ project, refreshData }) {
 }
 
 // Edit Project Status Modal
-export function EditProjectStatusModal({ project, refreshData }) {
-  const [show, setShow] = useState(false);
-  const [status, setStatus] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (show) {
-      setStatus(project.status || "");
-    }
-  }, [show, project]);
-
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-
-  const isValid = !!status;
-
-  const handleSave = async () => {
-    if (!isValid) return;
-
-    setIsLoading(true);
-    try {
-      const currentHeaders = {
-        ...headers,
-        "Authorization": "Token " + localStorage.getItem("userToken")
-      };
-
-      await axios.put(
-        UPDATE_PROJECT + project.project_id + "/",
-        { status: status },
-        { headers: currentHeaders }
-      );
-
-      Swal.fire("Success", "Status updated successfully", "success");
-      if (refreshData) refreshData();
-      handleClose();
-    } catch (error) {
-      console.error("Error updating status:", error);
-      const errorMessage = error.response?.data?.error || "Failed to update status";
-      Swal.fire("Error", errorMessage, "error");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <>
-      <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} /> Edit Status
-      </Button>
-
-      <Modal show={show} onHide={handleClose} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Status</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-            <Form.Group>
-              <Form.Label>Status:</Form.Label>
-              <Form.Control
-                as="select"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-              >
-                <option value="">Select Status</option>
-                <option value="Created">Created</option>
-                <option value="Assigned">Assigned</option>
-                <option value="Inprogress">In Progress</option>
-                <option value="Completed">Completed</option>
-                <option value="Settled">Settled</option>
-                <option value="Abandoned">Abandoned</option>
-              </Form.Control>
-            </Form.Group>
-        </Modal.Body>
-        <Modal.Footer>
-          <small className="mr-auto">
-            {!isValid ? (
-              <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
-                <li>Status is required</li>
-              </ul>
-            ) : (
-              <div style={{ color: "green" }}>
-                <AiOutlineCheckCircle style={{ marginRight: 5 }} /> Looks good.
-              </div>
-            )}
-          </small>
-          <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
-          <Button color="green" onClick={handleSave} loading={isLoading} disabled={!isValid}>Save Changes</Button>
-        </Modal.Footer>
-      </Modal>
-    </>
-  );
-}
+// Removed manual Status modal; status is now derived from boolean fields
 
 // Edit Project Taxation Modal
 export function EditProjectTaxationModal({ project, refreshData }) {
@@ -864,6 +783,215 @@ export function EditProjectNotesModal({ project, refreshData }) {
           </small>
           <Button color="red" onClick={handleClose} disabled={isLoading}>Cancel</Button>
           <Button color="green" onClick={handleSave} loading={isLoading}>Save Changes</Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+}
+
+// Generic toggle with auto-date helper (internal use)
+async function updateToggleWithDate(project, field, dateField, value, statusOnTrue) {
+  const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
+  const payload = {};
+  payload[field] = value;
+  payload[dateField] = value ? today() : null;
+  if (value) {
+    payload['status'] = statusOnTrue;
+  } else {
+    const next = { ...project, [field]: false };
+    payload['status'] = computeStatus(next);
+  }
+  await axios.put(
+    UPDATE_PROJECT + project.project_id + "/",
+    payload,
+    { headers: currentHeaders }
+  );
+}
+
+// Assigned
+export function EditProjectAssignedModal({ project, refreshData }) {
+  const [show, setShow] = useState(false);
+  const [assigned, setAssigned] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => { if (show) setAssigned(!!project.assigned); }, [show, project]);
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+  const handleSave = async () => {
+    setBusy(true);
+    try {
+      await updateToggleWithDate(project, 'assigned', 'assignedate', assigned, 'Assigned');
+      Swal.fire("Success", "Assigned status updated.", "success");
+      refreshData && refreshData();
+      setShow(false);
+    } catch (e) { Swal.fire("Error", e?.response?.data?.error || "Failed to update assigned", "error"); }
+    finally { setBusy(false); }
+  };
+  return (
+    <>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Assigned</Button>
+      <Modal show={show} onHide={handleClose} centered>
+        <Modal.Header closeButton><Modal.Title>Edit Assigned</Modal.Title></Modal.Header>
+        <Modal.Body>
+            <Form.Group>
+              <Form.Check type="switch" id="assigned-switch" label="Assigned" checked={assigned} onChange={(e) => setAssigned(e.target.checked)} />
+            </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button color="red" onClick={handleClose} disabled={busy}>Cancel</Button>
+          <Button color="green" onClick={handleSave} loading={busy}>Save Changes</Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+}
+
+// In progress
+export function EditProjectInprogressModal({ project, refreshData }) {
+  const [show, setShow] = useState(false);
+  const [inprogress, setInprogress] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => { if (show) setInprogress(!!project.inprogress); }, [show, project]);
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+  const handleSave = async () => {
+    setBusy(true);
+    try {
+      await updateToggleWithDate(project, 'inprogress', 'inprogressdate', inprogress, 'Inprogress');
+      Swal.fire("Success", "In progress updated.", "success");
+      refreshData && refreshData();
+      setShow(false);
+    } catch (e) { Swal.fire("Error", e?.response?.data?.error || "Failed to update in progress", "error"); }
+    finally { setBusy(false); }
+  };
+  return (
+    <>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit In progress</Button>
+      <Modal show={show} onHide={handleClose} centered>
+        <Modal.Header closeButton><Modal.Title>Edit In progress</Modal.Title></Modal.Header>
+        <Modal.Body>
+            <Form.Group>
+              <Form.Check type="switch" id="inprogress-switch" label="In progress" checked={inprogress} onChange={(e) => setInprogress(e.target.checked)} />
+            </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button color="red" onClick={handleClose} disabled={busy}>Cancel</Button>
+          <Button color="green" onClick={handleSave} loading={busy}>Save Changes</Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+}
+
+// Completed
+export function EditProjectCompletedModal({ project, refreshData }) {
+  const [show, setShow] = useState(false);
+  const [completed, setCompleted] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => { if (show) setCompleted(!!project.completed); }, [show, project]);
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+  const handleSave = async () => {
+    setBusy(true);
+    try {
+      await updateToggleWithDate(project, 'completed', 'completiondate', completed, 'Completed');
+      Swal.fire("Success", "Completed updated.", "success");
+      refreshData && refreshData();
+      setShow(false);
+    } catch (e) { Swal.fire("Error", e?.response?.data?.error || "Failed to update completed", "error"); }
+    finally { setBusy(false); }
+  };
+  return (
+    <>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Completed</Button>
+      <Modal show={show} onHide={handleClose} centered>
+        <Modal.Header closeButton><Modal.Title>Edit Completed</Modal.Title></Modal.Header>
+        <Modal.Body>
+            <Form.Group>
+              <Form.Check type="switch" id="completed-switch" label="Completed" checked={completed} onChange={(e) => setCompleted(e.target.checked)} />
+            </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button color="red" onClick={handleClose} disabled={busy}>Cancel</Button>
+          <Button color="green" onClick={handleSave} loading={busy}>Save Changes</Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+}
+
+// Settled
+export function EditProjectSettledModal({ project, refreshData }) {
+  const [show, setShow] = useState(false);
+  const [settled, setSettled] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => { if (show) setSettled(!!project.settled); }, [show, project]);
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+  const handleSave = async () => {
+    setBusy(true);
+    try {
+      await updateToggleWithDate(project, 'settled', 'settlementdate', settled, 'Settled');
+      Swal.fire("Success", "Settled updated.", "success");
+      refreshData && refreshData();
+      setShow(false);
+    } catch (e) { Swal.fire("Error", e?.response?.data?.error || "Failed to update settled", "error"); }
+    finally { setBusy(false); }
+  };
+  return (
+    <>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Settled</Button>
+      <Modal show={show} onHide={handleClose} centered>
+        <Modal.Header closeButton><Modal.Title>Edit Settled</Modal.Title></Modal.Header>
+        <Modal.Body>
+            <Form.Group>
+              <Form.Check type="switch" id="settled-switch" label="Settled" checked={settled} onChange={(e) => setSettled(e.target.checked)} />
+            </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button color="red" onClick={handleClose} disabled={busy}>Cancel</Button>
+          <Button color="green" onClick={handleSave} loading={busy}>Save Changes</Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+}
+
+// Abandoned
+export function EditProjectAbandonedModal({ project, refreshData }) {
+  const [show, setShow] = useState(false);
+  const [abandoned, setAbandoned] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => { if (show) setAbandoned(!!project.abandoned); }, [show, project]);
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+  const handleSave = async () => {
+    setBusy(true);
+    try {
+      await updateToggleWithDate(project, 'abandoned', 'abandondate', abandoned, 'Abandoned');
+      Swal.fire("Success", "Abandoned updated.", "success");
+      refreshData && refreshData();
+      setShow(false);
+    } catch (e) { Swal.fire("Error", e?.response?.data?.error || "Failed to update abandoned", "error"); }
+    finally { setBusy(false); }
+  };
+  return (
+    <>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Abandoned</Button>
+      <Modal show={show} onHide={handleClose} centered>
+        <Modal.Header closeButton><Modal.Title>Edit Abandoned</Modal.Title></Modal.Header>
+        <Modal.Body>
+            <Form.Group>
+              <Form.Check type="switch" id="abandoned-switch" label="Abandoned" checked={abandoned} onChange={(e) => setAbandoned(e.target.checked)} />
+            </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button color="red" onClick={handleClose} disabled={busy}>Cancel</Button>
+          <Button color="green" onClick={handleSave} loading={busy}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>

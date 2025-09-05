@@ -23,6 +23,7 @@ import {
   paginationOptions,
   headers,
   pageHeader,
+  loader,
 } from "../../global_vars";
 
 // Variables
@@ -47,7 +48,7 @@ const columns = [
   },
   {
     dataField: "title",
-    text: "Title",
+    text: "City",
     sort: true,
     filter: textFilter(),
   },
@@ -100,7 +101,7 @@ const columns = [
   },
   {
     dataField: "orderindex",
-    text: "Order Index",
+    text: "Order by",
     sort: true,
     filter: textFilter(),
   },
@@ -231,7 +232,7 @@ class AllCities extends React.Component {
                   </div>
                 </>
               ) : (
-                <div>Loading...</div>
+                <div>{loader()}</div>
               )}
             </div>
           </div>

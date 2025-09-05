@@ -22,6 +22,7 @@ import {
   paginationOptions,
   headers,
   pageHeader,
+  loader,
 } from "../../global_vars";
 import AddProjectTaskModal from "../../modals/create/add_project_task";
 
@@ -34,7 +35,7 @@ const ALL_PROJECT_TASKS = "http://localhost:8000/api/data_management/project_tas
 const columns = [
   {
     dataField: "projtask_id",
-    text: "Project Task ID",
+    text: "Project task ID",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => (
@@ -197,7 +198,7 @@ class AllProjectTasks extends React.Component {
                   </div>
                 </>
               ) : (
-                <div>Loading...</div>
+                <div>{loader()}</div>
               )}
             </div>
           </div>

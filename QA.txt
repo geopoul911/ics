@@ -1,5 +1,0 @@
-- θα έχουν πρόσβαση στον κώδικα?
-- θέλουν συγκεκριμμένη χρωματοπαλέτα?
-- full english?
-
-~ Regions = Countries / Cities / Provinces

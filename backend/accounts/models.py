@@ -53,7 +53,7 @@ class Consultant(AbstractBaseUser, PermissionsMixin):
     # your extra flags
     canassigntask = models.BooleanField(default=False)
     cashpassport = models.CharField(
-        max_length=120, blank=True, null=True,
+        max_length=40, blank=True, null=True,
         help_text="Comma-separated list of country codes (e.g., 'GRE,CAN' or 'GRE,USA,CAN')"
     )
     active = models.BooleanField(default=True)  # optional; redundant with is_active

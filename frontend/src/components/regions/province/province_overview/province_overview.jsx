@@ -42,7 +42,7 @@ function getProvinceIdFromPath() {
   return id ? decodeURIComponent(id) : null;
 }
 
-let overviewIconStyle = { color: "#2a9fd9", marginRight: "0.5em" };
+let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
 
 class ProvinceOverview extends React.Component {
   constructor(props) {
@@ -110,7 +110,7 @@ class ProvinceOverview extends React.Component {
                     <Card.Header>
                       <BsInfoSquare
                         style={{
-                          color: "#2a9fd9",
+                          color: "#93ab3c",
                           fontSize: "1.5em",
                           marginRight: "0.5em",
                         }}
@@ -118,22 +118,8 @@ class ProvinceOverview extends React.Component {
                       Province Information
                     </Card.Header>
                     <Card.Body>
-                      {/* Title */}
-                      <div className={"info_descr"}>
-                        <FiType style={overviewIconStyle} /> Title
-                      </div>
-                      <div className={"info_span"} style={{ position: "relative" }}>
-                        {province.title ? province.title : "N/A"}
-                        <span style={{ position: "absolute", right: "0px", top: "50%", transform: "translateY(-50%)" }}>
-                          <EditProvinceTitleModal
-                            province={province}
-                            update_state={this.update_state}
-                          />
-                        </span>
-                      </div>
-
                       {/* Province ID */}
-                      <div className={"info_descr"} style={{ marginTop: 16 }}>
+                      <div className={"info_descr"}>
                         <FaHashtag style={overviewIconStyle} /> Province ID (2–10 chars)
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
@@ -145,9 +131,24 @@ class ProvinceOverview extends React.Component {
                           />
                         </span>
                       </div>
+                      {/* Title */}
+                      <div className={"info_descr"}>
+                        <FiType style={overviewIconStyle} /> Province
+                      </div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {province.title ? province.title : "N/A"}
+                        <span style={{ position: "absolute", right: "0px", top: "50%", transform: "translateY(-50%)" }}>
+                          <EditProvinceTitleModal
+                            province={province}
+                            update_state={this.update_state}
+                          />
+                        </span>
+                      </div>
+
+
 
                       {/* Country */}
-                      <div className={"info_descr"} style={{ marginTop: 16 }}>
+                      <div className={"info_descr"}>
                         <FaGlobe style={overviewIconStyle} /> Country
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
@@ -160,9 +161,9 @@ class ProvinceOverview extends React.Component {
                         </span>
                       </div>
 
-                      {/* Order Index */}
-                      <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <BiSort style={overviewIconStyle} /> Order Index
+                      {/* Order by */}
+                      <div className={"info_descr"}>
+                        <BiSort style={overviewIconStyle} /> Order by
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {(typeof province.orderindex === "number" ||
@@ -182,7 +183,6 @@ class ProvinceOverview extends React.Component {
                         objectType="Province"
                         objectId={province.province_id}
                         objectName={province.title}
-                        warningMessage="This will also delete all cities associated with this province."
                         onObjectDeleted={() => {
                           window.location.href = "/regions/all_provinces";
                         }}

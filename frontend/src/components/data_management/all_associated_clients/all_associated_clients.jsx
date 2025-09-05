@@ -22,6 +22,7 @@ import "react-bootstrap-table-next/dist/react-bootstrap-table2.min.css";
 import {
   paginationOptions,
   headers,
+  loader,
   pageHeader,
 } from "../../global_vars";
 
@@ -68,7 +69,7 @@ const columns = [
   },
   {
     dataField: "orderindex",
-    text: "Order Index",
+    text: "Order by",
     sort: true,
     filter: textFilter(),
   },
@@ -193,7 +194,7 @@ class AllAssociatedClients extends React.Component {
                   </div>
                 </>
               ) : (
-                <div>Loading...</div>
+                <div>{loader()}</div>
               )}
             </div>
           </div>

@@ -855,12 +855,12 @@ export function EditPropertyTypeModal({ property, update_state }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const typeChoices = [
-    { value: "Plot", label: "Αγροτεμάχιο" },
-    { value: "Land", label: "Οικόπεδο" },
-    { value: "House", label: "Μονοκατοικία" },
-    { value: "Apartment", label: "Διαμέρισμα" },
-    { value: "Store", label: "Κατάστημα" },
-    { value: "Other", label: "Άλλο" },
+    { value: "Plot", label: "Plot" },
+    { value: "Land", label: "Land" },
+    { value: "House", label: "House" },
+    { value: "Apartment", label: "Apartment" },
+    { value: "Store", label: "Store" },
+    { value: "Other", label: "Other" },
   ];
 
   useEffect(() => {
@@ -1025,9 +1025,9 @@ export function EditPropertyStatusModal({ property, update_state }) {
 
   const statusChoices = [
     { value: "", label: "No Status" },
-    { value: "Empty", label: "Άδειο" },
-    { value: "Rented", label: "Ενοικιασμένο" },
-    { value: "Unfinished", label: "Ημιτελές" },
+    { value: "Empty", label: "Empty" },
+    { value: "Rented", label: "Rented" },
+    { value: "Unfinished", label: "Unfinished" },
   ];
 
   useEffect(() => {
@@ -1107,11 +1107,11 @@ export function EditPropertyMarketModal({ property, update_state }) {
 
   const marketChoices = [
     { value: "", label: "No Market" },
-    { value: "ShortTerm", label: "Βραχυπρόθεσμη Ενοικίαση" },
-    { value: "LongTerm", label: "Μακροπρόθεσμη Ενοικίαση" },
-    { value: "Sale", label: "Πώληση" },
-    { value: "Wait", label: "Αναμονή" },
-    { value: "Own", label: "Ιδιοκατοίκηση" },
+    { value: "ShortTerm", label: "Short Term" },
+    { value: "LongTerm", label: "Long Term" },
+    { value: "Sale", label: "Sale" },
+    { value: "Wait", label: "Wait" },
+    { value: "Own", label: "Own" },
   ];
 
   useEffect(() => {

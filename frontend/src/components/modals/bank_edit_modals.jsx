@@ -410,26 +410,26 @@ export function EditBankOrderIndexModal({ bank, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="tiny" basic title="Edit Order Index">
+      <Button onClick={handleShow} size="tiny" basic title="Edit Order by">
         <FiEdit style={{ marginRight: 6 }} />
-        Order Index
+        Order by
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Bank Order Index</Modal.Title>
+          <Modal.Title>Edit Bank Order by</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form.Group as={Row}>
               <Form.Label column sm={3}>
-                Order Index:
+                Order by:
               </Form.Label>
               <Col sm={9}>
                 <Form.Control
                   type="number"
                   value={orderindex}
                   onChange={(e) => setOrderindex(toSmallInt(e.target.value))}
-                  placeholder="Enter order index"
+                  placeholder="Enter order by"
                   isInvalid={orderindex !== "" && !isOrderIndexValid}
                 />
                 <Form.Control.Feedback type="invalid">
@@ -441,7 +441,7 @@ export function EditBankOrderIndexModal({ bank, update_state }) {
         <Modal.Footer>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
             <small style={{ color: isOrderIndexValid ? "green" : "red" }}>
-              {isOrderIndexValid ? "Looks good." : "Order Index is required and must be an integer."}
+              {isOrderIndexValid ? "Looks good." : "Order by is required and must be an integer."}
             </small>
             <div>
               <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>

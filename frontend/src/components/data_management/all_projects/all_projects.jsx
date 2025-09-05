@@ -23,6 +23,7 @@ import {
   paginationOptions,
   headers,
   pageHeader,
+  loader,
 } from "../../global_vars";
 
 // Variables
@@ -53,13 +54,13 @@ const columns = [
   },
   {
     dataField: "filecode",
-    text: "File Code",
+    text: "File code",
     sort: true,
     filter: textFilter(),
   },
   {
     dataField: "registrationdate",
-    text: "Registration Date",
+    text: "Entered",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => {
@@ -212,7 +213,7 @@ class AllProjects extends React.Component {
                   </div>
                 </>
               ) : (
-                <div>Loading...</div>
+                <div>{loader()}</div>
               )}
             </div>
           </div>

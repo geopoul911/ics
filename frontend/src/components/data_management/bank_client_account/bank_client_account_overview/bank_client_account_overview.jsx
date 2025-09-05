@@ -6,8 +6,8 @@ import NavigationBar from "../../../core/navigation_bar/navigation_bar";
 import Footer from "../../../core/footer/footer";
 
 // Icons / Images
-import { FaHashtag, FaSort, FaStop } from "react-icons/fa";
-import { BsInfoSquare } from "react-icons/bs";
+import { FaStop } from "react-icons/fa";
+import { FaIdBadge, FaStickyNote } from "react-icons/fa";
 import { MdCheckCircle, MdCancel } from "react-icons/md";
 
 // Modules / Functions
@@ -34,7 +34,7 @@ function getBankClientAccountIdFromPath() {
   return pathParts[pathParts.length - 1];
 }
 
-let overviewIconStyle = { color: "#2a9fd9", marginRight: "0.5em" };
+let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
 
 class BankClientAccountOverview extends React.Component {
   constructor(props) {
@@ -107,14 +107,14 @@ class BankClientAccountOverview extends React.Component {
                 <Card>
                   <Card.Header>
                     <h4>
-                      <FaHashtag style={overviewIconStyle} />
+                      <FaIdBadge style={overviewIconStyle} />
                       Basic Information
                     </h4>
                   </Card.Header>
                   <Card.Body>
                     {/* Bank Client Account ID */}
                     <div className={"info_descr"}>
-                      <FaHashtag style={overviewIconStyle} /> Bank Client Account ID
+                      <FaIdBadge style={overviewIconStyle} /> Bank Client Account ID
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {bankClientAccount.bankclientacco_id || "N/A"}
@@ -126,20 +126,13 @@ class BankClientAccountOverview extends React.Component {
                           transform: "translateY(-50%)",
                         }}
                       >
-                        <Button size="tiny" basic disabled>
-                          <FaStop
-                            disabled
-                            style={{ marginRight: 6, color: "red" }}
-                            title="Bank Client Account ID is immutable"
-                          />{" "}
-                          ID
-                        </Button>
+                        <Button size="tiny" basic disabled title="Bank Client Account ID is immutable"><FaStop style={{ marginRight: 6, color: "red" }} />ID</Button>
                       </span>
                     </div>
 
                     {/* Account Number */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Account Number
+                      <FaIdBadge style={overviewIconStyle} /> Account Number
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {bankClientAccount.accountnumber || "Not set"}
@@ -160,7 +153,7 @@ class BankClientAccountOverview extends React.Component {
 
                     {/* Transit Number */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Transit Number
+                      <FaStickyNote style={overviewIconStyle} /> Transit Number
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {bankClientAccount.transitnumber || "Not set"}
@@ -181,7 +174,7 @@ class BankClientAccountOverview extends React.Component {
 
                     {/* IBAN */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> IBAN
+                      <FaStickyNote style={overviewIconStyle} /> IBAN
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {bankClientAccount.iban || "Not set"}
@@ -202,7 +195,7 @@ class BankClientAccountOverview extends React.Component {
 
                     {/* Active Status */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Active Status
+                      <FaStickyNote style={overviewIconStyle} /> Active Status
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {bankClientAccount.active ? (
@@ -244,14 +237,14 @@ class BankClientAccountOverview extends React.Component {
                 <Card>
                   <Card.Header>
                     <h4>
-                      <FaSort style={overviewIconStyle} />
+                      <FaStickyNote style={overviewIconStyle} />
                       Related Information
                     </h4>
                   </Card.Header>
                   <Card.Body>
                     {/* Client */}
                     <div className={"info_descr"}>
-                      <BsInfoSquare style={overviewIconStyle} /> Client
+                      <FaStickyNote style={overviewIconStyle} /> Client
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {bankClientAccount.client?.fullname || "Not set"}
@@ -272,7 +265,7 @@ class BankClientAccountOverview extends React.Component {
 
                     {/* Bank */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Bank
+                      <FaStickyNote style={overviewIconStyle} /> Bank
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {bankClientAccount.bank?.bankname || "Not set"}

@@ -13,6 +13,7 @@ import { Card } from "react-bootstrap";
 import { Grid, Button } from "semantic-ui-react";
 import DeleteObjectModal from "../../../modals/delete_object";
 import { pageHeader } from "../../../global_vars";
+import { FaIdBadge, FaStickyNote, FaStop } from "react-icons/fa";
 import {
   EditTaxProjClientModal,
   EditTaxProjConsultantModal,
@@ -80,17 +81,17 @@ function TaxationProjectOverview() {
             <Grid stackable columns={2} divided>
               <Grid.Column>
                 <Card>
-                  <Card.Header>Basic Information</Card.Header>
+                  <Card.Header><FaIdBadge style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Basic Information</Card.Header>
                   <Card.Body>
-                    <div className={"info_descr"}>ID</div>
+                    <div className={"info_descr"}><FaIdBadge style={{ color: "#93ab3c", marginRight: "0.5em" }} /> ID</div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {item.taxproj_id}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
-                        <Button size="tiny" basic disabled title="ID is immutable">ID</Button>
+                        <Button size="tiny" basic disabled title="ID is immutable"><FaStop style={{ marginRight: 6, color: "red" }} />ID</Button>
                       </span>
                     </div>
 
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>Client</div>
+                    <div className={"info_descr"} style={{ marginTop: 16 }}><FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Client</div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {item.client ? `${item.client.surname} ${item.client.name}` : 'N/A'}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
@@ -98,7 +99,7 @@ function TaxationProjectOverview() {
                       </span>
                     </div>
 
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>Consultant</div>
+                    <div className={"info_descr"} style={{ marginTop: 16 }}><FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Consultant</div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {item.consultant?.fullname || 'N/A'}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
@@ -106,7 +107,7 @@ function TaxationProjectOverview() {
                       </span>
                     </div>
 
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>Tax Use</div>
+                    <div className={"info_descr"} style={{ marginTop: 16 }}><FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Tax Use</div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {item.taxuse}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
@@ -114,7 +115,7 @@ function TaxationProjectOverview() {
                       </span>
                     </div>
 
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>Deadline</div>
+                    <div className={"info_descr"} style={{ marginTop: 16 }}><FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Deadline</div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {item.deadline || 'N/A'}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
@@ -130,9 +131,9 @@ function TaxationProjectOverview() {
 
               <Grid.Column>
                 <Card>
-                  <Card.Header>Status</Card.Header>
+                  <Card.Header><FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Status</Card.Header>
                   <Card.Body>
-                    <div className={"info_descr"}>Declared</div>
+                    <div className={"info_descr"}><FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Declared</div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {item.declaredone ? 'Yes' : 'No'}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
@@ -142,7 +143,7 @@ function TaxationProjectOverview() {
 
                     {item.declaredone && (
                       <>
-                        <div className={"info_descr"} style={{ marginTop: 16 }}>Declaration Date</div>
+                        <div className={"info_descr"} style={{ marginTop: 16 }}><FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Declaration Date</div>
                         <div className={"info_span"} style={{ position: "relative" }}>
                           {item.declarationdate || 'N/A'}
                           <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
@@ -154,9 +155,9 @@ function TaxationProjectOverview() {
                   </Card.Body>
                 </Card>
                 <Card style={{ marginTop: 16 }}>
-                  <Card.Header>Comment</Card.Header>
+                  <Card.Header><FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Comment</Card.Header>
                   <Card.Body>
-                    <div className={"info_descr"}>Comment</div>
+                    <div className={"info_descr"}><FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Comment</div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {item.comment || 'N/A'}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>

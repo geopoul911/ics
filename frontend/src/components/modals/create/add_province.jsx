@@ -168,7 +168,7 @@ function AddProvinceModal() {
             <Col>
               <Form>
                 <Form.Group className="mb-3">
-                  <Form.Label>Title:</Form.Label>
+                  <Form.Label>Province:</Form.Label>
                   <Form.Control
                     maxLength={40}
                     placeholder="e.g., ATTICA"
@@ -208,7 +208,7 @@ function AddProvinceModal() {
                 </Form.Group>
 
                 <Form.Group className="mb-3">
-                  <Form.Label>Order Index*:</Form.Label>
+                  <Form.Label>Order by*:</Form.Label>
                   <Form.Control
                     type="number"
                     placeholder="e.g., 1"
@@ -249,7 +249,7 @@ function AddProvinceModal() {
                 {!isOrderIndexValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Order Index is required and must be an integer.
+                    Order by is required and must be an integer.
                   </li>
                 )}
               </ul>

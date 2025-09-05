@@ -11,6 +11,8 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { Modal, Col, Form, Row } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
+import PhoneInput from "react-phone-input-2";
+import 'react-phone-input-2/lib/bootstrap.css';
 
 // Global Variables
 import { headers } from "../../global_vars";
@@ -92,8 +94,8 @@ function AddProfessionalModal({ onProfessionalCreated }) {
   const isProfessionValid = profession_id !== "";
   const isCityValid = city_id !== "";
   const isEmailValid = !email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  const isPhoneValid = !phone || phone.length <= 15;
-  const isMobileValid = mobile.trim().length > 0 && mobile.length <= 15;
+  const isPhoneValid = !phone || phone.replace(/\D/g, '').length >= 7;
+  const isMobileValid = mobile.replace(/\D/g, '').length >= 7;
   const isFormValid = isIdValid && isFullnameValid && isProfessionValid && isCityValid && isMobileValid && isEmailValid && isPhoneValid;
 
   const createNewProfessional = async () => {
@@ -112,8 +114,8 @@ function AddProfessionalModal({ onProfessionalCreated }) {
           city_id,
           address: address.trim() || null,
           email: email.trim() || null,
-          phone: phone.trim() || null,
-          mobile: mobile.trim(),
+          phone: phone ? ('+' + phone.replace(/\D/g, '')) : null,
+          mobile: mobile ? ('+' + mobile.replace(/\D/g, '')) : null,
           reliability: reliability || null,
           active,
           notes: notes.trim() || null
@@ -171,7 +173,7 @@ function AddProfessionalModal({ onProfessionalCreated }) {
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-2">
-                      <Form.Label>Fullname *:</Form.Label>
+                      <Form.Label>Full name *:</Form.Label>
                       <Form.Control
                         maxLength={40}
                         placeholder="e.g., John Smith"
@@ -219,7 +221,7 @@ function AddProfessionalModal({ onProfessionalCreated }) {
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-2">
-                      <Form.Label>Email:</Form.Label>
+                      <Form.Label>E-mail:</Form.Label>
                       <Form.Control type="email" placeholder="name@example.com" onChange={(e) => setEmail(e.target.value)} value={email} isInvalid={email !== "" && !isEmailValid} />
                     </Form.Group>
                   </Col>
@@ -227,14 +229,28 @@ function AddProfessionalModal({ onProfessionalCreated }) {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Phone:</Form.Label>
-                      <Form.Control placeholder="Optional, max 15 chars" onChange={(e) => setPhone(e.target.value)} value={phone} isInvalid={phone !== "" && !isPhoneValid} />
+                      <Form.Label>Telephone:</Form.Label>
+                      <PhoneInput
+                        country={'gr'}
+                        value={phone}
+                        onChange={(val) => setPhone(val)}
+                        enableSearch
+                        countryCodeEditable={false}
+                        inputProps={{ name: 'phone' }}
+                      />
                     </Form.Group>
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Mobile *:</Form.Label>
-                      <Form.Control placeholder="e.g., +30-697-1234567" onChange={(e) => setMobile(e.target.value)} value={mobile} isInvalid={!isMobileValid} />
+                      <Form.Label>Cell phone *:</Form.Label>
+                      <PhoneInput
+                        country={'gr'}
+                        value={mobile}
+                        onChange={(val) => setMobile(val)}
+                        enableSearch
+                        countryCodeEditable={false}
+                        inputProps={{ name: 'mobile' }}
+                      />
                     </Form.Group>
                   </Col>
                 </Row>
@@ -281,7 +297,7 @@ function AddProfessionalModal({ onProfessionalCreated }) {
                   <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> Professional ID is required (2–10 chars).</li>
                 )}
                 {!isFullnameValid && (
-                  <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> Fullname is required (2–40 chars).</li>
+                  <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> Full name is required (2–40 chars).</li>
                 )}
                 {!isProfessionValid && (
                   <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> Profession is required.</li>
@@ -290,13 +306,13 @@ function AddProfessionalModal({ onProfessionalCreated }) {
                   <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> City is required.</li>
                 )}
                 {!isMobileValid && (
-                  <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> Mobile is required (max 15 chars).</li>
+                  <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> Cell phone is required (max 15 chars).</li>
                 )}
                 {!isEmailValid && (
-                  <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> Email must be a valid email address.</li>
+                  <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> E-mail must be a valid e-mail address.</li>
                 )}
                 {!isPhoneValid && (
-                  <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> Phone must be 15 characters or less.</li>
+                  <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> Telephone must be 15 characters or less.</li>
                 )}
               </ul>
             ) : (

@@ -6,7 +6,7 @@ import NavigationBar from "../../../core/navigation_bar/navigation_bar";
 import Footer from "../../../core/footer/footer";
 
 // Icons / Images
-import { FaHashtag, FaSort } from "react-icons/fa";
+import { FaHashtag, FaSort, FaStop } from "react-icons/fa";
 import { BsInfoSquare } from "react-icons/bs";
 
 // Modules / Functions
@@ -42,7 +42,7 @@ function getTaskIdFromPath() {
   return parts[idx + 1] || null;
 }
 
-let overviewIconStyle = { color: "#2a9fd9", marginRight: "0.5em" };
+let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
 
 class ProjectTaskOverview extends React.Component {
   constructor(props) {
@@ -97,12 +97,12 @@ class ProjectTaskOverview extends React.Component {
                     </Card.Header>
                     <Card.Body>
                       <div className={"info_descr"}>
-                        <FaHashtag style={overviewIconStyle} /> Task ID
+                        <FaHashtag style={overviewIconStyle} /> Project task ID
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {task.projtask_id || "N/A"}
                         <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
-                          <button className="ui button tiny basic" disabled title="Task ID is immutable">ID</button>
+                          <button className="ui button tiny basic" disabled title="Task ID is immutable"><FaStop style={{ marginRight: 6, color: "red" }} />ID</button>
                         </span>
                       </div>
 
@@ -203,7 +203,7 @@ class ProjectTaskOverview extends React.Component {
                       </div>
 
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <BsInfoSquare style={overviewIconStyle} /> Assign Date
+                        <BsInfoSquare style={overviewIconStyle} /> Entered
                       </div>
                       <div className={"info_span"}>{task.assigndate || "N/A"}</div>
 
@@ -218,7 +218,7 @@ class ProjectTaskOverview extends React.Component {
                       </div>
 
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <BsInfoSquare style={overviewIconStyle} /> Completion Date
+                        <BsInfoSquare style={overviewIconStyle} /> Completion date
                       </div>
                       <div className={"info_span"}>{task.completiondate || "N/A"}</div>
 

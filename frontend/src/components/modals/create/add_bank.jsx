@@ -195,7 +195,7 @@ function AddBankModal() {
               </Col>
               <Col md={6}>
                 <Form.Group>
-                  <Form.Label>Bank Name *</Form.Label>
+                  <Form.Label>Bank *</Form.Label>
                   <Form.Control
                     type="text"
                     value={bankname}
@@ -220,7 +220,7 @@ function AddBankModal() {
                     onChange={(e) => setCountry(e.target.value)}
                     isInvalid={country !== "" && !isCountryValid}
                   >
-                    <option value="">Select Country</option>
+                    <option value="">Select country</option>
                     {countries.map((countryOption) => (
                       <option key={countryOption.country_id} value={countryOption.country_id}>
                         {countryOption.title}
@@ -234,7 +234,7 @@ function AddBankModal() {
               </Col>
               <Col md={6}>
                 <Form.Group>
-                  <Form.Label>Order Index *</Form.Label>
+                  <Form.Label>Order by *</Form.Label>
                   <Form.Control
                     type="number"
                     value={orderindex}
@@ -243,7 +243,7 @@ function AddBankModal() {
                     isInvalid={!isOrderIndexValid}
                   />
                   <Form.Control.Feedback type="invalid">
-                    Order Index is required and must be an integer
+                    Order by is required and must be an integer
                   </Form.Control.Feedback>
                 </Form.Group>
               </Col>
@@ -252,7 +252,7 @@ function AddBankModal() {
             <Row>
               <Col md={6}>
                 <Form.Group>
-                  <Form.Label>Institution Number *</Form.Label>
+                  <Form.Label>Bank code *</Form.Label>
                   <Form.Control
                     type="text"
                     value={institutionnumber}
@@ -267,7 +267,7 @@ function AddBankModal() {
               </Col>
               <Col md={6}>
                 <Form.Group>
-                  <Form.Label>SWIFT Code *</Form.Label>
+                  <Form.Label>Swift code *</Form.Label>
                   <Form.Control
                     type="text"
                     value={swiftcode}
@@ -312,7 +312,7 @@ function AddBankModal() {
                 {!isBanknameValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Bank Name is required (2–40 chars).
+                    Bank name is required (2–40 chars).
                   </li>
                 )}
                 {!isCountryValid && (
@@ -324,19 +324,19 @@ function AddBankModal() {
                 {!isOrderIndexValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Order Index is required and must be an integer.
+                    Order by is required and must be an integer.
                   </li>
                 )}
                 {!isInstitutionNumberValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Institution Number is required (3 digits).
+                    Bank code is required (3 digits).
                   </li>
                 )}
                 {!isSwiftCodeValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    SWIFT Code is required (8–11 alphanumeric chars).
+                    Swift code is required (8–11 alphanumeric chars).
                   </li>
                 )}
               </ul>

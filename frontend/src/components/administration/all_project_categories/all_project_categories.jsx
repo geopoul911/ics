@@ -55,7 +55,7 @@ const columns = [
   },
   {
     dataField: "orderindex",
-    text: "Order Index",
+    text: "Order by",
     sort: true,
     filter: textFilter(),
   },

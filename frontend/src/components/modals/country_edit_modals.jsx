@@ -291,16 +291,16 @@ export function EditCountryOrderIndexModal({ country, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={onOpen} title="Edit Order Index">
+      <Button size="tiny" basic onClick={onOpen} title="Edit Order by">
         <FiEdit style={{ marginRight: 6 }} />
-        Order
+        Order by
       </Button>
 
       <Modal show={show} onHide={() => setShow(false)} centered>
-        <Modal.Header closeButton><Modal.Title>Edit Order Index</Modal.Title></Modal.Header>
+        <Modal.Header closeButton><Modal.Title>Edit Order by</Modal.Title></Modal.Header>
         <Modal.Body>
           <Form.Group>
-            <Form.Label>Order Index (integer)</Form.Label>
+            <Form.Label>Order by (integer)</Form.Label>
             <Form.Control
               type="number"
               value={value}
@@ -317,7 +317,7 @@ export function EditCountryOrderIndexModal({ country, update_state }) {
             ) : (
               <>
                 <AiOutlineWarning style={{ marginRight: 6 }} />
-                Must be an integer within SmallIntegerField range.
+                Order by must be an integer.
               </>
             )}
           </small>

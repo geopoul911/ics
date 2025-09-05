@@ -67,7 +67,7 @@ export function EditCashCountryModal({ cash, update_state }) {
           <Form.Group>
             <Form.Label>Country *:</Form.Label>
             <Form.Control as="select" value={country} onChange={(e) => setCountry(e.target.value)}>
-              <option value="">Select Country</option>
+              <option value="">Select country</option>
               {countries.map(c => (
                 <option key={c.country_id} value={c.country_id}>{c.country_id} - {c.title}</option>
               ))}
@@ -110,12 +110,12 @@ export function EditCashTrandateModal({ cash, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={() => setShow(true)}><FiEdit style={{ marginRight: 6 }} /> Edit Transaction Date</Button>
+      <Button size="tiny" basic onClick={() => setShow(true)}><FiEdit style={{ marginRight: 6 }} /> Edit Transaction date</Button>
       <Modal show={show} onHide={() => setShow(false)} centered>
-        <Modal.Header closeButton><Modal.Title>Edit Transaction Date</Modal.Title></Modal.Header>
+        <Modal.Header closeButton><Modal.Title>Edit Transaction date</Modal.Title></Modal.Header>
         <Modal.Body>
           <Form.Group>
-            <Form.Label>Transaction Date *:</Form.Label>
+            <Form.Label>Transaction date *:</Form.Label>
             <Form.Control type="date" value={trandate} onChange={(e) => setTrandate(e.target.value)} />
           </Form.Group>
         </Modal.Body>
@@ -176,7 +176,7 @@ export function EditCashConsultantModal({ cash, update_state }) {
           <Form.Group>
             <Form.Label>Consultant *:</Form.Label>
             <Form.Control as="select" value={consultant} onChange={(e) => setConsultant(e.target.value)}>
-              <option value="">Select Consultant</option>
+              <option value="">Select consultant</option>
               {consultants.map(c => (
                 <option key={c.consultant_id} value={c.consultant_id}>{c.consultant_id} - {c.fullname}</option>
               ))}
@@ -226,7 +226,7 @@ export function EditCashKindModal({ cash, update_state }) {
           <Form.Group>
             <Form.Label>Kind *:</Form.Label>
             <Form.Control as="select" value={kind} onChange={(e) => setKind(e.target.value)}>
-              <option value="">Select Kind</option>
+              <option value="">Select kind</option>
               <option value="E">Expense</option>
               <option value="P">Payment</option>
             </Form.Control>
@@ -267,12 +267,12 @@ export function EditCashAmountExpenseModal({ cash, update_state }) {
   if (cash.kind !== 'E') return null;
   return (
     <>
-      <Button size="tiny" basic onClick={() => setShow(true)}><FiEdit style={{ marginRight: 6 }} /> Edit Amount Expense</Button>
+      <Button size="tiny" basic onClick={() => setShow(true)}><FiEdit style={{ marginRight: 6 }} /> Edit Amount expense</Button>
       <Modal show={show} onHide={() => setShow(false)} centered>
-        <Modal.Header closeButton><Modal.Title>Edit Amount Expense</Modal.Title></Modal.Header>
+        <Modal.Header closeButton><Modal.Title>Edit Amount expense</Modal.Title></Modal.Header>
         <Modal.Body>
           <Form.Group>
-            <Form.Label>Amount Expense:</Form.Label>
+            <Form.Label>Amount expense:</Form.Label>
             <Form.Control type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g., 100.00" />
           </Form.Group>
         </Modal.Body>
@@ -311,12 +311,12 @@ export function EditCashAmountPaymentModal({ cash, update_state }) {
   if (cash.kind !== 'P') return null;
   return (
     <>
-      <Button size="tiny" basic onClick={() => setShow(true)}><FiEdit style={{ marginRight: 6 }} /> Edit Amount Payment</Button>
+      <Button size="tiny" basic onClick={() => setShow(true)}><FiEdit style={{ marginRight: 6 }} /> Edit Amount payment</Button>
       <Modal show={show} onHide={() => setShow(false)} centered>
-        <Modal.Header closeButton><Modal.Title>Edit Amount Payment</Modal.Title></Modal.Header>
+        <Modal.Header closeButton><Modal.Title>Edit Amount payment</Modal.Title></Modal.Header>
         <Modal.Body>
           <Form.Group>
-            <Form.Label>Amount Payment:</Form.Label>
+            <Form.Label>Amount payment:</Form.Label>
             <Form.Control type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g., 100.00" />
           </Form.Group>
         </Modal.Body>

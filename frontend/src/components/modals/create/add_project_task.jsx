@@ -191,19 +191,19 @@ function AddProjectTaskModal({ onCreated }) {
     <>
       <Button color="green" style={{ margin: 20 }} onClick={() => setShow(true)}>
         <BiPlus style={{ color: "white", fontSize: "1.3em", marginRight: "0.3em" }} />
-        Create Project Task
+        Create Project task
       </Button>
 
       <Modal show={show} onHide={handleClose} size="lg" centered>
         <Modal.Header closeButton>
-          <Modal.Title>Create New Project Task</Modal.Title>
+          <Modal.Title>Create new Project task</Modal.Title>
         </Modal.Header>
         <form onSubmit={handleSubmit}>
           <Modal.Body>
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Project Task ID *</Form.Label>
+                  <Form.Label>Project task ID *</Form.Label>
                   <Form.Control
                     type="text"
                     value={projtask_id}
@@ -338,7 +338,7 @@ function AddProjectTaskModal({ onCreated }) {
                   {!isProjtaskIdValid && (
                     <li>
                       <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                      Project Task ID is required (2–10 chars).
+                      Project task ID is required (2–10 chars).
                     </li>
                   )}
                   {!isProjectValid && (
@@ -362,7 +362,7 @@ function AddProjectTaskModal({ onCreated }) {
                   {!isTaskCategoryValid && (
                     <li>
                       <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                      Task Category is required.
+                      Task category is required.
                     </li>
                   )}
                   {!isAssignerValid && (

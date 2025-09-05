@@ -258,23 +258,23 @@ export function EditProjectCategoryOrderIndexModal({ project_category, onProject
 
       <Modal show={show} onHide={handleClose} centered size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Edit Project Category Order Index</Modal.Title>
+          <Modal.Title>Edit Project Category Order by</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form.Group as={Row}>
             <Form.Label column sm={3}>
-              Order Index:
+              Order by:
             </Form.Label>
             <Col sm={9}>
               <Form.Control
                 type="text"
                 value={orderindex}
                 onChange={(e) => setOrderIndex(validateOrderIndex(clampLen(e.target.value, 5)))}
-                placeholder="Enter order index (numeric)"
+                placeholder="Enter order by (numeric)"
                 isInvalid={orderindex !== "" && !isOrderIndexValid}
               />
               <Form.Control.Feedback type="invalid">
-                Order index must be a valid number
+                Order by must be a valid number
               </Form.Control.Feedback>
             </Col>
           </Form.Group>
@@ -288,12 +288,12 @@ export function EditProjectCategoryOrderIndexModal({ project_category, onProject
               >
                 {orderindex.trim().length === 0 && (
                   <li>
-                    Order index is required.
+                    Order by is required.
                   </li>
                 )}
                 {orderindex.trim().length > 0 && isNaN(orderindex) && (
                   <li>
-                    Order index must be a valid number.
+                    Order by must be a valid number.
                   </li>
                 )}
               </ul>
@@ -311,7 +311,7 @@ export function EditProjectCategoryOrderIndexModal({ project_category, onProject
             onClick={updateProjectCategoryOrderIndex}
             disabled={!isOrderIndexValid}
           >
-            Update Order Index
+            Update Order by
           </Button>
         </Modal.Footer>
       </Modal>

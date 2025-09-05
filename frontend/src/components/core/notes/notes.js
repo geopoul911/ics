@@ -22,7 +22,7 @@ function Notes(props) {
       <Card.Header>
         <BiNote
           style={{
-            color: "#2a9fd9",
+            color: "#93ab3c",
             fontSize: "1.5em",
             marginRight: "0.5em",
           }}

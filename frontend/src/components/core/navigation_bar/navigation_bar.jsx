@@ -21,7 +21,6 @@ import {
 } from "react-icons/bi";
 import {
   AiOutlineLogin,
-  AiOutlineHome,
 } from "react-icons/ai";
 import { CgProfile } from "react-icons/cg";
 import { FaArrowRight } from "react-icons/fa";
@@ -35,7 +34,7 @@ import {
 
 // Variables
 let iconStyle = {
-  color: "#2a9fd9",
+  color: "#93ab3c",
   fontSize: "1.5em",
   marginRight: "0.5em",
 };
@@ -146,17 +145,12 @@ class NavigationBar extends Component {
     return (
       <>
         <Navbar expand="lg" variant="dark">
-          <Link to="/">
+          <Link to="/dashboard">
             <img src={Logo} alt="logo" className="navLogo" />
           </Link>
           <Navbar.Toggle />
           <Navbar.Collapse>
             <Nav className="mr-auto">
-              {/* Home */}
-              <Nav.Link href="/">
-                <AiOutlineHome style={iconStyle} /> Home
-              </Nav.Link>
-
               {/* Dashboard */}
               <Nav.Link href="/dashboard">
                 <FaChartBar style={iconStyle} /> Dashboard
@@ -346,7 +340,7 @@ class NavigationBar extends Component {
                   <CgProfile style={iconStyle} /> {localStorage.getItem("user")}
                   <Dropdown onMouseLeave={this.meClose} onMouseOver={this.meOpen}>
                     <Dropdown.Menu show={this.state.meIsOpen} id="nav_me_dropdown">
-                      <Dropdown.Item href={"/administration/user/" + localStorage.getItem("user_id")}>
+                      <Dropdown.Item href={"/administration/consultant/" + localStorage.getItem("consultant_id")}>
                         <CgProfile /> My profile
                       </Dropdown.Item>
                       <Dropdown.Item href="/help">

@@ -253,7 +253,7 @@ function AddDocumentModal({ onClientCreated }) {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Valid Until</Form.Label>
+                  <Form.Label>Valid until</Form.Label>
                   <Form.Control
                     type="date"
                     value={validUntil}
@@ -283,14 +283,14 @@ function AddDocumentModal({ onClientCreated }) {
                     onChange={(e) => setStatus(e.target.value)}
                   >
                     <option value="">Select status (optional)</option>
-                    <option value="SENT_TO_ATHENS">Αποστολή προς την Αθήνα</option>
-                    <option value="RECEIVED_IN_ATHENS">Παραλήφθηκε από την Αθήνα</option>
-                    <option value="SENT_TO_TORONTO">Αποστολή προς το Τορόντο</option>
-                    <option value="RECEIVED_IN_TORONTO">Παραλήφθηκε από το Τορόντο</option>
-                    <option value="SENT_TO_MONTREAL">Αποστολή προς το Μόντρεαλ</option>
-                    <option value="RECEIVED_IN_MONTREAL">Παραλήφθηκε από το Μόντρεαλ</option>
-                    <option value="SENT_TO_CLIENT">Αποστολή προς τον Πελάτη</option>
-                    <option value="RECEIVED_FROM_CLIENT">Παραλήφθηκε από τον Πελάτη</option>
+                    <option value="SENT_TO_ATHENS">Sent To Athens</option>
+                    <option value="RECEIVED_IN_ATHENS">Received In Athens</option>
+                    <option value="SENT_TO_TORONTO">Sent To Toronto</option>
+                    <option value="RECEIVED_IN_TORONTO">Received In Toronto</option>
+                    <option value="SENT_TO_MONTREAL">Sent To Montreal</option>
+                    <option value="RECEIVED_IN_MONTREAL">Received In Montreal</option>
+                    <option value="SENT_TO_CLIENT">Sent To Client</option>
+                    <option value="RECEIVED_FROM_CLIENT">Received From Client</option>
                   </Form.Control>
                 </Form.Group>
               </Col>

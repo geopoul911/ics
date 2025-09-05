@@ -23,6 +23,7 @@ import {
   paginationOptions,
   headers,
   pageHeader,
+  loader,
 } from "../../global_vars";
 
 // Variables
@@ -61,21 +62,21 @@ const columns = [
   },
   {
     dataField: "client.surname",
-    text: "Client Surname",
+    text: "Client surname",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => row.client?.surname || "",
   },
   {
     dataField: "client.name",
-    text: "Client Name",
+    text: "Client name",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => row.client?.name || "",
   },
   {
     dataField: "created",
-    text: "Created Date",
+    text: "Created",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => {
@@ -87,7 +88,7 @@ const columns = [
   },
   {
     dataField: "validuntil",
-    text: "Valid Until",
+    text: "Valid until",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => {
@@ -232,7 +233,7 @@ class AllDocuments extends React.Component {
                   </div>
                 </>
               ) : (
-                <div>Loading...</div>
+                <div>{loader()}</div>
               )}
             </div>
           </div>

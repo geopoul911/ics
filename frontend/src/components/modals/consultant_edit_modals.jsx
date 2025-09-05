@@ -10,6 +10,9 @@ import { MdPhotoCamera } from "react-icons/md";
 import Swal from "sweetalert2";
 import { Modal, Col, Form, Row } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
+import PhoneInput from "react-phone-input-2";
+import 'react-phone-input-2/lib/bootstrap.css';
+
 
 // Global Variables
 import { headers } from "../global_vars";
@@ -30,17 +33,7 @@ const toSmallInt = (value) => {
 };
 
 // Field-specific validation helpers
-const validatePhone = (value) => {
-  // Allow digits, spaces, dashes, parentheses, plus sign
-  // eslint-disable-next-line no-useless-escape
-  return value.replace(/[^\d\s\-()\+]/g, "");
-};
-
-const validateMobile = (value) => {
-  // Allow digits, spaces, dashes, parentheses, plus sign
-  // eslint-disable-next-line no-useless-escape
-  return value.replace(/[^\d\s\-()\+]/g, "");
-};
+// removed legacy phone validators; using PhoneInput for phone formatting
 
 const validateFullname = (value) => {
   // Allow letters, spaces, hyphens, apostrophes
@@ -129,18 +122,18 @@ export function EditConsultantFullnameModal({ consultant, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="tiny" basic title="Edit Full Name">
+      <Button onClick={handleShow} size="tiny" basic title="Edit Full name">
         <FiEdit style={{ marginRight: 6 }} />
         Name
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Full Name</Modal.Title>
+          <Modal.Title>Edit Full name</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form.Group className="mb-3">
-              <Form.Label>Full Name</Form.Label>
+              <Form.Label>Full name</Form.Label>
               <Form.Control
                 type="text"
                 value={fullname}
@@ -232,18 +225,18 @@ export function EditConsultantEmailModal({ consultant, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="tiny" basic title="Edit Email">
+      <Button onClick={handleShow} size="tiny" basic title="Edit E-mail">
         <FiEdit style={{ marginRight: 6 }} />
-        Email
+        E-mail
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Email</Modal.Title>
+          <Modal.Title>Edit E-mail</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form.Group className="mb-3">
-              <Form.Label>Email</Form.Label>
+              <Form.Label>E-mail</Form.Label>
               <Form.Control
                 type="email"
                 value={email}
@@ -334,24 +327,25 @@ export function EditConsultantPhoneModal({ consultant, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="tiny" basic title="Edit Phone">
+      <Button onClick={handleShow} size="tiny" basic title="Edit Telephone">
         <FiEdit style={{ marginRight: 6 }} />
-        Phone
+        Telephone
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Phone</Modal.Title>
+          <Modal.Title>Edit Telephone</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form.Group className="mb-3">
-              <Form.Label>Phone</Form.Label>
-              <Form.Control
-                type="text"
+              <Form.Label>Telephone</Form.Label>
+              <PhoneInput
+                country={'gr'}
                 value={phone}
-                onChange={(e) => setPhone(validatePhone(clampLen(e.target.value, 15)))}
-                placeholder="Digits, spaces, -, (, ), + (optional)"
-                isInvalid={!isPhoneValid}
+                onChange={(val) => setPhone(val)}
+                enableSearch
+                countryCodeEditable={false}
+                inputProps={{ name: 'phone' }}
               />
             </Form.Group>
         </Modal.Body>
@@ -390,7 +384,7 @@ export function EditConsultantMobileModal({ consultant, update_state }) {
     setShow(true);
   };
 
-  const isMobileValid = mobile.trim().length > 0 && mobile.length <= 15;
+  const isMobileValid = mobile.trim().length > 0 && mobile.replace(/\D/g, '').length >= 7;
 
   const onSave = async () => {
     try {
@@ -401,7 +395,7 @@ export function EditConsultantMobileModal({ consultant, update_state }) {
 
       const res = await axios.patch(
         `${UPDATE_CONSULTANT}${consultant.consultant_id}/`,
-        { mobile: mobile.trim() },
+        { mobile: ('+' + mobile.replace(/\D/g, '')) },
         { headers: currentHeaders }
       );
 
@@ -436,24 +430,25 @@ export function EditConsultantMobileModal({ consultant, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="tiny" basic title="Edit Mobile">
+      <Button onClick={handleShow} size="tiny" basic title="Edit Cell phone">
         <FiEdit style={{ marginRight: 6 }} />
-        Mobile
+        Cell phone
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Mobile</Modal.Title>
+          <Modal.Title>Edit Cell phone</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form.Group className="mb-3">
-              <Form.Label>Mobile</Form.Label>
-              <Form.Control
-                type="text"
+              <Form.Label>Cell phone</Form.Label>
+              <PhoneInput
+                country={'gr'}
                 value={mobile}
-                onChange={(e) => setMobile(validateMobile(clampLen(e.target.value, 15)))}
-                placeholder="Digits, spaces, -, (, ), + (required)"
-                isInvalid={!isMobileValid}
+                onChange={(val) => setMobile(val)}
+                enableSearch
+                countryCodeEditable={false}
+                inputProps={{ name: 'mobile' }}
               />
             </Form.Group>
         </Modal.Body>
@@ -1057,18 +1052,18 @@ export function EditConsultantOrderIndexModal({ consultant, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="tiny" basic title="Edit Order Index">
+      <Button onClick={handleShow} size="tiny" basic title="Edit Order by">
         <FiEdit style={{ marginRight: 6 }} />
         Order
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Order Index</Modal.Title>
+          <Modal.Title>Edit Order by</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form.Group className="mb-3">
-              <Form.Label>Order Index</Form.Label>
+              <Form.Label>Order by</Form.Label>
               <Form.Control
                 type="number"
                 value={orderindex}

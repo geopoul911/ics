@@ -23,6 +23,7 @@ import {
   paginationOptions,
   headers,
   pageHeader,
+  loader,
 } from "../../global_vars";
 
 // Variables
@@ -61,7 +62,7 @@ const columns = [
   },
   {
     dataField: "bankclientacco.accountnumber",
-    text: "Account Number",
+    text: "Account number",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => row.bankclientacco?.accountnumber || "",
@@ -187,7 +188,7 @@ class AllBankProjectAccounts extends React.Component {
                   </div>
                 </>
               ) : (
-                <div>Loading...</div>
+                <div>{loader()}</div>
               )}
             </div>
           </div>

@@ -11,6 +11,7 @@ import {
   Legend,
 } from 'chart.js';
 import axios from 'axios';
+import { authHeaders } from '../../global_vars';
 
 ChartJS.register(
   CategoryScale,
@@ -35,7 +36,7 @@ const MonthlyRevenueChart = () => {
 
   const loadRevenueData = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/dashboard/revenue-trend/');
+      const response = await axios.get('http://localhost:8000/api/dashboard/revenue-trend/', { headers: authHeaders() });
       if (response.data.success) {
         const data = response.data.data;
         setChartData({

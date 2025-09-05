@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ListGroup, Badge, Spinner } from 'react-bootstrap';
 import { FaUser, FaProjectDiagram, FaFileAlt, FaCalendarAlt, FaExclamationTriangle } from 'react-icons/fa';
 import axios from 'axios';
+import { authHeaders } from '../global_vars';
 
 const RecentActivities = () => {
   const [activities, setActivities] = useState([]);
@@ -13,7 +14,7 @@ const RecentActivities = () => {
 
   const loadRecentActivities = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/dashboard/recent-activities/');
+      const response = await axios.get('http://localhost:8000/api/dashboard/recent-activities/', { headers: authHeaders() });
       if (response.data.success) {
         setActivities(response.data.data);
       }

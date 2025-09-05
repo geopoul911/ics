@@ -174,7 +174,7 @@ export default function AddInsuranceCarrierModal({ onInsuranceCarrierCreated }) 
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Title:</Form.Label>
+              <Form.Label>Public Insurance:</Form.Label>
               <Form.Control
                 type="text"
                 name="title"
@@ -190,12 +190,12 @@ export default function AddInsuranceCarrierModal({ onInsuranceCarrierCreated }) 
                 }
               />
               <Form.Control.Feedback type="invalid">
-                Title must be 2-40 characters
+                Public Insurance must be 2-40 characters
               </Form.Control.Feedback>
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Order Index *</Form.Label>
+              <Form.Label>Order by *</Form.Label>
               <Form.Control
                 type="number"
                 name="orderindex"
@@ -204,11 +204,11 @@ export default function AddInsuranceCarrierModal({ onInsuranceCarrierCreated }) 
                   ...prev,
                   orderindex: toSmallInt(e.target.value)
                 }))}
-                placeholder="Enter order index (numeric)"
+                placeholder="Enter order by (numeric)"
                 isInvalid={!Number.isInteger(+formData.orderindex)}
               />
               <Form.Control.Feedback type="invalid">
-                Order index is required and must be a valid number
+                Order by is required and must be a valid number
               </Form.Control.Feedback>
             </Form.Group>
 
@@ -245,25 +245,25 @@ export default function AddInsuranceCarrierModal({ onInsuranceCarrierCreated }) 
                 {formData.title.trim().length < 2 && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Title is required (2–40 chars).
+                    Public Insurance is required (2–40 chars).
                   </li>
                 )}
                 {formData.title.trim().length > 40 && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Title must be 2–40 chars.
+                    Public Insurance must be 2–40 chars.
                   </li>
                 )}
                 {!Number.isInteger(+formData.orderindex) && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Order Index is required and must be a valid number.
+                    Order by is required and must be a valid number.
                   </li>
                 )}
                 {formData.orderindex === "" && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Order Index is required and must be a valid number.
+                    Order by is required and must be a valid number.
                   </li>
                 )}
               </ul>

@@ -23,6 +23,7 @@ import {
   paginationOptions,
   headers,
   pageHeader,
+  loader,
 } from "../../global_vars";
 
 // Variables
@@ -47,7 +48,7 @@ const columns = [
   },
   {
     dataField: "fullname",
-    text: "Fullname",
+    text: "Full name",
     sort: true,
     filter: textFilter(),
   },
@@ -187,7 +188,7 @@ class AllProfessionals extends React.Component {
                   </div>
                 </>
               ) : (
-                <div>Loading...</div>
+                <div>{loader()}</div>
               )}
             </div>
           </div>

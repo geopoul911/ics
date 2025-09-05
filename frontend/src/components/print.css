@@ -3,10 +3,6 @@
     display: none;
   }
 
-  #group_stats_header {
-    display: none !important;
-  }
-
   .grid {
     display: none !important;
   }

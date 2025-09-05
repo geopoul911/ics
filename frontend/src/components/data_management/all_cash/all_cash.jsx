@@ -23,6 +23,7 @@ import {
   paginationOptions,
   headers,
   pageHeader,
+  loader,
 } from "../../global_vars";
 
 // Variables
@@ -61,7 +62,7 @@ const columns = [
   },
   {
     dataField: "trandate",
-    text: "Transaction Date",
+    text: "Transaction date",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => {
@@ -87,14 +88,14 @@ const columns = [
   },
   {
     dataField: "amountexp",
-    text: "Amount Expense",
+    text: "Amount expense",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => row.amountexp || "",
   },
   {
     dataField: "amountpay",
-    text: "Amount Payment",
+    text: "Amount payment",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => row.amountpay || "",
@@ -220,7 +221,7 @@ class AllCash extends React.Component {
                   </div>
                 </>
               ) : (
-                <div>Loading...</div>
+                <div>{loader()}</div>
               )}
             </div>
           </div>

@@ -29,7 +29,7 @@ class Home extends React.Component {
               <p>
                 A powerful CMS designed to manage clients, projects, documents, tasks and teams <br/> All in one place.
                </p>
-                <Button style={{color: "#2a9fd9", backgroundColor: "black", border: "1px solid #2a9fd9"}} onClick={() => (window.location = "/about")}>
+                <Button style={{color: "#93ab3c", backgroundColor: "black", border: "1px solid #93ab3c"}} onClick={() => (window.location = "/about")}>
                   About ICS
                 </Button>
             </Grid.Column>

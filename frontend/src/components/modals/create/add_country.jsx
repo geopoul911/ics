@@ -141,7 +141,7 @@ function AddCountryModal() {
             <Col>
               <Form>
                 <Form.Group className="mb-3">
-                  <Form.Label>Title:</Form.Label>
+                  <Form.Label>Country:</Form.Label>
                   <Form.Control
                     maxLength={40}
                     placeholder="e.g., GREECE"
@@ -177,7 +177,7 @@ function AddCountryModal() {
                 </Form.Group>
 
                 <Form.Group className="mb-3">
-                  <Form.Label>Order Index* (default 0):</Form.Label>
+                  <Form.Label>Order by (default 0):</Form.Label>
                   <Form.Control
                     type="number"
                     placeholder="e.g., 1"
@@ -218,7 +218,7 @@ function AddCountryModal() {
                 {!isOrderIndexValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Order index is required.
+                    Order by is required.
                   </li>
                 )}
               </ul>

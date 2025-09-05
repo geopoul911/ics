@@ -13,6 +13,7 @@ import { Card } from "react-bootstrap";
 import { Grid, Button } from "semantic-ui-react";
 import DeleteObjectModal from "../../modals/delete_object";
 import { pageHeader } from "../../global_vars";
+import { FaIdBadge, FaStickyNote, FaStop } from "react-icons/fa";
 import { EditBPAProjectModal, EditBPAClientModal, EditBPABankClientAccountModal, EditBPANotesModal } from "../../modals/bank_project_account_edit_modals";
 
 // Global Variables
@@ -72,17 +73,17 @@ function BankProjectAccountOverview() {
             <Grid stackable columns={2} divided>
               <Grid.Column>
                 <Card>
-                  <Card.Header>Basic Information</Card.Header>
+                  <Card.Header><FaIdBadge style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Basic Information</Card.Header>
                   <Card.Body>
-                    <div className={"info_descr"}>Bank Project Account ID</div>
+                    <div className={"info_descr"}><FaIdBadge style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Bank Project Account ID</div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {bankProjectAccount.bankprojacco_id}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
-                        <Button size="tiny" basic disabled title="ID is immutable">ID</Button>
+                        <Button size="tiny" basic disabled title="ID is immutable"><FaStop style={{ marginRight: 6, color: "red" }} />ID</Button>
                       </span>
                     </div>
 
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>Project</div>
+                    <div className={"info_descr"} style={{ marginTop: 16 }}><FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Project</div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {bankProjectAccount.project?.title || 'N/A'}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
@@ -90,7 +91,7 @@ function BankProjectAccountOverview() {
                       </span>
                     </div>
 
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>Client</div>
+                    <div className={"info_descr"} style={{ marginTop: 16 }}><FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Client</div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {bankProjectAccount.client?.name || bankProjectAccount.client?.fullname || 'N/A'}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
@@ -98,7 +99,7 @@ function BankProjectAccountOverview() {
                       </span>
                     </div>
 
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>Account Number</div>
+                    <div className={"info_descr"} style={{ marginTop: 16 }}><FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Account number</div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {bankProjectAccount.bankclientacco?.accountnumber || 'N/A'}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
@@ -107,16 +108,19 @@ function BankProjectAccountOverview() {
                     </div>
                   </Card.Body>
                   <Card.Footer>
-                    <DeleteObjectModal objectType="BankProjectAccount" objectId={bankProjectAccount.bankprojacco_id} objectName={bankProjectAccount.bankprojacco_id} />
+                    <DeleteObjectModal objectType="BankProjectAccount"
+                      objectId={bankProjectAccount.bankprojacco_id}
+                      objectName={bankProjectAccount.bankprojacco_id}
+                    />
                   </Card.Footer>
                 </Card>
               </Grid.Column>
 
               <Grid.Column>
                 <Card>
-                  <Card.Header>Additional Details</Card.Header>
+                  <Card.Header><FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Additional Details</Card.Header>
                   <Card.Body>
-                    <div className={"info_descr"}>Notes</div>
+                    <div className={"info_descr"}><FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Notes</div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {bankProjectAccount.notes || 'N/A'}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>

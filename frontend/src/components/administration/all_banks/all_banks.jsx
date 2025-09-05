@@ -49,7 +49,7 @@ const columns = [
   },
   {
     dataField: "bankname",
-    text: "Bank Name",
+    text: "Bank",
     sort: true,
     filter: textFilter(),
   },
@@ -62,19 +62,19 @@ const columns = [
   },
   {
     dataField: "orderindex",
-    text: "Order Index",
+    text: "Order by",
     sort: true,
     filter: textFilter(),
   },
   {
     dataField: "institutionnumber",
-    text: "Institution Number",
+    text: "Bank code",
     sort: true,
     filter: textFilter(),
   },
   {
     dataField: "swiftcode",
-    text: "SWIFT Code",
+    text: "Swift code",
     sort: true,
     filter: textFilter(),
   },

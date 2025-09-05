@@ -11,6 +11,8 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { Modal, Col, Form, Row } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
+import PhoneInput from "react-phone-input-2";
+import 'react-phone-input-2/lib/bootstrap.css';
 
 // Global Variables
 import { headers } from "../../global_vars";
@@ -60,6 +62,7 @@ function AddClientContactModal({ refreshData }) {
   // Dropdown Data
   const [projects, setProjects] = useState([]);
   const [professionals, setProfessionals] = useState([]);
+  const [lockedByProfessional, setLockedByProfessional] = useState(false);
 
   const resetForm = () => {
     setClientcontId("");
@@ -119,13 +122,35 @@ function AddClientContactModal({ refreshData }) {
 
   const handleShow = () => setShow(true);
 
+  const onProfessionalSelect = (id) => {
+    setProfessionalId(id);
+    if (!id) {
+      setLockedByProfessional(false);
+      return;
+    }
+    const prof = professionals.find((p) => String(p.professional_id) === String(id));
+    if (!prof) {
+      setLockedByProfessional(false);
+      return;
+    }
+    setFullname(prof.fullname || "");
+    setAddress(prof.address || "");
+    setEmail(prof.email || "");
+    setPhone((prof.phone || "").replace(/\D/g, ""));
+    setMobile((prof.mobile || "").replace(/\D/g, ""));
+    setProfession((prof.profession && (prof.profession.title || prof.profession)) || "");
+    setReliability(prof.reliability || "");
+    setCity((prof.city && (prof.city.title || prof.city.name || prof.city)) || "");
+    setLockedByProfessional(true);
+  };
+
   // Validation
   const isClientcontIdValid = clientcontId.trim().length >= 2 && clientcontId.trim().length <= 10;
   const isFullnameValid = fullname.trim().length >= 2 && fullname.trim().length <= 40;
   const isAddressValid = !address || (address.trim().length >= 2 && address.trim().length <= 80);
   const isEmailValid = validateEmail(email);
-  const normalizedPhone = (phone || '').replace(/\s+/g, '');
-  const normalizedMobile = (mobile || '').replace(/\s+/g, '');
+  const normalizedPhone = phone ? ('+' + (phone || '').replace(/\D/g, '')) : '';
+  const normalizedMobile = mobile ? ('+' + (mobile || '').replace(/\D/g, '')) : '';
   const isPhoneValid = !phone || phoneRegex.test(normalizedPhone);
   const isMobileValid = phoneRegex.test(normalizedMobile);
   const isProfessionValid = !profession || (profession.trim().length >= 2 && profession.trim().length <= 40);
@@ -235,13 +260,14 @@ function AddClientContactModal({ refreshData }) {
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Full Name *</Form.Label>
+                      <Form.Label>Full name *</Form.Label>
                       <Form.Control
                         type="text"
                         value={fullname}
                         onChange={(e) => setFullname(clampLen(e.target.value, 40))}
                         maxLength={40}
                         placeholder="Enter full name"
+                        disabled={lockedByProfessional}
                       />
                       <Form.Text className="text-muted">
                         {fullname.length}/40 characters
@@ -253,7 +279,7 @@ function AddClientContactModal({ refreshData }) {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Father's Name</Form.Label>
+                      <Form.Label>Father fullname</Form.Label>
                       <Form.Control
                         type="text"
                         value={fathername}
@@ -268,7 +294,7 @@ function AddClientContactModal({ refreshData }) {
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Mother's Name</Form.Label>
+                      <Form.Label>Mother fullname</Form.Label>
                       <Form.Control
                         type="text"
                         value={mothername}
@@ -308,6 +334,7 @@ function AddClientContactModal({ refreshData }) {
                         onChange={(e) => setCity(clampLen(e.target.value, 40))}
                         maxLength={40}
                         placeholder="Enter city"
+                        disabled={lockedByProfessional}
                       />
                       <Form.Text className="text-muted">
                         {city.length}/40 characters
@@ -326,6 +353,7 @@ function AddClientContactModal({ refreshData }) {
                         onChange={(e) => setAddress(clampLen(e.target.value, 80))}
                         maxLength={80}
                         placeholder="Enter address"
+                        disabled={lockedByProfessional}
                       />
                       <Form.Text className="text-muted">
                         {address.length}/80 characters
@@ -337,12 +365,13 @@ function AddClientContactModal({ refreshData }) {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Email *</Form.Label>
+                      <Form.Label>E-mail *</Form.Label>
                       <Form.Control
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="Enter email address"
+                        disabled={lockedByProfessional}
                       />
                     </Form.Group>
                   </Col>
@@ -355,6 +384,7 @@ function AddClientContactModal({ refreshData }) {
                         onChange={(e) => setProfession(clampLen(e.target.value, 40))}
                         maxLength={40}
                         placeholder="Enter profession"
+                        disabled={lockedByProfessional}
                       />
                       <Form.Text className="text-muted">
                         {profession.length}/40 characters
@@ -366,13 +396,15 @@ function AddClientContactModal({ refreshData }) {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Phone *</Form.Label>
-                      <Form.Control
-                        type="tel"
+                      <Form.Label>Telephone *</Form.Label>
+                      <PhoneInput
+                        country={'gr'}
                         value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        maxLength={16}
-                        placeholder="e.g., +302101111111"
+                        onChange={(val) => setPhone(val)}
+                        enableSearch
+                        countryCodeEditable={false}
+                        inputProps={{ name: 'phone' }}
+                        disabled={lockedByProfessional}
                       />
                       <Form.Text className="text-muted">
                         {phone.length}/16 characters
@@ -381,13 +413,15 @@ function AddClientContactModal({ refreshData }) {
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Mobile *</Form.Label>
-                      <Form.Control
-                        type="tel"
+                      <Form.Label>Cell phone *</Form.Label>
+                      <PhoneInput
+                        country={'gr'}
                         value={mobile}
-                        onChange={(e) => setMobile(e.target.value)}
-                        maxLength={16}
-                        placeholder="e.g., +306900000000"
+                        onChange={(val) => setMobile(val)}
+                        enableSearch
+                        countryCodeEditable={false}
+                        inputProps={{ name: 'mobile' }}
+                        disabled={lockedByProfessional}
                       />
                       <Form.Text className="text-muted">
                         {mobile.length}/16 characters
@@ -404,6 +438,7 @@ function AddClientContactModal({ refreshData }) {
                         as="select"
                         value={reliability}
                         onChange={(e) => setReliability(e.target.value)}
+                        disabled={lockedByProfessional}
                       >
                         <option value="">Select reliability level</option>
                         <option value="High">High</option>
@@ -438,7 +473,7 @@ function AddClientContactModal({ refreshData }) {
                       <Form.Control
                         as="select"
                         value={professionalId}
-                        onChange={(e) => setProfessionalId(e.target.value)}
+                        onChange={(e) => onProfessionalSelect(e.target.value)}
                       >
                         <option value="">Select professional (optional)</option>
                         {professionals.map((professional) => (
@@ -495,7 +530,7 @@ function AddClientContactModal({ refreshData }) {
                 {!isFullnameValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Full Name is required (2–40 chars).
+                    Full name is required (2–40 chars).
                   </li>
                 )}
                 {!isAddressValid && (
@@ -507,19 +542,19 @@ function AddClientContactModal({ refreshData }) {
                 {!isEmailValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Valid email is required.
+                    Valid e-mail is required.
                   </li>
                 )}
                 {!isPhoneValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Phone is required (7–15 chars).
+                    Telephone is required (7–15 chars).
                   </li>
                 )}
                 {!isMobileValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Mobile is required (7–15 chars).
+                    Cell phone is required (7–15 chars).
                   </li>
                 )}
                 {!isProfessionValid && (

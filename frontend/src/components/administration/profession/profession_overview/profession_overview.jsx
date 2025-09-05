@@ -2,8 +2,8 @@
 import React from "react";
 
 // Icons / Images
-import { BsInfoSquare } from "react-icons/bs";
-import { FaHashtag, FaStop } from "react-icons/fa";
+import { FaStop } from "react-icons/fa";
+import { FaIdBadge } from "react-icons/fa";
 
 // Modules / Functions
 import { Card } from "react-bootstrap";
@@ -38,7 +38,7 @@ function getProfessionIdFromPath() {
   return id ? decodeURIComponent(id) : null;
 }
 
-let overviewIconStyle = { color: "#2a9fd9", marginRight: "0.5em" };
+let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
 
 class ProfessionOverview extends React.Component {
   constructor(props) {
@@ -103,9 +103,9 @@ class ProfessionOverview extends React.Component {
                 <Grid.Column>
                   <Card>
                     <Card.Header>
-                      <BsInfoSquare
+                      <FaIdBadge
                         style={{
-                          color: "#2a9fd9",
+                          color: "#93ab3c",
                           fontSize: "1.5em",
                           marginRight: "0.5em",
                         }}
@@ -115,7 +115,7 @@ class ProfessionOverview extends React.Component {
                     <Card.Body>
                       {/* Profession ID */}
                       <div className={"info_descr"}>
-                        <FaHashtag style={overviewIconStyle} /> Profession ID
+                        <FaIdBadge style={overviewIconStyle} /> Profession ID
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {profession.profession_id ? profession.profession_id : "N/A"}
@@ -129,7 +129,7 @@ class ProfessionOverview extends React.Component {
 
                       {/* Title */}
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <BsInfoSquare style={overviewIconStyle} /> Title
+                        <FaIdBadge style={overviewIconStyle} /> Title
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {profession.title ? profession.title : "N/A"}
@@ -146,7 +146,6 @@ class ProfessionOverview extends React.Component {
                         objectId={profession.profession_id}
                         objectName={profession.title}
                         objectType="Profession"
-                        warningMessage="This will also delete all professionals associated with this profession."
                         onObjectDeleted={() => {
                           window.location.href = "/administration/all_professions";
                         }}

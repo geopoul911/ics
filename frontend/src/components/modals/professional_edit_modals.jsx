@@ -9,6 +9,8 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { Modal, Form } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
+import PhoneInput from "react-phone-input-2";
+import 'react-phone-input-2/lib/bootstrap.css';
 
 // Globals
 import { headers } from "../global_vars";
@@ -42,17 +44,17 @@ export function EditProfessionalFullnameModal({ professional, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={() => setShow(true)}><FiEdit style={{ marginRight: 6 }} /> Edit Fullname</Button>
+      <Button size="tiny" basic onClick={() => setShow(true)}><FiEdit style={{ marginRight: 6 }} /> Edit Full name</Button>
       <Modal show={show} onHide={() => setShow(false)} centered>
-        <Modal.Header closeButton><Modal.Title>Edit Fullname</Modal.Title></Modal.Header>
+        <Modal.Header closeButton><Modal.Title>Edit Full name</Modal.Title></Modal.Header>
         <Modal.Body>
           <Form.Group>
-            <Form.Label>Fullname *:</Form.Label>
+            <Form.Label>Full name *:</Form.Label>
             <Form.Control value={fullname} onChange={(e) => setFullname(e.target.value)} maxLength={40} placeholder="2–40 chars" />
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <small className="mr-auto"><div style={{ color: isValid ? "green" : "red" }}>{isValid ? "Looks good." : "Fullname is required (2–40 chars)."}</div></small>
+          <small className="mr-auto"><div style={{ color: isValid ? "green" : "red" }}>{isValid ? "Looks good." : "Full name is required (2–40 chars)."}</div></small>
           <Button color="red" onClick={() => setShow(false)} disabled={busy}>Cancel</Button>
           <Button color="green" onClick={handleSave} disabled={!isValid || busy}>{busy ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
@@ -236,17 +238,17 @@ export function EditProfessionalEmailModal({ professional, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={() => setShow(true)}><FiEdit style={{ marginRight: 6 }} /> Edit Email</Button>
+      <Button size="tiny" basic onClick={() => setShow(true)}><FiEdit style={{ marginRight: 6 }} /> Edit E-mail</Button>
       <Modal show={show} onHide={() => setShow(false)} centered>
-        <Modal.Header closeButton><Modal.Title>Edit Email</Modal.Title></Modal.Header>
+        <Modal.Header closeButton><Modal.Title>Edit E-mail</Modal.Title></Modal.Header>
         <Modal.Body>
           <Form.Group>
-            <Form.Label>Email:</Form.Label>
+            <Form.Label>E-mail:</Form.Label>
             <Form.Control type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" />
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <small className="mr-auto"><div style={{ color: isValid ? "green" : "red" }}>{isValid ? "Looks good." : "Enter a valid email."}</div></small>
+          <small className="mr-auto"><div style={{ color: isValid ? "green" : "red" }}>{isValid ? "Looks good." : "Enter a valid e-mail."}</div></small>
           <Button color="red" onClick={() => setShow(false)} disabled={busy}>Cancel</Button>
           <Button color="green" onClick={handleSave} disabled={!isValid || busy}>{busy ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
@@ -261,12 +263,12 @@ export function EditProfessionalPhoneModal({ professional, update_state }) {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => { if (show) setPhone(professional.phone || ""); }, [show, professional]);
-  const isValid = !phone || String(phone).trim().length <= 15;
+  const isValid = !phone || String(phone).replace(/\D/g, '').length >= 7;
 
   const handleSave = async () => {
     if (!isValid) return; setBusy(true);
     try {
-      const payload = { phone: (String(phone).trim() === "" ? null : String(phone).trim()) };
+      const payload = { phone: (String(phone).trim() === "" ? null : ('+' + String(phone).replace(/\D/g, ''))) };
       const res = await axios.put(UPDATE_PRO + professional.professional_id + "/", payload, { headers: getAuthHeaders() });
       Swal.fire("Success", "Phone updated successfully", "success");
       update_state && update_state(res.data);
@@ -279,17 +281,24 @@ export function EditProfessionalPhoneModal({ professional, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={() => setShow(true)}><FiEdit style={{ marginRight: 6 }} /> Edit Phone</Button>
+      <Button size="tiny" basic onClick={() => setShow(true)}><FiEdit style={{ marginRight: 6 }} /> Edit Telephone</Button>
       <Modal show={show} onHide={() => setShow(false)} centered>
-        <Modal.Header closeButton><Modal.Title>Edit Phone</Modal.Title></Modal.Header>
+        <Modal.Header closeButton><Modal.Title>Edit Telephone</Modal.Title></Modal.Header>
         <Modal.Body>
           <Form.Group>
-            <Form.Label>Phone:</Form.Label>
-            <Form.Control value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={15} />
+            <Form.Label>Telephone:</Form.Label>
+            <PhoneInput
+              country={'gr'}
+              value={phone}
+              onChange={(val) => setPhone(val)}
+              enableSearch
+              countryCodeEditable={false}
+              inputProps={{ name: 'phone' }}
+            />
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <small className="mr-auto"><div style={{ color: isValid ? "green" : "red" }}>{isValid ? "Looks good." : "Max 15 characters."}</div></small>
+          <small className="mr-auto"><div style={{ color: isValid ? "green" : "red" }}>{isValid ? "Looks good." : "Max 15 digits."}</div></small>
           <Button color="red" onClick={() => setShow(false)} disabled={busy}>Cancel</Button>
           <Button color="green" onClick={handleSave} disabled={!isValid || busy}>{busy ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>
@@ -304,12 +313,12 @@ export function EditProfessionalMobileModal({ professional, update_state }) {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => { if (show) setMobile(professional.mobile || ""); }, [show, professional]);
-  const isValid = String(mobile).trim().length > 0 && String(mobile).trim().length <= 15;
+  const isValid = String(mobile).replace(/\D/g, '').length >= 7;
 
   const handleSave = async () => {
     if (!isValid) return; setBusy(true);
     try {
-      const res = await axios.put(UPDATE_PRO + professional.professional_id + "/", { mobile: String(mobile).trim() }, { headers: getAuthHeaders() });
+      const res = await axios.put(UPDATE_PRO + professional.professional_id + "/", { mobile: ('+' + String(mobile).replace(/\D/g, '')) }, { headers: getAuthHeaders() });
       Swal.fire("Success", "Mobile updated successfully", "success");
       update_state && update_state(res.data);
       setShow(false);
@@ -321,17 +330,24 @@ export function EditProfessionalMobileModal({ professional, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={() => setShow(true)}><FiEdit style={{ marginRight: 6 }} /> Edit Mobile</Button>
+      <Button size="tiny" basic onClick={() => setShow(true)}><FiEdit style={{ marginRight: 6 }} /> Edit Cell phone</Button>
       <Modal show={show} onHide={() => setShow(false)} centered>
-        <Modal.Header closeButton><Modal.Title>Edit Mobile</Modal.Title></Modal.Header>
+        <Modal.Header closeButton><Modal.Title>Edit Cell phone</Modal.Title></Modal.Header>
         <Modal.Body>
           <Form.Group>
-            <Form.Label>Mobile *:</Form.Label>
-            <Form.Control value={mobile} onChange={(e) => setMobile(e.target.value)} maxLength={15} />
+            <Form.Label>Cell phone *:</Form.Label>
+            <PhoneInput
+              country={'gr'}
+              value={mobile}
+              onChange={(val) => setMobile(val)}
+              enableSearch
+              countryCodeEditable={false}
+              inputProps={{ name: 'mobile' }}
+            />
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <small className="mr-auto"><div style={{ color: isValid ? "green" : "red" }}>{isValid ? "Looks good." : "Mobile is required (max 15)."}</div></small>
+          <small className="mr-auto"><div style={{ color: isValid ? "green" : "red" }}>{isValid ? "Looks good." : "Cell phone is required (max 15)."}</div></small>
           <Button color="red" onClick={() => setShow(false)} disabled={busy}>Cancel</Button>
           <Button color="green" onClick={handleSave} disabled={!isValid || busy}>{busy ? "Saving..." : "Save Changes"}</Button>
         </Modal.Footer>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ListGroup, Badge, Spinner } from 'react-bootstrap';
 import { FaCrown, FaMedal, FaAward } from 'react-icons/fa';
 import axios from 'axios';
+import { authHeaders } from '../global_vars';
 
 const TopClients = () => {
   const [clients, setClients] = useState([]);
@@ -13,7 +14,7 @@ const TopClients = () => {
 
   const loadTopClients = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/dashboard/top-clients/');
+      const response = await axios.get('http://localhost:8000/api/dashboard/top-clients/', { headers: authHeaders() });
       if (response.data.success) {
         setClients(response.data.data);
       }

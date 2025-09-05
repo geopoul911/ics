@@ -42,7 +42,7 @@ function getCityIdFromPath() {
   return id ? decodeURIComponent(id) : null;
 }
 
-let overviewIconStyle = { color: "#2a9fd9", marginRight: "0.5em" };
+let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
 
 class CityOverview extends React.Component {
   constructor(props) {
@@ -108,7 +108,7 @@ class CityOverview extends React.Component {
                     <Card.Header>
                       <BsInfoSquare
                         style={{
-                          color: "#2a9fd9",
+                          color: "#93ab3c",
                           fontSize: "1.5em",
                           marginRight: "0.5em",
                         }}
@@ -116,22 +116,8 @@ class CityOverview extends React.Component {
                       City Information
                     </Card.Header>
                     <Card.Body>
-                      {/* Title */}
-                      <div className={"info_descr"}>
-                        <FiType style={overviewIconStyle} /> Title
-                      </div>
-                      <div className={"info_span"} style={{ position: "relative" }}>
-                        {city.title ? city.title : "N/A"}
-                        <span style={{ position: "absolute", right: "0px", top: "50%", transform: "translateY(-50%)" }}>
-                          <EditCityTitleModal
-                            city={city}
-                            update_state={this.update_state}
-                          />
-                        </span>
-                      </div>
-
                       {/* City ID */}
-                      <div className={"info_descr"} style={{ marginTop: 16 }}>
+                      <div className={"info_descr"}>
                         <FaHashtag style={overviewIconStyle} /> City ID (2–10 chars)
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
@@ -144,8 +130,24 @@ class CityOverview extends React.Component {
                         </span>
                       </div>
 
+                      {/* Title */}
+                      <div className={"info_descr"}>
+                        <FiType style={overviewIconStyle} /> City
+                      </div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {city.title ? city.title : "N/A"}
+                        <span style={{ position: "absolute", right: "0px", top: "50%", transform: "translateY(-50%)" }}>
+                          <EditCityTitleModal
+                            city={city}
+                            update_state={this.update_state}
+                          />
+                        </span>
+                      </div>
+
+
+
                       {/* Location (Country & Province) */}
-                      <div className={"info_descr"} style={{ marginTop: 16 }}>
+                      <div className={"info_descr"}>
                         <FaGlobe style={overviewIconStyle} /> Country & Province
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
@@ -158,9 +160,9 @@ class CityOverview extends React.Component {
                         </span>
                       </div>
 
-                      {/* Order Index */}
-                      <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <BiSort style={overviewIconStyle} /> Order Index
+                      {/* Order by */}
+                      <div className={"info_descr"}>
+                        <BiSort style={overviewIconStyle} /> Order by
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {(typeof city.orderindex === "number" ||

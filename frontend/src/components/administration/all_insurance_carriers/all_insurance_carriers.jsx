@@ -50,13 +50,13 @@ const columns = [
   },
   {
     dataField: "title",
-    text: "Title",
+    text: "Public Insurance",
     sort: true,
     filter: textFilter(),
   },
   {
     dataField: "orderindex",
-    text: "Order Index",
+    text: "Order by",
     sort: true,
     filter: textFilter(),
   },

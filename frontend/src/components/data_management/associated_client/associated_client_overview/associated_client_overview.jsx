@@ -2,9 +2,8 @@
 import React from "react";
 
 // Icons / Images
-import { BsInfoSquare } from "react-icons/bs";
-import { FaHashtag, FaStop } from "react-icons/fa";
-import { MdSecurity } from "react-icons/md";
+import { FaStop } from "react-icons/fa";
+import { FaIdBadge, FaStickyNote } from "react-icons/fa";
 
 // Modules / Functions
 import { Card } from "react-bootstrap";
@@ -42,7 +41,7 @@ function getAssociatedClientIdFromPath() {
   return id ? decodeURIComponent(id) : null;
 }
 
-let overviewIconStyle = { color: "#2a9fd9", marginRight: "0.5em" };
+let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
 
 class AssociatedClientOverview extends React.Component {
   constructor(props) {
@@ -111,14 +110,14 @@ class AssociatedClientOverview extends React.Component {
                 <Card>
                   <Card.Header>
                     <h4>
-                      <FaHashtag style={overviewIconStyle} />
+                      <FaIdBadge style={overviewIconStyle} />
                       Basic Information
                     </h4>
                   </Card.Header>
                   <Card.Body>
                     {/* Associated Client ID */}
                     <div className={"info_descr"}>
-                      <FaHashtag style={overviewIconStyle} /> Associated Client ID
+                      <FaIdBadge style={overviewIconStyle} /> Associated Client ID
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {associatedClient.assoclient_id || "N/A"}
@@ -132,7 +131,7 @@ class AssociatedClientOverview extends React.Component {
 
                     {/* Project */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Project
+                      <FaStickyNote style={overviewIconStyle} /> Project
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {associatedClient.project?.title || "Not set"}
@@ -146,7 +145,7 @@ class AssociatedClientOverview extends React.Component {
 
                     {/* Client */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Client
+                      <FaStickyNote style={overviewIconStyle} /> Client
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {associatedClient.client?.surname} {associatedClient.client?.name || "Not set"}
@@ -158,9 +157,9 @@ class AssociatedClientOverview extends React.Component {
                       </span>
                     </div>
 
-                    {/* Order Index */}
+                    {/* Order by */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Order Index
+                      <FaStickyNote style={overviewIconStyle} /> Order by
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {associatedClient.orderindex || "Not set"}
@@ -174,7 +173,7 @@ class AssociatedClientOverview extends React.Component {
 
                     {/* Notes */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <BsInfoSquare style={overviewIconStyle} /> Notes
+                      <FaStickyNote style={overviewIconStyle} /> Notes
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {associatedClient.notes || "No notes"}
@@ -204,14 +203,14 @@ class AssociatedClientOverview extends React.Component {
                 <Card>
                   <Card.Header>
                     <h4>
-                      <MdSecurity style={overviewIconStyle} />
+                      <FaStickyNote style={overviewIconStyle} />
                       Additional Information
                     </h4>
                   </Card.Header>
                   <Card.Body>
                     {/* This card can be used for additional information in the future */}
                     <div className={"info_descr"}>
-                      <BsInfoSquare style={overviewIconStyle} /> Associated Client Details
+                      <FaStickyNote style={overviewIconStyle} /> Associated Client Details
                     </div>
                     <div className={"info_span"}>
                       This Associated Client links the project "{associatedClient.project?.title || "Unknown"}" with the client "{associatedClient.client?.surname || ""} {associatedClient.client?.name || ""}".

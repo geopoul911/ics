@@ -378,16 +378,16 @@ export function EditBankClientAccountTransitNumberModal({ bankClientAccount, ref
   return (
     <>
       <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} /> Edit Transit Number
+        <FiEdit style={{ marginRight: 6 }} /> Edit Branch number
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Transit Number</Modal.Title>
+          <Modal.Title>Edit Branch number</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form.Group>
-              <Form.Label>Transit Number</Form.Label>
+              <Form.Label>Branch number</Form.Label>
               <Form.Control
                 type="text"
                 value={transitnumber}

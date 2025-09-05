@@ -23,6 +23,7 @@ import {
   paginationOptions,
   headers,
   pageHeader,
+  loader,
 } from "../../global_vars";
 
 // Variables
@@ -47,7 +48,7 @@ const columns = [
   },
   {
     dataField: "title",
-    text: "Title",
+    text: "Province",
     sort: true,
     filter: textFilter(),
   },
@@ -71,7 +72,7 @@ const columns = [
   },
   {
     dataField: "orderindex",
-    text: "Order Index",
+    text: "Order by",
     sort: true,
     filter: textFilter(),
   },
@@ -202,7 +203,7 @@ class AllProvinces extends React.Component {
                   </div>
                 </>
               ) : (
-                <div>Loading...</div>
+                <div>{loader()}</div>
               )}
             </div>
           </div>

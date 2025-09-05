@@ -349,12 +349,12 @@ function AddPropertyModal({ onPropertyCreated }) {
                         onChange={(e) => setType(e.target.value)}
                       >
                         <option value="">Select property type</option>
-                        <option value="Plot">Αγροτεμάχιο</option>
-                        <option value="Land">Οικόπεδο</option>
-                        <option value="House">Μονοκατοικία</option>
-                        <option value="Apartment">Διαμέρισμα</option>
-                        <option value="Store">Κατάστημα</option>
-                        <option value="Other">Άλλο</option>
+                        <option value="Plot">Plot</option>
+                        <option value="Land">Land</option>
+                        <option value="House">House</option>
+                        <option value="Apartment">Apartment</option>
+                        <option value="Store">Store</option>
+                        <option value="Other">Other</option>
                       </Form.Control>
                     </Form.Group>
                   </Col>
@@ -458,9 +458,9 @@ function AddPropertyModal({ onPropertyCreated }) {
                         onChange={(e) => setStatus(e.target.value)}
                       >
                         <option value="">Select status (optional)</option>
-                        <option value="Empty">Άδειο</option>
-                        <option value="Rented">Ενοικιασμένο</option>
-                        <option value="Unfinished">Ημιτελές</option>
+                        <option value="Empty">Empty</option>
+                        <option value="Rented">Rented</option>
+                        <option value="Unfinished">Unfinished</option>
                       </Form.Control>
                     </Form.Group>
                   </Col>
@@ -473,11 +473,11 @@ function AddPropertyModal({ onPropertyCreated }) {
                         onChange={(e) => setMarket(e.target.value)}
                       >
                         <option value="">Select market (optional)</option>
-                        <option value="ShortTerm">Βραχυπρόθεσμη Ενοικίαση</option>
-                        <option value="LongTerm">Μακροπρόθεσμη Ενοικίαση</option>
-                        <option value="Sale">Πώληση</option>
-                        <option value="Wait">Αναμονή</option>
-                        <option value="Own">Ιδιοκατοίκηση</option>
+                        <option value="ShortTerm">Short Term</option>
+                        <option value="LongTerm">Long Term</option>
+                        <option value="Sale">Sale</option>
+                        <option value="Wait">Wait</option>
+                        <option value="Own">Own</option>
                       </Form.Control>
                     </Form.Group>
                   </Col>
@@ -591,7 +591,7 @@ function AddPropertyModal({ onPropertyCreated }) {
                     style={{ fontSize: 18, marginRight: 6 }}
                   />
                   Validated
-                  
+
                 </li>
               </ul>
             )}

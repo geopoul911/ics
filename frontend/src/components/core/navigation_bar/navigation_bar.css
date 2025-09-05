@@ -11,7 +11,7 @@
 }
 
 .nav-link:hover {
-  color: #2a9fd9 !important;
+  color: #93ab3c !important;
 }
 
 .navbar {
@@ -35,7 +35,7 @@
 
 /* group dropdown's links on hover */
 #nav_group_dropdown > a:hover {
-  color: #2a9fd9 !important;
+  color: #93ab3c !important;
   background-color: rgb(16, 16, 16) !important;
 }
 
@@ -59,7 +59,7 @@
 
 /* report dropdown's links on hover */
 #nav_report_dropdown > a:hover {
-  color: #2a9fd9 !important;
+  color: #93ab3c !important;
   background-color: rgb(16, 16, 16) !important;
 }
 
@@ -83,7 +83,7 @@
 
 /* data management dropdown's links on hover */
 #nav_data_dropdown > a:hover {
-  color: #2a9fd9 !important;
+  color: #93ab3c !important;
   background-color: rgb(16, 16, 16) !important;
 }
 
@@ -106,7 +106,7 @@
 
 /* data management dropdown's links on hover */
 #nav_map_dropdown > a:hover {
-  color: #2a9fd9 !important;
+  color: #93ab3c !important;
   background-color: rgb(16, 16, 16) !important;
 }
 
@@ -127,7 +127,7 @@
 
 /* admin dropdown's links on hover */
 #nav_admin_dropdown > a:hover {
-  color: #2a9fd9 !important;
+  color: #93ab3c !important;
   background-color: rgb(16, 16, 16) !important;
 }
 
@@ -150,7 +150,7 @@
 
 /* me dropdown's links on hover */
 #nav_me_dropdown > a:hover {
-  color: #2a9fd9 !important;
+  color: #93ab3c !important;
   background-color: rgb(16, 16, 16) !important;
 }
 
@@ -161,5 +161,5 @@
 }
 
 .auth_button:hover {
-  color: #2a9fd9 !important;
+  color: #93ab3c !important;
 }

@@ -9,6 +9,10 @@ import RecentActivities from './RecentActivities';
 import TopClients from './TopClients';
 import OverdueItems from './OverdueItems';
 import axios from 'axios';
+import NavigationBar from '../core/navigation_bar/navigation_bar';
+import Footer from '../core/footer/footer';
+import { authHeaders } from '../global_vars';
+import { loader } from '../global_vars';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -29,7 +33,7 @@ const Dashboard = () => {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:8000/api/dashboard/stats/');
+      const response = await axios.get('http://localhost:8000/api/dashboard/stats/', { headers: authHeaders() });
       if (response.data.success) {
         setStats(response.data.data);
       }
@@ -43,26 +47,32 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <Container fluid className="mt-4">
-        <div className="text-center">
-          <div className="spinner-border" role="status">
-            <span className="visually-hidden">Loading...</span>
+      <>
+        <NavigationBar />
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '85vh' }}>
+              {loader()}
           </div>
-        </div>
-      </Container>
+        <Footer />
+      </>
     );
   }
 
   if (error) {
     return (
-      <Container fluid className="mt-4">
-        <Alert variant="danger">{error}</Alert>
-      </Container>
+      <>
+        <NavigationBar />
+        <Container fluid className="mt-4">
+          <Alert variant="danger">{error}</Alert>
+        </Container>
+        <Footer />
+      </>
     );
   }
 
   return (
-    <Container fluid className="mt-4">
+    <>
+      <NavigationBar />
+      <Container fluid className="mt-4">
       <Row className="mb-4">
         <Col>
           <h2 className="mb-0">
@@ -176,7 +186,9 @@ const Dashboard = () => {
           </Card>
         </Col>
       </Row>
-    </Container>
+      </Container>
+      <Footer />
+    </>
   );
 };
 

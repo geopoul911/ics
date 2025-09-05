@@ -10,6 +10,8 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { Modal, Form } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
+import PhoneInput from "react-phone-input-2";
+import 'react-phone-input-2/lib/bootstrap.css';
 
 // Global Variables
 import { headers } from "../global_vars";
@@ -79,16 +81,16 @@ export function EditClientContactFullnameModal({ clientContact, update_state }) 
     <>
       <Button size="tiny" basic onClick={handleShow}>
         <FiEdit style={{ marginRight: 6 }} />
-        Edit Full Name
+        Edit Full name
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Full Name</Modal.Title>
+          <Modal.Title>Edit Full name</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form.Group>
-              <Form.Label>Full Name</Form.Label>
+              <Form.Label>Full name</Form.Label>
               <Form.Control
                 type="text"
                 value={fullname}
@@ -190,16 +192,16 @@ export function EditClientContactFathernameModal({ clientContact, update_state }
     <>
       <Button size="tiny" basic onClick={handleShow}>
         <FiEdit style={{ marginRight: 6 }} />
-        Edit Father's Name
+        Edit Father fullname
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Father's Name</Modal.Title>
+          <Modal.Title>Edit Father fullname</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form.Group>
-              <Form.Label>Father's Name</Form.Label>
+              <Form.Label>Father fullname</Form.Label>
               <Form.Control
                 type="text"
                 value={fathername}
@@ -293,16 +295,16 @@ export function EditClientContactMothernameModal({ clientContact, update_state }
     <>
       <Button size="tiny" basic onClick={handleShow}>
         <FiEdit style={{ marginRight: 6 }} />
-        Edit Mother's Name
+        Edit Mother fullname
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Mother's Name</Modal.Title>
+          <Modal.Title>Edit Mother fullname</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form.Group>
-              <Form.Label>Mother's Name</Form.Label>
+              <Form.Label>Mother fullname</Form.Label>
               <Form.Control
                 type="text"
                 value={mothername}
@@ -613,16 +615,16 @@ export function EditClientContactEmailModal({ clientContact, update_state }) {
     <>
       <Button size="tiny" basic onClick={handleShow}>
         <FiEdit style={{ marginRight: 6 }} />
-        Edit Email
+        Edit E-mail
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Email</Modal.Title>
+          <Modal.Title>Edit E-mail</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form.Group>
-              <Form.Label>Email</Form.Label>
+              <Form.Label>E-mail</Form.Label>
               <Form.Control
                 type="email"
                 value={email}
@@ -682,7 +684,7 @@ export function EditClientContactPhoneModal({ clientContact, update_state }) {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const isPhoneValid = phone.trim().length > 0 && phone.trim().length <= 15;
+  const isPhoneValid = !phone || phone.replace(/\D/g, '').length >= 7;
 
   const handleSave = async () => {
     if (!isPhoneValid) return;
@@ -696,7 +698,7 @@ export function EditClientContactPhoneModal({ clientContact, update_state }) {
     try {
       const response = await axios.patch(
         `${UPDATE_CLIENT_CONTACT}${clientContact.clientcont_id}/`,
-        { phone: phone.trim() },
+        { phone: ('+' + phone.replace(/\D/g, '')) },
         { headers: currentHeaders }
       );
 
@@ -723,42 +725,34 @@ export function EditClientContactPhoneModal({ clientContact, update_state }) {
     <>
       <Button size="tiny" basic onClick={handleShow}>
         <FiEdit style={{ marginRight: 6 }} />
-        Edit Phone
+        Edit Telephone
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Phone</Modal.Title>
+          <Modal.Title>Edit Telephone</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form.Group>
-              <Form.Label>Phone</Form.Label>
-              <Form.Control
-                type="tel"
+              <Form.Label>Telephone</Form.Label>
+              <PhoneInput
+                country={'gr'}
                 value={phone}
-                onChange={(e) => setPhone(clampLen(e.target.value, 15))}
-                maxLength={15}
-                placeholder="Enter phone number"
+                onChange={(val) => setPhone(val)}
+                enableSearch
+                countryCodeEditable={false}
+                inputProps={{ name: 'phone' }}
               />
-              {/* No character countdown */}
             </Form.Group>
         </Modal.Body>
         <Modal.Footer>
           <small className="mr-auto">
             {!isPhoneValid ? (
               <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
-                {phone.trim().length === 0 && (
-                  <li>
-                    <AiOutlineWarning style={{ marginRight: 5 }} />
-                    Phone is required
-                  </li>
-                )}
-                {phone.trim().length > 15 && (
-                  <li>
-                    <AiOutlineWarning style={{ marginRight: 5 }} />
-                    Phone must be at most 15 characters
-                  </li>
-                )}
+                <li>
+                  <AiOutlineWarning style={{ marginRight: 5 }} />
+                  Enter a valid phone number (or leave empty)
+                </li>
               </ul>
             ) : (
               <div style={{ color: "green" }}>
@@ -794,7 +788,7 @@ export function EditClientContactMobileModal({ clientContact, update_state }) {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const isMobileValid = mobile.trim().length > 0 && mobile.trim().length <= 15;
+  const isMobileValid = mobile.trim().length > 0 && mobile.replace(/\D/g, '').length >= 7;
 
   const handleSave = async () => {
     if (!isMobileValid) return;
@@ -808,7 +802,7 @@ export function EditClientContactMobileModal({ clientContact, update_state }) {
     try {
       const response = await axios.patch(
         `${UPDATE_CLIENT_CONTACT}${clientContact.clientcont_id}/`,
-        { mobile: mobile.trim() },
+        { mobile: ('+' + mobile.replace(/\D/g, '')) },
         { headers: currentHeaders }
       );
 
@@ -835,24 +829,24 @@ export function EditClientContactMobileModal({ clientContact, update_state }) {
     <>
       <Button size="tiny" basic onClick={handleShow}>
         <FiEdit style={{ marginRight: 6 }} />
-        Edit Mobile
+        Edit Cell phone
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Mobile</Modal.Title>
+          <Modal.Title>Edit Cell phone</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form.Group>
-              <Form.Label>Mobile</Form.Label>
-              <Form.Control
-                type="tel"
+              <Form.Label>Cell phone</Form.Label>
+              <PhoneInput
+                country={'gr'}
                 value={mobile}
-                onChange={(e) => setMobile(clampLen(e.target.value, 15))}
-                maxLength={15}
-                placeholder="Enter mobile number"
+                onChange={(val) => setMobile(val)}
+                enableSearch
+                countryCodeEditable={false}
+                inputProps={{ name: 'mobile' }}
               />
-              {/* No character countdown */}
             </Form.Group>
         </Modal.Body>
         <Modal.Footer>

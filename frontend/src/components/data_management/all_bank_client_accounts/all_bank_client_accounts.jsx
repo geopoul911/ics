@@ -23,6 +23,7 @@ import {
   paginationOptions,
   headers,
   pageHeader,
+  loader,
 } from "../../global_vars";
 
 // Variables
@@ -59,14 +60,14 @@ const columns = [
   },
   {
     dataField: "transitnumber",
-    text: "Transit Number",
+    text: "Branch number",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => row.transitnumber || "",
   },
   {
     dataField: "accountnumber",
-    text: "Account Number",
+    text: "Account number",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => row.accountnumber || "",
@@ -203,7 +204,7 @@ class AllBankClientAccounts extends React.Component {
                   </div>
                 </>
               ) : (
-                <div>Loading...</div>
+                <div>{loader()}</div>
               )}
             </div>
           </div>

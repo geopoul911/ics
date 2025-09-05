@@ -53,7 +53,7 @@ function getConsultantIdFromPath() {
   return id ? decodeURIComponent(id) : null;
 }
 
-let overviewIconStyle = { color: "#2a9fd9", marginRight: "0.5em" };
+let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
 
 class ConsultantOverview extends React.Component {
   constructor(props) {
@@ -134,7 +134,7 @@ class ConsultantOverview extends React.Component {
                             height: "150px",
                             borderRadius: "50%",
                             objectFit: "cover",
-                            border: "4px solid #2a9fd9",
+                            border: "4px solid #93ab3c",
                             boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
                           }}
                         />
@@ -148,7 +148,7 @@ class ConsultantOverview extends React.Component {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            border: "4px solid #2a9fd9",
+                            border: "4px solid #93ab3c",
                             boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
                           }}
                         >
@@ -173,7 +173,7 @@ class ConsultantOverview extends React.Component {
                         margin: "0", 
                         fontSize: "2.5rem", 
                         fontWeight: "bold",
-                        color: "#2a9fd9"
+                        color: "#93ab3c"
                       }}>
                         {consultant.fullname || "N/A"}
                       </h1>
@@ -202,7 +202,7 @@ class ConsultantOverview extends React.Component {
                     <Card.Header>
                       <BsInfoSquare
                         style={{
-                          color: "#2a9fd9",
+                          color: "#93ab3c",
                           fontSize: "1.5em",
                           marginRight: "0.5em",
                         }}
@@ -224,9 +224,9 @@ class ConsultantOverview extends React.Component {
                         </span>
                       </div>
 
-                      {/* Email */}
+                      {/* E-mail */}
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <FaEnvelope style={overviewIconStyle} /> Email
+                        <FaEnvelope style={overviewIconStyle} /> E-mail
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {consultant.email ? consultant.email : "N/A"}
@@ -238,9 +238,9 @@ class ConsultantOverview extends React.Component {
                         </span>
                       </div>
 
-                      {/* Phone */}
+                      {/* Telephone */}
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <FaPhone style={overviewIconStyle} /> Phone
+                        <FaPhone style={overviewIconStyle} /> Telephone
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {consultant.phone ? consultant.phone : "N/A"}
@@ -252,9 +252,9 @@ class ConsultantOverview extends React.Component {
                         </span>
                       </div>
 
-                      {/* Mobile */}
+                      {/* Cell phone */}
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <FaMobile style={overviewIconStyle} /> Mobile
+                        <FaMobile style={overviewIconStyle} /> Cell phone
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {consultant.mobile ? consultant.mobile : "N/A"}
@@ -266,9 +266,9 @@ class ConsultantOverview extends React.Component {
                         </span>
                       </div>
 
-                      {/* Order Index */}
+                      {/* Order by */}
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <FaSort style={overviewIconStyle} /> Order Index
+                        <FaSort style={overviewIconStyle} /> Order by
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {(typeof consultant.orderindex === "number" ||
@@ -288,7 +288,6 @@ class ConsultantOverview extends React.Component {
                         objectId={consultant.consultant_id}
                         objectName={consultant.fullname}
                         objectType="Consultant"
-                        warningMessage="This will also delete all projects, tasks, and other data associated with this consultant."
                         onObjectDeleted={() => {
                           window.location.href = "/administration/all_consultants";
                         }}
@@ -301,7 +300,7 @@ class ConsultantOverview extends React.Component {
                     <Card.Header>
                       <MdSecurity
                         style={{
-                          color: "#2a9fd9",
+                          color: "#93ab3c",
                           fontSize: "1.5em",
                           marginRight: "0.5em",
                         }}

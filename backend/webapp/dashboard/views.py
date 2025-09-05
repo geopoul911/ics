@@ -3,9 +3,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.db.models import Count, Sum, Q
 from django.utils import timezone
-from datetime import datetime, timedelta
-from webapp.models import Client, Project, Document, ProjectTask, Cash, TaxationProject
-import calendar
+from datetime import datetime, timedelta, date
+from webapp.models import Client, Project, Document, ProjectTask, Cash, TaxationProject, AssociatedClient
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -14,7 +13,8 @@ def dashboard_stats(request):
     try:
         # Get current date and calculate date ranges
         now = timezone.now()
-        last_month = now - timedelta(days=30)
+        today = now.date()
+        last_month = today - timedelta(days=30)
         
         # Basic counts
         total_clients = Client.objects.count()
@@ -23,29 +23,21 @@ def dashboard_stats(request):
         
         # Active projects (status = 'active' or 'in_progress')
         active_projects = Project.objects.filter(
-            status__in=['active', 'in_progress']
+            status__in=['Created', 'Assigned', 'Inprogress']
         ).count()
         
         # Overdue tasks
         overdue_tasks = ProjectTask.objects.filter(
-            due_date__lt=now.date(),
-            status__in=['pending', 'in_progress']
-        ).count()
+            deadline__lt=today
+        ).exclude(status='Completed').count()
         
         # Calculate total revenue from Cash model
-        total_revenue = Cash.objects.filter(
-            transaction_type='income'
-        ).aggregate(
-            total=Sum('amount')
-        )['total'] or 0
+        total_revenue = Cash.objects.aggregate(total=Sum('amountpay'))['total'] or 0
         
         # Calculate revenue for last month
         last_month_revenue = Cash.objects.filter(
-            transaction_type='income',
-            date__gte=last_month
-        ).aggregate(
-            total=Sum('amount')
-        )['total'] or 0
+            trandate__gte=last_month
+        ).aggregate(total=Sum('amountpay'))['total'] or 0
         
         # Calculate percentage change
         if total_revenue > 0 and last_month_revenue > 0:
@@ -80,35 +72,31 @@ def revenue_trend(request):
     """Get revenue trend data for the last 6 months"""
     try:
         now = timezone.now()
+        today = now.date()
         months = []
         revenue_data = []
         projected_data = []
-        
-        for i in range(6):
-            # Calculate month start and end
-            month_start = now.replace(day=1) - timedelta(days=30*i)
-            month_end = (month_start + timedelta(days=32)).replace(day=1) - timedelta(days=1)
-            
-            # Get revenue for this month
+
+        # Build last 6 month windows
+        current_month_start = today.replace(day=1)
+        for i in range(5, -1, -1):
+            # Approximate month by subtracting i months using 30-day steps
+            month_start = current_month_start - timedelta(days=30 * i)
+            # Next month start approximation
+            next_month_start = month_start + timedelta(days=32)
+            next_month_start = next_month_start.replace(day=1)
+            month_end = next_month_start - timedelta(days=1)
+
             month_revenue = Cash.objects.filter(
-                transaction_type='income',
-                date__gte=month_start,
-                date__lte=month_end
-            ).aggregate(
-                total=Sum('amount')
-            )['total'] or 0
-            
+                trandate__gte=month_start,
+                trandate__lte=month_end
+            ).aggregate(total=Sum('amountpay'))['total'] or 0
+
             months.append(month_start.strftime('%b'))
             revenue_data.append(float(month_revenue))
-            
-            # Simple projection (10% growth)
-            projected = month_revenue * 1.1 if month_revenue > 0 else 10000
+
+            projected = month_revenue * 1.1 if month_revenue and month_revenue > 0 else 10000
             projected_data.append(float(projected))
-        
-        # Reverse to show oldest to newest
-        months.reverse()
-        revenue_data.reverse()
-        projected_data.reverse()
         
         return Response({
             'success': True,
@@ -138,10 +126,13 @@ def project_status(request):
         labels = []
         values = []
         
-        for status in status_counts:
-            status_name = status['status'].replace('_', ' ').title()
+        # Map status code to display label
+        status_map = dict(Project.STATUS_CHOICES)
+        for item in status_counts:
+            code = item['status']
+            status_name = status_map.get(code, code)
             labels.append(status_name)
-            values.append(status['count'])
+            values.append(item['count'])
         
         return Response({
             'success': True,
@@ -168,32 +159,30 @@ def task_completion(request):
         in_progress_data = []
         overdue_data = []
         
-        for i in range(4):
-            # Calculate week start and end
-            week_start = now - timedelta(weeks=i+1)
-            week_end = week_start + timedelta(days=7)
-            
-            # Get task counts for this week
+        for i in range(4, 0, -1):
+            week_end = now.date() - timedelta(weeks=4 - i)
+            week_start = week_end - timedelta(days=7)
+
             completed = ProjectTask.objects.filter(
-                status='completed',
-                updated_at__gte=week_start,
-                updated_at__lt=week_end
+                status='Completed',
+                completiondate__gte=week_start,
+                completiondate__lt=week_end
             ).count()
-            
+
             in_progress = ProjectTask.objects.filter(
-                status='in_progress',
-                updated_at__gte=week_start,
-                updated_at__lt=week_end
+                status='Inprogress',
+                assigndate__gte=week_start,
+                assigndate__lt=week_end
             ).count()
-            
+
             overdue = ProjectTask.objects.filter(
-                due_date__lt=now.date(),
-                status__in=['pending', 'in_progress'],
-                updated_at__gte=week_start,
-                updated_at__lt=week_end
+                deadline__lt=now.date()
+            ).exclude(status='Completed').filter(
+                deadline__gte=week_start,
+                deadline__lt=week_end
             ).count()
-            
-            labels.append(f'Week {4-i}')
+
+            labels.append(f'Week {i}')
             completed_data.append(completed)
             in_progress_data.append(in_progress)
             overdue_data.append(overdue)
@@ -226,48 +215,47 @@ def recent_activities(request):
     """Get recent activities"""
     try:
         # Get recent projects
-        recent_projects = Project.objects.order_by('-created_at')[:3]
+        recent_projects = Project.objects.order_by('-registrationdate')[:3]
         activities = []
         
         for project in recent_projects:
             activities.append({
-                'id': f'project_{project.id}',
+                'id': f'project_{project.project_id}',
                 'type': 'project',
                 'action': 'Project created',
-                'description': f'New project "{project.name}" was created',
-                'user': project.created_by.get_full_name() if project.created_by else 'System',
-                'timestamp': project.created_at.isoformat(),
+                'description': f'New project "{project.title}" was created',
+                'user': project.registrationuser or 'System',
+                'timestamp': project.registrationdate.isoformat(),
                 'priority': 'normal'
             })
         
         # Get recent documents
-        recent_documents = Document.objects.order_by('-created_at')[:2]
+        recent_documents = Document.objects.order_by('-created')[:2]
         for doc in recent_documents:
             activities.append({
-                'id': f'doc_{doc.id}',
+                'id': f'doc_{doc.document_id}',
                 'type': 'document',
                 'action': 'Document uploaded',
                 'description': f'New document "{doc.title}" was uploaded',
-                'user': doc.uploaded_by.get_full_name() if doc.uploaded_by else 'System',
-                'timestamp': doc.created_at.isoformat(),
+                'user': 'System',
+                'timestamp': doc.created.isoformat(),
                 'priority': 'normal'
             })
         
         # Get overdue tasks as alerts
         overdue_tasks = ProjectTask.objects.filter(
-            due_date__lt=timezone.now().date(),
-            status__in=['pending', 'in_progress']
-        )[:2]
+            deadline__lt=timezone.now().date()
+        ).exclude(status='Completed')[:2]
         
         for task in overdue_tasks:
-            days_overdue = (timezone.now().date() - task.due_date).days
+            days_overdue = (timezone.now().date() - task.deadline).days
             activities.append({
-                'id': f'task_{task.id}',
+                'id': f'task_{task.projtask_id}',
                 'type': 'alert',
                 'action': 'Overdue task',
                 'description': f'Task "{task.title}" is overdue by {days_overdue} days',
                 'user': 'System',
-                'timestamp': task.due_date.isoformat(),
+                'timestamp': task.deadline.isoformat(),
                 'priority': 'high'
             })
         
@@ -290,38 +278,42 @@ def recent_activities(request):
 def top_clients(request):
     """Get top clients by revenue"""
     try:
-        # Get clients with their total revenue
-        clients_with_revenue = []
-        
+        # Compute per-client revenue from Cash for projects associated with the client
+        results = []
         for client in Client.objects.all():
-            # Calculate total revenue from projects
-            total_revenue = Project.objects.filter(
-                client=client
-            ).aggregate(
-                total=Sum('budget')
+            # Collect distinct project ids associated with this client
+            project_ids = list(
+                AssociatedClient.objects.filter(client=client)
+                .values_list('project__project_id', flat=True)
+                .distinct()
+            )
+
+            if not project_ids:
+                continue
+
+            # Sum payments for those projects
+            total_revenue = Cash.objects.filter(project__project_id__in=project_ids).aggregate(
+                total=Sum('amountpay')
             )['total'] or 0
-            
-            # Count projects
-            project_count = Project.objects.filter(client=client).count()
-            
-            if total_revenue > 0:
-                clients_with_revenue.append({
-                    'id': client.id,
-                    'name': client.name,
-                    'revenue': float(total_revenue),
-                    'projects': project_count,
-                    'status': client.status,
-                    'rank': 0  # Will be set below
-                })
-        
-        # Sort by revenue and assign ranks
-        clients_with_revenue.sort(key=lambda x: x['revenue'], reverse=True)
-        for i, client in enumerate(clients_with_revenue[:5]):  # Top 5
-            client['rank'] = i + 1
-        
+
+            project_count = len(project_ids)
+
+            results.append({
+                'id': client.client_id,
+                'name': f"{client.surname} {client.name}",
+                'revenue': float(total_revenue),
+                'projects': project_count,
+                'status': 'active' if client.active else 'inactive',
+                'rank': 0
+            })
+
+        results.sort(key=lambda x: x['revenue'], reverse=True)
+        for i, item in enumerate(results[:5]):
+            item['rank'] = i + 1
+
         return Response({
             'success': True,
-            'data': clients_with_revenue[:5]
+            'data': results[:5]
         })
         
     except Exception as e:
@@ -340,40 +332,39 @@ def overdue_items(request):
         
         # Get overdue tasks
         overdue_tasks = ProjectTask.objects.filter(
-            due_date__lt=now.date(),
-            status__in=['pending', 'in_progress']
-        ).select_related('project', 'assigned_to')
+            deadline__lt=now.date()
+        ).exclude(status='Completed').select_related('project', 'assignee')
         
         for task in overdue_tasks:
-            days_overdue = (now.date() - task.due_date).days
+            days_overdue = (now.date() - task.deadline).days
             overdue_items.append({
-                'id': f'task_{task.id}',
+                'id': f'task_{task.projtask_id}',
                 'type': 'task',
                 'title': task.title,
-                'project': task.project.name if task.project else 'No Project',
-                'dueDate': task.due_date.isoformat(),
+                'project': task.project.title if task.project else 'No Project',
+                'dueDate': task.deadline.isoformat(),
                 'daysOverdue': days_overdue,
-                'priority': task.priority,
-                'assignee': task.assigned_to.get_full_name() if task.assigned_to else 'Unassigned'
+                'priority': task.get_priority_display() if hasattr(task, 'get_priority_display') else task.priority,
+                'assignee': str(task.assignee) if task.assignee else 'Unassigned'
             })
         
         # Get overdue projects
         overdue_projects = Project.objects.filter(
-            end_date__lt=now.date(),
-            status__in=['active', 'in_progress']
+            deadline__lt=now.date(),
+            status__in=['Created', 'Assigned', 'Inprogress']
         )
         
         for project in overdue_projects:
-            days_overdue = (now.date() - project.end_date).days
+            days_overdue = (now.date() - project.deadline).days
             overdue_items.append({
-                'id': f'project_{project.id}',
+                'id': f'project_{project.project_id}',
                 'type': 'project',
-                'title': project.name,
-                'project': project.name,
-                'dueDate': project.end_date.isoformat(),
+                'title': project.title,
+                'project': project.title,
+                'dueDate': project.deadline.isoformat(),
                 'daysOverdue': days_overdue,
                 'priority': 'medium',
-                'assignee': project.manager.get_full_name() if project.manager else 'Unassigned'
+                'assignee': str(project.consultant) if project.consultant else 'Unassigned'
             })
         
         # Sort by days overdue (most overdue first)

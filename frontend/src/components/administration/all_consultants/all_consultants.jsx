@@ -47,7 +47,7 @@ const columns = [
   },
   {
     dataField: "fullname",
-    text: "Full Name",
+    text: "Full name",
     sort: true,
     filter: textFilter(),
   },
@@ -97,7 +97,7 @@ const columns = [
   },
   {
     dataField: "email",
-    text: "Email",
+    text: "E-mail",
     sort: true,
     filter: textFilter(),
   },
@@ -118,7 +118,7 @@ const columns = [
   },
   {
     dataField: "orderindex",
-    text: "Order Index",
+    text: "Order by",
     sort: true,
     filter: textFilter(),
   },

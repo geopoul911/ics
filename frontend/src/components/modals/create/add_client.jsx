@@ -11,6 +11,8 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { Modal, Col, Form, Row } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
+import PhoneInput from "react-phone-input-2";
+import 'react-phone-input-2/lib/bootstrap.css';
 
 // Global Variables
 import { headers } from "../../global_vars";
@@ -270,10 +272,10 @@ function AddClientModal({ onClientCreated }) {
   const isAddressValid = address.trim().length >= 2 && address.trim().length <= 120;
   const isPostalCodeValid = postalcode.trim().length >= 1 && postalcode.trim().length <= 10;
   const isEmailValid = validateEmail(email);
-  const isPhone1Valid = !phone1 || phone1.length >= 7;
-  const isPhone2Valid = !phone2 || phone2.length >= 7;
-  const isMobile1Valid = !mobile1 || mobile1.length >= 7;
-  const isMobile2Valid = !mobile2 || mobile2.length >= 7;
+  const isPhone1Valid = !phone1 || phone1.replace(/\D/g, '').length >= 7;
+  const isPhone2Valid = !phone2 || phone2.replace(/\D/g, '').length >= 7;
+  const isMobile1Valid = mobile1.replace(/\D/g, '').length >= 7;
+  const isMobile2Valid = !mobile2 || mobile2.replace(/\D/g, '').length >= 7;
   const isCountryValid = country.length > 0;
   const isProvinceValid = province.length > 0;
   const isCityValid = city.length > 0;
@@ -328,10 +330,10 @@ function AddClientModal({ onClientCreated }) {
           
           // Optional fields
           email: email.trim() || null,
-          phone1: phone1.trim() || null,
-          phone2: phone2.trim() || null,
-          mobile1: mobile1.trim() || null,
-          mobile2: mobile2.trim() || null,
+          phone1: phone1 ? ('+' + phone1.replace(/\D/g, '')) : null,
+          phone2: phone2 ? ('+' + phone2.replace(/\D/g, '')) : null,
+          mobile1: mobile1 ? ('+' + mobile1.replace(/\D/g, '')) : null,
+          mobile2: mobile2 ? ('+' + mobile2.replace(/\D/g, '')) : null,
           birthdate: birthdate || null,
           birthplace: birthplace.trim() || null,
           fathername: fathername.trim() || null,
@@ -454,10 +456,10 @@ function AddClientModal({ onClientCreated }) {
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Onoma (Greek Name):</Form.Label>
+                      <Form.Label>GrName:</Form.Label>
                       <Form.Control
                         maxLength={40}
-                        placeholder="e.g., Ιωάννης"
+                        placeholder="e.g., Ioannis"
                         onChange={(e) => setOnoma(clampLen(e.target.value, 40))}
                         value={onoma}
                       />
@@ -468,10 +470,10 @@ function AddClientModal({ onClientCreated }) {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Eponymo (Greek Surname):</Form.Label>
+                      <Form.Label>GrSurname:</Form.Label>
                       <Form.Control
                         maxLength={40}
-                        placeholder="e.g., Παπαδόπουλος"
+                        placeholder="e.g., Papadopoulos"
                         onChange={(e) => setEponymo(clampLen(e.target.value, 40))}
                         value={eponymo}
                       />
@@ -573,7 +575,7 @@ function AddClientModal({ onClientCreated }) {
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Postal Code *:</Form.Label>
+                      <Form.Label>ZIP / PC *:</Form.Label>
                       <Form.Control
                         maxLength={10}
                         placeholder="e.g., 12345"
@@ -589,7 +591,7 @@ function AddClientModal({ onClientCreated }) {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Email:</Form.Label>
+                      <Form.Label>E-mail:</Form.Label>
                       <Form.Control
                         type="email"
                         maxLength={100}
@@ -601,13 +603,14 @@ function AddClientModal({ onClientCreated }) {
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Phone 1:</Form.Label>
-                      <Form.Control
-                        type="tel"
-                        maxLength={15}
-                        placeholder="e.g., +30-210-1234567"
-                        onChange={(e) => setPhone1(clampLen(e.target.value, 15))}
+                      <Form.Label>Telephone 1:</Form.Label>
+                      <PhoneInput
+                        country={'gr'}
                         value={phone1}
+                        onChange={(val) => setPhone1(val)}
+                        enableSearch
+                        countryCodeEditable={false}
+                        inputProps={{ name: 'phone1' }}
                       />
                     </Form.Group>
                   </Col>
@@ -616,25 +619,27 @@ function AddClientModal({ onClientCreated }) {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Phone 2:</Form.Label>
-                      <Form.Control
-                        type="tel"
-                        maxLength={15}
-                        placeholder="e.g., +30-210-7654321"
-                        onChange={(e) => setPhone2(clampLen(e.target.value, 15))}
+                      <Form.Label>Telephone 2:</Form.Label>
+                      <PhoneInput
+                        country={'gr'}
                         value={phone2}
+                        onChange={(val) => setPhone2(val)}
+                        enableSearch
+                        countryCodeEditable={false}
+                        inputProps={{ name: 'phone2' }}
                       />
                     </Form.Group>
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Mobile 1:</Form.Label>
-                      <Form.Control
-                        type="tel"
-                        maxLength={15}
-                        placeholder="e.g., +30-697-1234567"
-                        onChange={(e) => setMobile1(clampLen(e.target.value, 15))}
+                      <Form.Label>Cell phone 1:</Form.Label>
+                      <PhoneInput
+                        country={'gr'}
                         value={mobile1}
+                        onChange={(val) => setMobile1(val)}
+                        enableSearch
+                        countryCodeEditable={false}
+                        inputProps={{ name: 'mobile1' }}
                       />
                     </Form.Group>
                   </Col>
@@ -643,13 +648,14 @@ function AddClientModal({ onClientCreated }) {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Mobile 2:</Form.Label>
-                      <Form.Control
-                        type="tel"
-                        maxLength={15}
-                        placeholder="e.g., +30-697-7654321"
-                        onChange={(e) => setMobile2(clampLen(e.target.value, 15))}
+                      <Form.Label>Cell phone 2:</Form.Label>
+                      <PhoneInput
+                        country={'gr'}
                         value={mobile2}
+                        onChange={(val) => setMobile2(val)}
+                        enableSearch
+                        countryCodeEditable={false}
+                        inputProps={{ name: 'mobile2' }}
                       />
                     </Form.Group>
                   </Col>
@@ -660,7 +666,7 @@ function AddClientModal({ onClientCreated }) {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Birth Date:</Form.Label>
+                      <Form.Label>Birthdate:</Form.Label>
                       <Form.Control
                         type="date"
                         onChange={(e) => setBirthdate(e.target.value)}
@@ -670,7 +676,7 @@ function AddClientModal({ onClientCreated }) {
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Birth Place:</Form.Label>
+                      <Form.Label>Birthplace:</Form.Label>
                       <Form.Control
                         maxLength={60}
                         placeholder="e.g., Athens, Greece"
@@ -684,7 +690,7 @@ function AddClientModal({ onClientCreated }) {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Father's Name:</Form.Label>
+                      <Form.Label>Father fullname:</Form.Label>
                       <Form.Control
                         maxLength={80}
                         placeholder="e.g., Michael Smith"
@@ -695,7 +701,7 @@ function AddClientModal({ onClientCreated }) {
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Mother's Name:</Form.Label>
+                      <Form.Label>Mother fullname:</Form.Label>
                       <Form.Control
                         maxLength={80}
                         placeholder="e.g., Maria Smith"
@@ -709,7 +715,7 @@ function AddClientModal({ onClientCreated }) {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Marital Status:</Form.Label>
+                      <Form.Label>Marital status:</Form.Label>
                       <Form.Control
                         as="select"
                         onChange={(e) => setMaritalstatus(e.target.value)}
@@ -757,7 +763,7 @@ function AddClientModal({ onClientCreated }) {
                 <Row>
                   <Col md={4}>
                     <Form.Group className="mb-3">
-                      <Form.Label>AFM (Greek Tax Number):</Form.Label>
+                      <Form.Label>TIN-GR:</Form.Label>
                       <Form.Control
                         maxLength={9}
                         placeholder="e.g., 123456789"
@@ -771,7 +777,7 @@ function AddClientModal({ onClientCreated }) {
                   </Col>
                   <Col md={4}>
                     <Form.Group className="mb-3">
-                      <Form.Label>SIN (Canadian Tax Number):</Form.Label>
+                      <Form.Label>TIN:</Form.Label>
                       <Form.Control
                         maxLength={9}
                         placeholder="e.g., 123456789"
@@ -895,7 +901,7 @@ function AddClientModal({ onClientCreated }) {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Police ID Number:</Form.Label>
+                      <Form.Label>GR ID Number:</Form.Label>
                       <Form.Control
                         maxLength={15}
                         placeholder="e.g., AB123456"
@@ -911,7 +917,7 @@ function AddClientModal({ onClientCreated }) {
                 <Row>
                   <Col md={4}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Pension Country 1:</Form.Label>
+                      <Form.Label>Country 1:</Form.Label>
                       <Form.Control
                         as="select"
                         onChange={(e) => setPensioncountry1(e.target.value)}
@@ -928,7 +934,7 @@ function AddClientModal({ onClientCreated }) {
                   </Col>
                   <Col md={4}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Insurance Carrier 1:</Form.Label>
+                      <Form.Label>Public Insurance 1:</Form.Label>
                       <Form.Control
                         as="select"
                         onChange={(e) => setInsucarrier1(e.target.value)}
@@ -959,7 +965,7 @@ function AddClientModal({ onClientCreated }) {
                 <Row>
                   <Col md={4}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Pension Country 2:</Form.Label>
+                      <Form.Label>Country 2:</Form.Label>
                       <Form.Control
                         as="select"
                         onChange={(e) => setPensioncountry2(e.target.value)}
@@ -976,7 +982,7 @@ function AddClientModal({ onClientCreated }) {
                   </Col>
                   <Col md={4}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Insurance Carrier 2:</Form.Label>
+                      <Form.Label>Public Insurance 2:</Form.Label>
                       <Form.Control
                         as="select"
                         onChange={(e) => setInsucarrier2(e.target.value)}
@@ -1183,7 +1189,7 @@ function AddClientModal({ onClientCreated }) {
                 {!isMobile1Valid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Mobile 1 must be at least 7 characters if provided.
+                    Mobile 1 is required and must be at least 7 digits.
                   </li>
                 )}
                 {!isMobile2Valid && (

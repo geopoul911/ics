@@ -23,6 +23,7 @@ import {
   paginationOptions,
   headers,
   pageHeader,
+  loader,
 } from "../../global_vars";
 
 // Variables
@@ -47,7 +48,7 @@ const columns = [
   },
   {
     dataField: "fullname",
-    text: "Full Name",
+    text: "Full name",
     sort: true,
     filter: textFilter(),
   },
@@ -60,21 +61,21 @@ const columns = [
   },
   {
     dataField: "email",
-    text: "Email",
+    text: "E-mail",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => row.email || "",
   },
   {
     dataField: "phone",
-    text: "Phone",
+    text: "Telephone",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => row.phone || "",
   },
   {
     dataField: "mobile",
-    text: "Mobile",
+    text: "Cell phone",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => row.mobile || "",
@@ -92,9 +93,9 @@ const columns = [
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => {
-      if (row.reliability === 'High') return 'Μεγάλη';
-      if (row.reliability === 'Medium') return 'Μέτρια';
-      if (row.reliability === 'Low') return 'Μικρή';
+      if (row.reliability === 'High') return 'High';
+      if (row.reliability === 'Medium') return 'Medium';
+      if (row.reliability === 'Low') return 'Low';
       return row.reliability || "";
     },
   },
@@ -230,7 +231,7 @@ class AllClientContacts extends React.Component {
                   </div>
                 </>
               ) : (
-                <div>Loading...</div>
+                <div>{loader()}</div>
               )}
             </div>
           </div>

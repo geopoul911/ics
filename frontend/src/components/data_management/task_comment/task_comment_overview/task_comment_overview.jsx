@@ -6,7 +6,7 @@ import NavigationBar from "../../../core/navigation_bar/navigation_bar";
 import Footer from "../../../core/footer/footer";
 
 // Icons / Images
-import { BsInfoSquare } from "react-icons/bs";
+import { FaIdBadge, FaStickyNote, FaStop } from "react-icons/fa";
 
 // Modules / Functions
 import { Card } from "react-bootstrap";
@@ -29,7 +29,7 @@ function getTaskCommentIdFromPath() {
   return pathParts[pathParts.length - 1];
 }
 
-let overviewIconStyle = { color: "#2a9fd9", marginRight: "0.5em" };
+let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
 
 class TaskCommentOverview extends React.Component {
   constructor(props) {
@@ -106,18 +106,18 @@ class TaskCommentOverview extends React.Component {
                 <Grid.Column>
                   <Card>
                     <Card.Header>
-                      <BsInfoSquare style={overviewIconStyle} /> Basic Information
+                      <FaIdBadge style={overviewIconStyle} /> Basic Information
                     </Card.Header>
                     <Card.Body>
-                      <div className={"info_descr"}>Task Comment ID</div>
+                      <div className={"info_descr"}><FaIdBadge style={overviewIconStyle} /> Task Comment ID</div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {taskComment.taskcomm_id || "N/A"}
                         <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
-                          <button className="ui button tiny basic" disabled title="ID is immutable">ID</button>
+                          <button className="ui button tiny basic" disabled title="ID is immutable"><FaStop style={{ marginRight: 6, color: "red" }} />ID</button>
                         </span>
                       </div>
 
-                      <div className={"info_descr"} style={{ marginTop: 16 }}>Project Task</div>
+                      <div className={"info_descr"} style={{ marginTop: 16 }}><FaStickyNote style={overviewIconStyle} /> Project Task</div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {taskComment.projtask?.title || "N/A"}
                         <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
@@ -125,7 +125,7 @@ class TaskCommentOverview extends React.Component {
                         </span>
                       </div>
 
-                      <div className={"info_descr"} style={{ marginTop: 16 }}>Registration Date</div>
+                      <div className={"info_descr"} style={{ marginTop: 16 }}><FaStickyNote style={overviewIconStyle} /> Entered</div>
                       <div className={"info_span"}>
                         {taskComment.commentregistration ? new Date(taskComment.commentregistration).toLocaleString() : "N/A"}
                       </div>
@@ -139,10 +139,10 @@ class TaskCommentOverview extends React.Component {
                 <Grid.Column>
                   <Card>
                     <Card.Header>
-                      <BsInfoSquare style={overviewIconStyle} /> Details
+                      <FaStickyNote style={overviewIconStyle} /> Details
                     </Card.Header>
                     <Card.Body>
-                      <div className={"info_descr"}>Consultant</div>
+                      <div className={"info_descr"}><FaStickyNote style={overviewIconStyle} /> Consultant</div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {(taskComment.consultant && (taskComment.consultant.fullname || `${taskComment.consultant.surname || ''} ${taskComment.consultant.name || ''}`.trim())) || "N/A"}
                         <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
@@ -150,7 +150,7 @@ class TaskCommentOverview extends React.Component {
                         </span>
                       </div>
 
-                      <div className={"info_descr"} style={{ marginTop: 16 }}>Comment</div>
+                      <div className={"info_descr"} style={{ marginTop: 16 }}><FaStickyNote style={overviewIconStyle} /> Comment</div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {taskComment.comment || "N/A"}
                         <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>

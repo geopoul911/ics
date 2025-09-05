@@ -24,7 +24,7 @@ import {
 import { FaGlobe } from "react-icons/fa";
 
 export const iconStyle = {
-  color: "#2a9fd9",
+  color: "#93ab3c",
   fontSize: "1.5em",
   marginRight: "0.5em",
 };
@@ -53,8 +53,14 @@ export const headers = {
   "Authorization": `Token ${localStorage.getItem('userToken')}`,
 };
 
+// Dynamic auth headers to always use the latest token value
+export const authHeaders = () => ({
+  "Content-type": "Application/json",
+  "Authorization": `Token ${localStorage.getItem('userToken')}`,
+});
+
 export const rootIconStyle = {
-  color: "#2a9fd9",
+  color: "#93ab3c",
   fontSize: "1.5em",
   marginRight: 20,
 };

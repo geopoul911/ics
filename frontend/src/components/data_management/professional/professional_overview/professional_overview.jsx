@@ -13,6 +13,7 @@ import { Card } from "react-bootstrap";
 import { Grid, Button } from "semantic-ui-react";
 import DeleteObjectModal from "../../../modals/delete_object";
 import { pageHeader } from "../../../global_vars";
+import { FaIdBadge, FaUser, FaStickyNote, FaStop } from "react-icons/fa";
 import {
   EditProfessionalFullnameModal,
   EditProfessionalProfessionModal,
@@ -83,17 +84,24 @@ function ProfessionalOverview() {
             <Grid stackable columns={2} divided>
               <Grid.Column>
                 <Card>
-                  <Card.Header>Basic Information</Card.Header>
+                  <Card.Header>
+                    <FaIdBadge style={{ color: "#93ab3c", marginRight: "0.5em" }} />
+                    Basic Information
+                  </Card.Header>
                   <Card.Body>
-                    <div className={"info_descr"}>ID</div>
+                    <div className={"info_descr"}>
+                      <FaIdBadge style={{ color: "#93ab3c", marginRight: "0.5em" }} /> ID
+                    </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {professional.professional_id}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
-                        <Button size="tiny" basic disabled title="ID is immutable">ID</Button>
+                        <Button size="tiny" basic disabled title="ID is immutable"><FaStop style={{ marginRight: 6, color: "red" }} />ID</Button>
                       </span>
                     </div>
 
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>Fullname</div>
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>
+                      <FaIdBadge style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Full name
+                    </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {professional.fullname || 'N/A'}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
@@ -101,7 +109,9 @@ function ProfessionalOverview() {
                       </span>
                     </div>
 
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>Profession</div>
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>
+                      <FaIdBadge style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Profession
+                    </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {professional.profession?.title || 'N/A'}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
@@ -109,7 +119,9 @@ function ProfessionalOverview() {
                       </span>
                     </div>
 
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>City</div>
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>
+                      <FaIdBadge style={{ color: "#93ab3c", marginRight: "0.5em" }} /> City
+                    </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {professional.city?.title || 'N/A'}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
@@ -117,7 +129,9 @@ function ProfessionalOverview() {
                       </span>
                     </div>
 
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>Reliability</div>
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>
+                      <FaIdBadge style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Reliability
+                    </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {professional.reliability || 'N/A'}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
@@ -133,9 +147,14 @@ function ProfessionalOverview() {
 
               <Grid.Column>
                 <Card>
-                  <Card.Header>Contact</Card.Header>
+                  <Card.Header>
+                    <FaUser style={{ color: "#93ab3c", marginRight: "0.5em" }} />
+                    Contact
+                  </Card.Header>
                   <Card.Body>
-                    <div className={"info_descr"}>Address</div>
+                    <div className={"info_descr"}>
+                      <FaUser style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Address
+                    </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {professional.address || 'N/A'}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
@@ -143,7 +162,9 @@ function ProfessionalOverview() {
                       </span>
                     </div>
 
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>Email</div>
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>
+                      <FaUser style={{ color: "#93ab3c", marginRight: "0.5em" }} /> E-mail
+                    </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {professional.email || 'N/A'}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
@@ -151,7 +172,9 @@ function ProfessionalOverview() {
                       </span>
                     </div>
 
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>Phone</div>
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>
+                      <FaUser style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Telephone
+                    </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {professional.phone || 'N/A'}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
@@ -159,7 +182,9 @@ function ProfessionalOverview() {
                       </span>
                     </div>
 
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>Mobile</div>
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>
+                      <FaUser style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Cell phone
+                    </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {professional.mobile || 'N/A'}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
@@ -167,7 +192,9 @@ function ProfessionalOverview() {
                       </span>
                     </div>
 
-                    <div className={"info_descr"} style={{ marginTop: 16 }}>Active</div>
+                    <div className={"info_descr"} style={{ marginTop: 16 }}>
+                      <FaUser style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Active
+                    </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {professional.active ? 'Yes' : 'No'}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
@@ -177,9 +204,14 @@ function ProfessionalOverview() {
                   </Card.Body>
                 </Card>
                 <Card style={{ marginTop: 16 }}>
-                  <Card.Header>Notes</Card.Header>
+                  <Card.Header>
+                    <FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} />
+                    Notes
+                  </Card.Header>
                   <Card.Body>
-                    <div className={"info_descr"}>Notes</div>
+                    <div className={"info_descr"}>
+                      <FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Notes
+                    </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {professional.notes || 'N/A'}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>

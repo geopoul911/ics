@@ -6,7 +6,8 @@ import NavigationBar from "../../../core/navigation_bar/navigation_bar";
 import Footer from "../../../core/footer/footer";
 
 // Icons / Images
-import { FaHashtag, FaSort } from "react-icons/fa";
+import { FaSort } from "react-icons/fa";
+import { FaIdBadge, FaStickyNote, FaStop } from "react-icons/fa";
 import { BsInfoSquare } from "react-icons/bs";
 import { MdCheckCircle, MdCancel } from "react-icons/md";
 
@@ -18,7 +19,6 @@ import axios from "axios";
 // Global Variables
 import { headers, pageHeader } from "../../../global_vars";
 import {
-  EditProjectIdModal,
   EditProjectTitleModal,
   EditProjectConsultantModal,
   EditProjectFilecodeModal,
@@ -27,6 +27,11 @@ import {
   EditProjectStatusModal,
   EditProjectDetailsModal,
   EditProjectNotesModal,
+  EditProjectAssignedModal,
+  EditProjectInprogressModal,
+  EditProjectCompletedModal,
+  EditProjectSettledModal,
+  EditProjectAbandonedModal,
 } from "../../../modals/project_edit_modals";
 import DeleteObjectModal from "../../../modals/delete_object";
 
@@ -37,7 +42,7 @@ function getProjectIdFromPath() {
   return pathParts[pathParts.length - 1];
 }
 
-let overviewIconStyle = { color: "#2a9fd9", marginRight: "0.5em" };
+let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
 
 class ProjectOverview extends React.Component {
   constructor(props) {
@@ -110,23 +115,23 @@ class ProjectOverview extends React.Component {
                   <Card>
                     <Card.Header>
                       <h4>
-                        <FaHashtag style={overviewIconStyle} />
+                        <FaIdBadge style={overviewIconStyle} />
                         Basic Information
                       </h4>
                     </Card.Header>
                     <Card.Body>
                       <div className={"info_descr"}>
-                        <FaHashtag style={overviewIconStyle} /> Project ID
+                        <FaIdBadge style={overviewIconStyle} /> Project ID
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {project.project_id || "N/A"}
-                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
-                          <EditProjectIdModal project={project} refreshData={this.fetchProject} />
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)", display: "flex", gap: 8, alignItems: "center" }}>
+                          <button className="ui button tiny basic" disabled title="Project ID is immutable"><FaStop style={{ marginRight: 6, color: "red" }} />ID</button>
                         </span>
                       </div>
 
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <BsInfoSquare style={overviewIconStyle} /> Title
+                        <FaIdBadge style={overviewIconStyle} /> Title
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {project.title || "N/A"}
@@ -136,7 +141,7 @@ class ProjectOverview extends React.Component {
                       </div>
 
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <BsInfoSquare style={overviewIconStyle} /> File Code
+                        <FaIdBadge style={overviewIconStyle} /> File code
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {project.filecode || "N/A"}
@@ -146,14 +151,14 @@ class ProjectOverview extends React.Component {
                       </div>
 
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <BsInfoSquare style={overviewIconStyle} /> Registration Date
+                        <FaIdBadge style={overviewIconStyle} /> Entered
                       </div>
                       <div className={"info_span"}>
                         {project.registrationdate ? new Date(project.registrationdate).toLocaleDateString() : "N/A"}
                       </div>
 
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <BsInfoSquare style={overviewIconStyle} /> Registration User
+                        <FaIdBadge style={overviewIconStyle} /> User
                       </div>
                       <div className={"info_span"}>
                         {project.registrationuser || "N/A"}
@@ -191,11 +196,8 @@ class ProjectOverview extends React.Component {
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
                         <FaSort style={overviewIconStyle} /> Status
                       </div>
-                      <div className={"info_span"} style={{ position: "relative" }}>
+                      <div className={"info_span"}>
                         {project.status || "N/A"}
-                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
-                          <EditProjectStatusModal project={project} refreshData={this.fetchProject} />
-                        </span>
                       </div>
 
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
@@ -221,6 +223,61 @@ class ProjectOverview extends React.Component {
                           <EditProjectDeadlineModal project={project} refreshData={this.fetchProject} />
                         </span>
                       </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>
+                        <BsInfoSquare style={overviewIconStyle} /> Assigned
+                      </div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {project.assigned ? <span style={{ color: "green" }}><MdCheckCircle /></span> : <span style={{ color: "red" }}><MdCancel /></span>}
+                        {project.assignedate ? ` — ${new Date(project.assignedate).toLocaleDateString()}` : ""}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditProjectAssignedModal project={project} refreshData={this.fetchProject} />
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>
+                        <BsInfoSquare style={overviewIconStyle} /> In progress
+                      </div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {project.inprogress ? <span style={{ color: "green" }}><MdCheckCircle /></span> : <span style={{ color: "red" }}><MdCancel /></span>}
+                        {project.inprogressdate ? ` — ${new Date(project.inprogressdate).toLocaleDateString()}` : ""}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditProjectInprogressModal project={project} refreshData={this.fetchProject} />
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>
+                        <BsInfoSquare style={overviewIconStyle} /> Completed
+                      </div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {project.completed ? <span style={{ color: "green" }}><MdCheckCircle /></span> : <span style={{ color: "red" }}><MdCancel /></span>}
+                        {project.completiondate ? ` — ${new Date(project.completiondate).toLocaleDateString()}` : ""}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditProjectCompletedModal project={project} refreshData={this.fetchProject} />
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>
+                        <BsInfoSquare style={overviewIconStyle} /> Settled
+                      </div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {project.settled ? <span style={{ color: "green" }}><MdCheckCircle /></span> : <span style={{ color: "red" }}><MdCancel /></span>}
+                        {project.settlementdate ? ` — ${new Date(project.settlementdate).toLocaleDateString()}` : ""}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditProjectSettledModal project={project} refreshData={this.fetchProject} />
+                        </span>
+                      </div>
+
+                      <div className={"info_descr"} style={{ marginTop: 16 }}>
+                        <BsInfoSquare style={overviewIconStyle} /> Abandoned
+                      </div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {project.abandoned ? <span style={{ color: "green" }}><MdCheckCircle /></span> : <span style={{ color: "red" }}><MdCancel /></span>}
+                        {project.abandondate ? ` — ${new Date(project.abandondate).toLocaleDateString()}` : ""}
+                        <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                          <EditProjectAbandonedModal project={project} refreshData={this.fetchProject} />
+                        </span>
+                      </div>
                     </Card.Body>
                   </Card>
                 </Grid.Column>
@@ -228,13 +285,13 @@ class ProjectOverview extends React.Component {
                   <Card>
                     <Card.Header>
                       <h4>
-                        <BsInfoSquare style={overviewIconStyle} />
+                        <FaStickyNote style={overviewIconStyle} />
                         Additional Information
                       </h4>
                     </Card.Header>
                     <Card.Body>
                       <div className={"info_descr"}>
-                        <BsInfoSquare style={overviewIconStyle} /> Details
+                        <FaStickyNote style={overviewIconStyle} /> Details
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {project.details || "No details provided"}
@@ -243,7 +300,7 @@ class ProjectOverview extends React.Component {
                         </span>
                       </div>
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <BsInfoSquare style={overviewIconStyle} /> Notes
+                        <FaStickyNote style={overviewIconStyle} /> Notes
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {project.notes || "No notes provided"}

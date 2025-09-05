@@ -42,7 +42,7 @@ function getCountryIdFromPath() {
   return id ? decodeURIComponent(id) : null;
 }
 
-let overviewIconStyle = { color: "#2a9fd9", marginRight: "0.5em" };
+let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
 
 class CountryOverview extends React.Component {
   constructor(props) {
@@ -108,7 +108,7 @@ class CountryOverview extends React.Component {
                     <Card.Header>
                       <BsInfoSquare
                         style={{
-                          color: "#2a9fd9",
+                          color: "#93ab3c",
                           fontSize: "1.5em",
                           marginRight: "0.5em",
                         }}
@@ -116,22 +116,8 @@ class CountryOverview extends React.Component {
                       Country Information
                     </Card.Header>
                     <Card.Body>
-                      {/* Title */}
-                      <div className={"info_descr"}>
-                        <FiType style={overviewIconStyle} /> Title
-                      </div>
-                      <div className={"info_span"} style={{ position: "relative" }}>
-                        {country.title ? country.title : "N/A"}
-                        <span style={{ position: "absolute", right: "0px", top: "50%", transform: "translateY(-50%)" }}>
-                          <EditCountryTitleModal
-                            country={country}
-                            update_state={this.update_state}
-                          />
-                        </span>
-                      </div>
-
                       {/* Country ID */}
-                      <div className={"info_descr"} style={{ marginTop: 16 }}>
+                      <div className={"info_descr"}>
                         <FaHashtag style={overviewIconStyle} /> Country ID (2–3 chars)
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
@@ -143,9 +129,22 @@ class CountryOverview extends React.Component {
                           />
                         </span>
                       </div>
+                      {/* Title */}
+                      <div className={"info_descr"}>
+                        <FiType style={overviewIconStyle} /> Country
+                      </div>
+                      <div className={"info_span"} style={{ position: "relative" }}>
+                        {country.title ? country.title : "N/A"}
+                        <span style={{ position: "absolute", right: "0px", top: "50%", transform: "translateY(-50%)" }}>
+                          <EditCountryTitleModal
+                            country={country}
+                            update_state={this.update_state}
+                          />
+                        </span>
+                      </div>
 
                       {/* Currency */}
-                      <div className={"info_descr"} style={{ marginTop: 16 }}>
+                      <div className={"info_descr"}>
                         <GiMoneyStack style={overviewIconStyle} /> Currency
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
@@ -158,9 +157,9 @@ class CountryOverview extends React.Component {
                         </span>
                       </div>
 
-                      {/* Order Index */}
-                      <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <BiSort style={overviewIconStyle} /> Order Index
+                      {/* Order by */}
+                      <div className={"info_descr"}>
+                        <BiSort style={overviewIconStyle} /> Order by
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {(typeof country.orderindex === "number" ||
@@ -180,7 +179,6 @@ class CountryOverview extends React.Component {
                         objectType="Country"
                         objectId={country.country_id}
                         objectName={country.title}
-                        warningMessage="This will also delete all provinces and cities associated with this country."
                         onObjectDeleted={() => {
                           window.location.href = "/regions/all_countries";
                         }}

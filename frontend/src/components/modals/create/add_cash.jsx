@@ -190,7 +190,7 @@ function AddCashModal({ onCashCreated }) {
         <BiPlus
           style={{ color: "white", fontSize: "1.3em", marginRight: "0.3em" }}
         />
-        Create new Cash Entry
+        Create new Cash entry
       </Button>
 
       <Modal
@@ -201,15 +201,15 @@ function AddCashModal({ onCashCreated }) {
         centered
       >
         <Modal.Header closeButton>
-          <Modal.Title>Create new Cash Entry</Modal.Title>
+          <Modal.Title>Create new Cash entry</Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
           <Row className="justify-content-md-center">
             <Col>
               <Form>
-                {/* Basic Information */}
-                <h6 className="mb-3">Basic Information</h6>
+                {/* Basic information */}
+                <h6 className="mb-3">Basic information</h6>
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
@@ -230,7 +230,7 @@ function AddCashModal({ onCashCreated }) {
                         onChange={(e) => setProject(e.target.value)}
                         value={project}
                       >
-                        <option value="">Select Project</option>
+                        <option value="">Select project</option>
                         {Array.isArray(projects) && projects.map((project) => (
                           <option key={project.project_id} value={project.project_id}>
                             {project.title}
@@ -250,7 +250,7 @@ function AddCashModal({ onCashCreated }) {
                         onChange={(e) => setCountry(e.target.value)}
                         value={country}
                       >
-                        <option value="">Select Country</option>
+                        <option value="">Select country</option>
                         {Array.isArray(countries) && countries.map((country) => (
                           <option key={country.country_id} value={country.country_id}>
                             {country.title}
@@ -261,7 +261,7 @@ function AddCashModal({ onCashCreated }) {
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Transaction Date *:</Form.Label>
+                      <Form.Label>Transaction date *:</Form.Label>
                       <Form.Control
                         type="date"
                         onChange={(e) => setTrandate(e.target.value)}
@@ -280,7 +280,7 @@ function AddCashModal({ onCashCreated }) {
                         onChange={(e) => setConsultant(e.target.value)}
                         value={consultant}
                       >
-                        <option value="">Select Consultant</option>
+                        <option value="">Select consultant</option>
                         {Array.isArray(consultants) && consultants.map((consultant) => (
                           <option key={consultant.consultant_id} value={consultant.consultant_id}>
                             {consultant.fullname}
@@ -308,7 +308,7 @@ function AddCashModal({ onCashCreated }) {
                   <Row>
                     <Col md={6}>
                       <Form.Group className="mb-3">
-                        <Form.Label>Amount Expense:</Form.Label>
+                        <Form.Label>Amount expense:</Form.Label>
                         <Form.Control
                           type="number"
                           placeholder="e.g., 100.00"
@@ -323,7 +323,7 @@ function AddCashModal({ onCashCreated }) {
                   <Row>
                     <Col md={6}>
                       <Form.Group className="mb-3">
-                        <Form.Label>Amount Payment:</Form.Label>
+                        <Form.Label>Amount payment:</Form.Label>
                         <Form.Control
                           type="number"
                           placeholder="e.g., 100.00"
@@ -378,7 +378,7 @@ function AddCashModal({ onCashCreated }) {
                 {!isTrandateValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Transaction Date is required.
+                    Transaction date is required.
                   </li>
                 )}
                 {!isConsultantValid && (

@@ -14,7 +14,7 @@ import { Link } from "react-router-dom";
 import { pageHeader } from "../../global_vars";
 
 // Variables
-let iconStyle = { color: "#2a9fd9", fontSize: "1.5em", marginRight: 20 };
+let iconStyle = { color: "#93ab3c", fontSize: "1.5em", marginRight: 20 };
 
 class DataManagementRoot extends React.Component {
   render() {
@@ -37,7 +37,7 @@ class DataManagementRoot extends React.Component {
                   marginRight: "15%"
                 }}>
                   <h3 style={{ 
-                    color: "#2a9fd9", 
+                    color: "#93ab3c", 
                     margin: "0", 
                     fontSize: "1.2em", 
                     fontWeight: "bold" 
@@ -62,7 +62,7 @@ class DataManagementRoot extends React.Component {
                   marginRight: "15%"
                 }}>
                   <h3 style={{ 
-                    color: "#2a9fd9", 
+                    color: "#93ab3c", 
                     margin: "0", 
                     fontSize: "1.2em", 
                     fontWeight: "bold" 
@@ -88,7 +88,7 @@ class DataManagementRoot extends React.Component {
                   marginRight: "15%"
                 }}>
                   <h3 style={{ 
-                    color: "#2a9fd9", 
+                    color: "#93ab3c", 
                     margin: "0", 
                     fontSize: "1.2em", 
                     fontWeight: "bold" 

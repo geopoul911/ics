@@ -2,8 +2,8 @@
 import React from "react";
 
 // Icons / Images
-import { BsInfoSquare } from "react-icons/bs";
-import { FaHashtag, FaSort, FaStop } from "react-icons/fa";
+import { FaStop } from "react-icons/fa";
+import { FaIdBadge } from "react-icons/fa";
 import { MdSecurity, MdCheckCircle, MdCancel } from "react-icons/md";
 
 // Modules / Functions
@@ -41,7 +41,7 @@ function getInsuranceCarrierIdFromPath() {
   return id ? decodeURIComponent(id) : null;
 }
 
-let overviewIconStyle = { color: "#2a9fd9", marginRight: "0.5em" };
+let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
 
 class InsuranceCarrierOverview extends React.Component {
   constructor(props) {
@@ -106,9 +106,9 @@ class InsuranceCarrierOverview extends React.Component {
                 <Grid.Column>
                   <Card>
                     <Card.Header>
-                      <BsInfoSquare
+                      <FaIdBadge
                         style={{
-                          color: "#2a9fd9",
+                          color: "#93ab3c",
                           fontSize: "1.5em",
                           marginRight: "0.5em",
                         }}
@@ -118,7 +118,7 @@ class InsuranceCarrierOverview extends React.Component {
                     <Card.Body>
                       {/* Insurance Carrier ID */}
                       <div className={"info_descr"}>
-                        <FaHashtag style={overviewIconStyle} /> Insurance Carrier ID
+                        <FaIdBadge style={overviewIconStyle} /> Insurance Carrier ID
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {insurance_carrier.insucarrier_id ? insurance_carrier.insucarrier_id : "N/A"}
@@ -131,8 +131,8 @@ class InsuranceCarrierOverview extends React.Component {
                       </div>
 
                       {/* Title */}
-                      <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <BsInfoSquare style={overviewIconStyle} /> Title
+                      <div className={"info_descr"}>
+                        <FaIdBadge style={overviewIconStyle} /> Public Insurance
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {insurance_carrier.title ? insurance_carrier.title : "N/A"}
@@ -144,9 +144,9 @@ class InsuranceCarrierOverview extends React.Component {
                         </span>
                       </div>
 
-                      {/* Order Index */}
-                      <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <FaSort style={overviewIconStyle} /> Order Index
+                      {/* Order by */}
+                      <div className={"info_descr"}>
+                        <FaIdBadge style={overviewIconStyle} /> Order by
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {(typeof insurance_carrier.orderindex === "number" ||
@@ -166,7 +166,6 @@ class InsuranceCarrierOverview extends React.Component {
                         objectId={insurance_carrier.insucarrier_id}
                         objectName={insurance_carrier.title}
                         objectType="InsuranceCarrier"
-                        warningMessage="This will also delete all client insurance associations with this carrier."
                         onObjectDeleted={() => {
                           window.location.href = "/administration/all_insurance_carriers";
                         }}
@@ -179,7 +178,7 @@ class InsuranceCarrierOverview extends React.Component {
                     <Card.Header>
                       <MdSecurity
                         style={{
-                          color: "#2a9fd9",
+                          color: "#93ab3c",
                           fontSize: "1.5em",
                           marginRight: "0.5em",
                         }}

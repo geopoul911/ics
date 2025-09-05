@@ -404,11 +404,11 @@ export function EditDocumentCreatedModal({ document, update_state }) {
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Created Date</Modal.Title>
+          <Modal.Title>Edit Created</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form.Group>
-              <Form.Label>Created Date *:</Form.Label>
+              <Form.Label>Created *</Form.Label>
               <Form.Control
                 type="date"
                 value={created}
@@ -474,15 +474,15 @@ export function EditDocumentValidUntilModal({ document, update_state }) {
 
   return (
     <>
-      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Valid Until</Button>
+      <Button size="tiny" basic onClick={handleShow}><FiEdit style={{ marginRight: 6 }} /> Edit Valid until</Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Valid Until Date</Modal.Title>
+          <Modal.Title>Edit Valid until</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form.Group>
-              <Form.Label>Valid Until Date *:</Form.Label>
+              <Form.Label>Valid until *</Form.Label>
               <Form.Control
                 type="date"
                 value={validuntil}
@@ -840,14 +840,14 @@ export function EditDocumentStatusModal({ document, update_state }) {
 
   const statusChoices = [
     { value: "", label: "No Status" },
-    { value: "SENT_TO_ATHENS", label: "Αποστολή προς την Αθήνα" },
-    { value: "RECEIVED_IN_ATHENS", label: "Παραλήφθηκε από την Αθήνα" },
-    { value: "SENT_TO_TORONTO", label: "Αποστολή προς το Τορόντο" },
-    { value: "RECEIVED_IN_TORONTO", label: "Παραλήφθηκε από το Τορόντο" },
-    { value: "SENT_TO_MONTREAL", label: "Αποστολή προς το Μόντρεαλ" },
-    { value: "RECEIVED_IN_MONTREAL", label: "Παραλήφθηκε από το Μόντρεαλ" },
-    { value: "SENT_TO_CLIENT", label: "Αποστολή προς τον Πελάτη" },
-    { value: "RECEIVED_FROM_CLIENT", label: "Παραλήφθηκε από τον Πελάτη" },
+    { value: "SENT_TO_ATHENS", label: "Sent To Athens" },
+    { value: "RECEIVED_IN_ATHENS", label: "Received From Athens" },
+    { value: "SENT_TO_TORONTO", label: "Sent To Toronto" },
+    { value: "RECEIVED_IN_TORONTO", label: "Received From Toronto" },
+    { value: "SENT_TO_MONTREAL", label: "Sent To Montreal" },
+    { value: "RECEIVED_IN_MONTREAL", label: "Received From Montreal" },
+    { value: "SENT_TO_CLIENT", label: "Sent To Client" },
+    { value: "RECEIVED_FROM_CLIENT", label: "Received From Client" },
   ];
 
   useEffect(() => {

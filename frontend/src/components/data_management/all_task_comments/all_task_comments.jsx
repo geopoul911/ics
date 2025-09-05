@@ -23,6 +23,7 @@ import {
   paginationOptions,
   headers,
   pageHeader,
+  loader,
 } from "../../global_vars";
 
 // Variables
@@ -54,7 +55,7 @@ const columns = [
   },
   {
     dataField: "commentregistration",
-    text: "Registration Date",
+    text: "Entered",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => {
@@ -66,14 +67,14 @@ const columns = [
   },
   {
     dataField: "consultant.surname",
-    text: "Consultant Surname",
+    text: "Consultant surname",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => row.consultant?.surname || "",
   },
   {
     dataField: "consultant.name",
-    text: "Consultant Name",
+    text: "Consultant name",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => row.consultant?.name || "",
@@ -199,7 +200,7 @@ class AllTaskComments extends React.Component {
                   </div>
                 </>
               ) : (
-                <div>Loading...</div>
+                <div>{loader()}</div>
               )}
             </div>
           </div>

@@ -18,7 +18,7 @@ class FourOFour extends React.Component {
       <>
         <NavigationBar />
         <div className="imageContainer">
-          <Button style={{color: "#2a9fd9", backgroundColor: "black", border: "1px solid #2a9fd9"}} onClick={() => (window.location = "/")}>
+          <Button style={{color: "#93ab3c", backgroundColor: "black", border: "1px solid #93ab3c"}} onClick={() => (window.location = "/")}>
             Back to home page
           </Button>
         </div>

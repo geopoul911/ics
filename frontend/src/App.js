@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { useState } from "react";
 
 // Core
-import Home from "./components/core/home/home";
 import About from "./components/core/about/about";
 import Terms from "./components/core/terms/terms";
 import Help from "./components/core/help/help";
@@ -96,7 +95,7 @@ function App() {
           isLoggedIn={!!userToken}
           exact={true}
           path="/"
-          render={(props) => <Home {...props} setUserToken={setUserToken} />}
+          render={(props) => <Dashboard {...props} setUserToken={setUserToken} />}
         />
         <Route
           exact

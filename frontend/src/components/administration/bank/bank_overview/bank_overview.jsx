@@ -2,8 +2,8 @@
 import React from "react";
 
 // Icons / Images
-import { BsInfoSquare } from "react-icons/bs";
-import { FaHashtag, FaSort, FaStop } from "react-icons/fa";
+import { FaStop } from "react-icons/fa";
+import { FaIdBadge, FaStickyNote } from "react-icons/fa";
 import { MdSecurity, MdCheckCircle, MdCancel } from "react-icons/md";
 
 // Modules / Functions
@@ -44,7 +44,7 @@ function getBankIdFromPath() {
   return id ? decodeURIComponent(id) : null;
 }
 
-let overviewIconStyle = { color: "#2a9fd9", marginRight: "0.5em" };
+let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
 
 class BankOverview extends React.Component {
   constructor(props) {
@@ -111,9 +111,9 @@ class BankOverview extends React.Component {
                 <Grid.Column>
                   <Card>
                     <Card.Header>
-                      <BsInfoSquare
+                      <FaIdBadge
                         style={{
-                          color: "#2a9fd9",
+                          color: "#93ab3c",
                           fontSize: "1.5em",
                           marginRight: "0.5em",
                         }}
@@ -123,7 +123,7 @@ class BankOverview extends React.Component {
                     <Card.Body>
                       {/* Bank ID */}
                       <div className={"info_descr"}>
-                        <FaHashtag style={overviewIconStyle} /> Bank ID
+                        <FaIdBadge style={overviewIconStyle} /> Bank ID
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {bank.bank_id ? bank.bank_id : "N/A"}
@@ -137,7 +137,7 @@ class BankOverview extends React.Component {
 
                       {/* Bank Name */}
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <BsInfoSquare style={overviewIconStyle} /> Bank Name
+                        <FaIdBadge style={overviewIconStyle} /> Bank
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {bank.bankname ? bank.bankname : "N/A"}
@@ -151,7 +151,7 @@ class BankOverview extends React.Component {
 
                       {/* Country */}
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <BsInfoSquare style={overviewIconStyle} /> Country
+                        <FaStickyNote style={overviewIconStyle} /> Country
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {bank.country ? (typeof bank.country === 'object' ? bank.country.title : bank.country) : "N/A"}
@@ -163,9 +163,9 @@ class BankOverview extends React.Component {
                         </span>
                       </div>
 
-                      {/* Order Index */}
+                      {/* Order by */}
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <FaSort style={overviewIconStyle} /> Order Index
+                        <FaIdBadge style={overviewIconStyle} /> Order by
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {(typeof bank.orderindex === "number" ||
@@ -180,9 +180,9 @@ class BankOverview extends React.Component {
                         </span>
                       </div>
 
-                      {/* Institution Number */}
+                      {/* Bank code */}
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <BsInfoSquare style={overviewIconStyle} /> Institution Number
+                        <FaStickyNote style={overviewIconStyle} /> Bank code
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {bank.institutionnumber ? bank.institutionnumber : "N/A"}
@@ -194,9 +194,9 @@ class BankOverview extends React.Component {
                         </span>
                       </div>
 
-                      {/* SWIFT Code */}
+                      {/* Swift code */}
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <BsInfoSquare style={overviewIconStyle} /> SWIFT Code
+                        <FaStickyNote style={overviewIconStyle} /> Swift code
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {bank.swiftcode ? bank.swiftcode : "N/A"}
@@ -213,7 +213,6 @@ class BankOverview extends React.Component {
                         objectId={bank.bank_id}
                         objectName={bank.bankname}
                         objectType="Bank"
-                        warningMessage="This will also delete all bank client accounts and bank project accounts associated with this bank."
                         onObjectDeleted={() => {
                           window.location.href = "/administration/all_banks";
                         }}
@@ -226,7 +225,7 @@ class BankOverview extends React.Component {
                     <Card.Header>
                       <MdSecurity
                         style={{
-                          color: "#2a9fd9",
+                          color: "#93ab3c",
                           fontSize: "1.5em",
                           marginRight: "0.5em",
                         }}

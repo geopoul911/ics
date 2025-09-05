@@ -7,6 +7,7 @@ import {
   Legend,
 } from 'chart.js';
 import axios from 'axios';
+import { authHeaders } from '../../global_vars';
 
 ChartJS.register(
   ArcElement,
@@ -27,7 +28,7 @@ const ProjectStatusChart = () => {
 
   const loadProjectStatusData = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/dashboard/project-status/');
+      const response = await axios.get('http://localhost:8000/api/dashboard/project-status/', { headers: authHeaders() });
       if (response.data.success) {
         const data = response.data.data;
         setChartData({

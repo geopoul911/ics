@@ -2,8 +2,8 @@
 import React from "react";
 
 // Icons / Images
-import { BsInfoSquare } from "react-icons/bs";
-import { FaHashtag, FaSort, FaStop } from "react-icons/fa";
+import { FaStop } from "react-icons/fa";
+import { FaIdBadge } from "react-icons/fa";
 import { MdSecurity, MdCheckCircle, MdCancel } from "react-icons/md";
 
 // Modules / Functions
@@ -41,7 +41,7 @@ function getProjectCategoryIdFromPath() {
   return id ? decodeURIComponent(id) : null;
 }
 
-let overviewIconStyle = { color: "#2a9fd9", marginRight: "0.5em" };
+let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
 
 class ProjectCategoryOverview extends React.Component {
   constructor(props) {
@@ -106,9 +106,9 @@ class ProjectCategoryOverview extends React.Component {
                 <Grid.Column>
                   <Card>
                     <Card.Header>
-                      <BsInfoSquare
+                      <FaIdBadge
                         style={{
-                          color: "#2a9fd9",
+                          color: "#93ab3c",
                           fontSize: "1.5em",
                           marginRight: "0.5em",
                         }}
@@ -118,7 +118,7 @@ class ProjectCategoryOverview extends React.Component {
                     <Card.Body>
                       {/* Project Category ID */}
                       <div className={"info_descr"}>
-                        <FaHashtag style={overviewIconStyle} /> Category ID
+                        <FaIdBadge style={overviewIconStyle} /> Category ID
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {project_category.projcate_id ? project_category.projcate_id : "N/A"}
@@ -132,7 +132,7 @@ class ProjectCategoryOverview extends React.Component {
 
                       {/* Title */}
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <BsInfoSquare style={overviewIconStyle} /> Title
+                        <FaIdBadge style={overviewIconStyle} /> Title
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {project_category.title ? project_category.title : "N/A"}
@@ -144,9 +144,9 @@ class ProjectCategoryOverview extends React.Component {
                         </span>
                       </div>
 
-                      {/* Order Index */}
+                      {/* Order by */}
                       <div className={"info_descr"} style={{ marginTop: 16 }}>
-                        <FaSort style={overviewIconStyle} /> Order Index
+                        <FaIdBadge style={overviewIconStyle} /> Order by
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
                         {(typeof project_category.orderindex === "number" ||
@@ -166,7 +166,6 @@ class ProjectCategoryOverview extends React.Component {
                         object_id={project_category.projcate_id}
                         object_name={project_category.title}
                         object_type="ProjectCategory"
-                        warningMessage="This will also delete all projects associated with this category."
                         onDeleteSuccess={() => {
                           window.location.href = "/administration/all_project_categories";
                         }}
@@ -179,7 +178,7 @@ class ProjectCategoryOverview extends React.Component {
                     <Card.Header>
                       <MdSecurity
                         style={{
-                          color: "#2a9fd9",
+                          color: "#93ab3c",
                           fontSize: "1.5em",
                           marginRight: "0.5em",
                         }}

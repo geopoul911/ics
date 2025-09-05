@@ -210,7 +210,7 @@ function AddCityModal() {
             <Col>
               <Form>
                 <Form.Group className="mb-3">
-                  <Form.Label>Title:</Form.Label>
+                  <Form.Label>City:</Form.Label>
                   <Form.Control
                     maxLength={40}
                     placeholder="e.g., ATHENS"
@@ -267,7 +267,7 @@ function AddCityModal() {
                 </Form.Group>
 
                 <Form.Group className="mb-3">
-                  <Form.Label>Order Index*:</Form.Label>
+                  <Form.Label>Order by*:</Form.Label>
                   <Form.Control
                     type="number"
                     placeholder="e.g., 1"
@@ -314,7 +314,7 @@ function AddCityModal() {
                 {!isOrderIndexValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Order Index is required and must be an integer.
+                    Order by is required and must be an integer.
                   </li>
                 )}
               </ul>

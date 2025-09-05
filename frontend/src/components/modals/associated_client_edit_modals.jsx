@@ -299,21 +299,21 @@ export function EditAssociatedClientOrderindexModal({ associatedClient, update_s
   return (
     <>
       <Button size="tiny" basic onClick={handleShow}>
-        <FiEdit style={{ marginRight: 6 }} /> Edit Order Index
+        <FiEdit style={{ marginRight: 6 }} /> Edit Order by
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Order Index</Modal.Title>
+          <Modal.Title>Edit Order by</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form.Group>
-              <Form.Label>Order Index *:</Form.Label>
+              <Form.Label>Order by *:</Form.Label>
               <Form.Control
                 type="number"
                 value={orderindex}
                 onChange={(e) => setOrderindex(e.target.value)}
-                placeholder="Enter order index"
+                placeholder="Enter order by"
               />
             </Form.Group>
         </Modal.Body>
@@ -323,9 +323,9 @@ export function EditAssociatedClientOrderindexModal({ associatedClient, update_s
               <div style={{ color: "green" }}>Looks good.</div>
             ) : (
               <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
-                {!String(orderindex).trim() && (<li>Order index is required</li>)}
+                {!String(orderindex).trim() && (<li>Order by is required</li>)}
                 {(String(orderindex).trim() && (isNaN(parseInt(orderindex, 10)) || parseInt(orderindex, 10) < 0)) && (
-                  <li>Order index must be a positive number</li>
+                  <li>Order by must be a positive number</li>
                 )}
               </ul>
             )}

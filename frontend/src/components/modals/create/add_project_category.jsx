@@ -170,12 +170,12 @@ export default function AddProjectCategoryModal({ onProjectCategoryCreated }) {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Order Index *</Form.Label>
+              <Form.Label>Order by *</Form.Label>
               <Form.Control
                 type="text"
                 value={orderindex}
                 onChange={(e) => setOrderIndex(validateOrderIndex(clampLen(e.target.value, 5)))}
-                placeholder="Enter order index (numeric)"
+                placeholder="Enter order by (numeric)"
                 isInvalid={!isOrderIndexValid}
               />
             </Form.Group>
@@ -212,7 +212,7 @@ export default function AddProjectCategoryModal({ onProjectCategoryCreated }) {
                 {!isOrderIndexValid && (
                   <li>
                     <AiOutlineWarning style={{ marginRight: 5 }} />
-                    Order index is required and must be a valid number
+                    Order by is required and must be a valid number
                   </li>
                 )}
               </ul>

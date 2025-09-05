@@ -12,6 +12,8 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { Modal, Col, Form, Row } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
+import PhoneInput from "react-phone-input-2";
+import 'react-phone-input-2/lib/bootstrap.css';
 
 // Global Variables
 import { headers } from "../../global_vars";
@@ -36,11 +38,6 @@ const toSmallInt = (value) => {
 const countryCodeRegex = /^([A-Z]{3}(,\s[A-Z]{3})*)?$/;
 
 // Validation helpers
-// eslint-disable-next-line no-useless-escape
-const validatePhone = (value) => value.replace(/[^\d\s\-()\+]/g, "");
-// eslint-disable-next-line no-useless-escape
-const validateMobile = (value) => value.replace(/[^\d\s\-()\+]/g, "");
-// eslint-disable-next-line no-useless-escape
 const validateUsername = (value) => value.replace(/[^a-zA-Z0-9]/g, "");
 const validatePassword = (password) => {
   const hasCapital = /[A-Z]/.test(password);
@@ -129,8 +126,8 @@ function AddConsultantModal() {
   const isConsultantIdValid = consultantId.length >= 2 && consultantId.length <= 10;
   const isFullnameValid = fullname.trim().length >= 2 && fullname.trim().length <= 40;
   const isEmailValid = email !== "" && email.includes("@") && email.length >= 5; // required
-  const isPhoneValid = !phone || phone.length <= 15; // optional
-  const isMobileValid = mobile !== "" && mobile.length <= 15; // required
+  const isPhoneValid = !phone || phone.replace(/\D/g, '').length >= 7; // optional
+  const isMobileValid = mobile.replace(/\D/g, '').length >= 7; // required
   const isRoleValid = ["A", "S", "U", "C"].includes(role);
   const isUsernameValid = username.length >= 3 && username.length <= 15;
   const isPasswordValid = validatePassword(password) && password === confirmPassword;
@@ -157,8 +154,8 @@ function AddConsultantModal() {
       formData.append('consultant_id', consultantId);
       formData.append('fullname', fullname.trim());
       formData.append('email', email);
-      if (phone) formData.append('phone', phone);
-      formData.append('mobile', mobile);
+      if (phone) formData.append('phone', ('+' + phone.replace(/\D/g, '')));
+      formData.append('mobile', ('+' + mobile.replace(/\D/g, '')));
       formData.append('role', role);
       formData.append('username', username);
       formData.append('password', password);
@@ -277,7 +274,7 @@ function AddConsultantModal() {
               </Col>
               <Col md={6}>
                 <Form.Group>
-                  <Form.Label>Full Name *</Form.Label>
+                  <Form.Label>Full name *</Form.Label>
                   <Form.Control
                     type="text"
                     value={fullname}
@@ -293,9 +290,9 @@ function AddConsultantModal() {
             </Row>
 
             <Row>
-                             <Col md={6}>
+              <Col md={6}>
                  <Form.Group>
-                   <Form.Label>Email *</Form.Label>
+                   <Form.Label>E-mail *</Form.Label>
                    <Form.Control
                      type="email"
                      value={email}
@@ -310,37 +307,33 @@ function AddConsultantModal() {
                </Col>
                <Col md={6}>
                  <Form.Group>
-                   <Form.Label>Phone</Form.Label>
-                   <Form.Control
-                     type="text"
-                     value={phone}
-                     onChange={(e) => setPhone(validatePhone(clampLen(e.target.value, 15)))}
-                     placeholder="Enter phone number (digits, spaces, -, (, ), +)"
-                     isInvalid={phone !== "" && !isPhoneValid}
-                   />
-                   <Form.Control.Feedback type="invalid">
-                     Phone must be 15 characters or less.
-                   </Form.Control.Feedback>
-                 </Form.Group>
-               </Col>
+                   <Form.Label>Telephone</Form.Label>
+                   <PhoneInput
+                    country={'gr'}
+                    value={phone}
+                    onChange={(val) => setPhone(val)}
+                    enableSearch
+                    countryCodeEditable={false}
+                    inputProps={{ name: 'phone' }}
+                  />
+                </Form.Group>
+              </Col>
             </Row>
 
             <Row>
-                             <Col md={6}>
-                 <Form.Group>
-                   <Form.Label>Mobile *</Form.Label>
-                   <Form.Control
-                     type="text"
-                     value={mobile}
-                     onChange={(e) => setMobile(validateMobile(clampLen(e.target.value, 15)))}
-                     placeholder="Enter mobile number (digits, spaces, -, (, ), +)"
-                     isInvalid={mobile !== "" && !isMobileValid}
-                   />
-                   <Form.Control.Feedback type="invalid">
-                     Mobile number must be 15 characters or less
-                   </Form.Control.Feedback>
-                 </Form.Group>
-               </Col>
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label>Cell phone *</Form.Label>
+                  <PhoneInput
+                    country={'gr'}
+                    value={mobile}
+                    onChange={(val) => setMobile(val)}
+                    enableSearch
+                    countryCodeEditable={false}
+                    inputProps={{ name: 'mobile' }}
+                  />
+                </Form.Group>
+              </Col>
               <Col md={6}>
                 <Form.Group>
                   <Form.Label>Role *</Form.Label>
@@ -382,7 +375,7 @@ function AddConsultantModal() {
               <Col md={6}>
                 <Form.Group>
                   <Form.Label>Password *</Form.Label>
-                                     <Form.Control
+                    <Form.Control
                      type="password"
                      value={password}
                      onChange={(e) => setPassword(e.target.value)}
@@ -414,7 +407,7 @@ function AddConsultantModal() {
               </Col>
               <Col md={6}>
                 <Form.Group>
-                  <Form.Label>Order Index *</Form.Label>
+                  <Form.Label>Order by *</Form.Label>
                   <Form.Control
                     type="number"
                     value={orderindex}
@@ -423,7 +416,7 @@ function AddConsultantModal() {
                     isInvalid={!isOrderIndexValid}
                   />
                   <Form.Control.Feedback type="invalid">
-                    Order Index is required and must be an integer
+                    Order by is required and must be an integer
                   </Form.Control.Feedback>
                 </Form.Group>
               </Col>
@@ -544,7 +537,7 @@ function AddConsultantModal() {
                  {!isMobileValid && (
                    <li>
                      <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                     Mobile is required (max 15 chars).
+                     Mobile is required and must be at least 7 digits.
                    </li>
                  )}
                  {!isRoleValid && (

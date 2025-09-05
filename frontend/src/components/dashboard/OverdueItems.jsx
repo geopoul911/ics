@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ListGroup, Badge, Spinner, Button } from 'react-bootstrap';
 import { FaExclamationTriangle, FaCalendarAlt, FaClock } from 'react-icons/fa';
 import axios from 'axios';
+import { authHeaders } from '../global_vars';
 
 const OverdueItems = () => {
   const [overdueItems, setOverdueItems] = useState([]);
@@ -13,7 +14,7 @@ const OverdueItems = () => {
 
   const loadOverdueItems = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/dashboard/overdue-items/');
+      const response = await axios.get('http://localhost:8000/api/dashboard/overdue-items/', { headers: authHeaders() });
       if (response.data.success) {
         setOverdueItems(response.data.data);
       }

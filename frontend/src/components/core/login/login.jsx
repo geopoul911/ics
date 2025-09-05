@@ -2,9 +2,9 @@
 import React from "react";
 
 // Modules / Functions
+import axios from "axios";
 import { Form, Alert } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
-import axios from "axios";
 
 // Custom made components
 import NavigationBar from "../navigation_bar/navigation_bar";
@@ -14,7 +14,7 @@ import Footer from "../footer/footer";
 import "./login.css";
 
 // Global Variables
-import { loader, pageHeader } from "../../global_vars";
+import { headers, loader, pageHeader } from "../../global_vars";
 
 // Icons - Images
 import Logo from "../../../images/core/logos/logo_white.png";
@@ -44,73 +44,72 @@ class Login extends React.Component {
   }
 
   // on login attempt
-  onSubmit = async (e) => {
+  onSubmit = (e) => {
     e.preventDefault();
     const username = e.target.username.value;
     const password = e.target.password.value;
-    
-    try {
-      const response = await axios.post(LOGIN, {
+    axios({
+      method: "post",
+      url: LOGIN,
+      headers: headers,
+      data: {
         username,
         password,
-      });
-      
+      },
+    })
       // Local Storage is set whenever a user is logged in.
-      const token = response?.data?.token;
-      localStorage.setItem("userToken", token);
-      localStorage.setItem("user-token", token); // Also set for new API
-      localStorage.setItem("user", username);
-      localStorage.setItem("user_id", response?.data?.user?.id);
-      localStorage.setItem("user_email", response?.data?.user?.email);
+      .then((res) => {
+        const token = res.data.token;
+        localStorage.setItem("userToken", token);
+        localStorage.setItem("consultant_id", res?.data?.user?.consultant_id);
+        localStorage.setItem("user-token", token); // Also set for new API
+        localStorage.setItem("user", username);
+        localStorage.setItem("user_id", res?.data?.user?.id);
+        localStorage.setItem("user_email", res?.data?.user?.email);
 
-      this.props.setUserToken(token);
-      this.props.history.push("/");
-    } catch (error) {
-      console.error('Login error:', error);
-      
-      // Django axes Custom modification to allow white listed addresses
-      if (error.message.includes('failed_wl')) {
-        this.setState({
-          error_message:
-            "Login attempt Failed. \n Please verify your username and password.",
-          attemptsRemaining: this.state.attemptsRemaining - 1,
-        });
-      } else {
-        this.setState({
-          error_message:
-            "Login attempt Failed. \n Please verify your username and password.",
-          whiteListed: true,
-        });
-      }
+        this.props.setUserToken(token);
+        this.props.history.push("/dashboard");
+      })
+      .catch((e) => {
+        // Django axes Custom modification to allow white listed addresses
+        if (e.response.data.failed_wl) {
+          this.setState({
+            error_message:
+              "Login attempt Failed. \n Please verify your username and password.",
+            attemptsRemaining: this.state.attemptsRemaining - 1,
+          });
+        } else {
+          this.setState({
+            error_message:
+              "Login attempt Failed. \n Please verify your username and password.",
+            whiteListed: true,
+          });
+        }
 
-      // block the user if they fail 5 times and his IP is not whitelisted
-      if (this.state.attemptsRemaining <= 0) {
-        this.setState({
-          isBlocked: true,
-        });
-      }
-    }
+        // block the user if they fail 5 times and his IP is not whitelisted
+        if (this.state.attemptsRemaining <= 0) {
+          this.setState({
+            isBlocked: true,
+          });
+        }
+      });
   };
 
   // When component mounts, we will need to check if IP is not in blacklist
   // and also get attempt num / block status
-  componentDidMount = async () => {
-    try {
-      const response = await axios.get(CHECK_IP);
-      this.setState({
-        isBlocked: response?.data?.isBlocked,
-        attemptsRemaining: response?.data?.attempts_remaining,
-        is_loaded: true,
+  componentDidMount() {
+    axios
+      .get(CHECK_IP, {
+        headers: { 'Content-Type': 'application/json' },
+      })
+      .then((res) => {
+        this.setState({
+          isBlocked: res.data.isBlocked,
+          attemptsRemaining: res.data.attempts_remaining,
+          is_loaded: true,
+        });
       });
-    } catch (error) {
-      console.error('Error checking access status:', error);
-      this.setState({
-        isBlocked: false,
-        attemptsRemaining: 5,
-        is_loaded: true,
-      });
-    }
-  };
+  }
 
   componentDidUpdate(prevProps, prevState) {
     // Check if error_message has changed
@@ -145,7 +144,7 @@ class Login extends React.Component {
 
     if (isLoggedIn) {
       // If user is already logged in, redirect to home
-      this.props.history.push("/");
+      this.props.history.push("/dashboard");
     }
 
     return (
@@ -185,7 +184,8 @@ class Login extends React.Component {
                       disabled={this.state.isBlocked}
                     />
                     <Form.Text className="text-muted">
-                      If you don't have an account, contact ICS's IT Department.
+                      If you don't have an account, contact ICS's IT
+                      Department.
                     </Form.Text>
                   </Form.Group>
                   {/* Password field */}
@@ -239,11 +239,11 @@ class Login extends React.Component {
                   <Button
                     className="loginButton"
                     style={{
-                      backgroundColor: this.state.isBlocked ? "red" : "#2a9fd9",
+                      backgroundColor: this.state.isBlocked ? "red" : "#93ab3c",
                       color: "white",
                     }}
                     type="submit"
-                    disabled={this.state.isBlocked || !!this.state.error_message}
+                    disabled={this.state.isBlocked || this.state.error_message}
                   >
                     Log in
                   </Button>
@@ -261,3 +261,4 @@ class Login extends React.Component {
 }
 
 export default Login;
+

@@ -15,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'f2h*8c#j3m@!q!z4&jv@1g4rb5o5-8ox-^d%o6=gi+e8&d=ofp'
 
 
-# colors = green : #2a9fd9;
+# colors = green : #93ab3c;
 # black / white
 
 
@@ -179,22 +179,24 @@ AUTHENTICATION_BACKENDS = [
 # Django axes documentation : https://django-axes.readthedocs.io/en/latest/
 AXES_ENABLED = True
 
+# Blocks account based on username
+AXES_ONLY_USER_FAILURES = False
+
 # Accounts are blocked after 5th failed attempt
 AXES_FAILURE_LIMIT = 5
+
+# refer to the Django request and response objects documentation
+AXES_META_PRECEDENCE_ORDER = [
+    'HTTP_X_FORWARDED_FOR',
+    'REMOTE_ADDR',
+]
+
+AXES_IP_WHITELIST = []
 
 # Lock out by combination of username and IP (default behavior)
 
 # When user logs in successfully, delete failed attempts
 AXES_RESET_ON_SUCCESS = True
-
-# Lockout timeout (in seconds) - 0 means permanent lockout
-AXES_COOLOFF_TIME = 0
-
-# Custom lockout template
-AXES_LOCKOUT_TEMPLATE = 'axes/lockout.html'
-
-# Custom lockout URL
-AXES_LOCKOUT_URL = '/api/user/lockout/'
 
 # Use custom user model
 AUTH_USER_MODEL = "accounts.Consultant"

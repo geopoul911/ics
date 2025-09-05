@@ -10,6 +10,8 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { Modal, Form } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
+import PhoneInput from "react-phone-input-2";
+import 'react-phone-input-2/lib/bootstrap.css';
 
 // Global Variables
 import { headers } from "../global_vars";
@@ -727,18 +729,18 @@ export function EditClientEmailModal({ client, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="tiny" basic title="Edit Email">
+      <Button onClick={handleShow} size="tiny" basic title="Edit E-mail">
         <FiEdit style={{ marginRight: 6 }} />
-        Email
+        E-mail
       </Button>
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Email</Modal.Title>
+          <Modal.Title>Edit E-mail</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form.Group>
             <Form.Label>
-              Email
+              E-mail
               {email && validateEmail(email) ? (
                 <AiOutlineCheckCircle style={{ color: "green", marginLeft: "0.5em" }} />
               ) : email ? (
@@ -755,7 +757,7 @@ export function EditClientEmailModal({ client, update_state }) {
               isInvalid={email && !isEmailValid}
             />
             <Form.Control.Feedback type="invalid">
-              Please enter a valid email address.
+              Please enter a valid e-mail address.
             </Form.Control.Feedback>
           </Form.Group>
         </Modal.Body>
@@ -765,7 +767,7 @@ export function EditClientEmailModal({ client, update_state }) {
               <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
                 <li>
                   <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                  Email must be a valid email address.
+                  E-mail must be a valid e-mail address.
                 </li>
               </ul>
             ) : (
@@ -847,16 +849,14 @@ export function EditClientPhone1Modal({ client, update_state }) {
         <Modal.Body>
           <Form.Group>
             <Form.Label>Phone 1</Form.Label>
-            <Form.Control
-              type="text"
+            <PhoneInput
+              country={'gr'}
               value={phone1}
-              onChange={(e) => setPhone1(clampLen(e.target.value, 20))}
-              placeholder="Enter phone number"
-              isInvalid={!!phone1 && !isPhoneValid(phone1)}
+              onChange={(val) => setPhone1(val)}
+              enableSearch
+              countryCodeEditable={false}
+              inputProps={{ name: 'phone1' }}
             />
-            <Form.Control.Feedback type="invalid">
-              Phone must be at least 7 digits (spaces ignored).
-            </Form.Control.Feedback>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
@@ -947,16 +947,14 @@ export function EditClientMobile1Modal({ client, update_state }) {
         <Modal.Body>
           <Form.Group>
             <Form.Label>Mobile 1</Form.Label>
-            <Form.Control
-              type="text"
+            <PhoneInput
+              country={'gr'}
               value={mobile1}
-              onChange={(e) => setMobile1(clampLen(e.target.value, 20))}
-              placeholder="Enter mobile number"
-              isInvalid={!!mobile1 && !isPhoneValid(mobile1)}
+              onChange={(val) => setMobile1(val)}
+              enableSearch
+              countryCodeEditable={false}
+              inputProps={{ name: 'mobile1' }}
             />
-            <Form.Control.Feedback type="invalid">
-              Mobile must be at least 7 digits (spaces ignored).
-            </Form.Control.Feedback>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
@@ -1047,16 +1045,14 @@ export function EditClientPhone2Modal({ client, update_state }) {
         <Modal.Body>
           <Form.Group>
             <Form.Label>Phone 2</Form.Label>
-            <Form.Control
-              type="text"
+            <PhoneInput
+              country={'gr'}
               value={phone2}
-              onChange={(e) => setPhone2(clampLen(e.target.value, 20))}
-              placeholder="Enter phone number"
-              isInvalid={!!phone2 && !isPhoneValid(phone2)}
+              onChange={(val) => setPhone2(val)}
+              enableSearch
+              countryCodeEditable={false}
+              inputProps={{ name: 'phone2' }}
             />
-            <Form.Control.Feedback type="invalid">
-              Phone must be at least 7 digits (spaces ignored).
-            </Form.Control.Feedback>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
@@ -1147,16 +1143,14 @@ export function EditClientMobile2Modal({ client, update_state }) {
         <Modal.Body>
           <Form.Group>
             <Form.Label>Mobile 2</Form.Label>
-            <Form.Control
-              type="text"
+            <PhoneInput
+              country={'gr'}
               value={mobile2}
-              onChange={(e) => setMobile2(clampLen(e.target.value, 20))}
-              placeholder="Enter mobile number"
-              isInvalid={!!mobile2 && !isPhoneValid(mobile2)}
+              onChange={(val) => setMobile2(val)}
+              enableSearch
+              countryCodeEditable={false}
+              inputProps={{ name: 'mobile2' }}
             />
-            <Form.Control.Feedback type="invalid">
-              Mobile must be at least 7 digits (spaces ignored).
-            </Form.Control.Feedback>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>

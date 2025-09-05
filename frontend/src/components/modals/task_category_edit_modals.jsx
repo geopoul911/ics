@@ -236,23 +236,23 @@ export function EditTaskCategoryOrderIndexModal({ task_category, onTaskCategoryU
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Task Category Order Index</Modal.Title>
+          <Modal.Title>Edit Task Category Order by</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form.Group as={Row}>
               <Form.Label column sm={3}>
-                Order Index:
+                Order by:
               </Form.Label>
               <Col sm={9}>
                 <Form.Control
                   type="text"
                   value={orderindex}
                   onChange={(e) => setOrderIndex(validateOrderIndex(clampLen(e.target.value, 5)))}
-                  placeholder="Enter order index (numeric)"
+                  placeholder="Enter order by (numeric)"
                   isInvalid={orderindex !== "" && !isOrderIndexValid}
                 />
                 <Form.Control.Feedback type="invalid">
-                  Order index must be a valid number
+                  Order by must be a valid number
                 </Form.Control.Feedback>
               </Col>
             </Form.Group>
@@ -262,7 +262,7 @@ export function EditTaskCategoryOrderIndexModal({ task_category, onTaskCategoryU
             {!isOrderIndexValid ? (
               <div style={{ color: "red" }}>
                 <AiOutlineWarning style={{ marginRight: 5 }} />
-                Order index must be a valid number
+                Order by must be a valid number
               </div>
             ) : (
               <div style={{ color: "green" }}>
@@ -279,7 +279,7 @@ export function EditTaskCategoryOrderIndexModal({ task_category, onTaskCategoryU
             onClick={updateTaskCategoryOrderIndex}
             disabled={!isOrderIndexValid}
           >
-            Update Order Index
+            Update Order by
           </Button>
         </Modal.Footer>
       </Modal>
