@@ -87,6 +87,13 @@ const columns = [
     formatter: (cell, row) => (row.kind === 'E' ? 'Expense' : 'Payment'),
   },
   {
+    dataField: "currency",
+    text: "Currency",
+    sort: true,
+    filter: textFilter(),
+    formatter: (cell, row) => row.currency || "",
+  },
+  {
     dataField: "amountexp",
     text: "Amount expense",
     sort: true,

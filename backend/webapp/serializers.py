@@ -1651,6 +1651,14 @@ class ProjectTaskSerializer(serializers.ModelSerializer):
         self._assign_fk(validated_data, 'taskcate_id', TaskCategory, 'taskcate')
         self._assign_fk(validated_data, 'assigner_id', Consultant, 'assigner')
         self._assign_fk(validated_data, 'assignee_id', Consultant, 'assignee')
+        # Fallback: if assigner still missing, default to request.user
+        if not validated_data.get('assigner'):
+            try:
+                user = self.context.get('request').user
+                if isinstance(user, Consultant):
+                    validated_data['assigner'] = user
+            except Exception:
+                pass
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
@@ -1876,13 +1884,14 @@ class ProjectTaskDetailSerializer(serializers.ModelSerializer):
 # List serializers for search functionality
 class ProjectListSerializer(serializers.ModelSerializer):
     consultant = ConsultantSerializer(read_only=True)
+    categories = ProjectCategorySerializer(many=True, read_only=True)
     primary_client = serializers.SerializerMethodField()
     completion_percentage = serializers.SerializerMethodField()
     
     class Meta:
         model = Project
         fields = ['project_id', 'title', 'filecode', 'status', 'deadline', 
-                 'consultant', 'primary_client', 'completion_percentage', 
+                 'consultant', 'categories', 'primary_client', 'completion_percentage', 
                  'registrationdate', 'taxation']
     
     def get_primary_client(self, obj):
@@ -1908,12 +1917,14 @@ class ClientListSerializer(serializers.ModelSerializer):
 class ProjectTaskListSerializer(serializers.ModelSerializer):
     project = ProjectSerializer(read_only=True)
     assignee = ConsultantSerializer(read_only=True)
+    assigner = ConsultantSerializer(read_only=True)
+    taskcate = TaskCategorySerializer(read_only=True)
     is_overdue = serializers.SerializerMethodField()
     
     class Meta:
         model = ProjectTask
         fields = ['projtask_id', 'title', 'project', 'status', 'priority', 
-                 'deadline', 'assignee', 'is_overdue', 'assigndate']
+                 'deadline', 'assigner', 'assignee', 'taskcate', 'is_overdue', 'assigndate']
     
     def get_is_overdue(self, obj):
         return obj.is_overdue

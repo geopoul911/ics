@@ -4,15 +4,13 @@ import { Breadcrumb } from "react-bootstrap";
 
 // Icons / Images
 import {
+  BiBell,
   BiHelpCircle,
 } from "react-icons/bi";
 import {
   AiOutlineLogin,
 } from "react-icons/ai";
 import { GoLaw } from "react-icons/go";
-import {
-  MdUpdate,
-} from "react-icons/md";
 import {
   FaDatabase,
   FaBriefcase,
@@ -145,18 +143,18 @@ export function pageHeader(value, objName) {
         <hr />
       </>
     );
-  } else if (value === "updates") {
+  } else if (value === "notifications") {
     return (
       <>
         <div className="page_header">
           <h2>
-            <MdUpdate style={iconStyle} />
-            Updates
+            <BiBell style={iconStyle} />
+            Notifications
           </h2>
           <Breadcrumb>
             <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
             <Breadcrumb.Item href="/help/">Help</Breadcrumb.Item>
-            <Breadcrumb.Item active>Updates</Breadcrumb.Item>
+            <Breadcrumb.Item active>Notifications</Breadcrumb.Item>
           </Breadcrumb>
         </div>
         <hr />
@@ -419,7 +417,45 @@ export function pageHeader(value, objName) {
                   </>
                 );
               }
-              
+              else if (value === "client_related") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> Client Related Objects
+                      </h2>
+                      <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/data_management/root">
+                          Data Management
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item active>Related Objects of {objName}</Breadcrumb.Item>
+                      </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
+              }
+              else if (value === "client_projects_properties") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> Client Projects Properties
+                      </h2>
+                    <Breadcrumb>
+                      <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                      <Breadcrumb.Item href="/data_management/root">
+                        Data Management
+                      </Breadcrumb.Item>
+                      <Breadcrumb.Item active>Projects Properties of {objName}</Breadcrumb.Item>
+                    </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
+              }
+
               else if (value === "all_associated_clients") {
                 return (
                   <>
@@ -1117,8 +1153,7 @@ export function pageHeader(value, objName) {
                <hr />
              </>
            );
-         }  
-         else if (value === "property_overview") {
+         }  else if (value === "property_overview") {
            return (
              <>
                <div className="page_header">
@@ -1136,6 +1171,129 @@ export function pageHeader(value, objName) {
                <hr />
              </>
            );
-         } 
+         } else if (value === "reports_clients") {
+           return (
+             <>
+               <div className="page_header">
+                 <h2>
+                   <FaArrowRight style={iconStyle} /> Reports — Clients
+                 </h2>
+                 <Breadcrumb>
+                   <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                   <Breadcrumb.Item href="/reports/root">
+                     Reports
+                   </Breadcrumb.Item>
+                   <Breadcrumb.Item active>Reports — Clients</Breadcrumb.Item>
+                 </Breadcrumb>
+               </div>
+             </>
+           );
+         } else if (value === "reports_projects") {
+          return (
+            <>
+              <div className="page_header">
+                <h2>
+                  <FaArrowRight style={iconStyle} /> Reports — Projects
+                </h2>
+                <Breadcrumb>
+                  <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                  <Breadcrumb.Item href="/reports/root">Reports</Breadcrumb.Item>
+                  <Breadcrumb.Item active>Reports — Projects</Breadcrumb.Item>
+                </Breadcrumb>
+              </div>
+            </>
+          );
+        } else if (value === "reports_tasks") {
+          return (
+            <>
+              <div className="page_header">
+                <h2>
+                  <FaArrowRight style={iconStyle} /> Reports — Tasks
+                </h2>
+                <Breadcrumb>
+                  <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                  <Breadcrumb.Item href="/reports/root">Reports</Breadcrumb.Item>
+                  <Breadcrumb.Item active>Reports — Tasks</Breadcrumb.Item>
+                </Breadcrumb>
+              </div>
+            </>
+          );
+        } else if (value === "reports_properties") {
+          return (
+            <>
+              <div className="page_header">
+                <h2>
+                  <FaArrowRight style={iconStyle} /> Reports — Properties
+                </h2>
+                <Breadcrumb>
+                  <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                  <Breadcrumb.Item href="/reports/root">Reports</Breadcrumb.Item>
+                  <Breadcrumb.Item active>Reports — Properties</Breadcrumb.Item>
+                </Breadcrumb>
+              </div>
+            </>
+          );
+        } else if (value === "reports_documents") {
+          return (
+            <>
+              <div className="page_header">
+                <h2>
+                  <FaArrowRight style={iconStyle} /> Reports — Documents
+                </h2>
+                <Breadcrumb>
+                  <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                  <Breadcrumb.Item href="/reports/root">Reports</Breadcrumb.Item>
+                  <Breadcrumb.Item active>Reports — Documents</Breadcrumb.Item>
+                </Breadcrumb>
+              </div>
+            </>
+          );
+        } else if (value === "reports_cash") {
+          return (
+            <>
+              <div className="page_header">
+                <h2>
+                  <FaArrowRight style={iconStyle} /> Reports — Cash
+                </h2>
+                <Breadcrumb>
+                  <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                  <Breadcrumb.Item href="/reports/root">Reports</Breadcrumb.Item>
+                  <Breadcrumb.Item active>Reports — Cash</Breadcrumb.Item>
+                </Breadcrumb>
+              </div>
+            </>
+          );
+        } else if (value === "reports_professionals") {
+          return (
+            <>
+              <div className="page_header">
+                <h2>
+                  <FaArrowRight style={iconStyle} /> Reports — Professionals
+                </h2>
+                <Breadcrumb>
+                  <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                  <Breadcrumb.Item href="/reports/root">Reports</Breadcrumb.Item>
+                  <Breadcrumb.Item active>Reports — Professionals</Breadcrumb.Item>
+                </Breadcrumb>
+              </div>
+            </>
+          );
+        } else if (value === "reports_statistics") {
+          return (
+            <>
+              <div className="page_header">
+                <h2>
+                  <FaArrowRight style={iconStyle} /> Reports — Statistics
+                </h2>
+                <Breadcrumb>
+                  <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                  <Breadcrumb.Item href="/reports/root">Reports</Breadcrumb.Item>
+                  <Breadcrumb.Item active>Reports — Statistics</Breadcrumb.Item>
+                </Breadcrumb>
+              </div>
+            </>
+          );
+        }
+
   return <></>;
 }

@@ -17,6 +17,7 @@ import {
   EditCashAmountExpenseModal,
   EditCashAmountPaymentModal,
   EditCashReasonModal,
+  EditCashCurrencyModal,
 } from "../../../modals/cash_edit_modals";
 import { pageHeader } from "../../../global_vars";
 import { FaIdBadge, FaStickyNote, FaStop } from "react-icons/fa";
@@ -123,6 +124,14 @@ function CashOverview() {
                       {cash.kind === 'E' ? 'Expense' : 'Payment'}
                       <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
                         <EditCashKindModal cash={cash} update_state={setCash} />
+                      </span>
+                    </div>
+
+                    <div className={"info_descr"} style={{ marginTop: 16 }}><FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Currency</div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {cash.currency || 'N/A'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditCashCurrencyModal cash={cash} update_state={setCash} />
                       </span>
                     </div>
                   </Card.Body>

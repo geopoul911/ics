@@ -70,6 +70,8 @@ class ConsultantOverview extends React.Component {
       projects: [],
       cashItems: [],
       taxationProjects: [],
+      tasksByProject: {}, // { [project_id]: { assignedToMe: [], assignedByMe: [] } }
+      taskCommentsByProject: {}, // { [project_id]: { [task_id]: comments[] } }
     };
   }
 
@@ -125,7 +127,40 @@ class ConsultantOverview extends React.Component {
           } catch (_e) { taxationProjects = []; }
         }
 
-        this.setState({ consultant, projects, cashItems, taxationProjects, is_loaded: true });
+        // Build tasks per project (assigned to me / assigned by me)
+        let tasksByProject = {};
+        let taskCommentsByProject = {};
+        try {
+          const detailPromises = (projects || []).map((p) =>
+            axios.get(`http://localhost:8000/api/data_management/project/${p.project_id}/`, { headers: currentHeaders })
+          );
+          const details = await Promise.all(detailPromises.map((pr) => pr.catch((e) => ({ error: e }))));
+          const myId = consultant.consultant_id;
+          details.forEach((dr, idx) => {
+            const proj = projects[idx];
+            if (!proj) return;
+            const tasks = Array.isArray(dr?.data?.tasks) ? dr.data.tasks : [];
+            const assignedToMe = tasks.filter((t) => t?.assignee?.consultant_id === myId);
+            const assignedByMe = tasks.filter((t) => t?.assigner?.consultant_id === myId);
+            tasksByProject[proj.project_id] = { assignedToMe, assignedByMe };
+
+            // Build comments map per task for this project
+            const projComments = Array.isArray(dr?.data?.task_comments) ? dr.data.task_comments : [];
+            const mapByTask = {};
+            projComments.forEach((cm) => {
+              const tid = cm?.projtask?.projtask_id || cm?.projtask_id;
+              if (!tid) return;
+              if (!mapByTask[tid]) mapByTask[tid] = [];
+              mapByTask[tid].push(cm);
+            });
+            taskCommentsByProject[proj.project_id] = mapByTask;
+          });
+        } catch (_e) {
+          tasksByProject = {};
+          taskCommentsByProject = {};
+        }
+
+        this.setState({ consultant, projects, cashItems, taxationProjects, tasksByProject, taskCommentsByProject, is_loaded: true });
       })
       .catch((e) => {
         if (e?.response?.status === 401) {
@@ -474,6 +509,132 @@ class ConsultantOverview extends React.Component {
                                 <span style={labelPillStyle}>Status</span>
                                 <span style={valueTextStyle}>{p.status || 'N/A'}</span>
                               </div>
+                              {/* Inline tasks under project */}
+                              {(() => {
+                                const tp = this.state.tasksByProject?.[p.project_id] || { assignedToMe: [], assignedByMe: [] };
+                                const any = (tp.assignedToMe && tp.assignedToMe.length) || (tp.assignedByMe && tp.assignedByMe.length);
+                                if (!any) return null;
+                                return (
+                                  <div style={{ marginTop: 10, paddingLeft: 12 }}>
+                                    {Array.isArray(tp.assignedToMe) && tp.assignedToMe.length > 0 ? (
+                                      <div style={{ marginBottom: 8 }}>
+                                        <div style={{ marginBottom: 6, fontWeight: 700 }}>Assigned to me</div>
+                                        <ul className="list-unstyled" style={{ margin: 0 }}>
+                                          {tp.assignedToMe.map((t, tidx) => (
+                                            <li key={t.projtask_id || tidx} style={{ padding: '6px 0' }}>
+                                              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                                                <span style={labelPillStyle}>#</span>
+                                                <span style={valueTextStyle}>{tidx + 1}</span>
+                                                <span style={{ width: 10 }} />
+                                                <span style={labelPillStyle}>ID</span>
+                                                <a href={`/data_management/project_task/${t.projtask_id}`} className="pillLink" style={{ ...valueTextStyle }}>{t.projtask_id}</a>
+                                                <span style={{ width: 10 }} />
+                                                <span style={labelPillStyle}>Title</span>
+                                                <span style={valueTextStyle}>{t.title}</span>
+                                                <span style={{ width: 10 }} />
+                                                <span style={labelPillStyle}>Status</span>
+                                                <span style={valueTextStyle}>{t.status || 'N/A'}</span>
+                                              </div>
+                                              {(() => {
+                                                const comments = (this.state.taskCommentsByProject?.[p.project_id]?.[t.projtask_id]) || [];
+                                                if (!comments.length) return null;
+                                                return (
+                                                  <div style={{ marginTop: 6, paddingLeft: 12, borderLeft: '3px solid #eef5ff' }}>
+                                                    <div style={{ marginBottom: 4, fontWeight: 700, color: '#2c3e50' }}>Comments</div>
+                                                    <ul className="list-unstyled" style={{ margin: 0 }}>
+                                                      {comments.map((cm, cidx) => (
+                                                        <li key={cm.taskcomm_id || cidx} style={{ padding: '6px 0', borderBottom: '1px dashed #eee' }}>
+                                                          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                                                            <span style={labelPillStyle}>#</span>
+                                                            <span style={valueTextStyle}>{cidx + 1}</span>
+                                                            {cm.commentregistration ? (<>
+                                                              <span style={{ width: 10 }} />
+                                                              <span style={labelPillStyle}>Time</span>
+                                                              <span style={valueTextStyle}>{new Date(cm.commentregistration).toLocaleString()}</span>
+                                                            </>) : null}
+                                                            {cm.consultant ? (<>
+                                                              <span style={{ width: 10 }} />
+                                                              <span style={labelPillStyle}>By</span>
+                                                              <span style={valueTextStyle}>{cm.consultant.fullname || `${cm.consultant.surname || ''} ${cm.consultant.name || ''}`.trim()}</span>
+                                                            </>) : null}
+                                                            {cm.comment ? (<>
+                                                              <span style={{ width: 10 }} />
+                                                              <span style={labelPillStyle}>Comment</span>
+                                                              <span style={valueTextStyle}>{cm.comment}</span>
+                                                            </>) : null}
+                                                          </div>
+                                                        </li>
+                                                      ))}
+                                                    </ul>
+                                                  </div>
+                                                );
+                                              })()}
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    ) : null}
+                                    {Array.isArray(tp.assignedByMe) && tp.assignedByMe.length > 0 ? (
+                                      <div>
+                                        <div style={{ marginBottom: 6, fontWeight: 700 }}>Assigned by me</div>
+                                        <ul className="list-unstyled" style={{ margin: 0 }}>
+                                          {tp.assignedByMe.map((t, tidx) => (
+                                            <li key={t.projtask_id || tidx} style={{ padding: '6px 0' }}>
+                                              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                                                <span style={labelPillStyle}>#</span>
+                                                <span style={valueTextStyle}>{tidx + 1}</span>
+                                                <span style={{ width: 10 }} />
+                                                <span style={labelPillStyle}>ID</span>
+                                                <a href={`/data_management/project_task/${t.projtask_id}`} className="pillLink" style={{ ...valueTextStyle }}>{t.projtask_id}</a>
+                                                <span style={{ width: 10 }} />
+                                                <span style={labelPillStyle}>Title</span>
+                                                <span style={valueTextStyle}>{t.title}</span>
+                                                <span style={{ width: 10 }} />
+                                                <span style={labelPillStyle}>Status</span>
+                                                <span style={valueTextStyle}>{t.status || 'N/A'}</span>
+                                              </div>
+                                              {(() => {
+                                                const comments = (this.state.taskCommentsByProject?.[p.project_id]?.[t.projtask_id]) || [];
+                                                if (!comments.length) return null;
+                                                return (
+                                                  <div style={{ marginTop: 6, paddingLeft: 12, borderLeft: '3px solid #eef5ff' }}>
+                                                    <div style={{ marginBottom: 4, fontWeight: 700, color: '#2c3e50' }}>Comments</div>
+                                                    <ul className="list-unstyled" style={{ margin: 0 }}>
+                                                      {comments.map((cm, cidx) => (
+                                                        <li key={cm.taskcomm_id || cidx} style={{ padding: '6px 0', borderBottom: '1px dashed #eee' }}>
+                                                          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                                                            <span style={labelPillStyle}>#</span>
+                                                            <span style={valueTextStyle}>{cidx + 1}</span>
+                                                            {cm.commentregistration ? (<>
+                                                              <span style={{ width: 10 }} />
+                                                              <span style={labelPillStyle}>Time</span>
+                                                              <span style={valueTextStyle}>{new Date(cm.commentregistration).toLocaleString()}</span>
+                                                            </>) : null}
+                                                            {cm.consultant ? (<>
+                                                              <span style={{ width: 10 }} />
+                                                              <span style={labelPillStyle}>By</span>
+                                                              <span style={valueTextStyle}>{cm.consultant.fullname || `${cm.consultant.surname || ''} ${cm.consultant.name || ''}`.trim()}</span>
+                                                            </>) : null}
+                                                            {cm.comment ? (<>
+                                                              <span style={{ width: 10 }} />
+                                                              <span style={labelPillStyle}>Comment</span>
+                                                              <span style={valueTextStyle}>{cm.comment}</span>
+                                                            </>) : null}
+                                                          </div>
+                                                        </li>
+                                                      ))}
+                                                    </ul>
+                                                  </div>
+                                                );
+                                              })()}
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    ) : null}
+                                  </div>
+                                );
+                              })()}
                             </li>
                           ))}
                         </ul>
@@ -507,6 +668,11 @@ class ConsultantOverview extends React.Component {
                                 <span style={{ width: 10 }} />
                                 <span style={labelPillStyle}>Kind</span>
                                 <span style={valueTextStyle}>{c.kind === 'E' ? 'Expense' : 'Payment'}</span>
+                                {c.currency ? (<>
+                                  <span style={{ width: 10 }} />
+                                  <span style={labelPillStyle}>Currency</span>
+                                  <span style={valueTextStyle}>{c.currency}</span>
+                                </>) : null}
                               </div>
                             </li>
                           ))}

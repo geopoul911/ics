@@ -12,6 +12,7 @@ import NavigationBar from "../../core/navigation_bar/navigation_bar";
 import Footer from "../../core/footer/footer";
 import ClientOverView from "./client_overview/client_overview";
 import RelatedObjects from "./related_objects/related_objects";
+import ProjectsProperties from "./projects_properties/projects_properties";
 
 class Client extends React.Component {
 
@@ -23,12 +24,16 @@ class Client extends React.Component {
           <TabList>
             <Tab> Overview </Tab>
             <Tab>Related Objects</Tab>
+            <Tab>Projects Properties</Tab>
           </TabList>
           <TabPanel>
             <ClientOverView />
           </TabPanel>
           <TabPanel>
             <RelatedObjects />
+          </TabPanel>
+          <TabPanel>
+            <ProjectsProperties />
           </TabPanel>
         </Tabs>
         <Footer />

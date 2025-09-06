@@ -7,7 +7,7 @@ import Footer from "../../core/footer/footer";
 import axios from "axios";
 
 // Modules / Functions
-import filterFactory, { textFilter } from "react-bootstrap-table2-filter";
+import filterFactory, { textFilter, dateFilter, Comparator } from "react-bootstrap-table2-filter";
 import ToolkitProvider from "react-bootstrap-table2-toolkit";
 import Swal from "sweetalert2";
 import BootstrapTable from "react-bootstrap-table-next";
@@ -75,8 +75,20 @@ const columns = [
     dataField: "deadline",
     text: "Deadline",
     sort: true,
-    filter: textFilter(),
+    filter: dateFilter({
+      comparator: Comparator.LE,
+      withoutEmptyComparatorOption: true,
+      comparatorStyle: { display: 'none' },
+      delay: 0,
+    }),
     formatter: (cell, row) => (row.deadline ? new Date(row.deadline).toLocaleDateString() : ""),
+  },
+  {
+    dataField: "assigner.fullname",
+    text: "Assigner",
+    sort: true,
+    filter: textFilter(),
+    formatter: (cell, row) => row.assigner?.fullname || ((row.assigner && `${row.assigner.surname || ''} ${row.assigner.name || ''}`.trim()) || ''),
   },
   {
     dataField: "assignee.fullname",
@@ -84,6 +96,13 @@ const columns = [
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => row.assignee?.fullname || "",
+  },
+  {
+    dataField: "taskcate.title",
+    text: "Category",
+    sort: true,
+    filter: textFilter(),
+    formatter: (cell, row) => row.taskcate?.title || "",
   },
 ];
 
@@ -131,8 +150,14 @@ class AllProjectTasks extends React.Component {
           allTasks = [];
         }
         
+        // Normalize deadline to Date objects for correct dateFilter comparison
+        const normalized = (allTasks || []).map((t) => ({
+          ...t,
+          deadline: t && t.deadline ? new Date(t.deadline) : null,
+        }));
+
         this.setState({
-          all_project_tasks: allTasks,
+          all_project_tasks: normalized,
           is_loaded: true,
         });
       })

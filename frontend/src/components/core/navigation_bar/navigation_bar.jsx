@@ -9,7 +9,7 @@ import "./navigation_bar.css";
 import axios from "axios";
 
 // Modules / Functions
-import { Navbar, Nav, Dropdown } from "react-bootstrap";
+import { Navbar, Nav, Dropdown, Badge } from "react-bootstrap";
 
 import { Link } from "react-router-dom";
 
@@ -39,6 +39,10 @@ let iconStyle = {
   marginRight: "0.5em",
 };
 
+const API_BASE = (typeof window !== 'undefined' && window.location && window.location.port === '3000')
+  ? 'http://127.0.0.1:8000'
+  : '';
+
 // Navigation Bar has no url , it is included in all pages
 class NavigationBar extends Component {
   constructor(props) {
@@ -49,6 +53,7 @@ class NavigationBar extends Component {
       meIsOpen: false,
       reportIsOpen: false,
       regionIsOpen: false,
+      unreadCount: 0,
     };
     this.dataOpen = this.dataOpen.bind(this);
     this.dataClose = this.dataClose.bind(this);
@@ -60,6 +65,7 @@ class NavigationBar extends Component {
     this.reportClose = this.reportClose.bind(this);
     this.regionOpen = this.regionOpen.bind(this);
     this.regionClose = this.regionClose.bind(this);
+    this.refreshNotifications = this.refreshNotifications.bind(this);
   }
 
   // Logout
@@ -68,6 +74,26 @@ class NavigationBar extends Component {
     localStorage.removeItem("userToken");
     setUserToken(null);
   };
+
+  componentDidMount() {
+    this.refreshNotifications();
+    this._notifTimer = setInterval(this.refreshNotifications, 60000);
+  }
+
+  componentWillUnmount() {
+    if (this._notifTimer) clearInterval(this._notifTimer);
+  }
+
+  refreshNotifications() {
+    try {
+      const token = localStorage.getItem("userToken");
+      if (!token) return;
+      fetch(API_BASE + "/api/view/notifications/", { headers: { Authorization: "Token " + token } })
+        .then(r => r.json())
+        .then(d => this.setState({ unreadCount: Array.isArray(d.notifications) ? d.notifications.length : 0 }))
+        .catch(() => {});
+    } catch (_e) {}
+  }
 
   // Open Data Management Dropdown
   dataOpen = () => {
@@ -167,51 +193,12 @@ class NavigationBar extends Component {
                     <Dropdown.Item href="/data_management/all_clients">
                       <FaArrowRight style={iconStyle}/> Clients
                     </Dropdown.Item>
-                    <Dropdown.Item href="/data_management/all_client_contacts">
-                      <FaArrowRight style={iconStyle}/> Client Contacts
-                    </Dropdown.Item>
-                    <Dropdown.Item href="/data_management/all_bank_client_accounts">
-                      <FaArrowRight style={iconStyle}/> Bank Client Accounts
-                    </Dropdown.Item>
                     
                     {/* Projects & Tasks */}
                     <Dropdown.Divider />
                     <Dropdown.Header>Projects & Tasks</Dropdown.Header>
                     <Dropdown.Item href="/data_management/all_projects">
                       <FaArrowRight style={iconStyle}/> Projects
-                    </Dropdown.Item>
-                    <Dropdown.Item href="/data_management/all_associated_clients">
-                      <FaArrowRight style={iconStyle}/> Associated Clients
-                    </Dropdown.Item>
-                    <Dropdown.Item href="/data_management/all_project_tasks">
-                      <FaArrowRight style={iconStyle}/> Project Tasks
-                    </Dropdown.Item>
-                    <Dropdown.Item href="/data_management/all_task_comments">
-                      <FaArrowRight style={iconStyle}/> Task Comments
-                    </Dropdown.Item>
-                    
-                    {/* Documents */}
-                    <Dropdown.Divider />
-                    <Dropdown.Header>Documents</Dropdown.Header>
-                    <Dropdown.Item href="/data_management/all_documents">
-                      <FaArrowRight style={iconStyle}/> Documents
-                    </Dropdown.Item>
-                    
-                    {/* Properties */}
-                    <Dropdown.Divider />
-                    <Dropdown.Header>Properties</Dropdown.Header>
-                    <Dropdown.Item href="/data_management/all_properties">
-                      <FaArrowRight style={iconStyle}/> Properties
-                    </Dropdown.Item>
-                    
-                    {/* Financial */}
-                    <Dropdown.Divider />
-                    <Dropdown.Header>Financial</Dropdown.Header>
-                    <Dropdown.Item href="/data_management/all_cash">
-                      <FaArrowRight style={iconStyle}/> Cash
-                    </Dropdown.Item>
-                    <Dropdown.Item href="/data_management/all_bank_project_accounts">
-                      <FaArrowRight style={iconStyle}/> Bank Project Accounts
                     </Dropdown.Item>
                     
                     {/* Directory */}
@@ -244,17 +231,17 @@ class NavigationBar extends Component {
                     <Dropdown.Item href="/reports/tasks">
                       <FaArrowRight style={iconStyle}/> Tasks
                     </Dropdown.Item>
+                    <Dropdown.Item href="/reports/professionals">
+                      <FaArrowRight style={iconStyle}/> Professionals
+                    </Dropdown.Item>
+                    <Dropdown.Item href="/reports/cash">
+                      <FaArrowRight style={iconStyle}/> Cash
+                    </Dropdown.Item>
                     <Dropdown.Item href="/reports/properties">
                       <FaArrowRight style={iconStyle}/> Properties
                     </Dropdown.Item>
                     <Dropdown.Item href="/reports/documents">
                       <FaArrowRight style={iconStyle}/> Documents
-                    </Dropdown.Item>
-                    <Dropdown.Item href="/reports/cash">
-                      <FaArrowRight style={iconStyle}/> Cash
-                    </Dropdown.Item>
-                    <Dropdown.Item href="/reports/professionals">
-                      <FaArrowRight style={iconStyle}/> Professionals
                     </Dropdown.Item>
                     <Dropdown.Item href="/reports/statistics">
                       <FaArrowRight style={iconStyle}/> Statistics
@@ -333,6 +320,14 @@ class NavigationBar extends Component {
             ) : (
               /* Else get profile's dropdown  with "Me, Help, Useful links" */
               <>
+                <Nav.Link href="/notifications">
+                  <span style={{ position: 'relative', marginRight: 8 }}>
+                    <i className="fa fa-bell" style={{ color: "#93ab3c", fontSize: "1.4em" }} />
+                    {this.state.unreadCount > 0 && (
+                      <Badge variant="danger" style={{ position: 'absolute', top: -8, right: -10 }}>{this.state.unreadCount > 9 ? '9+' : this.state.unreadCount}</Badge>
+                    )}
+                  </span>
+                </Nav.Link>
                 <Nav.Link href={"/administration/user/" + localStorage.getItem("user_id")} onMouseLeave={this.meClose} onMouseOver={this.meOpen}>
                   <CgProfile style={iconStyle} /> {localStorage.getItem("user")}
                   <Dropdown onMouseLeave={this.meClose} onMouseOver={this.meOpen}>

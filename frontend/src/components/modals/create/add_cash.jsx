@@ -34,6 +34,7 @@ function AddCashModal({ onCashCreated, refreshData, defaultProjectId, lockProjec
   const [trandate, setTrandate] = useState("");
   const [consultant, setConsultant] = useState("");
   const [kind, setKind] = useState("E"); // Default to Expense
+  const [currency, setCurrency] = useState("");
   const [amountexp, setAmountexp] = useState("");
   const [amountpay, setAmountpay] = useState("");
   const [reason, setReason] = useState("");
@@ -50,6 +51,7 @@ function AddCashModal({ onCashCreated, refreshData, defaultProjectId, lockProjec
     setTrandate("");
     setConsultant("");
     setKind("E");
+    setCurrency("");
     setAmountexp("");
     setAmountpay("");
     setReason("");
@@ -160,6 +162,7 @@ function AddCashModal({ onCashCreated, refreshData, defaultProjectId, lockProjec
           trandate: trandate,
           consultant_id: consultant,
           kind: kind,
+          currency: currency || null,
 
           // Optional fields
           amountexp: kind === 'E' ? (amountexp.trim() || null) : null,
@@ -309,6 +312,20 @@ function AddCashModal({ onCashCreated, refreshData, defaultProjectId, lockProjec
                         <option value="E">Expense</option>
                         <option value="P">Payment</option>
                       </Form.Control>
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Currency:</Form.Label>
+                      <Form.Control
+                        placeholder="e.g., EUR"
+                        maxLength={3}
+                        onChange={(e) => setCurrency(e.target.value.toUpperCase())}
+                        value={currency}
+                      />
                     </Form.Group>
                   </Col>
                 </Row>

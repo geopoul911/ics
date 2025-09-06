@@ -1,5 +1,6 @@
 # app: auditlog/signals.py
 from django.contrib.auth import get_user_model
+from decimal import Decimal
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
@@ -7,6 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from accounts.middleware import get_current_user
 
 from .models import AuditEvent
+from webapp.models import Notification
 
 User = get_user_model()
 
@@ -57,6 +59,24 @@ def _on_login_failed(sender, credentials, request, **kwargs):
         metadata={"credentials": {"username": credentials.get("username")}},
     )
 
+    # Optional: if django-axes is installed and marks a user as locked out after repeated attempts,
+    # we also want to notify superusers when the lockout occurs.
+    try:
+      from axes.helpers import get_failure_limit
+      from axes.models import AccessAttempt
+      username = credentials.get('username')
+      # Count recent failures for this username
+      attempts = AccessAttempt.objects.filter(username=username).order_by('-id')
+      if attempts.count() >= get_failure_limit():
+          for su in User.objects.filter(is_superuser=True):
+              Notification.objects.create(
+                  user=su,
+                  type='security_lockout',
+                  message=f"User {username} has been locked out after repeated failed logins.",
+              )
+    except Exception:
+      pass
+
 # --- CRUD on arbitrary models ---
 
 def _is_excluded(sender):
@@ -85,6 +105,19 @@ def _audit_create_or_update(instance, created, using, update_fields=None, **kwar
 
     # capture field-level changes (old/new)
     changes = {}
+    
+    def _to_jsonable(val):
+        try:
+            if hasattr(val, 'isoformat'):
+                return val.isoformat()
+            if isinstance(val, Decimal):
+                return str(val)
+            if isinstance(val, (str, int, float, bool)) or val is None:
+                return val
+            return str(val)
+        except Exception:
+            return str(val)
+
     try:
         prev = getattr(instance, "_audit_prev", None)
         if not created and prev is not None:
@@ -96,12 +129,9 @@ def _audit_create_or_update(instance, created, using, update_fields=None, **kwar
                 except Exception:
                     continue
                 if old_val != new_val:
-                    # stringify to ensure JSON serializable
-                    try:
-                        o = old_val.isoformat() if hasattr(old_val, 'isoformat') else old_val
-                        n = new_val.isoformat() if hasattr(new_val, 'isoformat') else new_val
-                    except Exception:
-                        o, n = str(old_val), str(new_val)
+                    # ensure JSON-serializable representations
+                    o = _to_jsonable(old_val)
+                    n = _to_jsonable(new_val)
                     changes[fname] = {"old": o, "new": n}
         elif created:
             # on create, log initial values as new
@@ -112,7 +142,7 @@ def _audit_create_or_update(instance, created, using, update_fields=None, **kwar
                 except Exception:
                     continue
                 if val not in (None, ""):
-                    v = val.isoformat() if hasattr(val, 'isoformat') else val
+                    v = _to_jsonable(val)
                     changes[fname] = {"old": None, "new": v}
     except Exception:
         changes = changes or {}

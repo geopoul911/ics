@@ -53,6 +53,25 @@ const valueTextStyle = {
   fontWeight: 700,
 };
 
+// Helper to color-code project status
+function projectStatusColor(status) {
+  switch (status) {
+    case 'Created':
+      return '#c0392b'; // red
+    case 'Assigned':
+    case 'Inprogress':
+      return '#e67e22'; // orange
+    case 'Completed':
+      return '#27ae60'; // green
+    case 'Settled':
+      return '#17a2b8'; // cyan
+    case 'Abandoned':
+      return '#7f8c8d'; // grey
+    default:
+      return '#333333';
+  }
+}
+
 class ClientOverview extends React.Component {
   constructor(props) {
     super(props);
@@ -63,6 +82,8 @@ class ClientOverview extends React.Component {
       associatedClients: [],
       documents: [],
       bankProjectAccounts: [],
+      projects: [],
+      projectProperties: [],
     };
   }
 
@@ -84,14 +105,31 @@ class ClientOverview extends React.Component {
         const associatedClients = Array.isArray(res?.data?.associated_projects) ? res.data.associated_projects : [];
         const documents = Array.isArray(res?.data?.documents) ? res.data.documents : [];
         const bankProjectAccounts = Array.isArray(res?.data?.bank_project_accounts) ? res.data.bank_project_accounts : [];
+        const projects = associatedClients.map((ac) => ac.project).filter(Boolean);
         this.setState({
           client,
           bankAccounts,
           associatedClients,
           documents,
           bankProjectAccounts,
+          projects,
           is_loaded: true,
         });
+
+        // Fetch properties that belong to the client's projects
+        const projectIds = projects.map((p) => p.project_id);
+        if (projectIds.length > 0) {
+          axios
+            .get(`http://localhost:8000/api/data_management/all_properties/`, { headers: currentHeaders })
+            .then((prRes) => {
+              const allProps = Array.isArray(prRes?.data?.all_properties) ? prRes.data.all_properties : [];
+              const projectProperties = allProps.filter((prop) => projectIds.includes(prop.project?.project_id));
+              this.setState({ projectProperties });
+            })
+            .catch(() => this.setState({ projectProperties: [] }));
+        } else {
+          this.setState({ projectProperties: [] });
+        }
       })
       .catch((e) => {
         if (e?.response?.status === 401) {
@@ -126,7 +164,7 @@ class ClientOverview extends React.Component {
     return (
       <>
         <div className="rootContainer">
-          {pageHeader("client_overview", `${client.surname} ${client.name}`)}
+          {pageHeader("client_related", `${client.surname} ${client.name}`)}
           <div className="contentBody">
             <style>{`
               .pillLink { color: inherit; text-decoration: none; }
@@ -155,6 +193,11 @@ class ClientOverview extends React.Component {
                               <span style={{ width: 10 }} />
                               <span style={labelPillStyle}>Account number</span>
                               <span style={valueTextStyle}>{acc.accountnumber || 'N/A'}</span>
+                              {acc.iban ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>IBAN</span>
+                                <span style={valueTextStyle}>{acc.iban}</span>
+                              </>) : null}
                               <span style={{ width: 10 }} />
                               <span style={labelPillStyle}>Bank</span>
                               <span style={valueTextStyle}>{acc.bank?.bankname || 'N/A'}</span>
@@ -173,6 +216,108 @@ class ClientOverview extends React.Component {
                       lockClient={true}
                     />
                   </Card.Footer>
+                </Card>
+              </Grid.Column>
+              <Grid.Column>
+                <Card style={{ marginTop: 20 }}>
+                  <Card.Header>
+                    <h4>
+                      <MdLink style={overviewIconStyle} /> Projects
+                    </h4>
+                  </Card.Header>
+                  <Card.Body>
+                    {Array.isArray(this.state.projects) && this.state.projects.length > 0 ? (
+                      <ul className="list-unstyled" style={{ margin: 0 }}>
+                        {this.state.projects.map((p, idx) => (
+                          <li key={p.project_id} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                              <span style={labelPillStyle}>#</span>
+                              <span style={valueTextStyle}>{idx + 1}</span>
+                              <span style={{ width: 10 }} />
+                              <span style={labelPillStyle}>ID</span>
+                              <a href={`/data_management/project/${p.project_id}`} className="pillLink" style={{ ...valueTextStyle }}>{p.project_id}</a>
+                              <span style={{ width: 10 }} />
+                              <span style={labelPillStyle}>Title</span>
+                              <span style={valueTextStyle}>{p.title}</span>
+                              {p.registrationdate ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Registered</span>
+                                <span style={valueTextStyle}>{new Date(p.registrationdate).toLocaleDateString()}</span>
+                              </>) : null}
+                              {p.consultant ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Consultant</span>
+                                <a href={`/administration/consultant/${(p.consultant.consultant_id || p.consultant)}`} className="pillLink" style={{ ...valueTextStyle }}>{p.consultant.consultant_id || p.consultant}</a>
+                              </>) : null}
+                              {p.filecode ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>File code</span>
+                                <span style={valueTextStyle}>{p.filecode}</span>
+                              </>) : null}
+                              {p.status ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Status</span>
+                                <span style={{ ...valueTextStyle, color: projectStatusColor(p.status) }}>{p.status === 'Inprogress' ? 'In Progress' : p.status}</span>
+                              </>) : null}
+                              {p.deadline ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Deadline</span>
+                                <span style={valueTextStyle}>{new Date(p.deadline).toLocaleDateString()}</span>
+                              </>) : null}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div>No projects</div>
+                    )}
+                  </Card.Body>
+                </Card>
+              </Grid.Column>
+              <Grid.Column>
+                <Card style={{ marginTop: 20 }}>
+                  <Card.Header>
+                    <h4>
+                      <MdFolder style={overviewIconStyle} /> Properties (from client's projects)
+                    </h4>
+                  </Card.Header>
+                  <Card.Body>
+                    {Array.isArray(this.state.projectProperties) && this.state.projectProperties.length > 0 ? (
+                      <ul className="list-unstyled" style={{ margin: 0 }}>
+                        {this.state.projectProperties.map((prop, idx) => (
+                          <li key={prop.property_id} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                              <span style={labelPillStyle}>#</span>
+                              <span style={valueTextStyle}>{idx + 1}</span>
+                              <span style={{ width: 10 }} />
+                              <span style={labelPillStyle}>ID</span>
+                              <a href={`/data_management/property/${prop.property_id}`} className="pillLink" style={{ ...valueTextStyle }}>{prop.property_id}</a>
+                              <span style={{ width: 10 }} />
+                              <span style={labelPillStyle}>Description</span>
+                              <span style={valueTextStyle}>{prop.description}</span>
+                              {prop.location ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Location</span>
+                                <span style={valueTextStyle}>{prop.location}</span>
+                              </>) : null}
+                              {prop.city ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>City</span>
+                                <span style={valueTextStyle}>{prop.city?.title || prop.city?.name || ''}</span>
+                              </>) : null}
+                              {prop.project?.title ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Project</span>
+                                <a href={`/data_management/project/${prop.project?.project_id}`} className="pillLink" style={{ ...valueTextStyle }}>{prop.project?.title}</a>
+                              </>) : null}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div>No properties</div>
+                    )}
+                  </Card.Body>
                 </Card>
               </Grid.Column>
               <Grid.Column>
@@ -239,6 +384,16 @@ class ClientOverview extends React.Component {
                               <span style={{ width: 10 }} />
                               <span style={labelPillStyle}>Title</span>
                               <span style={valueTextStyle}>{doc.title}</span>
+                              {doc.project?.project_id ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Project</span>
+                                <a href={`/data_management/project/${doc.project.project_id}`} className="pillLink" style={{ ...valueTextStyle }}>{doc.project.project_id}</a>
+                              </>) : null}
+                              {doc.validuntil ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Valid until</span>
+                                <span style={valueTextStyle}>{new Date(doc.validuntil).toLocaleDateString()}</span>
+                              </>) : null}
                               <span style={{ width: 10 }} />
                               <span style={labelPillStyle}>Status</span>
                               <span style={valueTextStyle}>{doc.status || 'No status'}</span>

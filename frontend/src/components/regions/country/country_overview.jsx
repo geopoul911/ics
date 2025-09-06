@@ -103,6 +103,29 @@ class CountryOverview extends React.Component {
           }
         }
 
+        // Enrich provinces with their cities
+        try {
+          const citiesRes = await axios.get(
+            "http://localhost:8000/api/regions/all_cities/",
+            { headers: currentHeaders }
+          );
+          const allCities = citiesRes?.data?.all_cities || citiesRes?.data?.results || citiesRes?.data?.data || citiesRes?.data || [];
+          const cityByProvince = {};
+          (Array.isArray(allCities) ? allCities : []).forEach((c) => {
+            const provRef = c?.province;
+            const pid = typeof provRef === 'object' ? provRef?.province_id : provRef;
+            if (!pid) return;
+            if (!cityByProvince[pid]) cityByProvince[pid] = [];
+            cityByProvince[pid].push(c);
+          });
+          provinces = (provinces || []).map((p) => ({
+            ...p,
+            cities: cityByProvince[p.province_id] || [],
+          }));
+        } catch (_e) {
+          // ignore if cities endpoint fails; UI will simply omit cities
+        }
+
         this.setState({ country, provinces, is_loaded: true });
       })
       .catch((e) => {
@@ -248,6 +271,28 @@ class CountryOverview extends React.Component {
                                 <span style={labelPillStyle}>Province</span>
                                 <span style={valueTextStyle}>{p.title}</span>
                               </div>
+                              {/* Cities list for this province */}
+                              {Array.isArray(p.cities) && p.cities.length > 0 ? (
+                                <div style={{ marginTop: 8, paddingLeft: 12, borderLeft: '3px solid #eef5ff' }}>
+                                  <div style={{ marginBottom: 6, fontWeight: 700, color: '#2c3e50' }}>Cities</div>
+                                  <ul className="list-unstyled" style={{ margin: 0 }}>
+                                    {p.cities.map((c, cidx) => (
+                                      <li key={c.city_id || cidx} style={{ padding: '6px 0', borderBottom: '1px dashed #eee' }}>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                                          <span style={labelPillStyle}>#</span>
+                                          <span style={valueTextStyle}>{cidx + 1}</span>
+                                          <span style={{ width: 10 }} />
+                                          <span style={labelPillStyle}>ID</span>
+                                          <a href={`/regions/city/${c.city_id}`} className="pillLink" style={{ ...valueTextStyle }}>{c.city_id}</a>
+                                          <span style={{ width: 10 }} />
+                                          <span style={labelPillStyle}>City</span>
+                                          <span style={valueTextStyle}>{c.title}</span>
+                                        </div>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              ) : null}
                             </li>
                           ))}
                         </ul>

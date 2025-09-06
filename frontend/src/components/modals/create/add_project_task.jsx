@@ -34,7 +34,7 @@ function AddProjectTaskModal({ onCreated, refreshData, defaultProjectId, lockPro
   const [details, setDetails] = useState("");
   const [taskcate_id, setTaskcateId] = useState("");
   const [priority, setPriority] = useState("A");
-  const [assigner_id, setAssignerId] = useState("");
+  const [assigner_id, setAssignerId] = useState(localStorage.getItem("consultant_id") || "");
   const [assignee_id, setAssigneeId] = useState("");
   // Assign date will be auto-filled on backend; remove from UI
   const [deadline, setDeadline] = useState("");
@@ -46,6 +46,9 @@ function AddProjectTaskModal({ onCreated, refreshData, defaultProjectId, lockPro
       loadProjects();
       loadTaskCategories();
       loadConsultants();
+      // Pre-fill assigner as logged-in user (from localStorage)
+      const myId = localStorage.getItem("consultant_id");
+      if (myId) setAssignerId(myId);
     }
   }, [show]);
 
@@ -151,15 +154,19 @@ function AddProjectTaskModal({ onCreated, refreshData, defaultProjectId, lockPro
       setDetails("");
       setTaskcateId("");
       setPriority("A");
-      setAssignerId("");
       setAssigneeId("");
       
       setDeadline("");
       setWeight("");
       setEfforttime("");
-      setShow(false);
+      // Refresh parent lists immediately if handler provided
+      if (typeof refreshData === 'function') {
+        try { await refreshData(); } catch (_) {}
+      } else if (typeof onCreated === 'function') {
+        try { await onCreated(); } catch (_) {}
+      }
 
-      if (onCreated) onCreated();
+      setShow(false);
     } catch (error) {
       console.error("Error creating project task:", error);
       let errorMessage = "Failed to create project task";
@@ -179,7 +186,7 @@ function AddProjectTaskModal({ onCreated, refreshData, defaultProjectId, lockPro
     setDetails("");
     setTaskcateId("");
     setPriority("A");
-    setAssignerId("");
+    setAssignerId(localStorage.getItem("consultant_id") || "");
     setAssigneeId("");
     
     setDeadline("");
@@ -303,7 +310,7 @@ function AddProjectTaskModal({ onCreated, refreshData, defaultProjectId, lockPro
                   <Form.Control as="select" value={assigner_id} onChange={(e) => setAssignerId(e.target.value)}>
                     <option value="">Select assigner</option>
                     {consultants.map((c) => (
-                      <option key={c.consultant_id} value={c.consultant_id}> {c.consultant_id} - {c.fullname}</option>
+                      <option key={c.consultant_id} value={c.consultant_id}>{c.consultant_id} - {c.fullname}</option>
                     ))}
                   </Form.Control>
                 </Form.Group>

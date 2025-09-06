@@ -66,13 +66,6 @@ const columns = [
     formatter: (cell, row) => row.email || "",
   },
   {
-    dataField: "phone1",
-    text: "Telephone 1",
-    sort: true,
-    filter: textFilter(),
-    formatter: (cell, row) => row.phone1 || "",
-  },
-  {
     dataField: "mobile1",
     text: "Cell phone 1",
     sort: true,
@@ -87,23 +80,18 @@ const columns = [
     formatter: (cell, row) => row.country?.title || "",
   },
   {
+    dataField: "province.title",
+    text: "Province",
+    sort: true,
+    filter: textFilter(),
+    formatter: (cell, row) => row.province?.title || "",
+  },
+  {
     dataField: "city.title",
     text: "City",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => row.city?.title || "",
-  },
-  {
-    dataField: "registrationdate",
-    text: "Entered",
-    sort: true,
-    filter: textFilter(),
-    formatter: (cell, row) => {
-      if (row.registrationdate) {
-        return new Date(row.registrationdate).toLocaleDateString();
-      }
-      return "";
-    },
   },
   {
     dataField: "active",
@@ -113,6 +101,28 @@ const columns = [
     formatter: (cell, row) => (
       <span className={row.active ? "text-success" : "text-danger"}>
         {row.active ? "Yes" : "No"}
+      </span>
+    ),
+  },
+  {
+    dataField: "deceased",
+    text: "Deceased",
+    sort: true,
+    filter: textFilter(),
+    formatter: (cell, row) => (
+      <span className={row.deceased ? "text-danger" : "text-success"}>
+        {row.deceased ? "Yes" : "No"}
+      </span>
+    ),
+  },
+  {
+    dataField: "retired",
+    text: "Retired",
+    sort: true,
+    filter: textFilter(),
+    formatter: (cell, row) => (
+      <span className={row.retired ? "text-success" : "text-danger"}>
+        {row.retired ? "Yes" : "No"}
       </span>
     ),
   },

@@ -6,6 +6,7 @@ import { useState } from "react";
 import About from "./components/core/about/about";
 import Terms from "./components/core/terms/terms";
 import Help from "./components/core/help/help";
+import NotificationsPage from "./components/core/notifications/notifications";
 import FourOFour from "./components/core/404/404";
 import UnderConstruction from "./components/core/under_construction/under_construction";
 import Login from "./components/core/login/login";
@@ -18,6 +19,7 @@ import AllDocuments from "./components/data_management/all_documents/all_documen
 import DocumentOverview from "./components/data_management/document/document_overview/document_overview";
 import AllClients from "./components/data_management/all_clients/all_clients";
 import Client  from "./components/data_management/client/client";
+import ClientProjectsProperties from "./components/data_management/client/projects_properties/projects_properties";
 import AllClientContacts from "./components/data_management/all_client_contacts/all_client_contacts";
 import ClientContactOverview from "./components/data_management/client_contact/client_contact_overview/client_contact_overview";
 import AllBankClientAccounts from "./components/data_management/all_bank_client_accounts/all_bank_client_accounts";
@@ -44,6 +46,15 @@ import TaxationProjectOverview from "./components/data_management/taxation_proje
 
 // Reports
 import ReportsRoot from "./components/reports/reports_root/reports_root";
+import ClientsReport from "./components/reports/clients/clients_report";
+import ProjectsReport from "./components/reports/projects/projects_report";
+import TasksReport from "./components/reports/tasks/tasks_report";
+import PropertiesReport from "./components/reports/properties/properties_report";
+import DocumentsReport from "./components/reports/documents/documents_report";
+import CashReport from "./components/reports/cash/cash_report";
+import StatisticsReport from "./components/reports/statistics/statistics_report";
+import ProfessionalsReport from "./components/reports/professionals/professionals_report";
+
 import Dashboard from "./components/dashboard/Dashboard";
 
 // Administration
@@ -121,6 +132,14 @@ function App() {
           exact={true}
           path="/help"
           render={(props) => <Help {...props} setUserToken={setUserToken} />}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/notifications"
+          render={(props) => (
+            <NotificationsPage {...props} setUserToken={setUserToken} />
+          )}
         />
 
         <ProtectedRoute
@@ -233,6 +252,14 @@ function App() {
            path="/data_management/client/:id"
            render={(props) => (
              <Client {...props} setUserToken={setUserToken} />
+           )}
+         />
+         <ProtectedRoute
+           isLoggedIn={!!userToken}
+           exact={true}
+           path="/data_management/client/:id/projects_properties"
+           render={(props) => (
+             <ClientProjectsProperties {...props} setUserToken={setUserToken} />
            )}
          />
          <ProtectedRoute
@@ -427,6 +454,110 @@ function App() {
           path="/reports/root"
           render={(props) => (
             <ReportsRoot {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/reports/clients"
+          render={(props) => (
+            <ClientsReport {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/reports/projects"
+          render={(props) => (
+            <ProjectsReport {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/reports/tasks"
+          render={(props) => (
+            <TasksReport {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/reports/properties"
+          render={(props) => (
+            <PropertiesReport {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/reports/documents"
+          render={(props) => (
+            <DocumentsReport {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/reports/cash"
+          render={(props) => (
+            <CashReport {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/reports/statistics"
+          render={(props) => (
+            <StatisticsReport {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/reports/projects"
+          render={(props) => (
+            <ProjectsReport {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/reports/tasks"
+          render={(props) => (
+            <TasksReport {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/reports/properties"
+          render={(props) => (
+            <PropertiesReport {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/reports/documents"
+          render={(props) => (
+            <DocumentsReport {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/reports/cash"
+          render={(props) => (
+            <CashReport {...props} setUserToken={setUserToken} />
+          )}
+        />
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/reports/professionals"
+          render={(props) => (
+            <ProfessionalsReport {...props} setUserToken={setUserToken} />
           )}
         />
 

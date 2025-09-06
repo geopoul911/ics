@@ -36,8 +36,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-    'accounts',
-    'webapp',
+    'accounts.apps.AccountsConfig',
+    'webapp.apps.WebappConfig',
     'axes',
 ]
 

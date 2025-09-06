@@ -138,6 +138,45 @@ class Tasks extends React.Component {
                                 <span style={valueTextStyle}>{t.assignee.fullname}</span>
                               </>) : null}
                             </div>
+                            {/* Comments for this task */}
+                            {(() => {
+                              const taskId = t.projtask_id;
+                              const comments = (this.state.taskComments || []).filter((c) => {
+                                const cid = c?.projtask?.projtask_id || c?.projtask_id;
+                                return cid === taskId;
+                              });
+                              if (!comments.length) return null;
+                              return (
+                                <div style={{ marginTop: 8, paddingLeft: 12 }}>
+                                  <div style={{ marginBottom: 6, fontWeight: 700 }}>Comments</div>
+                                  <ul className="list-unstyled" style={{ margin: 0 }}>
+                                    {comments.map((cm, cidx) => (
+                                      <li key={cm.taskcomm_id || cidx} style={{ padding: '6px 0', borderBottom: '1px dashed #eee' }}>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                                          <span style={labelPillStyle}>#</span>
+                                          <span style={valueTextStyle}>{cidx + 1}</span>
+                                          {cm.commentregistration ? (<>
+                                            <span style={{ width: 10 }} />
+                                            <span style={labelPillStyle}>Time</span>
+                                            <span style={valueTextStyle}>{new Date(cm.commentregistration).toLocaleString()}</span>
+                                          </>) : null}
+                                          {cm.consultant ? (<>
+                                            <span style={{ width: 10 }} />
+                                            <span style={labelPillStyle}>By</span>
+                                            <span style={valueTextStyle}>{cm.consultant.fullname || `${cm.consultant.surname || ''} ${cm.consultant.name || ''}`.trim()}</span>
+                                          </>) : null}
+                                          {cm.comment ? (<>
+                                            <span style={{ width: 10 }} />
+                                            <span style={labelPillStyle}>Comment</span>
+                                            <span style={valueTextStyle}>{cm.comment}</span>
+                                          </>) : null}
+                                        </div>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              );
+                            })()}
                           </li>
                         ))}
                       </ul>
@@ -173,7 +212,9 @@ class Tasks extends React.Component {
                               {c.kind ? (<>
                                 <span style={{ width: 10 }} />
                                 <span style={labelPillStyle}>Kind</span>
-                                <span style={valueTextStyle}>{c.kind === 'E' ? 'Expense' : 'Payment'}</span>
+                                <span style={{ ...valueTextStyle, color: c.kind === 'E' ? '#c0392b' : '#27ae60' }}>
+                                  {c.kind === 'E' ? 'Expense' : 'Payment'}
+                                </span>
                               </>) : null}
                               {(c.amountpay || c.amountexp) ? (<>
                                 <span style={{ width: 10 }} />

@@ -12,6 +12,11 @@ from django.db.models.deletion import ProtectedError
 from django.http import Http404
 
 from webapp.models import Document, Project, Client, ClientContact, BankClientAccount, AssociatedClient, TaskComment, Property, Cash, Professional, TaxationProject, BankProjectAccount
+from webapp.notification_utils import (
+    send_notifications_for_project,
+    send_notifications_for_task,
+    send_notifications_for_task_comment,
+)
 from webapp.serializers import (
     DocumentSerializer, DocumentListSerializer, 
     ProjectReferenceSerializer, ProjectSerializer, ProjectListSerializer, ProjectDetailSerializer, ClientReferenceSerializer,
@@ -435,7 +440,7 @@ class AllTaskComments(generics.ListCreateAPIView):
         try:
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            serializer.save()
+            obj = serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response(
@@ -522,7 +527,19 @@ class AllProjectTasks(generics.ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         """Create a new project task"""
         try:
-            serializer = self.get_serializer(data=request.data, context={"request": request})
+            # Permission: only users who can assign tasks
+            user = request.user
+            if not getattr(user, 'canassigntask', False):
+                return Response({"error": "You are not allowed to assign tasks."}, status=status.HTTP_403_FORBIDDEN)
+
+            # Default assigner to the current user when not provided by client
+            payload = request.data.copy()
+            if not payload.get('assigner_id'):
+                current_id = getattr(user, 'consultant_id', None)
+                if current_id:
+                    payload['assigner_id'] = current_id
+
+            serializer = self.get_serializer(data=payload, context={"request": request})
             serializer.is_valid(raise_exception=True)
             with transaction.atomic():
                 obj = serializer.save()

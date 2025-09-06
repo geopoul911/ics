@@ -77,15 +77,40 @@ const columns = [
     filter: textFilter(),
   },
   {
-    dataField: "consultant.surname",
+    dataField: "consultant",
     text: "Consultant",
     sort: true,
     filter: textFilter(),
     formatter: (cell, row) => {
-      if (row.consultant) {
-        return `${row.consultant.surname} ${row.consultant.name}`;
-      }
-      return "";
+      const c = row.consultant;
+      if (!c) return "N/A";
+      if (c.fullname) return c.fullname;
+      const surname = c.surname || "";
+      const name = c.name || "";
+      const combined = `${surname} ${name}`.trim();
+      return combined || "N/A";
+    },
+    filterValue: (cell, row) => {
+      const c = row.consultant;
+      if (!c) return "";
+      if (c.fullname) return c.fullname;
+      const surname = c.surname || "";
+      const name = c.name || "";
+      return `${surname} ${name}`.trim();
+    },
+  },
+  {
+    dataField: "categories",
+    text: "Categories",
+    sort: false,
+    filter: textFilter(),
+    formatter: (cell, row) => {
+      const cats = Array.isArray(row.categories) ? row.categories : [];
+      return cats.map((c) => c?.title).filter(Boolean).join(", ");
+    },
+    filterValue: (cell, row) => {
+      const cats = Array.isArray(row.categories) ? row.categories : [];
+      return cats.map((c) => c?.title).filter(Boolean).join(" ");
     },
   },
   {

@@ -242,6 +242,50 @@ export function EditCashKindModal({ cash, update_state }) {
   );
 }
 
+// Currency
+export function EditCashCurrencyModal({ cash, update_state }) {
+  const [show, setShow] = useState(false);
+  const [currency, setCurrency] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => { if (show) setCurrency(cash.currency || ""); }, [show, cash]);
+
+  const handleSave = async () => {
+    setBusy(true);
+    try {
+      const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
+      const payload = { currency: (currency || "").trim() || null };
+      const res = await axios.put(UPDATE_CASH + cash.cash_id + "/", payload, { headers: currentHeaders });
+      Swal.fire("Success", "Currency updated successfully", "success");
+      update_state && update_state(res.data);
+      setShow(false);
+    } catch (e) {
+      const apiMsg = e?.response?.data?.detail || e?.response?.data || "Failed to update currency";
+      Swal.fire("Error", apiMsg, "error");
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <>
+      <Button size="tiny" basic onClick={() => setShow(true)}><FiEdit style={{ marginRight: 6 }} /> Edit Currency</Button>
+      <Modal show={show} onHide={() => setShow(false)} centered>
+        <Modal.Header closeButton><Modal.Title>Edit Currency</Modal.Title></Modal.Header>
+        <Modal.Body>
+          <Form.Group>
+            <Form.Label>Currency:</Form.Label>
+            <Form.Control value={currency} maxLength={3} onChange={(e) => setCurrency(e.target.value.toUpperCase())} placeholder="e.g., EUR" />
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <small className="mr-auto"><div style={{ color: "green" }}>Optional</div></small>
+          <Button color="red" onClick={() => setShow(false)} disabled={busy}>Cancel</Button>
+          <Button color="green" onClick={handleSave} disabled={busy}>{busy ? "Saving..." : "Save Changes"}</Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+}
+
 // Amount Expense (only when kind = E)
 export function EditCashAmountExpenseModal({ cash, update_state }) {
   const [show, setShow] = useState(false);

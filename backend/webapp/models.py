@@ -891,6 +891,7 @@ class Cash(models.Model):
     trandate = models.DateField()
     consultant = models.ForeignKey(Consultant, on_delete=models.PROTECT)
     kind = models.CharField(max_length=1, choices=[('E', 'Expense'), ('P', 'Payment')], blank=True, null=True)
+    currency = models.CharField(max_length=3, blank=True, null=True)
     amountexp = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     amountpay = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     reason = models.CharField(max_length=120)
@@ -918,6 +919,7 @@ class Notification(models.Model):
         ('task_completed', 'Task Completed'),
         ('task_deleted', 'Task Deleted'),
         ('deadline_approaching', 'Deadline Approaching'),
+        ('security_lockout', 'Security Lockout'),
     ]
 
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='notifications')

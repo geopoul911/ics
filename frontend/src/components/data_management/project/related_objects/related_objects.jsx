@@ -54,6 +54,7 @@ class RelatedObjects extends React.Component {
       project: {},
       is_loaded: false,
       associatedClients: [],
+      clients: [],
       documents: [],
       clientContacts: [],
       properties: [],
@@ -71,9 +72,20 @@ class RelatedObjects extends React.Component {
       const projectId = getProjectIdFromPath();
       const res = await axios.get(`${VIEW_PROJECT}${projectId}/`, { headers: currentHeaders });
       const p = res?.data || {};
+      const associated = p.associated_clients || [];
+      // Derive unique clients from associated clients
+      const clientsMap = {};
+      (Array.isArray(associated) ? associated : []).forEach((ac) => {
+        const c = ac?.client;
+        const cid = c?.client_id || c?.id;
+        if (c && cid && !clientsMap[cid]) clientsMap[cid] = c;
+      });
+      const clients = Object.values(clientsMap);
+
       this.setState({
         project: p,
-        associatedClients: p.associated_clients || [],
+        associatedClients: associated,
+        clients,
         documents: p.documents || [],
         clientContacts: p.contacts || [],
         properties: p.properties || [],
@@ -136,6 +148,11 @@ class RelatedObjects extends React.Component {
                                 <span style={labelPillStyle}>Order by</span>
                                 <span style={valueTextStyle}>{ac.orderindex}</span>
                               </>) : null}
+                              {ac.notes ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Notes</span>
+                                <span style={valueTextStyle}>{ac.notes}</span>
+                              </>) : null}
                             </div>
                           </li>
                         ))}
@@ -145,6 +162,34 @@ class RelatedObjects extends React.Component {
                   <Card.Footer>
                     <AddAssociatedClientModal refreshData={this.fetchData} defaultProjectId={this.state.project?.project_id} lockProject={true} />
                   </Card.Footer>
+                </Card>
+              </Grid.Column>
+
+              <Grid.Column>
+                <Card style={{ marginTop: 20 }}>
+                  <Card.Header>
+                    <h4><MdLink style={overviewIconStyle} /> Clients</h4>
+                  </Card.Header>
+                  <Card.Body>
+                    {Array.isArray(this.state.clients) && this.state.clients.length > 0 ? (
+                      <ul className="list-unstyled" style={{ margin: 0 }}>
+                        {this.state.clients.map((c, idx) => (
+                          <li key={c.client_id || idx} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                              <span style={labelPillStyle}>#</span>
+                              <span style={valueTextStyle}>{idx + 1}</span>
+                              <span style={{ width: 10 }} />
+                              <span style={labelPillStyle}>ID</span>
+                              <a href={`/data_management/client/${c.client_id}`} className="pillLink" style={{ ...valueTextStyle }}>{c.client_id}</a>
+                              <span style={{ width: 10 }} />
+                              <span style={labelPillStyle}>Full name</span>
+                              <span style={valueTextStyle}>{c.fullname || `${c.surname || ''} ${c.name || ''}`.trim()}</span>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (<div>No clients</div>)}
+                  </Card.Body>
                 </Card>
               </Grid.Column>
 
@@ -203,6 +248,26 @@ class RelatedObjects extends React.Component {
                               <span style={{ width: 10 }} />
                               <span style={labelPillStyle}>Full name</span>
                               <span style={valueTextStyle}>{cc.fullname}</span>
+                              {cc.connection ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Connection</span>
+                                <span style={valueTextStyle}>{cc.connection}</span>
+                              </>) : null}
+                              {cc.phone ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Phone</span>
+                                <span style={valueTextStyle}>{cc.phone}</span>
+                              </>) : null}
+                              {cc.mobile ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Mobile</span>
+                                <span style={valueTextStyle}>{cc.mobile}</span>
+                              </>) : null}
+                              {cc.notes ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Notes</span>
+                                <span style={valueTextStyle}>{cc.notes}</span>
+                              </>) : null}
                             </div>
                           </li>
                         ))}
@@ -266,6 +331,22 @@ class RelatedObjects extends React.Component {
                                 <span style={{ width: 10 }} />
                                 <span style={labelPillStyle}>Account</span>
                                 <span style={valueTextStyle}>{bpa.bankclientacco.accountnumber}</span>
+                              </>) : null}
+                              {bpa.client ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Client</span>
+                                <a
+                                  href={`/data_management/client/${(bpa.client && (bpa.client.client_id || bpa.client))}`}
+                                  className="pillLink"
+                                  style={{ ...valueTextStyle }}
+                                >
+                                  {(bpa.client && (bpa.client.client_id || bpa.client))}
+                                </a>
+                                {bpa.client && (bpa.client.fullname || bpa.client.surname || bpa.client.name) ? (<>
+                                  <span style={{ width: 10 }} />
+                                  <span style={labelPillStyle}>Full name</span>
+                                  <span style={valueTextStyle}>{bpa.client.fullname || `${bpa.client.surname || ''} ${bpa.client.name || ''}`.trim()}</span>
+                                </>) : null}
                               </>) : null}
                             </div>
                           </li>
