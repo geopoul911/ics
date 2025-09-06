@@ -2,6 +2,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from webapp.permissions import RoleBasedPermission
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from django.db import transaction
@@ -13,10 +14,10 @@ from django.http import Http404
 from webapp.models import Document, Project, Client, ClientContact, BankClientAccount, AssociatedClient, TaskComment, Property, Cash, Professional, TaxationProject, BankProjectAccount
 from webapp.serializers import (
     DocumentSerializer, DocumentListSerializer, 
-    ProjectReferenceSerializer, ProjectSerializer, ProjectListSerializer, ClientReferenceSerializer,
-    ClientSerializer, ClientListSerializer,
-    ClientContactSerializer, ClientContactListSerializer,
-    BankClientAccountSerializer, BankClientAccountListSerializer,
+    ProjectReferenceSerializer, ProjectSerializer, ProjectListSerializer, ProjectDetailSerializer, ClientReferenceSerializer,
+    ClientSerializer, ClientDetailSerializer, ClientListSerializer,
+    ClientContactSerializer, ClientContactListSerializer, ProfessionalDetailSerializer,
+    BankClientAccountSerializer, BankClientAccountListSerializer, BankClientAccountDetailSerializer,
     AssociatedClientSerializer,
     TaskCommentSerializer, PropertySerializer, PropertyListSerializer,
     CashSerializer, CashListSerializer,
@@ -34,7 +35,7 @@ class AllDocuments(generics.ListCreateAPIView):
     serializer_class = DocumentSerializer
     queryset = Document.objects.all().order_by('-created')
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     
     def get(self, request, *args, **kwargs):
         """Get all documents"""
@@ -78,6 +79,8 @@ class DocumentView(RetrieveUpdateDestroyAPIView):
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer
     lookup_field = 'document_id'
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -153,7 +156,7 @@ class AllProjects(generics.ListAPIView):
     """
     serializer_class = ProjectReferenceSerializer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     
     def get_queryset(self):
         return Project.objects.all().order_by('title')
@@ -178,7 +181,7 @@ class AllProjectsCRUD(generics.ListCreateAPIView):
     """
     serializer_class = ProjectListSerializer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get_queryset(self):
         return Project.objects.all().order_by('-registrationdate')
@@ -214,17 +217,17 @@ class ProjectView(RetrieveUpdateDestroyAPIView):
     """
     serializer_class = ProjectSerializer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     lookup_field = 'project_id'
 
     def get_queryset(self):
         return Project.objects.all()
 
     def get(self, request, *args, **kwargs):
-        """Get a single project"""
+        """Get a single project with full related objects"""
         try:
             instance = self.get_object()
-            serializer = self.get_serializer(instance, context={"request": request})
+            serializer = ProjectDetailSerializer(instance, context={"request": request})
             return Response(serializer.data)
         except Http404:
             return Response({"error": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -320,7 +323,7 @@ class AllAssociatedClients(generics.ListCreateAPIView):
     """
     serializer_class = AssociatedClientSerializer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     
     def get_queryset(self):
         return AssociatedClient.objects.all().order_by('orderindex', 'client__surname', 'client__name')
@@ -357,7 +360,7 @@ class AssociatedClientView(RetrieveUpdateDestroyAPIView):
     """
     serializer_class = AssociatedClientSerializer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     lookup_field = 'assoclient_id'
     
     def get_queryset(self):
@@ -409,7 +412,7 @@ class AllTaskComments(generics.ListCreateAPIView):
     """
     serializer_class = TaskCommentSerializer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     
     def get_queryset(self):
         return TaskComment.objects.all().order_by('-commentregistration')
@@ -446,7 +449,7 @@ class TaskCommentView(RetrieveUpdateDestroyAPIView):
     """
     serializer_class = TaskCommentSerializer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     lookup_field = 'taskcomm_id'
     
     def get_queryset(self):
@@ -498,7 +501,7 @@ class AllProjectTasks(generics.ListCreateAPIView):
     """
     serializer_class = ProjectTaskSerializer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get_queryset(self):
         from webapp.models import ProjectTask
@@ -539,7 +542,7 @@ class ProjectTaskView(RetrieveUpdateDestroyAPIView):
     """
     serializer_class = ProjectTaskSerializer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     lookup_field = 'projtask_id'
 
     def get_queryset(self):
@@ -592,8 +595,22 @@ class AllClients(generics.ListCreateAPIView):
     serializer_class = ClientSerializer
     queryset = Client.objects.all().order_by('-registrationdate')
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     
+    def get_queryset(self):
+        qs = Client.objects.all()
+        try:
+            insucarrier = self.request.query_params.get('insucarrier')
+            if insucarrier:
+                from django.db.models import Q
+                qs = qs.filter(
+                    Q(insucarrier1__insucarrier_id=insucarrier) |
+                    Q(insucarrier2__insucarrier_id=insucarrier)
+                )
+        except Exception:
+            pass
+        return qs.order_by('-registrationdate')
+
     def get(self, request, *args, **kwargs):
         """Get all clients"""
         try:
@@ -636,10 +653,12 @@ class ClientView(RetrieveUpdateDestroyAPIView):
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
     lookup_field = 'client_id'
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance, context={"request": request})
+        serializer = ClientDetailSerializer(instance, context={"request": request})
         return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
@@ -755,7 +774,7 @@ class AllClientContacts(generics.ListCreateAPIView):
     serializer_class = ClientContactSerializer
     queryset = ClientContact.objects.all().order_by('fullname')
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     
     def get(self, request, *args, **kwargs):
         """Get all client contacts"""
@@ -799,6 +818,8 @@ class ClientContactView(RetrieveUpdateDestroyAPIView):
     queryset = ClientContact.objects.all()
     serializer_class = ClientContactSerializer
     lookup_field = 'clientcont_id'
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -861,7 +882,7 @@ class AllClientContactsReference(generics.ListAPIView):
     """
     serializer_class = ClientContactListSerializer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     
     def get_queryset(self):
         return ClientContact.objects.filter(active=True).order_by('fullname')
@@ -887,7 +908,7 @@ class AllBankClientAccounts(generics.ListCreateAPIView):
     serializer_class = BankClientAccountSerializer
     queryset = BankClientAccount.objects.all().order_by('accountnumber')
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     
     def get(self, request, *args, **kwargs):
         """Get all bank client accounts"""
@@ -929,8 +950,10 @@ class BankClientAccountView(RetrieveUpdateDestroyAPIView):
     API endpoint for retrieving, updating, and deleting a specific bank client account.
     """
     queryset = BankClientAccount.objects.all()
-    serializer_class = BankClientAccountSerializer
+    serializer_class = BankClientAccountDetailSerializer
     lookup_field = 'bankclientacco_id'
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -993,7 +1016,7 @@ class AllBankClientAccountsReference(generics.ListAPIView):
     """
     serializer_class = BankClientAccountListSerializer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     
     def get_queryset(self):
         return BankClientAccount.objects.filter(active=True).order_by('accountnumber')
@@ -1018,7 +1041,7 @@ class AllClientsReference(generics.ListAPIView):
     """
     serializer_class = ClientReferenceSerializer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     
     def get_queryset(self):
         return Client.objects.filter(active=True).order_by('surname', 'name')
@@ -1044,7 +1067,7 @@ class AllProperties(generics.ListCreateAPIView):
     serializer_class = PropertySerializer
     queryset = Property.objects.all().order_by('property_id')
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     
     def get(self, request, *args, **kwargs):
         """Get all properties"""
@@ -1088,6 +1111,8 @@ class PropertyView(RetrieveUpdateDestroyAPIView):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
     lookup_field = 'property_id'
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -1151,7 +1176,7 @@ class AllCash(generics.ListCreateAPIView):
     serializer_class = CashSerializer
     queryset = Cash.objects.all().order_by('-trandate')
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     
     def get(self, request, *args, **kwargs):
         """Get all cash entries"""
@@ -1195,6 +1220,8 @@ class CashView(RetrieveUpdateDestroyAPIView):
     queryset = Cash.objects.all()
     serializer_class = CashSerializer
     lookup_field = 'cash_id'
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -1258,7 +1285,7 @@ class AllBankProjectAccounts(generics.ListCreateAPIView):
     serializer_class = BankProjectAccountSerializer
     queryset = BankProjectAccount.objects.all().order_by('bankprojacco_id')
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     
     def get(self, request, *args, **kwargs):
         """Get all bank project accounts"""
@@ -1301,6 +1328,8 @@ class BankProjectAccountView(RetrieveUpdateDestroyAPIView):
     queryset = BankProjectAccount.objects.all()
     serializer_class = BankProjectAccountSerializer
     lookup_field = 'bankprojacco_id'
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -1363,7 +1392,7 @@ class AllProfessionalsReference(generics.ListAPIView):
     """
     serializer_class = ProfessionalReferenceSerializer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get_queryset(self):
         return Professional.objects.filter(active=True).order_by('fullname')
@@ -1383,7 +1412,7 @@ class AllProfessionals(generics.ListCreateAPIView):
     """
     serializer_class = ProfessionalSerializer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get_queryset(self):
         return Professional.objects.all().order_by('fullname')
@@ -1418,10 +1447,12 @@ class ProfessionalView(RetrieveUpdateDestroyAPIView):
     queryset = Professional.objects.all()
     serializer_class = ProfessionalSerializer
     lookup_field = 'professional_id'
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance, context={"request": request})
+        serializer = ProfessionalDetailSerializer(instance, context={"request": request})
         return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
@@ -1454,7 +1485,7 @@ class ProfessionalView(RetrieveUpdateDestroyAPIView):
 class AllTaxationProjects(generics.ListCreateAPIView):
     serializer_class = TaxationProjectSerializer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get_queryset(self):
         return TaxationProject.objects.all().order_by('-deadline')
@@ -1486,6 +1517,8 @@ class TaxationProjectView(RetrieveUpdateDestroyAPIView):
     queryset = TaxationProject.objects.all()
     serializer_class = TaxationProjectSerializer
     lookup_field = 'taxproj_id'
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()

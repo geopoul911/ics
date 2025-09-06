@@ -24,7 +24,7 @@ const ADD_ASSOCIATED_CLIENT = "http://localhost:8000/api/data_management/associa
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);
 
-function AddAssociatedClientModal({ onClientCreated }) {
+function AddAssociatedClientModal({ onClientCreated, refreshData, defaultProjectId, defaultClientId, lockProject = false, lockClient = false }) {
   const [show, setShow] = useState(false);
 
   // Basic Information
@@ -49,6 +49,8 @@ function AddAssociatedClientModal({ onClientCreated }) {
   const handleClose = () => setShow(false);
   const handleShow = () => {
     resetForm();
+    if (defaultProjectId) setProject(defaultProjectId);
+    if (defaultClientId) setClient(defaultClientId);
     setShow(true);
   };
 
@@ -145,9 +147,9 @@ function AddAssociatedClientModal({ onClientCreated }) {
       });
 
       // Refresh the parent component if callback provided
-      if (onClientCreated) {
-        onClientCreated();
-      }
+      if (onClientCreated) onClientCreated();
+      if (refreshData) refreshData();
+      handleClose();
     } catch (e) {
       console.error('Associated Client creation error:', e.response?.data);
       const apiMsg =
@@ -222,6 +224,7 @@ function AddAssociatedClientModal({ onClientCreated }) {
                         as="select"
                         onChange={(e) => setProject(e.target.value)}
                         value={project}
+                        disabled={lockProject}
                       >
                         <option value="">Select Project</option>
                         {Array.isArray(projects) && projects.map((project) => (
@@ -239,6 +242,7 @@ function AddAssociatedClientModal({ onClientCreated }) {
                         as="select"
                         onChange={(e) => setClient(e.target.value)}
                         value={client}
+                        disabled={lockClient}
                       >
                         <option value="">Select Client</option>
                         {Array.isArray(clients) && clients.map((client) => (

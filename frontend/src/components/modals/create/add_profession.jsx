@@ -125,7 +125,7 @@ export default function AddProfessionModal({ onProfessionCreated }) {
         New Profession
       </Button>
 
-      <Modal show={show} onHide={handleClose} centered size="lg">
+      <Modal show={show} onHide={handleClose} centered size="lg" >
         <Modal.Header closeButton>
           <Modal.Title>Create New Profession</Modal.Title>
         </Modal.Header>

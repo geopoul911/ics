@@ -1,10 +1,6 @@
 // Built-ins
 import React from "react";
 
-// Custom Made Components
-import NavigationBar from "../../../core/navigation_bar/navigation_bar";
-import Footer from "../../../core/footer/footer";
-
 // Icons / Images
 import { FaSort } from "react-icons/fa";
 import { FaIdBadge, FaStickyNote, FaStop } from "react-icons/fa";
@@ -24,7 +20,6 @@ import {
   EditProjectFilecodeModal,
   EditProjectTaxationModal,
   EditProjectDeadlineModal,
-  EditProjectStatusModal,
   EditProjectDetailsModal,
   EditProjectNotesModal,
   EditProjectAssignedModal,
@@ -92,21 +87,18 @@ class ProjectOverview extends React.Component {
     if (!this.state.is_loaded) {
       return (
         <>
-          <NavigationBar />
           <div className="rootContainer">
             {pageHeader("project_overview", "")}
             <div className="contentBody">
               <div>Loading...</div>
             </div>
           </div>
-          <Footer />
         </>
       );
     }
 
     return (
       <>
-        <NavigationBar />
         <div className="rootContainer">
           {pageHeader("project_overview", project.title)}
           <div className="contentBody">
@@ -338,7 +330,6 @@ class ProjectOverview extends React.Component {
             </Grid>
           </div>
         </div>
-        <Footer />
       </>
     );
   }

@@ -30,7 +30,7 @@ const toSmallInt = (value) => {
   return Math.max(-32768, Math.min(32767, n)); // Django SmallIntegerField range
 };
 
-function AddProvinceModal() {
+function AddProvinceModal({ defaultCountryId, lockCountry = false, refreshData }) {
   const [show, setShow] = useState(false);
   const [countries, setCountries] = useState([]);
 
@@ -49,6 +49,7 @@ function AddProvinceModal() {
   const handleClose = () => setShow(false);
   const handleShow = () => {
     resetForm();
+    if (defaultCountryId) setCountryId(defaultCountryId);
     setShow(true);
   };
 
@@ -99,7 +100,7 @@ function AddProvinceModal() {
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
-      const res = await axios({
+      await axios({
         method: "post",
         url: ADD_PROVINCE,
         headers: currentHeaders,
@@ -111,8 +112,8 @@ function AddProvinceModal() {
         },
       });
 
-      const newId = res?.data?.province_id || res?.data?.id || provinceId;
-      window.location.href = "/regions/province/" + newId;
+      if (refreshData) refreshData();
+      setShow(false);
     } catch (e) {
       console.log('Error creating province:', e);
       console.log('Error response data:', e?.response?.data);
@@ -197,6 +198,7 @@ function AddProvinceModal() {
                     as="select"
                     onChange={(e) => setCountryId(e.target.value)}
                     value={countryId}
+                    disabled={lockCountry}
                   >
                     <option value="">Select Country</option>
                     {Array.isArray(countries) && countries.map((country) => (

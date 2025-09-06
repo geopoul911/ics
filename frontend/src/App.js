@@ -17,13 +17,13 @@ import DataManagementRoot from "./components/data_management/data_management_roo
 import AllDocuments from "./components/data_management/all_documents/all_documents";
 import DocumentOverview from "./components/data_management/document/document_overview/document_overview";
 import AllClients from "./components/data_management/all_clients/all_clients";
-import ClientOverview from "./components/data_management/client/client_overview/client_overview";
+import Client  from "./components/data_management/client/client";
 import AllClientContacts from "./components/data_management/all_client_contacts/all_client_contacts";
 import ClientContactOverview from "./components/data_management/client_contact/client_contact_overview/client_contact_overview";
 import AllBankClientAccounts from "./components/data_management/all_bank_client_accounts/all_bank_client_accounts";
 import BankClientAccountOverview from "./components/data_management/bank_client_account/bank_client_account_overview/bank_client_account_overview";
 import AllProjects from "./components/data_management/all_projects/all_projects";
-import ProjectOverview from "./components/data_management/project/project_overview/project_overview";
+import Project from "./components/data_management/project/project";
 import AllAssociatedClients from "./components/data_management/all_associated_clients/all_associated_clients";
 import AssociatedClientOverview from "./components/data_management/associated_client/associated_client_overview/associated_client_overview";
 import AllTaskComments from "./components/data_management/all_task_comments/all_task_comments";
@@ -60,16 +60,17 @@ import ProjectCategory from "./components/administration/project_category/projec
 import AllTaskCategoriesComponent from "./components/administration/all_task_categories/all_task_categories";
 import TaskCategoryOverview from "./components/administration/task_category/task_category_overview/task_category_overview";
 import AdministrationRoot from "./components/administration/administration_root/administration_root";
+import Logs from "./components/administration/logs/logs";
 
 
 // Regions
 import RegionRoot from "./components/regions/region_root/region_root";
 import AllCountries from "./components/regions/all_countries/all_countries";
-import Country from "./components/regions/country/country";
+import Country from "./components/regions/country/country_overview";
 import AllProvinces from "./components/regions/all_provinces/all_provinces";
-import Province from "./components/regions/province/province";
+import Province from "./components/regions/province/province_overview";
 import AllCities from "./components/regions/all_cities/all_cities";
-import City from "./components/regions/city/city";
+import City from "./components/regions/city/city_overview";
 
 // CSS
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -231,7 +232,7 @@ function App() {
            exact={true}
            path="/data_management/client/:id"
            render={(props) => (
-             <ClientOverview {...props} setUserToken={setUserToken} />
+             <Client {...props} setUserToken={setUserToken} />
            )}
          />
          <ProtectedRoute
@@ -279,7 +280,7 @@ function App() {
               exact={true}
               path="/data_management/project/:id"
               render={(props) => (
-                <ProjectOverview {...props} setUserToken={setUserToken} />
+                <Project {...props} setUserToken={setUserToken} />
               )}
             />
             <ProtectedRoute
@@ -436,6 +437,15 @@ function App() {
           path="/administration/root"
           render={(props) => (
             <AdministrationRoot {...props} setUserToken={setUserToken} />
+          )}
+        />
+
+        <ProtectedRoute
+          isLoggedIn={!!userToken}
+          exact={true}
+          path="/administration/logs"
+          render={(props) => (
+            <Logs {...props} setUserToken={setUserToken} />
           )}
         />
 

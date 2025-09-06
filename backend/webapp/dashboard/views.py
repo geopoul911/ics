@@ -1,5 +1,6 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from webapp.permissions import RoleBasedPermission
 from rest_framework.response import Response
 from django.db.models import Count, Sum, Q
 from django.utils import timezone
@@ -7,7 +8,7 @@ from datetime import datetime, timedelta, date
 from webapp.models import Client, Project, Document, ProjectTask, Cash, TaxationProject, AssociatedClient
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, RoleBasedPermission])
 def dashboard_stats(request):
     """Get dashboard statistics"""
     try:
@@ -67,7 +68,7 @@ def dashboard_stats(request):
         }, status=500)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, RoleBasedPermission])
 def revenue_trend(request):
     """Get revenue trend data for the last 6 months"""
     try:
@@ -114,7 +115,7 @@ def revenue_trend(request):
         }, status=500)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, RoleBasedPermission])
 def project_status(request):
     """Get project status distribution"""
     try:
@@ -149,7 +150,7 @@ def project_status(request):
         }, status=500)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, RoleBasedPermission])
 def task_completion(request):
     """Get task completion data for the last 4 weeks"""
     try:
@@ -210,7 +211,7 @@ def task_completion(request):
         }, status=500)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, RoleBasedPermission])
 def recent_activities(request):
     """Get recent activities"""
     try:
@@ -274,7 +275,7 @@ def recent_activities(request):
         }, status=500)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, RoleBasedPermission])
 def top_clients(request):
     """Get top clients by revenue"""
     try:
@@ -323,7 +324,7 @@ def top_clients(request):
         }, status=500)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, RoleBasedPermission])
 def overdue_items(request):
     """Get overdue tasks and projects"""
     try:

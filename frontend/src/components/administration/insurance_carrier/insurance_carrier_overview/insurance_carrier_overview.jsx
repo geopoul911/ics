@@ -9,6 +9,7 @@ import { MdSecurity, MdCheckCircle, MdCancel } from "react-icons/md";
 // Modules / Functions
 import { Card } from "react-bootstrap";
 import { Grid, Button } from "semantic-ui-react";
+ 
 import Swal from "sweetalert2";
 
 // Custom Made Components
@@ -42,6 +43,8 @@ function getInsuranceCarrierIdFromPath() {
 }
 
 let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
+let labelPillStyle = { background: "#eef5ff", color: "#2c3e50", padding: "2px 10px", borderRadius: "12px", fontSize: "0.85em", marginRight: "8px", border: "1px solid #d6e4ff" };
+let valueTextStyle = { fontWeight: 600, color: "#212529" };
 
 class InsuranceCarrierOverview extends React.Component {
   constructor(props) {
@@ -49,6 +52,7 @@ class InsuranceCarrierOverview extends React.Component {
     this.state = {
       insurance_carrier: {},
       is_loaded: false,
+      clients: [],
     };
   }
 
@@ -63,16 +67,15 @@ class InsuranceCarrierOverview extends React.Component {
 
     axios
       .get(`${VIEW_INSURANCE_CARRIER}${insuranceCarrierId}/`, { headers: currentHeaders })
-      .then((res) => {
-        // Accept a few possible payload shapes safely
-        const insurance_carrier =
-          res?.data ||
-          {};
-
-        this.setState({
-          insurance_carrier,
-          is_loaded: true,
-        });
+      .then(async (res) => {
+        const insurance_carrier = res?.data || {};
+        let clients = insurance_carrier.clients || [];
+        try {
+          const icid = insurance_carrier.insucarrier_id;
+          const clientsRes = await axios.get(`http://localhost:8000/api/data_management/clients/?insucarrier=${encodeURIComponent(icid)}`, { headers: currentHeaders });
+          clients = clientsRes?.data?.all_clients || [];
+        } catch (_e) { clients = []; }
+        this.setState({ insurance_carrier, clients, is_loaded: true });
       })
       .catch((e) => {
         if (e?.response?.status === 401) {
@@ -98,6 +101,10 @@ class InsuranceCarrierOverview extends React.Component {
     return (
       <>
         <NavigationBar />
+        <style>{`
+          .pillLink { color: inherit; text-decoration: none; }
+          .pillLink:hover { color: #93ab3c !important; text-decoration: none; }
+        `}</style>
         <div className="mainContainer">
           {pageHeader("insurance_carrier_overview", `Insurance Carrier: ${insurance_carrier.title || 'Loading...'}`)}
           {this.state.is_loaded ? (
@@ -205,7 +212,51 @@ class InsuranceCarrierOverview extends React.Component {
                     <Card.Footer></Card.Footer>
                   </Card>
                 </Grid.Column>
+
+                <Grid.Column>
+                  <Card style={{ marginTop: 20 }} widht={8}>
+                    <Card.Header>
+                      <FaIdBadge
+                        style={{ color: "#93ab3c", fontSize: "1.5em", marginRight: "0.5em" }}
+                      />
+                      Clients
+                    </Card.Header>
+                    <Card.Body>
+                      {Array.isArray(this.state.clients) && this.state.clients.length > 0 ? (
+                        <ul className="list-unstyled" style={{ margin: 0 }}>
+                          {this.state.clients.map((cl, idx) => (
+                            <li key={cl.client_id} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                                <span style={labelPillStyle}>#</span>
+                                <span style={valueTextStyle}>{idx + 1}</span>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>ID</span>
+                                <a href={`/data_management/client/${cl.client_id}`} className="pillLink" style={{ ...valueTextStyle }}>{cl.client_id}</a>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Name</span>
+                                <span style={valueTextStyle}>{cl.fullname || `${cl.surname || ''} ${cl.name || ''}`.trim()}</span>
+                                {cl.mobile1 ? (<>
+                                  <span style={{ width: 10 }} />
+                                  <span style={labelPillStyle}>Cell</span>
+                                  <span style={valueTextStyle}>{cl.mobile1}</span>
+                                </>) : null}
+                                {cl.email ? (<>
+                                  <span style={{ width: 10 }} />
+                                  <span style={labelPillStyle}>E-mail</span>
+                                  <span style={valueTextStyle}>{cl.email}</span>
+                                </>) : null}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div>No clients</div>
+                      )}
+                    </Card.Body>
+                  </Card>
+                </Grid.Column>
               </Grid>
+
             </>
           ) : (
             loader()

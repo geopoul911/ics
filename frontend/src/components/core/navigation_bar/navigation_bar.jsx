@@ -320,9 +320,6 @@ class NavigationBar extends Component {
                     <Dropdown.Item href="/administration/logs">
                       <FaArrowRight style={iconStyle}/> Logs
                     </Dropdown.Item>
-                    <Dropdown.Item href="/administration/access_history">
-                      <FaArrowRight style={iconStyle}/> Access History
-                    </Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
               </Nav.Link>

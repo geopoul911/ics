@@ -24,7 +24,7 @@ const ADD_PROJECT = "http://localhost:8000/api/data_management/projects/";
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);
 
-function AddProjectModal({ onProjectCreated }) {
+function AddProjectModal({ onProjectCreated, defaultConsultantId, lockConsultant = false, defaultTaxation = false, lockTaxation = false }) {
   const [show, setShow] = useState(false);
 
   // Basic Information
@@ -58,6 +58,8 @@ function AddProjectModal({ onProjectCreated }) {
   const handleClose = () => setShow(false);
   const handleShow = () => {
     resetForm();
+    if (defaultConsultantId) setConsultant(defaultConsultantId);
+    if (defaultTaxation) setTaxation(true);
     setShow(true);
   };
 
@@ -161,9 +163,15 @@ function AddProjectModal({ onProjectCreated }) {
       const newId = res?.data?.project_id || projectId.trim();
 
       Swal.fire({ icon: "success", title: "Success", text: "Project created successfully!" });
-      handleClose();
-      if (onProjectCreated) onProjectCreated();
-      if (newId) window.location.href = `/data_management/project/${encodeURIComponent(newId)}`;
+      if (onProjectCreated) {
+        setShow(false);
+        onProjectCreated();
+      } else if (newId) {
+        handleClose();
+        window.location.href = `/data_management/project/${encodeURIComponent(newId)}`;
+      } else {
+        handleClose();
+      }
     } catch (e) {
       console.error('Project creation error:', e.response?.data);
       const apiMsg =
@@ -274,6 +282,7 @@ function AddProjectModal({ onProjectCreated }) {
                         as="select"
                         onChange={(e) => setConsultant(e.target.value)}
                         value={consultant}
+                        disabled={lockConsultant}
                         isInvalid={consultant !== "" && !isConsultantValid}
                       >
                         <option value="">Select Consultant</option>
@@ -370,6 +379,7 @@ function AddProjectModal({ onProjectCreated }) {
                         label="Taxation Project"
                         checked={taxation}
                         onChange={(e) => setTaxation(e.target.checked)}
+                        disabled={lockTaxation}
                       />
                       <Form.Text className="text-muted">
                         Check if this is a taxation project

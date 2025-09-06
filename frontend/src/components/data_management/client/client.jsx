@@ -10,16 +10,10 @@ import "react-tabs/style/react-tabs.css";
 // Custom Made Components
 import NavigationBar from "../../core/navigation_bar/navigation_bar";
 import Footer from "../../core/footer/footer";
-import RegionOverView from "./city_overview/city_overview";
+import ClientOverView from "./client_overview/client_overview";
+import RelatedObjects from "./related_objects/related_objects";
 
-// region page Class
-class Region extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      region: {},
-    };
-  }
+class Client extends React.Component {
 
   render() {
     return (
@@ -28,9 +22,13 @@ class Region extends React.Component {
         <Tabs>
           <TabList>
             <Tab> Overview </Tab>
+            <Tab>Related Objects</Tab>
           </TabList>
           <TabPanel>
-            <RegionOverView />
+            <ClientOverView />
+          </TabPanel>
+          <TabPanel>
+            <RelatedObjects />
           </TabPanel>
         </Tabs>
         <Footer />
@@ -39,4 +37,4 @@ class Region extends React.Component {
   }
 }
 
-export default Region;
+export default Client;

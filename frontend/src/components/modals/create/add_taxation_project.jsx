@@ -4,140 +4,106 @@ import { useState, useEffect } from "react";
 // Icons / Images
 import { BiPlus } from "react-icons/bi";
 import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
-
 import axios from "axios";
 
 // Modules / Functions
 import Swal from "sweetalert2";
-import { Modal, Col, Form, Row } from "react-bootstrap";
+import { Modal, Form, Row, Col } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
 
 // Global Variables
 import { headers } from "../../global_vars";
 
-// Variables
-window.Swal = Swal;
-
-// API endpoints
+// API endpoint
 const ADD_TAXATION_PROJECT = "http://localhost:8000/api/data_management/taxation_projects/";
-const GET_ALL_CLIENTS = "http://localhost:8000/api/data_management/all_clients/";
-const GET_ALL_CONSULTANTS = "http://localhost:8000/api/administration/all_consultants/";
 
-// Helpers
-const onlyAlphanumeric = (value) => value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
-const clampLen = (value, max) => value.slice(0, max);
-
-function AddTaxationProjectModal({ onCreated }) {
+function AddTaxationProjectModal({ refreshData, defaultConsultantId, lockConsultant = false }) {
   const [show, setShow] = useState(false);
 
-  // Dropdown data
+  const [taxproj_id, setTaxprojId] = useState("");
+  const [client_id, setClientId] = useState("");
+  const [consultant_id, setConsultantId] = useState("");
+  const [taxuse, setTaxuse] = useState("");
+  const [deadline, setDeadline] = useState("");
+  const [declaredone, setDeclaredone] = useState(false);
+  const [declarationdate, setDeclarationdate] = useState("");
+  const [comment, setComment] = useState("");
+
   const [clients, setClients] = useState([]);
   const [consultants, setConsultants] = useState([]);
 
-  // Form state
-  const [taxProjId, setTaxProjId] = useState(""); // taxproj_id
-  const [clientId, setClientId] = useState(""); // required
-  const [consultantId, setConsultantId] = useState(""); // required
-  const [taxUse, setTaxUse] = useState(""); // required (integer)
-  const [deadline, setDeadline] = useState(""); // optional
-  const [declaredOne, setDeclaredOne] = useState(false); // optional, default false
-  const [declarationDate, setDeclarationDate] = useState(""); // optional
-  const [comment, setComment] = useState(""); // optional
-
   const resetForm = () => {
-    setTaxProjId("");
+    setTaxprojId("");
     setClientId("");
     setConsultantId("");
-    setTaxUse("");
+    setTaxuse("");
     setDeadline("");
-    setDeclaredOne(false);
-    setDeclarationDate("");
+    setDeclaredone(false);
+    setDeclarationdate("");
     setComment("");
   };
 
   const handleClose = () => setShow(false);
   const handleShow = () => {
     resetForm();
+    if (defaultConsultantId) setConsultantId(defaultConsultantId);
     setShow(true);
   };
 
-  // Load dropdowns on open
   useEffect(() => {
     if (show) {
-      loadDropdowns();
+      loadRefs();
     }
   }, [show]);
 
-  // Clear declaration date when declaredOne is unchecked
-  useEffect(() => {
-    if (!declaredOne) {
-      setDeclarationDate("");
-    }
-  }, [declaredOne]);
-
-  const loadDropdowns = async () => {
+  const loadRefs = async () => {
     try {
-      const currentHeaders = {
-        ...headers,
-        "Authorization": "Token " + localStorage.getItem("userToken"),
-      };
+      const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
       const [clientsRes, consultantsRes] = await Promise.all([
-        axios.get(GET_ALL_CLIENTS, { headers: currentHeaders }),
-        axios.get(GET_ALL_CONSULTANTS, { headers: currentHeaders }),
+        axios.get("http://localhost:8000/api/data_management/all_clients/", { headers: currentHeaders }),
+        axios.get("http://localhost:8000/api/administration/all_consultants/", { headers: currentHeaders }),
       ]);
-
       setClients(clientsRes?.data?.all_clients || []);
       setConsultants(consultantsRes?.data?.all_consultants || []);
-    } catch (error) {
-      console.error("Error loading dropdowns:", error);
+    } catch (e) {
+      console.error("Failed to load refs", e);
       setClients([]);
       setConsultants([]);
     }
   };
 
-  // Validation
-  const isIdValid = taxProjId.length >= 2 && taxProjId.length <= 10;
-  const isClientValid = clientId !== "";
-  const isConsultantValid = consultantId !== "";
-  const isTaxUseValid = /^\d+$/.test(taxUse) && taxUse.length <= 6; // basic numeric check
-  const isFormValid = isIdValid && isClientValid && isConsultantValid && isTaxUseValid;
+  const isIdValid = taxproj_id.trim().length >= 2 && taxproj_id.trim().length <= 10;
+  const isClientValid = client_id !== "";
+  const isConsultantValid = consultant_id !== "";
+  const isTaxuseValid = /^\d{1,4}$/.test(taxuse.trim());
+  const isFormValid = isIdValid && isClientValid && isConsultantValid && isTaxuseValid;
 
-  const createNew = async () => {
+  const handleSubmit = async () => {
+    if (!isFormValid) return;
     try {
-      const currentHeaders = {
-        ...headers,
-        "Authorization": "Token " + localStorage.getItem("userToken"),
-      };
-
-      const payload = {
-        taxproj_id: taxProjId,
-        client_id: clientId,
-        consultant_id: consultantId,
-        taxuse: taxUse ? parseInt(taxUse, 10) : null,
+      const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
+      await axios.post(ADD_TAXATION_PROJECT, {
+        taxproj_id: taxproj_id.trim(),
+        client_id,
+        consultant_id,
+        taxuse: taxuse.trim(),
         deadline: deadline || null,
-        declaredone: declaredOne,
-        declarationdate: declarationDate || null,
+        declaredone,
+        declarationdate: declarationdate || null,
         comment: comment.trim() || null,
-      };
+      }, { headers: currentHeaders });
 
-      const res = await axios.post(ADD_TAXATION_PROJECT, payload, { headers: currentHeaders });
-      if (res.status === 201) {
-        Swal.fire({ icon: "success", title: "Success!", text: "Taxation project created successfully." });
-        handleClose();
-        onCreated && onCreated();
+      Swal.fire({ icon: "success", title: "Success", text: "Taxation Project created successfully!" });
+      if (refreshData) {
+        setShow(false);
+        refreshData();
+      } else {
+        setShow(false);
       }
     } catch (e) {
-      console.error("Create taxation project error:", e);
-      let errorMessage = "An error occurred while creating the taxation project.";
-      if (e.response?.data?.error) {
-        errorMessage = e.response.data.error;
-      } else if (e.response?.data) {
-        const errors = e.response.data;
-        errorMessage = Object.entries(errors)
-          .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
-          .join('\n');
-      }
-      Swal.fire({ icon: "error", title: "Error", text: errorMessage });
+      console.error("Create taxation project error", e);
+      const apiMsg = e?.response?.data?.error || e?.response?.data?.detail || "Failed to create taxation project";
+      Swal.fire({ icon: "error", title: "Error", text: typeof apiMsg === 'object' ? JSON.stringify(apiMsg) : apiMsg });
     }
   };
 
@@ -153,113 +119,80 @@ function AddTaxationProjectModal({ onCreated }) {
           <Modal.Title>Create new Taxation Project</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Taxation Project ID *:</Form.Label>
-                  <Form.Control
-                    maxLength={10}
-                    placeholder="e.g., TXP001"
-                    value={taxProjId}
-                    onChange={(e) => setTaxProjId(clampLen(onlyAlphanumeric(e.target.value), 10))}
-                    isInvalid={taxProjId.length > 0 && !isIdValid}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    ID must be 2–10 alphanumeric characters.
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Tax Use *:</Form.Label>
-                  <Form.Control
-                    type="number"
-                    placeholder="e.g., 2024 or code"
-                    value={taxUse}
-                    onChange={(e) => setTaxUse(e.target.value.replace(/[^0-9]/g, ""))}
-                    isInvalid={taxUse.length > 0 && !isTaxUseValid}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    Enter a numeric value.
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Col>
-            </Row>
-
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Client *:</Form.Label>
-                  <Form.Control as="select" value={clientId} onChange={(e) => setClientId(e.target.value)}>
-                    <option value="">Select Client</option>
-                    {Array.isArray(clients) && clients.map((c) => (
-                      <option key={c.client_id} value={c.client_id}>{c.client_id} - {c.fullname}</option>
-                    ))}
-                  </Form.Control>
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Consultant *:</Form.Label>
-                  <Form.Control as="select" value={consultantId} onChange={(e) => setConsultantId(e.target.value)}>
-                    <option value="">Select Consultant</option>
-                    {Array.isArray(consultants) && consultants.map((u) => (
-                      <option key={u.consultant_id} value={u.consultant_id}>{u.consultant_id} - {u.fullname}</option>
-                    ))}
-                  </Form.Control>
-                </Form.Group>
-              </Col>
-            </Row>
-
-            <Row>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Deadline:</Form.Label>
-                  <Form.Control type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Check
-                    type="switch"
-                    id="declared-switch"
-                    label="Declared"
-                    checked={declaredOne}
-                    onChange={(e) => setDeclaredOne(e.target.checked)}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Declaration Date:</Form.Label>
-                  <Form.Control type="date" value={declarationDate} onChange={(e) => setDeclarationDate(e.target.value)} disabled={!declaredOne} />
-                </Form.Group>
-              </Col>
-            </Row>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Comment:</Form.Label>
-              <Form.Control as="textarea" rows={3} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Notes/comments (optional)" />
-            </Form.Group>
-          </Form>
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Taxation Project ID *</Form.Label>
+                <Form.Control value={taxproj_id} maxLength={10} onChange={(e) => setTaxprojId(e.target.value.toUpperCase())} placeholder="e.g., TP001" />
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Tax use *</Form.Label>
+                <Form.Control value={taxuse} maxLength={40} onChange={(e) => setTaxuse(e.target.value)} placeholder="e.g., Income" />
+              </Form.Group>
+            </Col>
+          </Row>
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Client *</Form.Label>
+                <Form.Control as="select" value={client_id} onChange={(e) => setClientId(e.target.value)}>
+                  <option value="">Select client</option>
+                  {clients.map((c) => (
+                    <option key={c.client_id} value={c.client_id}>{c.fullname || `${c.surname || ''} ${c.name || ''}`.trim()}</option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Consultant *</Form.Label>
+                <Form.Control as="select" value={consultant_id} onChange={(e) => setConsultantId(e.target.value)} disabled={lockConsultant}>
+                  <option value="">Select consultant</option>
+                  {consultants.map((u) => (
+                    <option key={u.consultant_id} value={u.consultant_id}>{u.fullname || u.username || u.consultant_id}</option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+            </Col>
+          </Row>
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Deadline</Form.Label>
+                <Form.Control type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Check type="checkbox" label="Declared" checked={declaredone} onChange={(e) => setDeclaredone(e.target.checked)} />
+              </Form.Group>
+            </Col>
+          </Row>
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Declaration date</Form.Label>
+                <Form.Control type="date" value={declarationdate} onChange={(e) => setDeclarationdate(e.target.value)} />
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Comment</Form.Label>
+                <Form.Control as="textarea" rows={3} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Optional" />
+              </Form.Group>
+            </Col>
+          </Row>
         </Modal.Body>
         <Modal.Footer>
           <small className="mr-auto">
             {!isFormValid ? (
               <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
-                {!isIdValid && (
-                  <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> ID is required (2–10 alphanumeric chars).</li>
-                )}
-                {!isTaxUseValid && (
-                  <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> Tax Use is required and must be numeric.</li>
-                )}
-                {!isClientValid && (
-                  <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> Client is required.</li>
-                )}
-                {!isConsultantValid && (
-                  <li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> Consultant is required.</li>
-                )}
+                {!isIdValid && (<li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> ID is required (2–10 chars).</li>)}
+                {!isClientValid && (<li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> Client is required.</li>)}
+                {!isConsultantValid && (<li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> Consultant is required.</li>)}
+                {!isTaxuseValid && (<li><AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} /> Tax use is required (4 digits).</li>)}
               </ul>
             ) : (
               <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "green" }}>
@@ -267,9 +200,8 @@ function AddTaxationProjectModal({ onCreated }) {
               </ul>
             )}
           </small>
-
           <Button color="red" onClick={handleClose}>Close</Button>
-          <Button color="green" onClick={createNew} disabled={!isFormValid}>Save Changes</Button>
+          <Button color="green" onClick={handleSubmit} disabled={!isFormValid}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
     </>

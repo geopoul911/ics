@@ -28,7 +28,7 @@ const GET_BANK_CLIENT_ACCOUNTS = "http://localhost:8000/api/data_management/all_
 const onlyAlphanumeric = (value) => value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
 const clampLen = (value, max) => value.slice(0, max);
 
-function AddBankProjectAccountModal({ onCreated }) {
+function AddBankProjectAccountModal({ onCreated, onBankProjectAccountCreated, refreshData, defaultProjectId, defaultClientId, lockProject = false, lockClient = false, redirectOnCreate = false }) {
   const [show, setShow] = useState(false);
 
   // Dropdowns
@@ -54,6 +54,8 @@ function AddBankProjectAccountModal({ onCreated }) {
   const handleClose = () => setShow(false);
   const handleShow = () => {
     resetForm();
+    if (defaultProjectId) setProjectId(defaultProjectId);
+    if (defaultClientId) setClientId(defaultClientId);
     setShow(true);
   };
 
@@ -110,9 +112,13 @@ function AddBankProjectAccountModal({ onCreated }) {
 
       const res = await axios.post(ADD_BANK_PROJECT_ACCOUNT, payload, { headers: currentHeaders });
       if (res.status === 201) {
-        // Navigate to overview
-        const newId = bankProjAccoId;
-        window.location.href = `/data_management/bank_project_account/${newId}`;
+        try { if (typeof onCreated === 'function') onCreated(res.data); } catch (_) {}
+        try { if (typeof onBankProjectAccountCreated === 'function') onBankProjectAccountCreated(res.data); } catch (_) {}
+        try { if (typeof refreshData === 'function') refreshData(); } catch (_) {}
+        handleClose();
+        if (redirectOnCreate && res?.data?.bankprojacco_id) {
+          window.location.href = `/data_management/bank_project_account/${res.data.bankprojacco_id}`;
+        }
       }
     } catch (e) {
       console.error("Create bank project account error:", e);
@@ -161,7 +167,7 @@ function AddBankProjectAccountModal({ onCreated }) {
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>Project *:</Form.Label>
-                  <Form.Control as="select" value={projectId} onChange={(e) => setProjectId(e.target.value)}>
+                  <Form.Control as="select" value={projectId} onChange={(e) => setProjectId(e.target.value)} disabled={lockProject}>
                     <option value="">Select Project</option>
                     {Array.isArray(projects) && projects.map((p) => (
                       <option key={p.project_id} value={p.project_id}>{p.project_id} - {p.title}</option>
@@ -175,7 +181,7 @@ function AddBankProjectAccountModal({ onCreated }) {
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>Client *:</Form.Label>
-                  <Form.Control as="select" value={clientId} onChange={(e) => setClientId(e.target.value)}>
+                  <Form.Control as="select" value={clientId} onChange={(e) => setClientId(e.target.value)} disabled={lockClient}>
                     <option value="">Select Client</option>
                     {Array.isArray(clients) && clients.map((c) => (
                       <option key={c.client_id} value={c.client_id}>{c.client_id} - {c.fullname || `${c.surname || ''} ${c.name || ''}`.trim()}</option>

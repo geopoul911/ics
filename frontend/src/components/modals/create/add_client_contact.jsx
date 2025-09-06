@@ -34,7 +34,7 @@ const validateEmail = (email) => {
 // Phone format must match backend: optional leading +, then digits only, up to 16 total chars
 const phoneRegex = /^\+?[1-9]\d{0,15}$/;
 
-function AddClientContactModal({ refreshData }) {
+function AddClientContactModal({ refreshData, defaultProjectId, lockProject = false, defaultProfessionalId, lockProfessional = false }) {
   const [show, setShow] = useState(false);
 
   // Basic Information
@@ -120,7 +120,14 @@ function AddClientContactModal({ refreshData }) {
     resetForm();
   };
 
-  const handleShow = () => setShow(true);
+  const handleShow = () => {
+    if (defaultProjectId) setProjectId(defaultProjectId);
+    if (defaultProfessionalId) {
+      setProfessionalId(defaultProfessionalId);
+      onProfessionalSelect(defaultProfessionalId);
+    }
+    setShow(true);
+  };
 
   const onProfessionalSelect = (id) => {
     setProfessionalId(id);
@@ -454,6 +461,7 @@ function AddClientContactModal({ refreshData }) {
                         as="select"
                         value={projectId}
                         onChange={(e) => setProjectId(e.target.value)}
+                        disabled={lockProject}
                       >
                         <option value="">Select project</option>
                         {projects.map((project) => (
@@ -474,6 +482,7 @@ function AddClientContactModal({ refreshData }) {
                         as="select"
                         value={professionalId}
                         onChange={(e) => onProfessionalSelect(e.target.value)}
+                        disabled={lockProfessional}
                       >
                         <option value="">Select professional (optional)</option>
                         {professionals.map((professional) => (

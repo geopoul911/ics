@@ -24,7 +24,7 @@ const ADD_CASH = "http://localhost:8000/api/data_management/cash/";
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);
 
-function AddCashModal({ onCashCreated }) {
+function AddCashModal({ onCashCreated, refreshData, defaultProjectId, lockProject = false, defaultConsultantId, lockConsultant = false }) {
   const [show, setShow] = useState(false);
 
   // Basic Information
@@ -58,6 +58,8 @@ function AddCashModal({ onCashCreated }) {
   const handleClose = () => setShow(false);
   const handleShow = () => {
     resetForm();
+    if (defaultProjectId) setProject(defaultProjectId);
+    if (defaultConsultantId) setConsultant(defaultConsultantId);
     setShow(true);
   };
 
@@ -166,9 +168,14 @@ function AddCashModal({ onCashCreated }) {
         },
       });
 
-      // Navigate to the new cash entry overview
-      const newId = cashId.trim();
-      window.location.href = `/data_management/cash/${newId}`;
+      if (refreshData) {
+        setShow(false);
+        refreshData();
+      } else {
+        // legacy behavior: navigate to overview
+        const newId = cashId.trim();
+        window.location.href = `/data_management/cash/${newId}`;
+      }
     } catch (e) {
       console.error('Cash creation error:', e.response?.data);
       const apiMsg =
@@ -229,6 +236,7 @@ function AddCashModal({ onCashCreated }) {
                         as="select"
                         onChange={(e) => setProject(e.target.value)}
                         value={project}
+                        disabled={lockProject}
                       >
                         <option value="">Select project</option>
                         {Array.isArray(projects) && projects.map((project) => (
@@ -279,6 +287,7 @@ function AddCashModal({ onCashCreated }) {
                         as="select"
                         onChange={(e) => setConsultant(e.target.value)}
                         value={consultant}
+                        disabled={lockConsultant}
                       >
                         <option value="">Select consultant</option>
                         {Array.isArray(consultants) && consultants.map((consultant) => (

@@ -7,14 +7,16 @@ from webapp.models import (
     TaskCategory,
     BankProjectAccount,
 )
-from accounts.models import Consultant
+from accounts.models import Consultant, AuditEvent
 from webapp.serializers import (
     ConsultantSerializer,
     BankSerializer,
     InsuranceCarrierSerializer,
     ProfessionSerializer,
     ProjectCategorySerializer,
+    ProjectCategoryDetailSerializer,
     TaskCategorySerializer,
+    TaskCategoryDetailSerializer,
 )
 
 import datetime
@@ -29,6 +31,7 @@ from django.http import HttpResponse, FileResponse, JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from webapp.permissions import RoleBasedPermission
 from rest_framework.authentication import TokenAuthentication
 from django.views import View
 from django.conf import settings
@@ -82,7 +85,9 @@ class AllConsultants(generics.ListCreateAPIView):
     serializer_class = ConsultantSerializer
     queryset = Consultant.objects.all().order_by("orderindex")
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
+    # Only Admin and Supervisor can create consultants
+    restrict_post_roles = ['A', 'S']
 
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -150,7 +155,7 @@ class ConsultantView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Consultant.objects.all()
     lookup_field = 'consultant_id'
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -289,7 +294,7 @@ class AllBanks(generics.ListCreateAPIView):
     serializer_class = BankSerializer
     queryset = Bank.objects.all().order_by('orderindex', 'bankname')
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     
     def get(self, request, *args, **kwargs):
         """Get all banks"""
@@ -333,6 +338,8 @@ class BankView(RetrieveUpdateDestroyAPIView):
     queryset = Bank.objects.all()
     serializer_class = BankSerializer
     lookup_field = 'bank_id'
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -414,7 +421,7 @@ class AllInsuranceCarriers(generics.ListCreateAPIView):
     serializer_class = InsuranceCarrierSerializer
     queryset = InsuranceCarrier.objects.all().order_by('orderindex', 'title')
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     
     def get(self, request, *args, **kwargs):
         """Get all insurance carriers"""
@@ -458,6 +465,8 @@ class InsuranceCarrierView(RetrieveUpdateDestroyAPIView):
     queryset = InsuranceCarrier.objects.all()
     serializer_class = InsuranceCarrierSerializer
     lookup_field = 'insucarrier_id'
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -539,7 +548,7 @@ class AllProfessions(generics.ListCreateAPIView):
     serializer_class = ProfessionSerializer
     queryset = Profession.objects.all().order_by('title')
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     
     def get(self, request, *args, **kwargs):
         """Get all professions"""
@@ -582,7 +591,7 @@ class ProfessionView(RetrieveUpdateDestroyAPIView):
     serializer_class = ProfessionSerializer
     queryset = Profession.objects.all()
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     lookup_field = 'profession_id'
 
     def get(self, request, *args, **kwargs):
@@ -707,7 +716,7 @@ class AllProjectCategories(generics.ListCreateAPIView):
     serializer_class = ProjectCategorySerializer
     queryset = ProjectCategory.objects.all().order_by("orderindex", "title")
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -773,14 +782,14 @@ class ProjectCategoryView(RetrieveUpdateDestroyAPIView):
     serializer_class = ProjectCategorySerializer
     queryset = ProjectCategory.objects.all()
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     lookup_field = 'projcate_id'
 
     def get(self, request, *args, **kwargs):
         """Get a specific project category"""
         try:
             instance = self.get_object()
-            serializer = self.get_serializer(instance, context={"request": request})
+            serializer = ProjectCategoryDetailSerializer(instance, context={"request": request})
             return Response(serializer.data)
         except ProjectCategory.DoesNotExist:
             return Response(
@@ -868,7 +877,7 @@ class AllTaskCategories(generics.ListCreateAPIView):
     serializer_class = TaskCategorySerializer
     queryset = TaskCategory.objects.all().order_by("orderindex", "title")
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -934,14 +943,14 @@ class TaskCategoryView(RetrieveUpdateDestroyAPIView):
     serializer_class = TaskCategorySerializer
     queryset = TaskCategory.objects.all()
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
     lookup_field = 'taskcate_id'
 
     def get(self, request, *args, **kwargs):
         """Get a specific task category"""
         try:
             instance = self.get_object()
-            serializer = self.get_serializer(instance, context={"request": request})
+            serializer = TaskCategoryDetailSerializer(instance, context={"request": request})
             return Response(serializer.data)
         except TaskCategory.DoesNotExist:
             return Response(
@@ -1011,4 +1020,66 @@ class TaskCategoryView(RetrieveUpdateDestroyAPIView):
                 {"error": f"Failed to delete task category: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class AuditEventList(generics.ListAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            qs = AuditEvent.objects.select_related('actor', 'target_content_type').all()
+            action = request.query_params.get('action')
+            actor = request.query_params.get('actor')
+            success = request.query_params.get('success')
+            start = request.query_params.get('start')
+            end = request.query_params.get('end')
+
+            if action:
+                qs = qs.filter(action=action)
+            if actor:
+                qs = qs.filter(actor__consultant_id=actor)
+            if success is not None:
+                s = success.lower()
+                if s in ['true', '1', 'yes']:
+                    qs = qs.filter(success=True)
+                elif s in ['false', '0', 'no']:
+                    qs = qs.filter(success=False)
+            if start:
+                qs = qs.filter(occurred_at__date__gte=start)
+            if end:
+                qs = qs.filter(occurred_at__date__lte=end)
+
+            qs = qs.order_by('-occurred_at')[:500]
+
+            data = []
+            for ev in qs:
+                try:
+                    item = {
+                        'id': ev.id,
+                        'occurred_at': getattr(ev.occurred_at, 'isoformat', lambda: str(ev.occurred_at))(),
+                        'actor': getattr(ev.actor, 'fullname', None),
+                        'actor_id': getattr(ev.actor, 'consultant_id', None),
+                        'action': getattr(ev, 'action', None),
+                        'target': {
+                            'model': getattr(getattr(ev, 'target_content_type', None), 'model', None),
+                            'object_id': getattr(ev, 'target_object_id', None),
+                        },
+                        'ip_address': getattr(ev, 'ip_address', None),
+                        'user_agent': getattr(ev, 'user_agent', None),
+                        'success': bool(getattr(ev, 'success', False)),
+                        'message': str(getattr(ev, 'message', '') or ''),
+                        'metadata': getattr(ev, 'metadata', None),
+                    }
+                    data.append(item)
+                except Exception:
+                    # Never break the list because of a single bad row
+                    try:
+                        data.append({'id': ev.id, 'occurred_at': str(ev.occurred_at), 'action': getattr(ev, 'action', None), 'success': bool(getattr(ev, 'success', False))})
+                    except Exception:
+                        pass
+
+            return Response({'audit_events': data})
+        except Exception as e:
+            return Response({'error': f'Failed to load audit events: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

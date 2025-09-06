@@ -11,12 +11,16 @@ import { FaUserTag } from "react-icons/fa";
 // Modules / Functions
 import { Card } from "react-bootstrap";
 import { Grid } from "semantic-ui-react";
+ 
 import Swal from "sweetalert2";
 
 // Custom Made Components
 import NavigationBar from "../../../core/navigation_bar/navigation_bar";
 import Footer from "../../../core/footer/footer";
 import DeleteObjectModal from "../../../modals/delete_object";
+import AddProjectModal from "../../../modals/create/add_project";
+import AddCashModal from "../../../modals/create/add_cash";
+import AddTaxationProjectModal from "../../../modals/create/add_taxation_project";
 import {
   EditConsultantIdModal,
   EditConsultantFullnameModal,
@@ -54,6 +58,8 @@ function getConsultantIdFromPath() {
 }
 
 let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
+let labelPillStyle = { background: "#eef5ff", color: "#2c3e50", padding: "2px 10px", borderRadius: "12px", fontSize: "0.85em", marginRight: "8px", border: "1px solid #d6e4ff" };
+let valueTextStyle = { fontWeight: 600, color: "#212529" };
 
 class ConsultantOverview extends React.Component {
   constructor(props) {
@@ -61,6 +67,9 @@ class ConsultantOverview extends React.Component {
     this.state = {
       consultant: {},
       is_loaded: false,
+      projects: [],
+      cashItems: [],
+      taxationProjects: [],
     };
   }
 
@@ -75,16 +84,48 @@ class ConsultantOverview extends React.Component {
 
     axios
       .get(`${VIEW_CONSULTANT}${consultantId}/`, { headers: currentHeaders })
-      .then((res) => {
-        // Accept a few possible payload shapes safely
-        const consultant =
-          res?.data ||
-          {};
+      .then(async (res) => {
+        const consultant = res?.data || {};
 
-        this.setState({
-          consultant,
-          is_loaded: true,
-        });
+        // Projects
+        let projects = consultant.projects || [];
+        if (!Array.isArray(projects) || projects.length === 0) {
+          try {
+            const projRes = await axios.get("http://localhost:8000/api/data_management/projects/", { headers: currentHeaders });
+            const allProjects = projRes?.data?.all_projects || projRes?.data?.results || projRes?.data?.data || projRes?.data || [];
+            const cidStr = String(consultant.consultant_id || "");
+            projects = (Array.isArray(allProjects) ? allProjects : []).filter((p) => {
+              const c = p?.consultant;
+              if (!c) return false;
+              const id = c?.consultant_id ?? c?.id ?? c;
+              return String(id) === cidStr;
+            });
+          } catch (_e) { projects = []; }
+        }
+
+        // Cash
+        let cashItems = consultant.cash || [];
+        if (!Array.isArray(cashItems) || cashItems.length === 0) {
+          try {
+            const cashRes = await axios.get("http://localhost:8000/api/data_management/cash/", { headers: currentHeaders });
+            const allCash = cashRes?.data?.all_cash || cashRes?.data?.results || cashRes?.data?.data || cashRes?.data || [];
+            const cid = consultant.consultant_id;
+            cashItems = (Array.isArray(allCash) ? allCash : []).filter(c => c.consultant && (c.consultant.consultant_id === cid || c.consultant === cid));
+          } catch (_e) { cashItems = []; }
+        }
+
+        // Taxation projects
+        let taxationProjects = consultant.taxation_projects || [];
+        if (!Array.isArray(taxationProjects) || taxationProjects.length === 0) {
+          try {
+            const taxRes = await axios.get("http://localhost:8000/api/data_management/taxation_projects/", { headers: currentHeaders });
+            const allTax = taxRes?.data?.all_taxation_projects || taxRes?.data?.results || taxRes?.data?.data || taxRes?.data || [];
+            const cid = consultant.consultant_id;
+            taxationProjects = (Array.isArray(allTax) ? allTax : []).filter(t => t.consultant && (t.consultant.consultant_id === cid || t.consultant === cid));
+          } catch (_e) { taxationProjects = []; }
+        }
+
+        this.setState({ consultant, projects, cashItems, taxationProjects, is_loaded: true });
       })
       .catch((e) => {
         if (e?.response?.status === 401) {
@@ -110,6 +151,10 @@ class ConsultantOverview extends React.Component {
     return (
       <>
         <NavigationBar />
+        <style>{`
+          .pillLink { color: inherit; text-decoration: none; }
+          .pillLink:hover { color: #93ab3c !important; text-decoration: none; }
+        `}</style>
         <div className="mainContainer">
           {pageHeader("consultant_overview", `Consultant: ${consultant.fullname || 'Loading...'}`)}
           {this.state.is_loaded ? (
@@ -400,6 +445,108 @@ class ConsultantOverview extends React.Component {
                       </div>
                     </Card.Body>
                     <Card.Footer></Card.Footer>
+                  </Card>
+                </Grid.Column>
+              </Grid>
+
+              <Grid stackable columns={2}>
+                <Grid.Column>
+                  <Card style={{ marginTop: 20 }}>
+                    <Card.Header>
+                      <BsInfoSquare style={{ color: "#93ab3c", fontSize: "1.5em", marginRight: "0.5em" }} />
+                      Projects
+                    </Card.Header>
+                    <Card.Body>
+                      {Array.isArray(this.state.projects) && this.state.projects.length > 0 ? (
+                        <ul className="list-unstyled" style={{ margin: 0 }}>
+                          {this.state.projects.map((p, idx) => (
+                            <li key={p.project_id} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                                <span style={labelPillStyle}>#</span>
+                                <span style={valueTextStyle}>{idx + 1}</span>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>ID</span>
+                                <a href={`/data_management/project/${p.project_id}`} className="pillLink" style={{ ...valueTextStyle }}>{p.project_id}</a>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Title</span>
+                                <span style={valueTextStyle}>{p.title}</span>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Status</span>
+                                <span style={valueTextStyle}>{p.status || 'N/A'}</span>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (<div>No projects</div>)}
+                    </Card.Body>
+                    <Card.Footer>
+                      <AddProjectModal defaultConsultantId={this.state.consultant?.consultant_id} lockConsultant={true} onProjectCreated={() => this.componentDidMount()} />
+                    </Card.Footer>
+                  </Card>
+                </Grid.Column>
+                <Grid.Column>
+                  <Card style={{ marginTop: 20 }}>
+                    <Card.Header>
+                      <BsInfoSquare style={{ color: "#93ab3c", fontSize: "1.5em", marginRight: "0.5em" }} />
+                      Cash
+                    </Card.Header>
+                    <Card.Body>
+                      {Array.isArray(this.state.cashItems) && this.state.cashItems.length > 0 ? (
+                        <ul className="list-unstyled" style={{ margin: 0 }}>
+                          {this.state.cashItems.map((c, idx) => (
+                            <li key={c.cash_id} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                                <span style={labelPillStyle}>#</span>
+                                <span style={valueTextStyle}>{idx + 1}</span>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>ID</span>
+                                <a href={`/data_management/cash/${c.cash_id}`} className="pillLink" style={{ ...valueTextStyle }}>{c.cash_id}</a>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Date</span>
+                                <span style={valueTextStyle}>{c.trandate ? new Date(c.trandate).toLocaleDateString() : ''}</span>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Kind</span>
+                                <span style={valueTextStyle}>{c.kind === 'E' ? 'Expense' : 'Payment'}</span>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (<div>No cash entries</div>)}
+                    </Card.Body>
+                    <Card.Footer>
+                      <AddCashModal defaultConsultantId={this.state.consultant?.consultant_id} lockConsultant={true} refreshData={() => this.componentDidMount()} />
+                    </Card.Footer>
+                  </Card>
+                </Grid.Column>
+                <Grid.Column width={8}>
+                  <Card style={{ marginTop: 20 }}>
+                    <Card.Header>
+                      <BsInfoSquare style={{ color: "#93ab3c", fontSize: "1.5em", marginRight: "0.5em" }} />
+                      Taxation projects
+                    </Card.Header>
+                    <Card.Body>
+                      {Array.isArray(this.state.taxationProjects) && this.state.taxationProjects.length > 0 ? (
+                        <ul className="list-unstyled" style={{ margin: 0 }}>
+                          {this.state.taxationProjects.map((t, idx) => (
+                            <li key={t.taxproj_id} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                                <span style={labelPillStyle}>#</span>
+                                <span style={valueTextStyle}>{idx + 1}</span>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>ID</span>
+                                <a href={`/data_management/taxation_project/${t.taxproj_id}`} className="pillLink" style={{ ...valueTextStyle }}>{t.taxproj_id}</a>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Client</span>
+                                <span style={valueTextStyle}>{t.client?.fullname || `${t.client?.surname || ''} ${t.client?.name || ''}`.trim()}</span>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (<div>No taxation projects</div>)}
+                    </Card.Body>
+                    <Card.Footer>
+                      <AddTaxationProjectModal refreshData={() => this.componentDidMount()} defaultConsultantId={this.state.consultant?.consultant_id} lockConsultant={true} />
+                    </Card.Footer>
                   </Card>
                 </Grid.Column>
               </Grid>

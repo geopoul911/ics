@@ -21,7 +21,7 @@ window.Swal = Swal;
 // API endpoint
 const ADD_BANK_CLIENT_ACCOUNT = "http://localhost:8000/api/data_management/bank_client_accounts/";
 
-function AddBankClientAccountModal({ refreshData }) {
+function AddBankClientAccountModal({ refreshData, defaultClientId, lockClient = false, defaultBankId, lockBank = false }) {
   const [show, setShow] = useState(false);
   
   // Form state
@@ -50,6 +50,8 @@ function AddBankClientAccountModal({ refreshData }) {
   const handleClose = () => setShow(false);
   const handleShow = () => {
     resetForm();
+    if (defaultClientId) setClient_id(defaultClientId);
+    if (defaultBankId) setBank_id(defaultBankId);
     setShow(true);
   };
 
@@ -187,6 +189,7 @@ function AddBankClientAccountModal({ refreshData }) {
                         as="select"
                         onChange={(e) => setClient_id(e.target.value)}
                         value={client_id}
+                        disabled={lockClient}
                       >
                         <option value="">Select Client</option>
                         {Array.isArray(clients) && clients.map((client) => (
@@ -204,6 +207,7 @@ function AddBankClientAccountModal({ refreshData }) {
                         as="select"
                         onChange={(e) => setBank_id(e.target.value)}
                         value={bank_id}
+                        disabled={lockBank}
                       >
                         <option value="">Select Bank</option>
                         {Array.isArray(banks) && banks.map((bank) => (
@@ -288,7 +292,7 @@ function AddBankClientAccountModal({ refreshData }) {
                 {!isTransitnumberValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Transit Number is required and must be exactly 5 digits.
+                    Branch Number is required and must be exactly 5 digits.
                   </li>
                 )}
                 {!isAccountnumberValid && (

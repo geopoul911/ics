@@ -58,6 +58,7 @@ MIDDLEWARE = [
     # If you do not want Axes to override the authentication response
     # you can skip installing the middleware and use your own views.
     'axes.middleware.AxesMiddleware',
+    'accounts.middleware.AuditUserMiddleware',
 ]
 
 # A string representing the full Python import path to your root URLconf, for example "mydjangoapps.urls".

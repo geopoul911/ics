@@ -19,7 +19,7 @@ window.Swal = Swal;
 
 const CREATE_PROJECT_TASK = "http://localhost:8000/api/data_management/project_tasks/";
 
-function AddProjectTaskModal({ onCreated }) {
+function AddProjectTaskModal({ onCreated, refreshData, defaultProjectId, lockProject = false }) {
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -189,7 +189,7 @@ function AddProjectTaskModal({ onCreated }) {
 
   return (
     <>
-      <Button color="green" style={{ margin: 20 }} onClick={() => setShow(true)}>
+      <Button color="green" style={{ margin: 20 }} onClick={() => { if (defaultProjectId) setProjectId(defaultProjectId); setShow(true); }}>
         <BiPlus style={{ color: "white", fontSize: "1.3em", marginRight: "0.3em" }} />
         Create Project task
       </Button>
@@ -216,7 +216,7 @@ function AddProjectTaskModal({ onCreated }) {
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>Project *</Form.Label>
-                  <Form.Control as="select" value={project_id} onChange={(e) => setProjectId(e.target.value)}>
+                  <Form.Control as="select" value={project_id} onChange={(e) => setProjectId(e.target.value)} disabled={lockProject}>
                     <option value="">Select project</option>
                     {projects.map((p) => (
                       <option key={p.project_id} value={p.project_id}>{p.title}</option>

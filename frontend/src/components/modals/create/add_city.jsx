@@ -31,7 +31,7 @@ const toSmallInt = (value) => {
   return Math.max(-32768, Math.min(32767, n)); // Django SmallIntegerField range
 };
 
-function AddCityModal() {
+function AddCityModal({ defaultCountryId, defaultProvinceId, lockCountry = false, lockProvince = false, refreshData }) {
   const [show, setShow] = useState(false);
   const [countries, setCountries] = useState([]);
   const [provinces, setProvinces] = useState([]);
@@ -53,6 +53,8 @@ function AddCityModal() {
   const handleClose = () => setShow(false);
   const handleShow = () => {
     resetForm();
+    if (defaultCountryId) setCountryId(defaultCountryId);
+    if (defaultProvinceId) setProvinceId(defaultProvinceId);
     setShow(true);
   };
 
@@ -93,10 +95,19 @@ function AddCityModal() {
     }
   }, [show]);
 
-  // Reset province when country changes
+  // Reset province when country changes (unless locked)
   useEffect(() => {
-    setProvinceId("");
-  }, [countryId]);
+    if (!lockProvince) {
+      setProvinceId("");
+    }
+  }, [countryId, lockProvince]);
+
+  // Ensure default province is applied when modal opens with locks
+  useEffect(() => {
+    if (show && lockProvince && defaultProvinceId) {
+      setProvinceId(defaultProvinceId);
+    }
+  }, [show, lockProvince, defaultProvinceId]);
 
   // Fetch provinces when country changes
   useEffect(() => {
@@ -140,7 +151,7 @@ function AddCityModal() {
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
 
-      const res = await axios({
+      await axios({
         method: "post",
         url: ADD_CITY,
         headers: currentHeaders,
@@ -152,9 +163,8 @@ function AddCityModal() {
           orderindex: Number(orderindex),
         },
       });
-
-      const newId = res?.data?.city_id || res?.data?.id || cityId;
-      window.location.href = "/regions/city/" + newId;
+      if (refreshData) refreshData();
+      setShow(false);
     } catch (e) {
       console.log('Error creating city:', e);
       console.log('Error response data:', e?.response?.data);
@@ -239,6 +249,7 @@ function AddCityModal() {
                     as="select"
                     onChange={(e) => setCountryId(e.target.value)}
                     value={countryId}
+                    disabled={lockCountry}
                   >
                     <option value="">Select Country</option>
                     {Array.isArray(countries) && countries.map((country) => (
@@ -255,7 +266,7 @@ function AddCityModal() {
                     as="select"
                     onChange={(e) => setProvinceId(e.target.value)}
                     value={provinceId}
-                    disabled={!countryId}
+                    disabled={!countryId || lockProvince}
                   >
                     <option value="">Select Province</option>
                     {Array.isArray(provinces) && provinces.map((province) => (

@@ -360,7 +360,67 @@ export function pageHeader(value, objName) {
                     <hr />
                   </>
                 );
-              } else if (value === "all_associated_clients") {
+              } 
+              else if (value === "project_tasks") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> Project Tasks
+                      </h2>
+                      <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/data_management/root">
+                          Data Management
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item active>Tasks of {objName}</Breadcrumb.Item>
+                      </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
+              } 
+              else if (value === "project_related") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> Project Related Objects
+                      </h2>
+                      <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/data_management/root">
+                          Data Management
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item active>Related Objects of {objName}</Breadcrumb.Item>
+                      </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
+              } 
+
+              else if (value === "administration_logs") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> Administration Logs
+                      </h2>
+                      <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/administration/root">
+                          Administration
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item active>Administration Logs</Breadcrumb.Item>
+                      </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
+              }
+              
+              else if (value === "all_associated_clients") {
                 return (
                   <>
                     <div className="page_header">

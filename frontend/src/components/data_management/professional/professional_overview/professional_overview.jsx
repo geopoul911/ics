@@ -14,6 +14,7 @@ import { Grid, Button } from "semantic-ui-react";
 import DeleteObjectModal from "../../../modals/delete_object";
 import { pageHeader } from "../../../global_vars";
 import { FaIdBadge, FaUser, FaStickyNote, FaStop } from "react-icons/fa";
+import AddClientContactModal from "../../../modals/create/add_client_contact";
 import {
   EditProfessionalFullnameModal,
   EditProfessionalProfessionModal,
@@ -37,6 +38,7 @@ function ProfessionalOverview() {
   const { id } = useParams();
   const [professional, setProfessional] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [projectContacts, setProjectContacts] = useState([]);
 
   useEffect(() => {
     const fetchProfessional = async () => {
@@ -50,7 +52,9 @@ function ProfessionalOverview() {
           headers: currentHeaders,
         });
 
-        setProfessional(response.data);
+        const data = response.data || {};
+        setProfessional(data);
+        setProjectContacts(Array.isArray(data.project_contacts) ? data.project_contacts : []);
         setIsLoaded(true);
       } catch (e) {
         console.error('Error fetching professional:', e);
@@ -81,6 +85,10 @@ function ProfessionalOverview() {
         {pageHeader("professional_overview", `Professional: ${professional.professional_id}`)}
         <div className="contentContainer">
           <div className="contentBody">
+            <style>{`
+              .pillLink { color: inherit; text-decoration: none; }
+              .pillLink:hover { color: #93ab3c; text-decoration: none; }
+            `}</style>
             <Grid stackable columns={2} divided>
               <Grid.Column>
                 <Card>
@@ -143,6 +151,23 @@ function ProfessionalOverview() {
                     <DeleteObjectModal objectType="Professional" objectId={professional.professional_id} objectName={professional.professional_id} />
                   </Card.Footer>
                 </Card>
+                <Card style={{ marginTop: 16 }}>
+                  <Card.Header>
+                    <FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} />
+                    Notes
+                  </Card.Header>
+                  <Card.Body>
+                    <div className={"info_descr"}>
+                      <FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Notes
+                    </div>
+                    <div className={"info_span"} style={{ position: "relative" }}>
+                      {professional.notes || 'N/A'}
+                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
+                        <EditProfessionalNotesModal professional={professional} update_state={setProfessional} />
+                      </span>
+                    </div>
+                  </Card.Body>
+                </Card>
               </Grid.Column>
 
               <Grid.Column>
@@ -203,23 +228,44 @@ function ProfessionalOverview() {
                     </div>
                   </Card.Body>
                 </Card>
+
                 <Card style={{ marginTop: 16 }}>
                   <Card.Header>
-                    <FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} />
-                    Notes
+                    <FaUser style={{ color: "#93ab3c", marginRight: "0.5em" }} />
+                    Client contacts
                   </Card.Header>
                   <Card.Body>
-                    <div className={"info_descr"}>
-                      <FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Notes
-                    </div>
-                    <div className={"info_span"} style={{ position: "relative" }}>
-                      {professional.notes || 'N/A'}
-                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
-                        <EditProfessionalNotesModal professional={professional} update_state={setProfessional} />
-                      </span>
-                    </div>
+                    {Array.isArray(projectContacts) && projectContacts.length > 0 ? (
+                      <ul className="list-unstyled" style={{ margin: 0 }}>
+                        {projectContacts.map((cc, idx) => (
+                          <li key={cc.clientcont_id} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                              <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '999px', background: '#f5f5f5', color: '#666', fontSize: 12, fontWeight: 600 }}>#</span>
+                              <span style={{ fontWeight: 700 }}>{idx + 1}</span>
+                              <span style={{ width: 10 }} />
+                              <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '999px', background: '#f5f5f5', color: '#666', fontSize: 12, fontWeight: 600 }}>ID</span>
+                              <a href={`/data_management/client_contact/${cc.clientcont_id}`} className="pillLink" style={{ fontWeight: 700 }}>{cc.clientcont_id}</a>
+                              <span style={{ width: 10 }} />
+                              <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '999px', background: '#f5f5f5', color: '#666', fontSize: 12, fontWeight: 600 }}>Full name</span>
+                              <span style={{ fontWeight: 700 }}>{cc.fullname}</span>
+                              {cc.project?.title ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '999px', background: '#f5f5f5', color: '#666', fontSize: 12, fontWeight: 600 }}>Project</span>
+                                <a href={`/data_management/project/${cc.project.project_id}`} className="pillLink" style={{ fontWeight: 700 }}>{cc.project.title}</a>
+                              </>) : null}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div>No client contacts</div>
+                    )}
                   </Card.Body>
+                  <Card.Footer>
+                    <AddClientContactModal defaultProfessionalId={professional.professional_id} lockProfessional={true} refreshData={() => window.location.reload()} />
+                  </Card.Footer>
                 </Card>
+
               </Grid.Column>
             </Grid>
           </div>

@@ -7,7 +7,6 @@ Developer Documentation
 Dashboard
 Report Pages?
 Logging
-Access History
 Double check models => CRUD actions
 CSRF + Security Best practices
 Handover Doc

@@ -109,9 +109,6 @@ class AdministrationRoot extends React.Component {
                 <Menu.Item as={Link} to="/administration/logs">
                   <FaArrowRight style={iconStyle} /> Logs
                 </Menu.Item>
-                <Menu.Item as={Link} to="/administration/access_history">
-                  <FaArrowRight style={iconStyle} /> Access History
-                </Menu.Item>
               </Menu>
             </Grid.Column>
           </Grid>

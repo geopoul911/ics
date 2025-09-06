@@ -171,7 +171,7 @@ function AddBankModal() {
         Create new Bank
       </Button>
 
-      <Modal show={show} onHide={handleClose} size="lg">
+      <Modal show={show} onHide={handleClose} size="lg" centered>
         <Modal.Header closeButton>
           <Modal.Title>Add New Bank</Modal.Title>
         </Modal.Header>

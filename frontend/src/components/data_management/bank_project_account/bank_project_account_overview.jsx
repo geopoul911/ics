@@ -70,6 +70,10 @@ function BankProjectAccountOverview() {
         {pageHeader("bank_project_account_overview", `Bank Project Account: ${bankProjectAccount.bankprojacco_id}`)}
         <div className="contentContainer">
           <div className="contentBody">
+            <style>{`
+              .pillLink { color: inherit; text-decoration: none; }
+              .pillLink:hover { color: #93ab3c; text-decoration: none; }
+            `}</style>
             <Grid stackable columns={2} divided>
               <Grid.Column>
                 <Card>
@@ -127,6 +131,37 @@ function BankProjectAccountOverview() {
                         <EditBPANotesModal bpa={bankProjectAccount} update_state={setBankProjectAccount} />
                       </span>
                     </div>
+                  </Card.Body>
+                </Card>
+
+                <Card style={{ marginTop: 20 }}>
+                  <Card.Header><FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Bank client accounts</Card.Header>
+                  <Card.Body>
+                    {bankProjectAccount.bankclientacco ? (
+                      <ul className="list-unstyled" style={{ margin: 0 }}>
+                        <li style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '999px', background: '#f5f5f5', color: '#666', fontSize: 12, fontWeight: 600 }}>#</span>
+                            <span style={{ fontWeight: 700 }}>1</span>
+                            <span style={{ width: 10 }} />
+                            <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '999px', background: '#f5f5f5', color: '#666', fontSize: 12, fontWeight: 600 }}>ID</span>
+                            <a href={`/data_management/bank_client_account/${bankProjectAccount.bankclientacco.bankclientacco_id}`} className="pillLink" style={{ fontWeight: 700 }}>{bankProjectAccount.bankclientacco.bankclientacco_id}</a>
+                            {bankProjectAccount.bankclientacco.accountnumber ? (<>
+                              <span style={{ width: 10 }} />
+                              <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '999px', background: '#f5f5f5', color: '#666', fontSize: 12, fontWeight: 600 }}>Account number</span>
+                              <span style={{ fontWeight: 700 }}>{bankProjectAccount.bankclientacco.accountnumber}</span>
+                            </>) : null}
+                            {bankProjectAccount.bankclientacco.bank?.bankname ? (<>
+                              <span style={{ width: 10 }} />
+                              <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '999px', background: '#f5f5f5', color: '#666', fontSize: 12, fontWeight: 600 }}>Bank</span>
+                              <span style={{ fontWeight: 700 }}>{bankProjectAccount.bankclientacco.bank.bankname}</span>
+                            </>) : null}
+                          </div>
+                        </li>
+                      </ul>
+                    ) : (
+                      <div>No bank client accounts</div>
+                    )}
                   </Card.Body>
                 </Card>
               </Grid.Column>

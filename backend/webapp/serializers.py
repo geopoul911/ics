@@ -969,6 +969,8 @@ class ProjectCategorySerializer(serializers.ModelSerializer):
             )
         return super().update(instance, validated_data)
 
+
+
 class ProjectSerializer(serializers.ModelSerializer):
     consultant = ConsultantSerializer(read_only=True)
     categories = ProjectCategorySerializer(many=True, read_only=True)
@@ -1096,6 +1098,14 @@ class ProjectSerializer(serializers.ModelSerializer):
             project.categories.set(categories)
         return project
 
+class ProjectCategoryDetailSerializer(ProjectCategorySerializer):
+    # Use reverse relation name from Project.categories (related_name='projects')
+    projects = ProjectSerializer(many=True, read_only=True)
+
+    class Meta(ProjectCategorySerializer.Meta):
+        # Explicitly include computed field 'projects'
+        fields = ['projcate_id', 'title', 'orderindex', 'active', 'projects']
+        
 class AssociatedClientSerializer(serializers.ModelSerializer):
     project = ProjectSerializer(read_only=True)
     client = ClientSerializer(read_only=True)
@@ -1246,6 +1256,9 @@ class DocumentSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """Create a new document instance"""
+        # Remove write-only flags that are not model fields
+        _ = validated_data.pop('remove_filepath', False)
+
         # Handle project_id conversion
         project_id = validated_data.pop('project_id', None)
         if project_id:
@@ -1438,6 +1451,7 @@ class ProfessionalSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(f"City with ID '{city_id}' does not exist.")
         return super().update(instance, validated_data)
 
+
 # Property serializers
 class PropertyListSerializer(serializers.ModelSerializer):
     project = ProjectReferenceSerializer(read_only=True)
@@ -1532,6 +1546,13 @@ class BankProjectAccountSerializer(serializers.ModelSerializer):
         self._assign_fk(validated_data, 'client_id', Client, 'client')
         self._assign_fk(validated_data, 'bankclientacco_id', BankClientAccount, 'bankclientacco')
         return super().update(instance, validated_data)
+
+# Detail serializer for BankClientAccount including related BankProjectAccounts
+class BankClientAccountDetailSerializer(BankClientAccountSerializer):
+    bank_project_accounts = BankProjectAccountSerializer(source='bankprojectaccount_set', many=True, read_only=True)
+
+    class Meta(BankClientAccountSerializer.Meta):
+        fields = '__all__'
 
 # Task related serializers
 class TaskCategorySerializer(serializers.ModelSerializer):
@@ -1679,6 +1700,7 @@ class TaskCommentSerializer(serializers.ModelSerializer):
         self._assign_fk(validated_data, 'consultant_id', Consultant, 'consultant')
         return super().update(instance, validated_data)
 
+
 # Cash and taxation serializers
 class CashSerializer(serializers.ModelSerializer):
     project = ProjectSerializer(read_only=True)
@@ -1795,9 +1817,11 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
     associated_clients = AssociatedClientSerializer(many=True, read_only=True)
     documents = DocumentSerializer(many=True, read_only=True)
     tasks = ProjectTaskSerializer(many=True, read_only=True)
-    properties = PropertySerializer(many=True, read_only=True)
-    bank_accounts = BankProjectAccountSerializer(many=True, read_only=True)
-    cash_transactions = CashSerializer(many=True, read_only=True)
+    # Reverse relations without explicit related_name need explicit sources
+    properties = PropertySerializer(source='property_set', many=True, read_only=True)
+    bank_accounts = BankProjectAccountSerializer(source='bankprojectaccount_set', many=True, read_only=True)
+    cash_transactions = serializers.SerializerMethodField()
+    task_comments = serializers.SerializerMethodField()
     contacts = serializers.SerializerMethodField()
     
     class Meta:
@@ -1809,6 +1833,16 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
         contacts = ClientContact.objects.filter(project=obj)
         return ClientContactListSerializer(contacts, many=True, context=self.context).data
 
+    def get_cash_transactions(self, obj):
+        from .models import Cash
+        qs = Cash.objects.filter(project=obj).order_by('-trandate')
+        return CashSerializer(qs, many=True, context=self.context).data
+
+    def get_task_comments(self, obj):
+        from .models import TaskComment
+        qs = TaskComment.objects.filter(projtask__project=obj).order_by('-commentregistration')
+        return TaskCommentSerializer(qs, many=True, context=self.context).data
+
 class ClientDetailSerializer(serializers.ModelSerializer):
     country = CountrySerializer(read_only=True)
     province = ProvinceSerializer(read_only=True)
@@ -1818,10 +1852,11 @@ class ClientDetailSerializer(serializers.ModelSerializer):
     pensioncountry2 = CountrySerializer(read_only=True)
     insucarrier1 = InsuranceCarrierSerializer(read_only=True)
     insucarrier2 = InsuranceCarrierSerializer(read_only=True)
-    bank_accounts = BankClientAccountSerializer(many=True, read_only=True)
+    bank_accounts = BankClientAccountSerializer(source='bankclientaccount_set', many=True, read_only=True)
     associated_projects = AssociatedClientSerializer(many=True, read_only=True)
     documents = DocumentSerializer(many=True, read_only=True)
     taxation_projects = TaxationProjectSerializer(many=True, read_only=True)
+    bank_project_accounts = BankProjectAccountSerializer(source='bankprojectaccount_set', many=True, read_only=True)
     
     class Meta:
         model = Client
@@ -1882,6 +1917,14 @@ class ProjectTaskListSerializer(serializers.ModelSerializer):
     
     def get_is_overdue(self, obj):
         return obj.is_overdue
+
+class TaskCategoryDetailSerializer(serializers.ModelSerializer):
+    # Include related tasks using reverse relation from ProjectTask.taskcate (related_name='tasks')
+    tasks = ProjectTaskListSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = TaskCategory
+        fields = ['taskcate_id', 'title', 'orderindex', 'active', 'tasks']
 
 class DocumentListSerializer(serializers.ModelSerializer):
     project = ProjectSerializer(read_only=True)
@@ -2021,5 +2064,9 @@ class ClientContactListSerializer(serializers.ModelSerializer):
             'reliability', 'city', 'active'
         ]
 
+# Detail serializer for Professional including related client contacts
+class ProfessionalDetailSerializer(ProfessionalSerializer):
+    project_contacts = ClientContactListSerializer(many=True, read_only=True)
 
-
+    class Meta(ProfessionalSerializer.Meta):
+        fields = '__all__'

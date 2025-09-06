@@ -4,6 +4,7 @@ import React from "react";
 // Icons / Images
 import { FaStop } from "react-icons/fa";
 import { FaIdBadge, FaUser, FaStickyNote } from "react-icons/fa";
+import { MdTask } from "react-icons/md";
 import { MdCheckCircle, MdCancel } from "react-icons/md";
 
 // Modules / Functions
@@ -52,6 +53,21 @@ function getClientContactIdFromPath() {
 }
 
 let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
+
+// Reusable styles for list-style UI
+const labelPillStyle = {
+  display: "inline-block",
+  padding: "2px 8px",
+  borderRadius: "999px",
+  background: "#f5f5f5",
+  color: "#666",
+  fontSize: 12,
+  fontWeight: 600,
+};
+
+const valueTextStyle = {
+  fontWeight: 700,
+};
 
 class ClientContactOverview extends React.Component {
   constructor(props) {
@@ -115,6 +131,10 @@ class ClientContactOverview extends React.Component {
         <div className="rootContainer">
           {pageHeader("client_contact_overview", `${clientContact.fullname}`)}
           <div className="contentBody">
+            <style>{`
+              .pillLink { color: inherit; text-decoration: none; }
+              .pillLink:hover { color: #93ab3c; text-decoration: none; }
+            `}</style>
             <Grid stackable columns={2}>
               <Grid.Column>
                 <Card>
@@ -349,7 +369,13 @@ class ClientContactOverview extends React.Component {
                       <FaStickyNote style={overviewIconStyle} /> Professional
                     </div>
                     <div className={"info_span"}>
-                      {clientContact.professional?.fullname || "Not set"}
+                      {clientContact.professional?.professional_id ? (
+                        <a href={`/data_management/professional/${clientContact.professional.professional_id}`}>
+                          {clientContact.professional.fullname}
+                        </a>
+                      ) : (
+                        clientContact.professional?.fullname || "Not set"
+                      )}
                     </div>
 
                     {/* Notes */}
@@ -368,7 +394,41 @@ class ClientContactOverview extends React.Component {
                   </Card.Body>
                 </Card>
 
-                
+                <Card style={{ marginTop: 20 }}>
+                  <Card.Header>
+                    <h4>
+                      <MdTask style={overviewIconStyle} />
+                      Projects
+                    </h4>
+                  </Card.Header>
+                  <Card.Body>
+                    {clientContact.project ? (
+                      <ul className="list-unstyled" style={{ margin: 0 }}>
+                        <li style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                            <span style={labelPillStyle}>#</span>
+                            <span style={valueTextStyle}>1</span>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>ID</span>
+                            <a href={`/data_management/project/${clientContact.project.project_id}`} className="pillLink" style={{ ...valueTextStyle }}>{clientContact.project.project_id}</a>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>Title</span>
+                            <span style={valueTextStyle}>{clientContact.project.title}</span>
+                            {clientContact.project.status ? (
+                              <>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Status</span>
+                                <span style={valueTextStyle}>{clientContact.project.status}</span>
+                              </>
+                            ) : null}
+                          </div>
+                        </li>
+                      </ul>
+                    ) : (
+                      <div>No projects</div>
+                    )}
+                  </Card.Body>
+                </Card>
               </Grid.Column>
             </Grid>
           </div>

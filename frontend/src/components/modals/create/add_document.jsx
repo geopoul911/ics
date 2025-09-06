@@ -27,7 +27,7 @@ const GET_CLIENTS = "http://localhost:8000/api/data_management/all_clients/";
 const onlyAlphanumeric = (value) => value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
 const clampLen = (value, max) => value.slice(0, max);
 
-function AddDocumentModal({ onClientCreated }) {
+function AddDocumentModal({ onClientCreated, refreshData, defaultProjectId, defaultClientId, lockProject = false, lockClient = false }) {
   const [show, setShow] = useState(false);
   const [projects, setProjects] = useState([]);
   const [clients, setClients] = useState([]);
@@ -87,6 +87,8 @@ function AddDocumentModal({ onClientCreated }) {
   const handleClose = () => setShow(false);
   const handleShow = () => {
     resetForm();
+    if (defaultProjectId) setProjectId(defaultProjectId);
+    if (defaultClientId) setClientId(defaultClientId);
     setShow(true);
   };
 
@@ -121,15 +123,8 @@ function AddDocumentModal({ onClientCreated }) {
       const response = await axios.post(ADD_DOCUMENT, formData, { headers: currentHeaders });
 
       if (response.status === 201) {
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: "Document created successfully.",
-        });
-
-        // Navigate to document overview
-        const newId = documentId;
-        window.location.href = `/data_management/document/${newId}`;
+        if (refreshData) refreshData();
+        handleClose();
       }
     } catch (error) {
       console.error("Error creating document:", error);
@@ -164,7 +159,7 @@ function AddDocumentModal({ onClientCreated }) {
         Create new Document
       </Button>
 
-      <Modal show={show} onHide={handleClose} size="lg">
+      <Modal show={show} onHide={handleClose} size="lg" centered>
         <Modal.Header closeButton>
           <Modal.Title>Create New Document</Modal.Title>
         </Modal.Header>
@@ -216,6 +211,7 @@ function AddDocumentModal({ onClientCreated }) {
                     as="select"
                     value={projectId}
                     onChange={(e) => setProjectId(e.target.value)}
+                    disabled={lockProject}
                   >
                     <option value="">Select a project (optional)</option>
                     {projects.map((project) => (
@@ -238,6 +234,7 @@ function AddDocumentModal({ onClientCreated }) {
                     as="select"
                     value={clientId}
                     onChange={(e) => setClientId(e.target.value)}
+                    disabled={lockClient}
                   >
                     <option value="">Select a client (optional)</option>
                     {clients.map((client) => (

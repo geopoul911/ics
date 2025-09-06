@@ -14,21 +14,24 @@ import { Grid } from "semantic-ui-react";
 import Swal from "sweetalert2";
 
 // Custom Made Components
-import DeleteObjectModal from "../../../modals/delete_object";
+import NavigationBar from "../../core/navigation_bar/navigation_bar";
+import Footer from "../../core/footer/footer";
+import DeleteObjectModal from "../../modals/delete_object";
 import {
   EditCountryIdModal,
   EditCountryTitleModal,
   EditCountryCurrencyModal,
   EditCountryOrderIndexModal,
-} from "../../../modals/country_edit_modals";
+} from "../../modals/country_edit_modals";
 import axios from "axios";
+import AddProvinceModal from "../../modals/create/add_province";
 
 // Global Variables
 import {
   headers,
   pageHeader,
   loader,
-} from "../../../global_vars";
+} from "../../global_vars";
 
 // API (Updated to use new data_management API)
 const VIEW_COUNTRY = "http://localhost:8000/api/regions/country/";
@@ -43,6 +46,17 @@ function getCountryIdFromPath() {
 }
 
 let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
+// Pretty label/value styling
+let labelPillStyle = {
+  background: "#eef5ff",
+  color: "#2c3e50",
+  padding: "2px 10px",
+  borderRadius: "12px",
+  fontSize: "0.85em",
+  marginRight: "8px",
+  border: "1px solid #d6e4ff",
+};
+let valueTextStyle = { fontWeight: 600, color: "#212529" };
 
 class CountryOverview extends React.Component {
   constructor(props) {
@@ -50,6 +64,7 @@ class CountryOverview extends React.Component {
     this.state = {
       country: {},
       is_loaded: false,
+      provinces: [],
     };
   }
 
@@ -64,16 +79,31 @@ class CountryOverview extends React.Component {
 
     axios
       .get(`${VIEW_COUNTRY}${countryId}/`, { headers: currentHeaders })
-      .then((res) => {
-        // Accept a few possible payload shapes safely
-        const country =
-          res?.data ||
-          {};
+      .then(async (res) => {
+        const country = res?.data || {};
+        let provinces = Array.isArray(country.provinces) ? country.provinces : [];
 
-        this.setState({
-          country,
-          is_loaded: true,
-        });
+        // Fallback: fetch all provinces and filter by this country
+        if (provinces.length === 0) {
+          try {
+            const provRes = await axios.get(
+              "http://localhost:8000/api/regions/all_provinces/",
+              { headers: currentHeaders }
+            );
+            const allProvinces = provRes?.data?.all_provinces || provRes?.data?.results || provRes?.data?.data || provRes?.data || [];
+            const cid = country.country_id;
+            provinces = (Array.isArray(allProvinces) ? allProvinces : []).filter((p) => {
+              const c = p.country;
+              if (!c) return false;
+              if (typeof c === 'object') return c.country_id === cid;
+              return c === cid;
+            });
+          } catch (_e) {
+            provinces = [];
+          }
+        }
+
+        this.setState({ country, provinces, is_loaded: true });
       })
       .catch((e) => {
         if (e?.response?.status === 401) {
@@ -98,6 +128,11 @@ class CountryOverview extends React.Component {
     
     return (
       <>
+        <NavigationBar />
+        <style>{`
+          .pillLink { color: inherit; text-decoration: none; }
+          .pillLink:hover { color: #93ab3c !important; text-decoration: none; }
+        `}</style>
         <div className="mainContainer">
           {pageHeader("country_overview", `${country.title || "Country"}`)}
           {this.state.is_loaded ? (
@@ -121,7 +156,7 @@ class CountryOverview extends React.Component {
                         <FaHashtag style={overviewIconStyle} /> Country ID (2–3 chars)
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
-                        {country.country_id ? country.country_id : "N/A"}
+                        <span style={valueTextStyle}>{country.country_id ? country.country_id : "N/A"}</span>
                         <span style={{ position: "absolute", right: "0px", top: "50%", transform: "translateY(-50%)" }}>
                           <EditCountryIdModal
                             country={country}
@@ -134,7 +169,7 @@ class CountryOverview extends React.Component {
                         <FiType style={overviewIconStyle} /> Country
                       </div>
                       <div className={"info_span"} style={{ position: "relative" }}>
-                        {country.title ? country.title : "N/A"}
+                        <span style={valueTextStyle}>{country.title ? country.title : "N/A"}</span>
                         <span style={{ position: "absolute", right: "0px", top: "50%", transform: "translateY(-50%)" }}>
                           <EditCountryTitleModal
                             country={country}
@@ -186,12 +221,54 @@ class CountryOverview extends React.Component {
                     </Card.Footer>
                   </Card>
                 </Grid.Column>
+                <Grid.Column>
+                  <Card>
+                    <Card.Header>
+                      <BsInfoSquare
+                        style={{
+                          color: "#93ab3c",
+                          fontSize: "1.5em",
+                          marginRight: "0.5em",
+                        }}
+                      />
+                      Provinces
+                    </Card.Header>
+                    <Card.Body>
+                      {Array.isArray(this.state.provinces) && this.state.provinces.length > 0 ? (
+                        <ul className="list-unstyled" style={{ margin: 0 }}>
+                          {this.state.provinces.map((p, idx) => (
+                            <li key={p.province_id} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                                <span style={labelPillStyle}>#</span>
+                                <span style={valueTextStyle}>{idx + 1}</span>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>ID</span>
+                                <a href={`/regions/province/${p.province_id}`} className="pillLink" style={{ ...valueTextStyle }}>{p.province_id}</a>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Province</span>
+                                <span style={valueTextStyle}>{p.title}</span>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (<div>No provinces</div>)}
+                    </Card.Body>
+                    <Card.Footer>
+                      <AddProvinceModal
+                        refreshData={() => this.componentDidMount()}
+                        defaultCountryId={this.state.country?.country_id}
+                        lockCountry={true}
+                      />
+                    </Card.Footer>
+                  </Card>
+                </Grid.Column>
               </Grid>
             </>
           ) : (
             loader()
-          )}
+          )}  
         </div>
+        <Footer />
       </>
     );
   }

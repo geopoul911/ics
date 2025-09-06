@@ -14,13 +14,15 @@ import { Grid } from "semantic-ui-react";
 import Swal from "sweetalert2";
 
 // Custom Made Components
-import DeleteObjectModal from "../../../modals/delete_object";
+import NavigationBar from "../../core/navigation_bar/navigation_bar";
+import Footer from "../../core/footer/footer";
+import DeleteObjectModal from "../../modals/delete_object";
 import {
   EditCityIdModal,
   EditCityTitleModal,
   EditCityOrderIndexModal,
   EditCityLocationModal,
-} from "../../../modals/city_edit_modals";
+} from "../../modals/city_edit_modals";
 import axios from "axios";
 
 // Global Variables
@@ -28,7 +30,7 @@ import {
   headers,
   pageHeader,
   loader,
-} from "../../../global_vars";
+} from "../../global_vars";
 
 // API (Using regions API)
 const VIEW_CITY = "http://localhost:8000/api/regions/city/";
@@ -98,6 +100,7 @@ class CityOverview extends React.Component {
     
     return (
       <>
+        <NavigationBar />
         <div className="mainContainer">
           {pageHeader("city_overview", `${city.title || "City"}`)}
           {this.state.is_loaded ? (
@@ -196,6 +199,7 @@ class CityOverview extends React.Component {
             loader()
           )}
         </div>
+        <Footer />
       </>
     );
   }

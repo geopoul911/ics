@@ -366,14 +366,21 @@ class AssociatedClient(models.Model):
 
     def clean(self):
         from django.core.exceptions import ValidationError
+        # Auto-assign orderindex to avoid validation errors
+        try:
+            existing_qs = self.project.associated_clients
+        except Exception:
+            # Fallback in case reverse manager is unavailable
+            existing_qs = AssociatedClient.objects.filter(project=self.project)
 
-        # Ensure at least one client per project
-        if not self.project.associated_clients.exists():
-            # If first association and orderindex not provided, set to 0 automatically
+        if not existing_qs.exists():
+            # First association always gets orderindex 0
+            self.orderindex = 0
+        else:
+            # For subsequent associations, default to next available index if not provided
             if self.orderindex in (None, ""):
-                self.orderindex = 0
-            elif self.orderindex != 0:
-                raise ValidationError({'orderindex': 'First client must have orderindex 0'})
+                last_index = existing_qs.aggregate(models.Max('orderindex'))['orderindex__max'] or 0
+                self.orderindex = last_index + 1
 
     def save(self, *args, **kwargs):
         self.full_clean()

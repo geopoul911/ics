@@ -28,9 +28,9 @@ import os
 from django.http import HttpResponse, FileResponse, JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework import status
-from webapp.xhr import get_user
 import logging
 from rest_framework.permissions import IsAuthenticated
+from webapp.permissions import RoleBasedPermission
 from rest_framework.authentication import TokenAuthentication
 from django.views import View
 from django.conf import settings
@@ -85,7 +85,7 @@ class AllCountries(generics.ListCreateAPIView):
     serializer_class = CountrySerializer
     queryset = Country.objects.all().order_by("orderindex")
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -152,7 +152,7 @@ class CountryView(generics.RetrieveUpdateDestroyAPIView):  # GET + PATCH/PUT + D
     serializer_class = CountrySerializer
     lookup_field = "country_id"
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -285,7 +285,7 @@ class AllCities(generics.ListCreateAPIView):
     serializer_class = CitySerializer
     queryset = City.objects.all().order_by("orderindex")
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get_queryset(self):
         queryset = City.objects.all().order_by("orderindex")
@@ -355,7 +355,7 @@ class CityView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = "city_id"
     queryset = City.objects.all()
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -478,7 +478,7 @@ class AllProvinces(generics.ListCreateAPIView):
     serializer_class = ProvinceSerializer
     queryset = Province.objects.all().order_by("orderindex")
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def get_queryset(self):
         queryset = Province.objects.all().order_by("orderindex")
@@ -548,7 +548,7 @@ class ProvinceView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = "province_id"
     queryset = Province.objects.all()
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()

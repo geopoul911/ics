@@ -22,7 +22,7 @@ const CREATE_TASK_COMMENT = "http://localhost:8000/api/data_management/task_comm
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);
 
-function AddTaskCommentModal({ onTaskCommentCreated }) {
+function AddTaskCommentModal({ onTaskCommentCreated, refreshData, defaultProjectTaskId, lockProjectTask = false }) {
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const [projectTasks, setProjectTasks] = useState([]);
@@ -160,7 +160,7 @@ function AddTaskCommentModal({ onTaskCommentCreated }) {
       <Button
         color="green"
         style={{ margin: 20 }}
-        onClick={() => setShow(true)}
+        onClick={() => { if (defaultProjectTaskId) setProjtask(defaultProjectTaskId); setShow(true); }}
       >
         <BiPlus
           style={{ color: "white", fontSize: "1.3em", marginRight: "0.3em" }}
@@ -194,6 +194,7 @@ function AddTaskCommentModal({ onTaskCommentCreated }) {
                     as="select"
                     value={projtask}
                     onChange={(e) => setProjtask(e.target.value)}
+                    disabled={lockProjectTask}
                   >
                     <option value="">Select a project task</option>
                     {projectTasks.map((task) => (

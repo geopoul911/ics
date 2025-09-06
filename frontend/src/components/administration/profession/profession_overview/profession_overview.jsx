@@ -4,16 +4,19 @@ import React from "react";
 // Icons / Images
 import { FaStop } from "react-icons/fa";
 import { FaIdBadge } from "react-icons/fa";
+import { FaUserTag } from "react-icons/fa";
 
 // Modules / Functions
 import { Card } from "react-bootstrap";
 import { Grid, Button } from "semantic-ui-react";
 import Swal from "sweetalert2";
+ 
 
 // Custom Made Components
 import NavigationBar from "../../../core/navigation_bar/navigation_bar";
 import Footer from "../../../core/footer/footer";
 import DeleteObjectModal from "../../../modals/delete_object";
+import AddProfessionalModal from "../../../modals/create/add_professional";
 import {
   EditProfessionTitleModal,
 } from "../../../modals/profession_edit_modals";
@@ -26,8 +29,9 @@ import {
   loader,
 } from "../../../global_vars";
 
-// API endpoint for profession
+// API endpoints
 const VIEW_PROFESSION = "http://localhost:8000/api/administration/profession/";
+const ALL_PROFESSIONALS = "http://localhost:8000/api/data_management/all_professionals/";
 
 // Helpers to read URL like: /administration/profession/<profession_id>
 function getProfessionIdFromPath() {
@@ -39,6 +43,8 @@ function getProfessionIdFromPath() {
 }
 
 let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
+let labelPillStyle = { background: "#eef5ff", color: "#2c3e50", padding: "2px 10px", borderRadius: "12px", fontSize: "0.85em", marginRight: "8px", border: "1px solid #d6e4ff" };
+let valueTextStyle = { fontWeight: 600, color: "#212529" };
 
 class ProfessionOverview extends React.Component {
   constructor(props) {
@@ -46,6 +52,7 @@ class ProfessionOverview extends React.Component {
     this.state = {
       profession: {},
       is_loaded: false,
+      professionals: [],
     };
   }
 
@@ -60,14 +67,26 @@ class ProfessionOverview extends React.Component {
 
     axios
       .get(`${VIEW_PROFESSION}${professionId}/`, { headers: currentHeaders })
-      .then((res) => {
+      .then(async (res) => {
         // Accept a few possible payload shapes safely
         const profession =
           res?.data ||
           {};
+        let professionals = profession.professionals || [];
+        if (!Array.isArray(professionals) || professionals.length === 0) {
+          try {
+            const prosRes = await axios.get(ALL_PROFESSIONALS, { headers: currentHeaders });
+            const allPros = prosRes?.data?.all_professionals || prosRes?.data?.results || prosRes?.data?.data || prosRes?.data || [];
+            const pid = profession.profession_id;
+            professionals = (Array.isArray(allPros) ? allPros : []).filter(p => (
+              p.profession?.profession_id === pid || p.profession === pid
+            ));
+          } catch (_e) { professionals = []; }
+        }
 
         this.setState({
           profession,
+          professionals,
           is_loaded: true,
         });
       })
@@ -95,6 +114,10 @@ class ProfessionOverview extends React.Component {
     return (
       <>
         <NavigationBar />
+        <style>{`
+          .pillLink { color: inherit; text-decoration: none; }
+          .pillLink:hover { color: #93ab3c !important; text-decoration: none; }
+        `}</style>
         <div className="mainContainer">
           {pageHeader("profession_overview", `Profession: ${profession.title || 'Loading...'}`)}
           {this.state.is_loaded ? (
@@ -149,6 +172,57 @@ class ProfessionOverview extends React.Component {
                         onObjectDeleted={() => {
                           window.location.href = "/administration/all_professions";
                         }}
+                      />
+                    </Card.Footer>
+                  </Card>
+                </Grid.Column>
+                <Grid.Column>
+                  <Card style={{ marginTop: 20 }}>
+                    <Card.Header>
+                      <FaUserTag
+                        style={{
+                          color: "#93ab3c",
+                          fontSize: "1.5em",
+                          marginRight: "0.5em",
+                        }}
+                      />
+                      Professionals
+                    </Card.Header>
+                    <Card.Body>
+                      {Array.isArray(this.state.professionals) && this.state.professionals.length > 0 ? (
+                        <ul className="list-unstyled" style={{ margin: 0 }}>
+                          {this.state.professionals.map((p, idx) => (
+                            <li key={p.professional_id} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                                <span style={labelPillStyle}>#</span>
+                                <span style={valueTextStyle}>{idx + 1}</span>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>ID</span>
+                                <a href={`/data_management/professional/${p.professional_id}`} className="pillLink" style={{ ...valueTextStyle }}>{p.professional_id}</a>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Full Name</span>
+                                <span style={valueTextStyle}>{p.fullname || 'N/A'}</span>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>City</span>
+                                <span style={valueTextStyle}>{p.city?.title || 'N/A'}</span>
+                                {p.reliability ? (<>
+                                  <span style={{ width: 10 }} />
+                                  <span style={labelPillStyle}>Reliability</span>
+                                  <span style={valueTextStyle}>{p.reliability}</span>
+                                </>) : null}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div>No professionals</div>
+                      )}
+                    </Card.Body>
+                    <Card.Footer>
+                      <AddProfessionalModal
+                        onProfessionalCreated={() => this.componentDidMount()}
+                        defaultProfessionId={this.state.profession?.profession_id}
+                        lockProfession={true}
                       />
                     </Card.Footer>
                   </Card>

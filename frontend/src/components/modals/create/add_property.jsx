@@ -25,7 +25,7 @@ const ADD_PROPERTY = "http://localhost:8000/api/data_management/all_properties/"
 const onlyAlphanumeric = (value) => value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
 const clampLen = (value, max) => value.slice(0, max);
 
-function AddPropertyModal({ onPropertyCreated }) {
+function AddPropertyModal({ onPropertyCreated, refreshData, defaultProjectId, lockProject = false }) {
   const [show, setShow] = useState(false);
   const [projects, setProjects] = useState([]);
   const [countries, setCountries] = useState([]);
@@ -67,6 +67,7 @@ function AddPropertyModal({ onPropertyCreated }) {
   const handleClose = () => setShow(false);
   const handleShow = () => {
     resetForm();
+    if (defaultProjectId) setProjectId(defaultProjectId);
     setShow(true);
   };
 
@@ -235,17 +236,10 @@ function AddPropertyModal({ onPropertyCreated }) {
       };
 
       const response = await axios.post(ADD_PROPERTY, propertyData, { headers: currentHeaders });
-
       if (response.status === 201) {
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: "Property created successfully.",
-        });
-
-        // Navigate to the newly created property's overview
-        const newId = propertyId;
-        window.location.href = `/data_management/property/${newId}`;
+        Swal.fire({ icon: "success", title: "Success!", text: "Property created successfully." });
+        if (refreshData) refreshData();
+        setShow(false);
       }
     } catch (error) {
       console.error("Error creating property:", error);
@@ -330,6 +324,7 @@ function AddPropertyModal({ onPropertyCreated }) {
                         as="select"
                         value={projectId}
                         onChange={(e) => setProjectId(e.target.value)}
+                        disabled={lockProject}
                       >
                         <option value="">Select a project</option>
                         {Array.isArray(projects) && projects.map((project) => (

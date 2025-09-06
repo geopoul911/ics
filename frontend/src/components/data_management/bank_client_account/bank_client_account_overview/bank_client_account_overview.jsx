@@ -36,6 +36,21 @@ function getBankClientAccountIdFromPath() {
 
 let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
 
+// Reusable styles for list-style UI
+const labelPillStyle = {
+  display: "inline-block",
+  padding: "2px 8px",
+  borderRadius: "999px",
+  background: "#f5f5f5",
+  color: "#666",
+  fontSize: 12,
+  fontWeight: 600,
+};
+
+const valueTextStyle = {
+  fontWeight: 700,
+};
+
 class BankClientAccountOverview extends React.Component {
   constructor(props) {
     super(props);
@@ -102,6 +117,10 @@ class BankClientAccountOverview extends React.Component {
         <div className="rootContainer">
           {pageHeader("bank_client_account_overview", `${bankClientAccount.accountnumber}`)}
           <div className="contentBody">
+            <style>{`
+              .pillLink { color: inherit; text-decoration: none; }
+              .pillLink:hover { color: #93ab3c; text-decoration: none; }
+            `}</style>
             <Grid stackable columns={2}>
               <Grid.Column>
                 <Card>
@@ -247,7 +266,13 @@ class BankClientAccountOverview extends React.Component {
                       <FaStickyNote style={overviewIconStyle} /> Client
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
-                      {bankClientAccount.client?.fullname || "Not set"}
+                      {bankClientAccount.client?.client_id ? (
+                        <a href={`/data_management/client/${bankClientAccount.client.client_id}`}>
+                          {bankClientAccount.client.fullname || `${bankClientAccount.client.surname || ''} ${bankClientAccount.client.name || ''}`.trim()}
+                        </a>
+                      ) : (
+                        bankClientAccount.client?.fullname || "Not set"
+                      )}
                       <span
                         style={{
                           position: "absolute",
@@ -285,7 +310,36 @@ class BankClientAccountOverview extends React.Component {
                     </div>
                   </Card.Body>
                 </Card>
-                
+                <Card style={{ marginTop: 20 }}>
+                  <Card.Header>
+                    <h4>
+                      <FaStickyNote style={overviewIconStyle} />
+                      Bank project accounts
+                    </h4>
+                  </Card.Header>
+                  <Card.Body>
+                    {Array.isArray(bankClientAccount.bank_project_accounts) && bankClientAccount.bank_project_accounts.length > 0 ? (
+                      <ul className="list-unstyled" style={{ margin: 0 }}>
+                        {bankClientAccount.bank_project_accounts.map((bpa, idx) => (
+                          <li key={bpa.bankprojacco_id} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                              <span style={labelPillStyle}>#</span>
+                              <span style={valueTextStyle}>{idx + 1}</span>
+                              <span style={{ width: 10 }} />
+                              <span style={labelPillStyle}>ID</span>
+                              <a href={`/data_management/bank_project_account/${bpa.bankprojacco_id}`} className="pillLink" style={{ ...valueTextStyle }}>{bpa.bankprojacco_id}</a>
+                              <span style={{ width: 10 }} />
+                              <span style={labelPillStyle}>Project</span>
+                              <a href={`/data_management/project/${bpa.project?.project_id || ''}`} className="pillLink" style={{ ...valueTextStyle }}>{bpa.project?.title || 'N/A'}</a>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div>No bank project accounts</div>
+                    )}
+                  </Card.Body>
+                </Card>
               </Grid.Column>
             </Grid>
           </div>

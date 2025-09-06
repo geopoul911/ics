@@ -10,7 +10,8 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from axes.models import AccessAttempt
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from accounts.models import AuditEvent
 
 from ipware.ip import get_client_ip
 User = get_user_model()
@@ -80,6 +81,8 @@ class LoginView(ObtainAuthToken):
             'token': token.key,
             'logged_in': True
         })
+        # Note: return above; audit after preparing payload
+
 
 
 # This class is only used to store the time of logout on db

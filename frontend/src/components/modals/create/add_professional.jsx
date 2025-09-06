@@ -25,13 +25,13 @@ const ADD_PROFESSIONAL = "http://localhost:8000/api/data_management/professional
 const ALL_PROFESSIONS = "http://localhost:8000/api/administration/all_professions/";
 const ALL_CITIES = "http://localhost:8000/api/regions/all_cities/";
 
-function AddProfessionalModal({ onProfessionalCreated }) {
+function AddProfessionalModal({ onProfessionalCreated, defaultProfessionId, lockProfession = false }) {
   const [show, setShow] = useState(false);
 
   // Form state
   const [professional_id, setProfessional_id] = useState("");
   const [fullname, setFullname] = useState("");
-  const [profession_id, setProfession_id] = useState("");
+  const [profession_id, setProfession_id] = useState(defaultProfessionId || "");
   const [city_id, setCity_id] = useState("");
   const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
@@ -62,6 +62,7 @@ function AddProfessionalModal({ onProfessionalCreated }) {
   const handleClose = () => setShow(false);
   const handleShow = () => {
     resetForm();
+    if (defaultProfessionId) setProfession_id(defaultProfessionId);
     setShow(true);
   };
 
@@ -122,10 +123,11 @@ function AddProfessionalModal({ onProfessionalCreated }) {
         },
         { headers: currentHeaders }
       );
-
-      // Navigate to overview
-      const newId = professional_id.trim().toUpperCase();
-      window.location.href = `/data_management/professional/${newId}`;
+      Swal.fire({ icon: 'success', title: 'Success', text: 'Professional created successfully!' });
+      if (onProfessionalCreated) {
+        setShow(false);
+        onProfessionalCreated();
+      }
     } catch (error) {
       console.error("Error creating professional:", error);
       let apiMsg = "Failed to create professional";
@@ -190,7 +192,7 @@ function AddProfessionalModal({ onProfessionalCreated }) {
                   <Col md={6}>
                     <Form.Group className="mb-2">
                       <Form.Label>Profession *:</Form.Label>
-                      <Form.Control as="select" onChange={(e) => setProfession_id(e.target.value)} value={profession_id} isInvalid={profession_id !== "" && !isProfessionValid}>
+                      <Form.Control as="select" onChange={(e) => setProfession_id(e.target.value)} value={profession_id} isInvalid={profession_id !== "" && !isProfessionValid} disabled={lockProfession}>
                         <option value="">Select Profession</option>
                         {Array.isArray(professions) && professions.map((p) => (
                           <option key={p.profession_id} value={p.profession_id}>{p.title}</option>

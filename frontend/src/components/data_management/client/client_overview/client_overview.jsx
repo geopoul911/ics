@@ -10,10 +10,9 @@ import { FaIdBadge, FaMapMarkerAlt, FaUser, FaFileInvoiceDollar, FaPassport, FaM
 import { Card } from "react-bootstrap";
 import { Grid, Button } from "semantic-ui-react";
 import Swal from "sweetalert2";
+import "react-bootstrap-table-next/dist/react-bootstrap-table2.min.css";
 
 // Custom Made Components
-import NavigationBar from "../../../core/navigation_bar/navigation_bar";
-import Footer from "../../../core/footer/footer";
 import DeleteObjectModal from "../../../modals/delete_object";
 import {
   EditClientSurnameModal,
@@ -85,6 +84,10 @@ class ClientOverview extends React.Component {
     this.state = {
       client: {},
       is_loaded: false,
+      bankAccounts: [],
+      associatedClients: [],
+      documents: [],
+      bankProjectAccounts: [],
     };
   }
 
@@ -98,8 +101,16 @@ class ClientOverview extends React.Component {
       .get(`${VIEW_CLIENT}${clientId}/`, { headers: currentHeaders })
       .then((res) => {
         const client = res?.data || {};
+        const bankAccounts = Array.isArray(res?.data?.bank_accounts) ? res.data.bank_accounts : [];
+        const associatedClients = Array.isArray(res?.data?.associated_projects) ? res.data.associated_projects : [];
+        const documents = Array.isArray(res?.data?.documents) ? res.data.documents : [];
+        const bankProjectAccounts = Array.isArray(res?.data?.bank_project_accounts) ? res.data.bank_project_accounts : [];
         this.setState({
           client,
+          bankAccounts,
+          associatedClients,
+          documents,
+          bankProjectAccounts,
           is_loaded: true,
         });
       })
@@ -125,19 +136,16 @@ class ClientOverview extends React.Component {
     if (!this.state.is_loaded) {
       return (
         <>
-          <NavigationBar />
           <div className="rootContainer">
             {pageHeader("client_overview", `${client.surname} ${client.name}`)}
             {loader()}
           </div>
-          <Footer />
         </>
       );
     }
 
     return (
       <>
-        <NavigationBar />
         <div className="rootContainer">
           {pageHeader("client_overview", `${client.surname} ${client.name}`)}
           <div className="contentBody">
@@ -869,7 +877,6 @@ class ClientOverview extends React.Component {
             </Grid>
           </div>
         </div>
-        <Footer />
       </>
     );
   }

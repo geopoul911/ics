@@ -250,7 +250,7 @@ function AddConsultantModal() {
         Create new Consultant
       </Button>
 
-      <Modal show={show} onHide={handleClose} size="lg">
+      <Modal show={show} onHide={handleClose} size="lg" centered>
         <Modal.Header closeButton>
           <Modal.Title>Add New Consultant</Modal.Title>
         </Modal.Header>

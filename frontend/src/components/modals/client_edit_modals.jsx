@@ -406,10 +406,12 @@ export function EditClientNameModal({ client, update_state }) {
       });
     } catch (error) {
       console.error("Error updating name:", error);
+      const resp = error?.response?.data;
+      const msg = (resp && (resp.error || resp.detail)) || (typeof resp === 'string' ? resp : null) || "Failed to update name.";
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: error.response?.data?.error || "Failed to update name.",
+        text: msg,
       });
     }
   };
@@ -719,10 +721,12 @@ export function EditClientEmailModal({ client, update_state }) {
       });
     } catch (error) {
       console.error("Error updating email:", error);
+      const resp = error?.response?.data;
+      const msg = (resp && (resp.error || resp.detail)) || (typeof resp === 'string' ? resp : null) || "Failed to update email.";
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: error.response?.data?.error || "Failed to update email.",
+        text: msg,
       });
     }
   };

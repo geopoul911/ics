@@ -1,6 +1,7 @@
 from django.urls import path, re_path
 from webapp.administration import views as views
 from webapp.administration import xhr as administration_xhr
+from webapp.administration.views import AuditEventList
 
 
 urlpatterns = [
@@ -35,4 +36,6 @@ urlpatterns = [
     path("task_category/<str:taskcate_id>/", views.TaskCategoryView.as_view(), name="task-category-detail"),
     path('delete_task_category/', administration_xhr.DeleteTaskCategory.as_view()),
 
+    # Audit Logs
+    path('audit_events/', AuditEventList.as_view()),
 ]

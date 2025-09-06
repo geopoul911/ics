@@ -9,12 +9,14 @@ import { MdSecurity, MdCheckCircle, MdCancel } from "react-icons/md";
 // Modules / Functions
 import { Card } from "react-bootstrap";
 import { Grid, Button } from "semantic-ui-react";
+ 
 import Swal from "sweetalert2";
 
 // Custom Made Components
 import NavigationBar from "../../../core/navigation_bar/navigation_bar";
 import Footer from "../../../core/footer/footer";
 import DeleteObjectModal from "../../../modals/delete_object";
+import AddBankClientAccountModal from "../../../modals/create/add_bank_client_account";
 import {
   EditBankNameModal,
   EditBankCountryModal,
@@ -45,6 +47,8 @@ function getBankIdFromPath() {
 }
 
 let overviewIconStyle = { color: "#93ab3c", marginRight: "0.5em" };
+let labelPillStyle = { background: "#eef5ff", color: "#2c3e50", padding: "2px 10px", borderRadius: "12px", fontSize: "0.85em", marginRight: "8px", border: "1px solid #d6e4ff" };
+let valueTextStyle = { fontWeight: 600, color: "#212529" };
 
 class BankOverview extends React.Component {
   constructor(props) {
@@ -52,6 +56,7 @@ class BankOverview extends React.Component {
     this.state = {
       bank: {},
       is_loaded: false,
+      bankClientAccounts: [],
     };
   }
 
@@ -66,16 +71,20 @@ class BankOverview extends React.Component {
 
     axios
       .get(`${VIEW_BANK}${bankId}/`, { headers: currentHeaders })
-      .then((res) => {
-        // Accept a few possible payload shapes safely
-        const bank =
-          res?.data ||
-          {};
+      .then(async (res) => {
+        const bank = res?.data || {};
 
-        this.setState({
-          bank,
-          is_loaded: true,
-        });
+        let bankClientAccounts = bank.bank_client_accounts || [];
+        if (!Array.isArray(bankClientAccounts) || bankClientAccounts.length === 0) {
+          try {
+            const bcaRes = await axios.get("http://localhost:8000/api/data_management/bank_client_accounts/", { headers: currentHeaders });
+            const all = bcaRes?.data?.all_bank_client_accounts || bcaRes?.data?.results || bcaRes?.data?.data || bcaRes?.data || [];
+            const bid = bank.bank_id;
+            bankClientAccounts = (Array.isArray(all) ? all : []).filter(a => a.bank && (a.bank.bank_id === bid || a.bank === bid));
+          } catch (_e) { bankClientAccounts = []; }
+        }
+
+        this.setState({ bank, bankClientAccounts, is_loaded: true });
       })
       .catch((e) => {
         if (e?.response?.status === 401) {
@@ -101,6 +110,10 @@ class BankOverview extends React.Component {
     return (
       <>
         <NavigationBar />
+        <style>{`
+          .pillLink { color: inherit; text-decoration: none; }
+          .pillLink:hover { color: #93ab3c !important; text-decoration: none; }
+        `}</style>
         <div className="mainContainer">
           {pageHeader("bank_overview", `Bank: ${bank.bankname || 'Loading...'}`)}
           {this.state.is_loaded ? (
@@ -250,6 +263,52 @@ class BankOverview extends React.Component {
                       </div>
                     </Card.Body>
                     <Card.Footer></Card.Footer>
+                  </Card>
+                </Grid.Column>
+                <Grid.Column width={8}>
+                  <Card>
+                    <Card.Header>
+                      <FaStickyNote style={{ color: "#93ab3c", fontSize: "1.5em", marginRight: "0.5em" }} />
+                      Bank client accounts
+                    </Card.Header>
+                    <Card.Body>
+                      {Array.isArray(this.state.bankClientAccounts) && this.state.bankClientAccounts.length > 0 ? (
+                        <ul className="list-unstyled" style={{ margin: 0 }}>
+                          {this.state.bankClientAccounts.map((acc, idx) => (
+                            <li key={acc.bankclientacco_id} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                                <span style={labelPillStyle}>#</span>
+                                <span style={valueTextStyle}>{idx + 1}</span>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>ID</span>
+                                <a href={`/data_management/bank_client_account/${acc.bankclientacco_id}`} className="pillLink" style={{ ...valueTextStyle }}>{acc.bankclientacco_id}</a>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Client</span>
+                                <span style={valueTextStyle}>{acc.client?.fullname || `${acc.client?.surname || ''} ${acc.client?.name || ''}`.trim() || 'N/A'}</span>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Account</span>
+                                <span style={valueTextStyle}>{acc.accountnumber || 'N/A'}</span>
+                                {acc.transitnumber ? (<>
+                                  <span style={{ width: 10 }} />
+                                  <span style={labelPillStyle}>Branch</span>
+                                  <span style={valueTextStyle}>{acc.transitnumber}</span>
+                                </>) : null}
+                                {acc.iban ? (<>
+                                  <span style={{ width: 10 }} />
+                                  <span style={labelPillStyle}>IBAN</span>
+                                  <span style={valueTextStyle}>{acc.iban}</span>
+                                </>) : null}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div>No bank client accounts</div>
+                      )}
+                    </Card.Body>
+                    <Card.Footer>
+                      <AddBankClientAccountModal refreshData={() => this.componentDidMount()} defaultBankId={this.state.bank?.bank_id} lockBank={true} />
+                    </Card.Footer>
                   </Card>
                 </Grid.Column>
               </Grid>
