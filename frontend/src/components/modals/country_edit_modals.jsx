@@ -228,7 +228,7 @@ export function EditCountryCurrencyModal({ country, update_state }) {
 }
 
 /* ===========================
-   4) Edit Order Index
+   4) Edit Order by
    =========================== */
 export function EditCountryOrderIndexModal({ country, update_state }) {
   const [show, setShow] = useState(false);
@@ -264,7 +264,7 @@ export function EditCountryOrderIndexModal({ country, update_state }) {
       console.log('Error response data:', e?.response?.data);
       
       // Handle different error response formats
-      let apiMsg = "Failed to update Order Index.";
+      let apiMsg = "Failed to update Order by.";
       
       // Priority order for error messages
       if (e?.response?.data?.orderindex && Array.isArray(e.response.data.orderindex)) {

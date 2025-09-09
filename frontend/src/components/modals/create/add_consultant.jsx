@@ -1,5 +1,5 @@
 // Built-ins
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Icons / Images
 import { BiPlus } from "react-icons/bi";
@@ -34,8 +34,7 @@ const toSmallInt = (value) => {
   return Math.max(-32768, Math.min(32767, n)); // Django SmallIntegerField range
 };
 
-// Regex to validate country codes: 3 capital letters separated by comma + space
-const countryCodeRegex = /^([A-Z]{3}(,\s[A-Z]{3})*)?$/;
+// Countries will be loaded to populate the multi-select for cash passport
 
 // Validation helpers
 const validateUsername = (value) => value.replace(/[^a-zA-Z0-9]/g, "");
@@ -59,7 +58,8 @@ function AddConsultantModal() {
   const [password, setPassword] = useState(""); // required
   const [confirmPassword, setConfirmPassword] = useState(""); // required
   const [canAssignTask, setCanAssignTask] = useState(false); // optional
-  const [cashPassport, setCashPassport] = useState(""); // optional
+  const [countries, setCountries] = useState([]);
+  const [selectedCodes, setSelectedCodes] = useState([]);
   const [active, setActive] = useState(true); // optional, default true
   const [orderindex, setOrderindex] = useState(""); // required small int
   const [selectedPhoto, setSelectedPhoto] = useState(null); // optional photo file
@@ -76,7 +76,6 @@ function AddConsultantModal() {
     setPassword("");
     setConfirmPassword("");
     setCanAssignTask(false);
-    setCashPassport("");
     setActive(true);
     setOrderindex("");
     setSelectedPhoto(null);
@@ -131,13 +130,29 @@ function AddConsultantModal() {
   const isRoleValid = ["A", "S", "U", "C"].includes(role);
   const isUsernameValid = username.length >= 3 && username.length <= 15;
   const isPasswordValid = validatePassword(password) && password === confirmPassword;
-  const isCashPassportValid = !cashPassport || (cashPassport.length <= 120 && countryCodeRegex.test(cashPassport)); // optional
+  const joinedCashPassport = selectedCodes.join(', ');
+  const isCashPassportValid = joinedCashPassport.length <= 120; // optional
   const isOrderIndexValid = orderindex !== "" && Number.isInteger(+orderindex); // required
 
   const isFormValid = isConsultantIdValid && isFullnameValid && isEmailValid &&
                      isPhoneValid && isMobileValid && isRoleValid &&
                      isUsernameValid && isPasswordValid && isCashPassportValid &&
                      isOrderIndexValid;
+
+  // Load countries when modal opens
+  useEffect(() => {
+    const loadCountries = async () => {
+      try {
+        const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
+        const res = await axios.get("http://localhost:8000/api/regions/all_countries/", { headers: currentHeaders });
+        const data = res?.data?.all_countries || [];
+        setCountries(Array.isArray(data) ? data : []);
+      } catch (_e) {
+        setCountries([]);
+      }
+    };
+    if (show) loadCountries();
+  }, [show]);
 
   const createNewConsultant = async () => {
     try {
@@ -160,9 +175,9 @@ function AddConsultantModal() {
       formData.append('username', username);
       formData.append('password', password);
       formData.append('canassigntask', canAssignTask);
-      if (cashPassport) formData.append('cashpassport', cashPassport);
+      if (joinedCashPassport) formData.append('cashpassport', joinedCashPassport);
       formData.append('active', active);
-      // Order index is required
+      // Order by is required
       formData.append('orderindex', Number(orderindex));
       
       // Add photo if selected
@@ -461,23 +476,44 @@ function AddConsultantModal() {
               </Row>
             )}
 
-                         <Row>
-               <Col md={12}>
-                 <Form.Group>
-                   <Form.Label>Cash Passport Countries</Form.Label>
-                   <Form.Control
-                     type="text"
-                     value={cashPassport}
-                     onChange={(e) => setCashPassport(clampLen(e.target.value, 120))}
-                     placeholder="Enter country codes (e.g., GRE, CAN, USA)"
-                     isInvalid={cashPassport !== "" && !isCashPassportValid}
-                   />
-                   <Form.Control.Feedback type="invalid">
-                     Format: 3 capital letters separated by comma + space (e.g., GRE, CAN, USA)
-                   </Form.Control.Feedback>
-                 </Form.Group>
-               </Col>
-             </Row>
+            <Row>
+              <Col md={12}>
+                <Form.Group>
+                  <Form.Label id="create-cashpassport-countries-label">Cash Passport Countries</Form.Label>
+                  {/* Hidden input to expose joined value for tooling/tests */}
+                  <input type="hidden" name="cashpassport" value={joinedCashPassport} />
+                  <div role="group" aria-labelledby="create-cashpassport-countries-label" style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {countries.map((c) => {
+                      const isSelected = selectedCodes.includes(c.country_id);
+                      return (
+                        <Button
+                          key={c.country_id}
+                          type="button"
+                          size="tiny"
+                          color={isSelected ? 'green' : 'grey'}
+                          onClick={() => {
+                            setSelectedCodes((prev) => {
+                              if (prev.includes(c.country_id)) {
+                                const next = prev.filter((id) => id !== c.country_id);
+                                return next;
+                              }
+                              const next = [...prev, c.country_id];
+                              return next;
+                            });
+                          }}
+                          title={`${c.country_id} - ${c.title}`}
+                        >
+                          {c.country_id}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  {!isCashPassportValid && (
+                    <div style={{ color: 'red', marginTop: 6 }}>Selection too long (max length 120 when joined)</div>
+                  )}
+                </Form.Group>
+              </Col>
+            </Row>
 
             <Row>
               <Col md={6}>
@@ -561,13 +597,13 @@ function AddConsultantModal() {
                  {!isCashPassportValid && (
                    <li>
                      <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                     Cash Passport Countries format: 3 capital letters separated by comma + space (e.g., GRE, CAN, USA).
+                     Cash Passport selection too long (max 120 characters when joined).
                    </li>
                  )}
                  {!isOrderIndexValid && (
                    <li>
                      <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                     Order Index is required and must be an integer.
+                     Order by is required and must be an integer.
                    </li>
                  )}
                </ul>

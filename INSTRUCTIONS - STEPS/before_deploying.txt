@@ -1,0 +1,20 @@
+Testing
+Terms
+Mail Settings
+Mailing
+Whitelists
+Audit Check
+Date Formats
+
+Axes unblock
+staff documentaiton
+developer dox
+on_delete check
+on_create check
+timezone = europe athens
+mail += expiring documents
+statistics check
+
+Filters all_table
+Filters reports
+Filters logging

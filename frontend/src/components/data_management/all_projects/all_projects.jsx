@@ -7,7 +7,7 @@ import Footer from "../../core/footer/footer";
 import axios from "axios";
 
 // Modules / Functions
-import filterFactory, { textFilter } from "react-bootstrap-table2-filter";
+import filterFactory, { textFilter, selectFilter } from "react-bootstrap-table2-filter";
 import ToolkitProvider from "react-bootstrap-table2-toolkit";
 import Swal from "sweetalert2";
 import BootstrapTable from "react-bootstrap-table-next";
@@ -69,6 +69,12 @@ const columns = [
       }
       return "";
     },
+    filterValue: (cell, row) => {
+      if (row.registrationdate) {
+        return new Date(row.registrationdate).toLocaleDateString();
+      }
+      return "";
+    },
   },
   {
     dataField: "status",
@@ -117,7 +123,14 @@ const columns = [
     dataField: "taxation",
     text: "Taxation",
     sort: true,
-    filter: textFilter(),
+    filter: selectFilter({
+      options: { "": "All", true: "Yes", false: "No" },
+      defaultValue: "",
+      onFilter: (filterVal, data) => {
+        if (filterVal === "" || filterVal === undefined || filterVal === null) return data;
+        return data.filter((row) => String(row.taxation) === String(filterVal));
+      },
+    }),
     formatter: (cell, row) => (
       <span className={row.taxation ? "text-success" : "text-danger"}>
         {row.taxation ? "Yes" : "No"}

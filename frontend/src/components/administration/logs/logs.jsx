@@ -87,6 +87,11 @@ function Logs() {
           <style>{`
             .pillLink { color: inherit; text-decoration: none; }
             .pillLink:hover { color: #93ab3c; text-decoration: none; }
+            .audit-row-delete { background-color: rgba(220, 53, 69, 0.12); }
+            .audit-row-update { background-color: rgba(0, 123, 255, 0.10); }
+            .audit-row-create { background-color: rgba(40, 167, 69, 0.12); }
+            .audit-row-failed { background-color: rgba(220, 20, 60, 0.25); }
+            .audit-row-auth { background-color: rgba(255, 165, 0, 0.15); }
           `}</style>
           <Grid stackable columns={1}>
             <Grid.Column>
@@ -185,17 +190,36 @@ function Logs() {
                           } catch (e) { return ''; }
                         }},
                       ]}
+                      rowClasses={(row) => {
+                        const action = (row.action || '').toLowerCase();
+                        const success = !!row.success;
+                        if (action === 'delete') return 'audit-row-delete';
+                        if (action === 'update') return 'audit-row-update';
+                        if (action === 'create') return 'audit-row-create';
+                        if (action === 'login_failed' || (!success && (action.includes('login') || action.includes('auth')))) return 'audit-row-failed';
+                        if (action.includes('login') || action.includes('logout') || action.includes('auth')) return 'audit-row-auth';
+                        return '';
+                      }}
                     >
                       {(props) => (
                         <BootstrapTable
                           {...props.baseProps}
                           bootstrap4
                           hover
-                          striped
                           condensed
                           bordered={false}
                           pagination={paginationFactory({ sizePerPage: 10 })}
                           filter={filterFactory()}
+                          rowClasses={(row) => {
+                            const action = (row.action || '').toLowerCase();
+                            const success = !!row.success;
+                            if (action === 'delete') return 'audit-row-delete';
+                            if (action === 'update') return 'audit-row-update';
+                            if (action === 'create') return 'audit-row-create';
+                            if (action === 'login_failed' || (!success && (action.includes('login') || action.includes('auth')))) return 'audit-row-failed';
+                            if (action.includes('login') || action.includes('logout') || action.includes('auth')) return 'audit-row-auth';
+                            return '';
+                          }}
                         />
                       )}
                     </ToolkitProvider>

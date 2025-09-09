@@ -10,7 +10,6 @@ import NotificationsPage from "./components/core/notifications/notifications";
 import FourOFour from "./components/core/404/404";
 import UnderConstruction from "./components/core/under_construction/under_construction";
 import Login from "./components/core/login/login";
-
 import ProtectedRoute from "./components/core/router/protected_route";
 
 // Data Management

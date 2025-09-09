@@ -1,15 +1,39 @@
 /* Styles for '.termsPaper' */
 .termsPaper {
-  width: 80%;
-  margin: 0 auto;
-  padding: 20px;
-  margin-bottom: 20px;
+  width: 85%;
+  margin: 0 auto 24px auto;
+  padding: 28px 32px;
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+}
+
+.termsPaper h1 {
+  font-size: 20px;
+  margin-top: 18px;
+  margin-bottom: 8px;
+  color: #222;
+}
+
+.termsPaper p, .termsPaper li {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #333;
+}
+
+.termsPaper hr {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #e0e0e0, transparent);
+  margin: 18px 0;
 }
 
 /* Media query for screens with a max-width of 900px */
 @media screen and (max-width: 900px) {
   /* Adjust width for smaller screens */
   .termsPaper {
-    width: 80%;
+    width: 92%;
+    padding: 20px;
   }
 }

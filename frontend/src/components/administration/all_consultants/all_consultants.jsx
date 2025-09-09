@@ -7,7 +7,7 @@ import Footer from "../../core/footer/footer";
 import axios from "axios";
 
 // Modules / Functions
-import filterFactory, { textFilter } from "react-bootstrap-table2-filter";
+import filterFactory, { textFilter, selectFilter } from "react-bootstrap-table2-filter";
 import ToolkitProvider from "react-bootstrap-table2-toolkit";
 import Swal from "sweetalert2";
 import BootstrapTable from "react-bootstrap-table-next";
@@ -55,7 +55,16 @@ const columns = [
     dataField: "photo_url",
     text: "Photo",
     sort: false,
-    filter: false,
+    filter: selectFilter({
+      options: { "": "All", yes: "Yes", no: "No" },
+      defaultValue: "",
+      
+      onFilter: (filterVal, data) => {
+        if (filterVal === "" || filterVal === undefined || filterVal === null) return data;
+        const wantYes = filterVal === "yes";
+        return data.filter((row) => Boolean(row.photo_url) === wantYes);
+      },
+    }),
     formatter: (cell, row) => (
       <div style={{ textAlign: 'center' }}>
         {row.photo_url ? (
@@ -114,6 +123,15 @@ const columns = [
         'C': 'User'
       };
       return roleMap[cell] || cell;
+    },
+    filterValue: (cell) => {
+      const roleMap = {
+        'A': 'Admin',
+        'S': 'Supervisor',
+        'U': 'Superuser',
+        'C': 'User'
+      };
+      return roleMap[cell] || '';
     }
   },
   {
@@ -126,7 +144,14 @@ const columns = [
     dataField: "active",
     text: "Active",
     sort: true,
-    filter: textFilter(),
+    filter: selectFilter({
+      options: { "": "All", true: "Yes", false: "No" },
+      defaultValue: "",
+      onFilter: (filterVal, data) => {
+        if (filterVal === "" || filterVal === undefined || filterVal === null) return data;
+        return data.filter((row) => String(row.active) === String(filterVal));
+      },
+    }),
     formatter: (cell) => cell ? "Yes" : "No"
   },
 ];

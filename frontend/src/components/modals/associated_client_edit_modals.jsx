@@ -239,7 +239,7 @@ export function EditAssociatedClientClientModal({ associatedClient, update_state
   );
 }
 
-// Edit Associated Client Order Index Modal
+// Edit Associated Client Order by Modal
 export function EditAssociatedClientOrderindexModal({ associatedClient, update_state }) {
   const [show, setShow] = useState(false);
   const [orderindex, setOrderindex] = useState("");
@@ -261,13 +261,13 @@ export function EditAssociatedClientOrderindexModal({ associatedClient, update_s
   const handleSave = async () => {
     const orderStr = String(orderindex).trim();
     if (!orderStr) {
-      Swal.fire("Error", "Order index is required", "error");
+      Swal.fire("Error", "Order by is required", "error");
       return;
     }
 
     const orderIndexNum = parseInt(orderStr, 10);
     if (isNaN(orderIndexNum) || orderIndexNum < 0) {
-      Swal.fire("Error", "Order index must be a positive number", "error");
+      Swal.fire("Error", "Order by must be a positive number", "error");
       return;
     }
 
@@ -284,7 +284,7 @@ export function EditAssociatedClientOrderindexModal({ associatedClient, update_s
         { headers: currentHeaders }
       );
 
-      Swal.fire("Success", "Order index updated successfully", "success");
+      Swal.fire("Success", "Order by updated successfully", "success");
       if (update_state) update_state(response.data);
       handleClose();
     } catch (e) {

@@ -65,6 +65,19 @@ class LoginView(ObtainAuthToken):
                     [client_ip],
                 )
             else:
+                # Explicit audit for failed login
+                try:
+                    AuditEvent.objects.create(
+                        actor=None,
+                        action=AuditEvent.Action.LOGIN_FAILED,
+                        ip_address=get_ip(request),
+                        user_agent=request.META.get('HTTP_USER_AGENT'),
+                        success=False,
+                        message=f"Failed login for username/email: {request.data.get('username', '')}",
+                        metadata={"credentials": {"username": request.data.get('username', '')}},
+                    )
+                except Exception:
+                    pass
                 return Response(status=400, data={'failed_wl': True})
 
         # Get user
@@ -74,6 +87,19 @@ class LoginView(ObtainAuthToken):
             token, created = Token.objects.get_or_create(user=user)
         except KeyError:
             return Response(status=400)
+
+        # Audit successful login (token-based)
+        try:
+            AuditEvent.objects.create(
+                actor=user,
+                action=AuditEvent.Action.LOGIN,
+                ip_address=get_ip(request),
+                user_agent=request.META.get('HTTP_USER_AGENT'),
+                success=True,
+                message="User logged in",
+            )
+        except Exception:
+            pass
 
         return Response({
             'user': UserSerializer(user).data,
@@ -91,6 +117,18 @@ class LogoutView(generics.ListAPIView):
     # Cross-Site Request Forgery
     @csrf_exempt
     def post(self, request):
+        try:
+            user = request.user if getattr(request, 'user', None) and request.user.is_authenticated else None
+            AuditEvent.objects.create(
+                actor=user,
+                action=AuditEvent.Action.LOGOUT,
+                ip_address=get_ip(request),
+                user_agent=request.META.get('HTTP_USER_AGENT'),
+                success=True,
+                message="User logged out",
+            )
+        except Exception as e:
+            pass
         return Response(status=200)
 
 

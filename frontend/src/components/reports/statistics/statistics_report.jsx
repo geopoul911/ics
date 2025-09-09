@@ -5,7 +5,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { FaPrint } from "react-icons/fa";
 import { Tabs, Tab } from "react-bootstrap";
-
 import ToolkitProvider from "react-bootstrap-table2-toolkit";
 import BootstrapTable from "react-bootstrap-table-next";
 import paginationFactory from "react-bootstrap-table2-paginator";
@@ -84,7 +83,7 @@ function StatisticsReport() {
 
   function setF(key, val) { setFilters((prev) => ({ ...prev, [key]: val })); }
 
-  const { startedByCategory, completedByCategory, durationStatsByCategory, projectsByConsultantCategory, tasksByTaskCategoryForCompleted, overallDuration } = useMemo(() => {
+  const { startedByCategory, completedByCategory, durationStatsByCategory, projectsByConsultantCategory, tasksByTaskCategoryForCompleted, overallDuration, startedProjectsCount, completedProjectsCount, completedTasksCount, totalTasksCount } = useMemo(() => {
     const from = filters.from ? new Date(filters.from) : null;
     const to = filters.to ? new Date(filters.to) : null;
 
@@ -104,34 +103,55 @@ function StatisticsReport() {
 
     // 1) Started per category (registrationdate in range)
     const started = [];
+    let startedProjectsCount = 0;
     projWithCats.forEach((p) => {
       if (inRange(p.registrationdate)) {
-        (p._cats || []).forEach((c) => started.push(c?.title || c));
+        startedProjectsCount += 1;
+        (p._cats || []).forEach((c) => {
+          const label = c && (c.title || c);
+          if (label) started.push(String(label));
+        });
       }
     });
     const startedByCategory = groupCount(started.map((t) => ({ k: t })), (x) => x.k);
 
     // 2) Completed per category (completiondate in range)
     const completed = [];
+    let completedProjectsCount = 0;
     projWithCats.forEach((p) => {
-      if (inRange(p.completiondate)) {
-        (p._cats || []).forEach((c) => completed.push(c?.title || c));
+      const isCompletedInRange = p.completiondate ? inRange(p.completiondate) : (!from && !to && p.status === 'Completed');
+      if (isCompletedInRange) {
+        completedProjectsCount += 1;
+        (p._cats || []).forEach((c) => {
+          const label = c && (c.title || c);
+          if (label) completed.push(String(label));
+        });
       }
     });
     const completedByCategory = groupCount(completed.map((t) => ({ k: t })), (x) => x.k);
 
-    // 3) Duration stats per category (assign -> completion)
+    // 3) Duration stats per category (start -> completion)
     const durationPerCategory = new Map();
     const allDurations = [];
     projWithCats.forEach((p) => {
-      if (!p.assignedate || !p.completiondate) return;
-      const duration = daysBetween(p.assignedate, p.completiondate);
+      const start = p.assignedate || p.registrationdate;
+      // Prefer completion; then settlement; if no date range selected and status is Completed, fall back to "today"
+      let end = p.completiondate || p.settlementdate || null;
+      if (!end && !from && !to && p.status === 'Completed') {
+        end = new Date();
+      }
+      if (!start || !end) return;
+      // Apply range to end date if range selected
+      if ((from || to) && !inRange(end)) return;
+      const duration = daysBetween(start, end);
       if (duration == null) return;
       (p._cats || []).forEach((c) => {
-        const key = c?.title || c;
-        const arr = durationPerCategory.get(key) || [];
+        const key = c && (c.title || c);
+        if (!key) return;
+        const k = String(key);
+        const arr = durationPerCategory.get(k) || [];
         arr.push(duration);
-        durationPerCategory.set(key, arr);
+        durationPerCategory.set(k, arr);
       });
       allDurations.push(duration);
     });
@@ -146,8 +166,9 @@ function StatisticsReport() {
       if (!inRange(p.registrationdate)) return;
       const cons = p.consultant?.fullname || p.consultant?.surname || "Consultant";
       (p._cats || []).forEach((c) => {
-        const cat = c?.title || c;
-        const key = `${cons}|||${cat}`;
+        const cat = c && (c.title || c);
+        if (!cat) return;
+        const key = `${cons}|||${String(cat)}`;
         projPerConsCat.set(key, (projPerConsCat.get(key) || 0) + 1);
       });
     });
@@ -157,34 +178,55 @@ function StatisticsReport() {
     });
 
     // 5) Tasks per task category for completed projects in range (completiondate)
-    const completedProjectIdsInRange = new Set((projects || []).filter((p) => inRange(p.completiondate)).map((p) => p.project_id));
+    const completedProjectIdsInRange = new Set((projects || []).filter((p) => {
+      if (p.completiondate) return inRange(p.completiondate);
+      // Fallback: if no date filters are set, include projects with status Completed even if completiondate missing
+      if (!from && !to && (p.status === 'Completed')) return true;
+      return false;
+    }).map((p) => p.project_id));
     const relevantTasks = (tasks || []).filter((t) => completedProjectIdsInRange.has(t.project?.project_id || t.project));
-    const tasksGrouped = groupCount(relevantTasks, (t) => t.taskcate?.title || t.taskcate);
+    const tasksGrouped = groupCount(relevantTasks, (t) => {
+      const label = t.taskcate && (t.taskcate.title || t.taskcate);
+      return label ? String(label) : 'Uncategorized';
+    });
+    const totalTasksCount = relevantTasks.length;
+    const completedTasksCount = relevantTasks.filter((t) => (t.status === 'Completed')).length;
 
-    return { startedByCategory, completedByCategory, durationStatsByCategory, projectsByConsultantCategory, tasksByTaskCategoryForCompleted: tasksGrouped, overallDuration: averageMinMax(allDurations) };
+    return { startedByCategory, completedByCategory, durationStatsByCategory, projectsByConsultantCategory, tasksByTaskCategoryForCompleted: tasksGrouped, overallDuration: averageMinMax(allDurations), startedProjectsCount, completedProjectsCount, completedTasksCount, totalTasksCount };
   }, [projects, tasks, filters]);
 
   // KPI tiles
-  const totalStarted = useMemo(() => (startedByCategory || []).reduce((s, r) => s + (r.count || 0), 0), [startedByCategory]);
-  const totalCompleted = useMemo(() => (completedByCategory || []).reduce((s, r) => s + (r.count || 0), 0), [completedByCategory]);
-  const totalTasksCompletedProjects = useMemo(() => (tasksByTaskCategoryForCompleted || []).reduce((s, r) => s + (r.count || 0), 0), [tasksByTaskCategoryForCompleted]);
+  const totalStarted = useMemo(() => startedProjectsCount || 0, [startedProjectsCount]);
+  const totalCompleted = useMemo(() => completedProjectsCount || 0, [completedProjectsCount]);
+  const tasksCompletedDenom = useMemo(() => ({ done: completedTasksCount || 0, total: totalTasksCount || 0 }), [completedTasksCount, totalTasksCount]);
 
-  // Tabular definitions
-  const columnsCounts = [
-    { dataField: "key", text: "Category", sort: true },
-    { dataField: "count", text: "Count", sort: true },
-  ];
-  const columnsDuration = [
-    { dataField: "key", text: "Category", sort: true },
-    { dataField: "min", text: "Min days", sort: true },
-    { dataField: "avg", text: "Avg days", sort: true, formatter: (c) => (c ? c.toFixed(1) : "0.0") },
-    { dataField: "max", text: "Max days", sort: true },
-  ];
-  const columnsProjectsByConsCat = [
-    { dataField: "consultant", text: "Consultant", sort: true },
-    { dataField: "category", text: "Category", sort: true },
-    { dataField: "count", text: "Projects", sort: true },
-  ];
+  // Helpers to build table columns with embedded bars
+  const makeCountColumns = (data, color) => {
+    const max = Math.max(1, ...data.map((d) => Number(d.count || 0)));
+    return [
+      { dataField: 'key', text: 'Category', sort: true },
+      { dataField: 'count', text: 'Count', sort: true, formatter: (c) => {
+          const pct = Math.round((Number(c || 0) / max) * 100);
+          return (
+            <div className="cellwrap"><div className="cellbar"><div className="cellfill" style={{ width: pct + '%', background: color }} /></div><span className="cellval">{c}</span></div>
+          );
+        }
+      },
+    ];
+  };
+
+  const makeDurationColumns = (rows) => {
+    const max = Math.max(1, ...rows.flatMap((r) => [r.min || 0, r.avg || 0, r.max || 0]));
+    const fmt = (v, col) => (
+      <div className="cellwrap"><div className="cellbar"><div className="cellfill" style={{ width: Math.round((Number(v || 0) / max) * 100) + '%', background: col }} /></div><span className="cellval">{Number(v || 0)}</span></div>
+    );
+    return [
+      { dataField: 'key', text: 'Category', sort: true },
+      { dataField: 'min', text: 'Min days', sort: true, formatter: (c) => fmt(c, '#6c757d') },
+      { dataField: 'avg', text: 'Avg days', sort: true, formatter: (c) => fmt(c, '#93ab3c') },
+      { dataField: 'max', text: 'Max days', sort: true, formatter: (c) => fmt(c, '#0d6efd') },
+    ];
+  };
 
   // Styles for KPI tiles
   const kpiStyle = {
@@ -238,7 +280,7 @@ function StatisticsReport() {
                   </div>
                   <div style={kpiStyle}>
                     <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Tasks (completed projects)</div>
-                    <div style={{ fontSize: 28, fontWeight: 700 }}>{totalTasksCompletedProjects}</div>
+                    <div style={{ fontSize: 28, fontWeight: 700 }}>{`${tasksCompletedDenom.done} / ${tasksCompletedDenom.total}`}</div>
                   </div>
                 </div>
 
@@ -249,13 +291,17 @@ function StatisticsReport() {
                     .stats-tabs .nav-link { background: #fff; color: #000 !important; border: 1px solid #93ab3c; margin-right: 8px; border-radius: 8px 8px 0 0; border-bottom: none; }
                     .stats-tabs .nav-link:hover { background: #f7f7f7; color: #000 !important; border-color: #93ab3c; }
                     .stats-tabs .nav-link.active { background: #93ab3c; color: #fff !important; border-color: #93ab3c; border-bottom: none; }
+                    .cellwrap { display:flex; align-items:center; gap:8px; }
+                    .cellbar { flex:1; height:12px; background:#f0f2f5; border-radius:6px; overflow:hidden; }
+                    .cellfill { height:100%; border-radius:6px; }
+                    .cellval { min-width:36px; text-align:right; font-weight:600; }
                   `}</style>
                   <Tabs defaultActiveKey="projects" id="stats-tabs" className="stats-tabs">
                     <Tab eventKey="projects" title="Projects">
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16, paddingTop: 12 }}>
                         <div>
                           <h6>Started by category</h6>
-                          <ToolkitProvider bootstrap4 keyField="key" data={startedByCategory} columns={columnsCounts} exportCSV={{ fileName: 'stats_projects_started.csv' }} search condensed>
+                          <ToolkitProvider bootstrap4 keyField="key" data={startedByCategory} columns={makeCountColumns(startedByCategory, '#0d6efd')} search>
                             {(props) => (
                               <BootstrapTable {...props.baseProps} pagination={paginationFactory(paginationOptions)} bordered={false} hover striped />
                             )}
@@ -263,7 +309,7 @@ function StatisticsReport() {
                         </div>
                         <div>
                           <h6>Completed by category</h6>
-                          <ToolkitProvider bootstrap4 keyField="key" data={completedByCategory} columns={columnsCounts} exportCSV={{ fileName: 'stats_projects_completed.csv' }} search condensed>
+                          <ToolkitProvider bootstrap4 keyField="key" data={completedByCategory} columns={makeCountColumns(completedByCategory, '#93ab3c')} search>
                             {(props) => (
                               <BootstrapTable {...props.baseProps} pagination={paginationFactory(paginationOptions)} bordered={false} hover striped />
                             )}
@@ -273,7 +319,7 @@ function StatisticsReport() {
                     </Tab>
                     <Tab eventKey="durations" title="Durations">
                       <div style={{ paddingTop: 12 }}>
-                        <ToolkitProvider bootstrap4 keyField="key" data={durationStatsByCategory} columns={columnsDuration} exportCSV={{ fileName: 'stats_project_duration.csv' }} search condensed>
+                        <ToolkitProvider bootstrap4 keyField="key" data={durationStatsByCategory} columns={makeDurationColumns(durationStatsByCategory)} search>
                           {(props) => (
                             <BootstrapTable {...props.baseProps} pagination={paginationFactory(paginationOptions)} bordered={false} hover striped />
                           )}
@@ -282,7 +328,7 @@ function StatisticsReport() {
                     </Tab>
                     <Tab eventKey="consultants" title="Consultants">
                       <div style={{ paddingTop: 12 }}>
-                        <ToolkitProvider bootstrap4 keyField={(row) => `${row.consultant}-${row.category}`} data={projectsByConsultantCategory} columns={columnsProjectsByConsCat} exportCSV={{ fileName: 'stats_projects_by_consultant_category.csv' }} search condensed>
+                        <ToolkitProvider bootstrap4 keyField={(row) => `${row.consultant}-${row.category}`} data={projectsByConsultantCategory} columns={[{dataField:'consultant',text:'Consultant',sort:true},{dataField:'category',text:'Category',sort:true},{dataField:'count',text:'Projects',sort:true,formatter:(c)=>{const max=Math.max(1,...projectsByConsultantCategory.map(r=>r.count||0));const pct=Math.round((Number(c||0)/max)*100);return(<div className="cellwrap"><div className="cellbar"><div className="cellfill" style={{width:pct+'%',background:'#6f42c1'}}/></div><span className="cellval">{c}</span></div>);}}]} search>
                           {(props) => (
                             <BootstrapTable {...props.baseProps} pagination={paginationFactory(paginationOptions)} bordered={false} hover striped />
                           )}
@@ -291,7 +337,7 @@ function StatisticsReport() {
                     </Tab>
                     <Tab eventKey="tasks" title="Tasks">
                       <div style={{ paddingTop: 12 }}>
-                        <ToolkitProvider bootstrap4 keyField="key" data={tasksByTaskCategoryForCompleted} columns={columnsCounts} exportCSV={{ fileName: 'stats_tasks_by_category_completed_projects.csv' }} search condensed>
+                        <ToolkitProvider bootstrap4 keyField="key" data={tasksByTaskCategoryForCompleted} columns={makeCountColumns(tasksByTaskCategoryForCompleted, '#fd7e14')} search>
                           {(props) => (
                             <BootstrapTable {...props.baseProps} pagination={paginationFactory(paginationOptions)} bordered={false} hover striped />
                           )}

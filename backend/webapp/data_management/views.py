@@ -1196,11 +1196,36 @@ class AllCash(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated, RoleBasedPermission]
     
     def get(self, request, *args, **kwargs):
-        """Get all cash entries"""
+        """Get all cash entries, filtered by user's cash passport countries if applicable"""
         try:
             queryset = self.get_queryset()
+
+            # Permission filter by cash passport countries
+            user = request.user
+            try:
+                role = getattr(user, 'role', None)
+                is_super = bool(getattr(user, 'is_superuser', False)) or role in ['A', 'S']
+            except Exception:
+                is_super = False
+
+            if not is_super:
+                codes = []
+                try:
+                    raw = getattr(user, 'cashpassport', None)
+                    if raw:
+                        codes = [c.strip() for c in str(raw).split(',') if c.strip()]
+                except Exception:
+                    codes = []
+                if codes:
+                    from django.db.models import Q
+                    q = Q()
+                    for code in codes:
+                        q |= Q(country__country_id=code)
+                    queryset = queryset.filter(q)
+                else:
+                    queryset = queryset.none()
+
             data = CashListSerializer(queryset, many=True, context={"request": request}).data
-            
             return Response({"all_cash": data})
         except Exception as e:
             return Response(
@@ -1242,6 +1267,21 @@ class CashView(RetrieveUpdateDestroyAPIView):
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
+        # Enforce view permission for specific cash entry based on cash passport countries
+        try:
+            user = request.user
+            role = getattr(user, 'role', None)
+            is_super = bool(getattr(user, 'is_superuser', False)) or role in ['A', 'S']
+            if not is_super:
+                allowed = []
+                raw = getattr(user, 'cashpassport', None)
+                if raw:
+                    allowed = [c.strip() for c in str(raw).split(',') if c.strip()]
+                if not allowed or str(instance.country.country_id) not in allowed:
+                    return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+        except Exception:
+            return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
         serializer = self.get_serializer(instance, context={"request": request})
         return Response(serializer.data)
 

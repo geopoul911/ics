@@ -156,7 +156,7 @@ function AddCountryModal() {
                   <Form.Label>Country ID:</Form.Label>
                   <Form.Control
                     maxLength={3}
-                    placeholder="e.g., GRC"
+                    placeholder="e.g., GR"
                     onChange={(e) =>
                       setCountryId(onlyUpperLetters(clampLen(e.target.value, 3)))
                     }

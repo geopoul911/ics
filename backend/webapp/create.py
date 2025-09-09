@@ -20,7 +20,7 @@ class AddCountry(generics.UpdateAPIView):
     """
     URL: add_country/
     Body (JSON): {
-      "country_id": "GRC",
+      "country_id": "GR",
       "orderindex": 1,
       "currency": "EUR",
       "title": "Greece"
@@ -54,7 +54,7 @@ class AddProvince(generics.UpdateAPIView):
     Body (JSON): {
       "province_id": "ATT",
       "orderindex": 1,
-      "country_id": "GRC",
+      "country_id": "GR",
       "title": "Attica"
     }
     """
@@ -88,7 +88,7 @@ class AddCity(generics.UpdateAPIView):
     Body (JSON): {
       "city_id": "ATH",
       "orderindex": 1,
-      "country_id": "GRC",
+      "country_id": "GR",
       "province_id": "ATT",
       "title": "Athens"
     }

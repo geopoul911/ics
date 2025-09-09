@@ -1087,7 +1087,7 @@ function AddClientModal({ onClientCreated }) {
                 {!isPostalCodeValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    Postal Code is required (1–10 chars).
+                    ZIP/PC is required (1–10 chars).
                   </li>
                 )}
                 {!isCountryValid && (
@@ -1111,7 +1111,7 @@ function AddClientModal({ onClientCreated }) {
                 {!isAfmValid && (
                   <li>
                     <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                    AFM must be exactly 9 digits.
+                    TIN-GR must be exactly 9 digits.
                   </li>
                 )}
                 {!isSinValid && (

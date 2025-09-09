@@ -111,6 +111,9 @@ class Country(models.Model):
     def __str__(self):
         return self.title
 
+    class Meta:
+        ordering = ['orderindex', 'title']
+
 class Province(models.Model):
     province_id = models.CharField(max_length=10, primary_key=True)
     orderindex = models.SmallIntegerField(default=0)
@@ -119,6 +122,9 @@ class Province(models.Model):
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        ordering = ['orderindex', 'title']
 
 class City(models.Model):
     city_id = models.CharField(max_length=10, primary_key=True)
@@ -130,6 +136,9 @@ class City(models.Model):
     def __str__(self):
         return self.title
 
+    class Meta:
+        ordering = ['orderindex', 'title']
+
 class InsuranceCarrier(models.Model):
     insucarrier_id = models.CharField(max_length=10, primary_key=True)
     orderindex = models.SmallIntegerField(default=0)
@@ -138,6 +147,9 @@ class InsuranceCarrier(models.Model):
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        ordering = ['orderindex', 'title']
 
 class Bank(models.Model):
     bank_id = models.CharField(max_length=10, primary_key=True)
@@ -150,6 +162,9 @@ class Bank(models.Model):
 
     def __str__(self):
         return self.bankname
+
+    class Meta:
+        ordering = ['orderindex', 'bankname']
 
 class Client(models.Model):
     client_id = models.CharField(max_length=10, primary_key=True)
@@ -348,7 +363,7 @@ class Project(models.Model):
 class AssociatedClient(models.Model):
     assoclient_id = models.CharField(max_length=10, primary_key=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='associated_clients')
-    client = models.ForeignKey(Client, on_delete=models.PROTECT, related_name='associated_projects')
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='associated_projects')
     orderindex = models.SmallIntegerField(default=0)
     notes = models.TextField(blank=True, null=True)
 
@@ -446,12 +461,6 @@ class Document(models.Model):
         verbose_name = "Document"
         verbose_name_plural = "Documents"
         ordering = ['-created']
-        constraints = [
-            models.CheckConstraint(
-                check=~models.Q(project__isnull=True, client__isnull=True),
-                name='document_must_have_project_or_client'
-            )
-        ]
 
     def clean(self):
         from django.core.exceptions import ValidationError
@@ -565,10 +574,12 @@ class ClientContact(models.Model):
     fathername = models.CharField(max_length=80, blank=True, null=True)
     mothername = models.CharField(max_length=80, blank=True, null=True)
     connection = models.CharField(max_length=40, blank=True, null=True)
+
     address = models.CharField(max_length=80, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True, null=True)
     mobile = models.CharField(max_length=15)
+
     profession = models.CharField(max_length=40, blank=True, null=True)
     reliability = models.CharField(max_length=10, choices=RELIABILITY_CHOICES, blank=True, null=True)
     city = models.CharField(max_length=40)
@@ -737,17 +748,22 @@ class ProjectTask(models.Model):
 
     projtask_id = models.CharField(max_length=10, primary_key=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tasks')
+
     title = models.CharField(max_length=120)
     details = models.TextField()
     taskcate = models.ForeignKey(TaskCategory, on_delete=models.PROTECT, related_name='tasks')
     priority = models.CharField(max_length=1, choices=PRIORITY_CHOICES, default='B', blank=True, null=True)
+
     weight = models.PositiveSmallIntegerField(default=1, blank=True, null=True,
         help_text="Task weight for project completion percentage calculation")
+
     assigner = models.ForeignKey(Consultant, on_delete=models.PROTECT, related_name='assigned_tasks')
     assignee = models.ForeignKey(Consultant, on_delete=models.PROTECT, blank=True, null=True, related_name='tasks')
+
     assigndate = models.DateField(blank=True, null=True)
     deadline = models.DateField(blank=True, null=True)
     completiondate = models.DateField(blank=True, null=True)
+
     efforttime = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True,
         help_text="Time spent on task in hours (0.5 step)")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Created')
@@ -891,7 +907,7 @@ class Cash(models.Model):
     trandate = models.DateField()
     consultant = models.ForeignKey(Consultant, on_delete=models.PROTECT)
     kind = models.CharField(max_length=1, choices=[('E', 'Expense'), ('P', 'Payment')], blank=True, null=True)
-    currency = models.CharField(max_length=3, blank=True, null=True)
+    
     amountexp = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     amountpay = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     reason = models.CharField(max_length=120)

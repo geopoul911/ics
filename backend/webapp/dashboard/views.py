@@ -5,7 +5,10 @@ from rest_framework.response import Response
 from django.db.models import Count, Sum, Q
 from django.utils import timezone
 from datetime import datetime, timedelta, date
-from webapp.models import Client, Project, Document, ProjectTask, Cash, TaxationProject, AssociatedClient
+from webapp.models import Client, Project, Document, ProjectTask, Cash, TaxationProject, AssociatedClient, Notification
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, RoleBasedPermission])
@@ -66,6 +69,139 @@ def dashboard_stats(request):
             'success': False,
             'error': str(e)
         }, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, RoleBasedPermission])
+def my_dashboard(request):
+    """Aggregate data for the logged-in consultant: projects, tasks, notifications, deadlines, actions, expiring documents"""
+    try:
+        user = request.user
+        today = timezone.now().date()
+        soon = today + timedelta(days=14)
+
+        # My projects (not completed)
+        my_projects = list(
+            Project.objects.filter(consultant=user).exclude(status='Completed')
+            .order_by('-registrationdate')
+            .values('project_id', 'title', 'status', 'deadline')[:10]
+        )
+
+        # My tasks (assigner or assignee), not completed
+        my_tasks = list(
+            ProjectTask.objects.filter(
+                Q(assigner=user) | Q(assignee=user)
+            ).exclude(status='Completed')
+            .order_by('-assigndate')
+            .values('projtask_id', 'title', 'status', 'deadline', 'project__project_id')[:10]
+        )
+
+        # My unread notifications
+        my_unread = list(
+            Notification.objects.filter(user=user, read=False)
+            .order_by('-created_at')
+            .values('id', 'type', 'message', 'created_at', 'related_project__project_id', 'related_task__projtask_id')[:10]
+        )
+
+        # Deadlines (tasks/projects/taxation projects due within 14 days, not completed)
+        deadlines = []
+        for t in ProjectTask.objects.filter(deadline__isnull=False, deadline__lte=soon).exclude(status='Completed')[:20]:
+            deadlines.append({
+                'type': 'task',
+                'title': t.title,
+                'deadline': t.deadline,
+                'id': t.projtask_id,
+                'project_id': getattr(getattr(t, 'project', None), 'project_id', None)
+            })
+        for p in Project.objects.filter(deadline__isnull=False, deadline__lte=soon).exclude(status='Completed')[:20]:
+            deadlines.append({
+                'type': 'project',
+                'title': p.title,
+                'deadline': p.deadline,
+                'id': p.project_id
+            })
+        # Taxation project deadlines
+        for tp in TaxationProject.objects.filter(deadline__isnull=False, deadline__lte=soon)[:20]:
+            deadlines.append({
+                'type': 'taxation_project',
+                'title': f"Taxation {tp.taxproj_id}",
+                'deadline': tp.deadline,
+                'id': tp.taxproj_id
+            })
+
+        # My latest actions from audit logs
+        from accounts.models import AuditEvent
+        action_qs = AuditEvent.objects.filter(actor=user).order_by('-occurred_at')[:20]
+        verb_map = {
+            'create': 'Created',
+            'update': 'Updated',
+            'delete': 'Deleted',
+            'login': 'Login',
+            'logout': 'Logout',
+            'login_failed': 'Login Failed',
+        }
+
+        def _display_name(obj, fallback_id=None):
+            try:
+                for attr in ['title', 'name', 'fullname', 'description']:
+                    v = getattr(obj, attr, None)
+                    if v:
+                        return str(v)
+                # common IDs as names if title missing
+                for attr in ['project_id', 'client_id', 'document_id', 'taxproj_id', 'profession_id', 'projcate_id', 'taskcate_id']:
+                    v = getattr(obj, attr, None)
+                    if v:
+                        return str(v)
+                return str(obj) if obj is not None else (fallback_id or '')
+            except Exception:
+                return str(fallback_id or '')
+
+        actions = []
+        for ev in action_qs:
+            try:
+                model_code = getattr(getattr(ev, 'target_content_type', None), 'model', None)
+                model_title = (model_code or '').replace('_', ' ').title() if model_code else ''
+                verb = verb_map.get(getattr(ev, 'action', None), str(getattr(ev, 'action', '')).title())
+                obj = getattr(ev, 'target', None)
+                obj_name = _display_name(obj, getattr(ev, 'target_object_id', None))
+                label = f"{verb} {model_title}{(': ' + obj_name) if obj_name else ''}"
+                actions.append({
+                    'id': ev.id,
+                    'occurred_at': getattr(ev.occurred_at, 'isoformat', lambda: str(ev.occurred_at))(),
+                    'label': label,
+                })
+            except Exception:
+                # Fallback to minimal info
+                actions.append({
+                    'id': getattr(ev, 'id', None),
+                    'occurred_at': str(getattr(ev, 'occurred_at', '')),
+                    'label': str(getattr(ev, 'action', '')),
+                })
+
+        # Expiring documents related to consultant's projects (next 30 days)
+        expiring_docs = list(
+            Document.objects.filter(
+                project__consultant=user,
+                validuntil__isnull=False,
+                validuntil__lte=today + timedelta(days=30)
+            )
+            .order_by('validuntil')
+            .values('document_id', 'title', 'validuntil', 'project__project_id')[:10]
+        )
+
+        return Response({
+            'success': True,
+            'data': {
+                'projects': my_projects,
+                'tasks': my_tasks,
+                'notifications': my_unread,
+                'deadlines': deadlines,
+                'actions': actions,
+                'expiring_documents': expiring_docs,
+            }
+        })
+    except Exception as e:
+        return Response({'success': False, 'error': str(e)}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, RoleBasedPermission])

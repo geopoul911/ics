@@ -120,7 +120,7 @@ export function EditInsuranceCarrierTitleModal({ insurance_carrier, update_state
         <Modal.Body>
             <Form.Group as={Row}>
               <Form.Label column sm={3}>
-                Title:
+                Public Insurance:
               </Form.Label>
               <Col sm={9}>
                 <Form.Control
@@ -160,7 +160,7 @@ export function EditInsuranceCarrierTitleModal({ insurance_carrier, update_state
   );
 }
 
-// Edit Insurance Carrier Order Index Modal
+// Edit Insurance Carrier Order by Modal
 export function EditInsuranceCarrierOrderIndexModal({ insurance_carrier, update_state }) {
   const [show, setShow] = useState(false);
   const [orderindex, setOrderindex] = useState("");
@@ -177,7 +177,7 @@ export function EditInsuranceCarrierOrderIndexModal({ insurance_carrier, update_
     if (!isOrderIndexValid) {
       Swal.fire({
         icon: "error",
-        title: "Invalid Order Index",
+        title: "Invalid Order by",
         text: "Please enter a valid order index",
       });
       return;
@@ -238,19 +238,19 @@ export function EditInsuranceCarrierOrderIndexModal({ insurance_carrier, update_
 
   return (
     <>
-      <Button onClick={handleShow} size="tiny" basic title="Edit Order Index">
+      <Button onClick={handleShow} size="tiny" basic title="Edit Order by">
         <FiEdit style={{ marginRight: 6 }} />
-        Order Index
+        Order by
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Insurance Carrier Order Index</Modal.Title>
+          <Modal.Title>Edit Insurance Carrier Order by</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form.Group as={Row}>
               <Form.Label column sm={3}>
-                Order Index:
+                Order by:
               </Form.Label>
               <Col sm={9}>
                 <Form.Control
@@ -269,7 +269,7 @@ export function EditInsuranceCarrierOrderIndexModal({ insurance_carrier, update_
         <Modal.Footer>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
             <small style={{ color: isOrderIndexValid ? "green" : "red" }}>
-              {isOrderIndexValid ? "Looks good." : "Order Index is required and must be an integer."}
+              {isOrderIndexValid ? "Looks good." : "Order by is required and must be an integer."}
             </small>
             <div>
               <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>

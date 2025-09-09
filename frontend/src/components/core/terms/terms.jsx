@@ -22,7 +22,11 @@ class Terms extends React.Component {
         <NavigationBar />
         {pageHeader("terms")}
         <div className="mainContainer">
-          <Paper className="termsPaper" style={{ backgroundColor: "#eee" }}>
+          <Paper className="termsPaper">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <div style={{ fontWeight: 800, fontSize: 22 }}>Terms and Conditions</div>
+              <div style={{ fontSize: 12, color: '#666' }}>Last updated: {new Date().toLocaleDateString()}</div>
+            </div>
             <h1>1) Introduction</h1>
             <p>
               These Terms and Conditions (“Terms”) govern your access to and use

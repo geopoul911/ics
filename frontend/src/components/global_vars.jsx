@@ -63,6 +63,43 @@ export const rootIconStyle = {
   marginRight: 20,
 };
 
+// Currency helpers
+export function currencySymbol(code) {
+  const c = String(code || '').toUpperCase();
+  const map = {
+    EUR: '€',
+    USD: '$',
+    GBP: '£',
+    CAD: 'C$',
+    AUD: 'A$',
+    JPY: '¥',
+    CNY: '¥',
+    CHF: 'CHF',
+    SEK: 'kr',
+    NOK: 'kr',
+    DKK: 'kr',
+    PLN: 'zł',
+    CZK: 'Kč',
+    RON: 'lei',
+    BGN: 'лв',
+    HUF: 'Ft',
+    TRY: '₺',
+  };
+  return map[c] || c || '';
+}
+
+export function formatAmountWithCurrency(amount, currencyCode) {
+  const sym = currencySymbol(currencyCode);
+  const n = (amount === null || amount === undefined || amount === '') ? null : Number(amount);
+  if (n === null || Number.isNaN(n)) return '';
+  try {
+    // Keep simple formatting to avoid locale surprises
+    return `${sym}${n.toFixed(2)}`;
+  } catch (_) {
+    return `${sym}${amount}`;
+  }
+}
+
 // Pagination options for all tables
 export const paginationOptions = {
   paginationSize: 7,
@@ -430,6 +467,125 @@ export function pageHeader(value, objName) {
                           Data Management
                         </Breadcrumb.Item>
                         <Breadcrumb.Item active>Related Objects of {objName}</Breadcrumb.Item>
+                      </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
+              }
+              else if (value === "client_related_projects") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> Client — Projects
+                      </h2>
+                      <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/data_management/root">Data Management</Breadcrumb.Item>
+                        <Breadcrumb.Item active>Projects of {objName}</Breadcrumb.Item>
+                      </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
+              }
+              else if (value === "client_related_properties") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> Client — Properties
+                      </h2>
+                      <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/data_management/root">Data Management</Breadcrumb.Item>
+                        <Breadcrumb.Item active>Properties of {objName}</Breadcrumb.Item>
+                      </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
+              }
+              else if (value === "client_related_bank_client_accounts") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> Client — Bank client accounts
+                      </h2>
+                      <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/data_management/root">Data Management</Breadcrumb.Item>
+                        <Breadcrumb.Item active>Bank client accounts of {objName}</Breadcrumb.Item>
+                      </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
+              }
+              else if (value === "client_related_associated_clients") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> Client — Associated clients
+                      </h2>
+                      <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/data_management/root">Data Management</Breadcrumb.Item>
+                        <Breadcrumb.Item active>Associated clients of {objName}</Breadcrumb.Item>
+                      </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
+              }
+              else if (value === "client_related_documents") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> Client — Documents
+                      </h2>
+                      <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/data_management/root">Data Management</Breadcrumb.Item>
+                        <Breadcrumb.Item active>Documents of {objName}</Breadcrumb.Item>
+                      </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
+              }
+              else if (value === "client_related_cash") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> Client — Cash
+                      </h2>
+                      <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/data_management/root">Data Management</Breadcrumb.Item>
+                        <Breadcrumb.Item active>Cash of {objName}</Breadcrumb.Item>
+                      </Breadcrumb>
+                    </div>
+                    <hr />
+                  </>
+                );
+              }
+              else if (value === "client_related_bank_project_accounts") {
+                return (
+                  <>
+                    <div className="page_header">
+                      <h2>
+                        <FaArrowRight style={iconStyle} /> Client — Bank project accounts
+                      </h2>
+                      <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/data_management/root">Data Management</Breadcrumb.Item>
+                        <Breadcrumb.Item active>Bank project accounts of {objName}</Breadcrumb.Item>
                       </Breadcrumb>
                     </div>
                     <hr />
@@ -1176,14 +1332,14 @@ export function pageHeader(value, objName) {
              <>
                <div className="page_header">
                  <h2>
-                   <FaArrowRight style={iconStyle} /> Reports — Clients
+                   <FaArrowRight style={iconStyle} /> Clients
                  </h2>
                  <Breadcrumb>
                    <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
                    <Breadcrumb.Item href="/reports/root">
                      Reports
                    </Breadcrumb.Item>
-                   <Breadcrumb.Item active>Reports — Clients</Breadcrumb.Item>
+                   <Breadcrumb.Item active>Clients</Breadcrumb.Item>
                  </Breadcrumb>
                </div>
              </>
@@ -1193,12 +1349,12 @@ export function pageHeader(value, objName) {
             <>
               <div className="page_header">
                 <h2>
-                  <FaArrowRight style={iconStyle} /> Reports — Projects
+                  <FaArrowRight style={iconStyle} /> Projects
                 </h2>
                 <Breadcrumb>
                   <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
                   <Breadcrumb.Item href="/reports/root">Reports</Breadcrumb.Item>
-                  <Breadcrumb.Item active>Reports — Projects</Breadcrumb.Item>
+                  <Breadcrumb.Item active>Projects</Breadcrumb.Item>
                 </Breadcrumb>
               </div>
             </>
@@ -1208,12 +1364,12 @@ export function pageHeader(value, objName) {
             <>
               <div className="page_header">
                 <h2>
-                  <FaArrowRight style={iconStyle} /> Reports — Tasks
+                  <FaArrowRight style={iconStyle} /> Tasks
                 </h2>
                 <Breadcrumb>
                   <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
                   <Breadcrumb.Item href="/reports/root">Reports</Breadcrumb.Item>
-                  <Breadcrumb.Item active>Reports — Tasks</Breadcrumb.Item>
+                  <Breadcrumb.Item active>Tasks</Breadcrumb.Item>
                 </Breadcrumb>
               </div>
             </>
@@ -1223,12 +1379,12 @@ export function pageHeader(value, objName) {
             <>
               <div className="page_header">
                 <h2>
-                  <FaArrowRight style={iconStyle} /> Reports — Properties
+                  <FaArrowRight style={iconStyle} /> Properties
                 </h2>
                 <Breadcrumb>
                   <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
                   <Breadcrumb.Item href="/reports/root">Reports</Breadcrumb.Item>
-                  <Breadcrumb.Item active>Reports — Properties</Breadcrumb.Item>
+                  <Breadcrumb.Item active>Properties</Breadcrumb.Item>
                 </Breadcrumb>
               </div>
             </>
@@ -1238,12 +1394,12 @@ export function pageHeader(value, objName) {
             <>
               <div className="page_header">
                 <h2>
-                  <FaArrowRight style={iconStyle} /> Reports — Documents
+                  <FaArrowRight style={iconStyle} /> Documents
                 </h2>
                 <Breadcrumb>
                   <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
                   <Breadcrumb.Item href="/reports/root">Reports</Breadcrumb.Item>
-                  <Breadcrumb.Item active>Reports — Documents</Breadcrumb.Item>
+                  <Breadcrumb.Item active>Documents</Breadcrumb.Item>
                 </Breadcrumb>
               </div>
             </>
@@ -1253,12 +1409,12 @@ export function pageHeader(value, objName) {
             <>
               <div className="page_header">
                 <h2>
-                  <FaArrowRight style={iconStyle} /> Reports — Cash
+                  <FaArrowRight style={iconStyle} /> Cash
                 </h2>
                 <Breadcrumb>
                   <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
                   <Breadcrumb.Item href="/reports/root">Reports</Breadcrumb.Item>
-                  <Breadcrumb.Item active>Reports — Cash</Breadcrumb.Item>
+                  <Breadcrumb.Item active>Cash</Breadcrumb.Item>
                 </Breadcrumb>
               </div>
             </>
@@ -1268,12 +1424,12 @@ export function pageHeader(value, objName) {
             <>
               <div className="page_header">
                 <h2>
-                  <FaArrowRight style={iconStyle} /> Reports — Professionals
+                  <FaArrowRight style={iconStyle} /> Professionals
                 </h2>
                 <Breadcrumb>
                   <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
                   <Breadcrumb.Item href="/reports/root">Reports</Breadcrumb.Item>
-                  <Breadcrumb.Item active>Reports — Professionals</Breadcrumb.Item>
+                  <Breadcrumb.Item active>Professionals</Breadcrumb.Item>
                 </Breadcrumb>
               </div>
             </>
@@ -1283,17 +1439,32 @@ export function pageHeader(value, objName) {
             <>
               <div className="page_header">
                 <h2>
-                  <FaArrowRight style={iconStyle} /> Reports — Statistics
+                  <FaArrowRight style={iconStyle} /> Statistics
                 </h2>
                 <Breadcrumb>
                   <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
                   <Breadcrumb.Item href="/reports/root">Reports</Breadcrumb.Item>
-                  <Breadcrumb.Item active>Reports — Statistics</Breadcrumb.Item>
+                  <Breadcrumb.Item active>Statistics</Breadcrumb.Item>
                 </Breadcrumb>
               </div>
             </>
           );
         }
-
+        else if (value === "dashboard") {
+          return (
+            <>
+              <div className="page_header">
+                <h2>
+                  <FaArrowRight style={iconStyle} /> Dashboard
+                </h2>
+                <Breadcrumb>
+                  <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                  <Breadcrumb.Item active>Dashboard</Breadcrumb.Item>
+                </Breadcrumb>
+              </div>
+              <hr />
+            </>
+          );
+        }
   return <></>;
 }

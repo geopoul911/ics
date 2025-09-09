@@ -7,7 +7,7 @@ import Footer from "../../core/footer/footer";
 import axios from "axios";
 
 // Modules / Functions
-import filterFactory, { textFilter } from "react-bootstrap-table2-filter";
+import filterFactory, { textFilter, selectFilter } from "react-bootstrap-table2-filter";
 import ToolkitProvider from "react-bootstrap-table2-toolkit";
 import Swal from "sweetalert2";
 import BootstrapTable from "react-bootstrap-table-next";
@@ -29,8 +29,8 @@ import {
 // Variables
 window.Swal = Swal;
 
-// API endpoint
-const ALL_PROFESSIONALS = "http://localhost:8000/api/data_management/all_professionals/";
+// API endpoint (use full list including inactive)
+const ALL_PROFESSIONALS = "http://localhost:8000/api/data_management/professionals/";
 
 const columns = [
   {
@@ -76,6 +76,14 @@ const columns = [
     dataField: "active",
     text: "Active",
     sort: true,
+    filter: selectFilter({
+      options: { "": "All", true: "Yes", false: "No" },
+      defaultValue: "",
+      onFilter: (filterVal, data) => {
+        if (filterVal === "" || filterVal === undefined || filterVal === null) return data;
+        return data.filter((row) => String(row.active) === String(filterVal));
+      },
+    }),
     formatter: (cell) => (cell ? "Yes" : "No"),
   },
 ];

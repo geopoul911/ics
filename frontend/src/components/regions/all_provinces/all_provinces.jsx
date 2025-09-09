@@ -69,6 +69,11 @@ const columns = [
         </Button>
       );
     },
+    filterValue: (cell, row) => {
+      const countryData = row.country;
+      if (!countryData) return "";
+      return typeof countryData === 'object' ? (countryData.title || "") : String(countryData || "");
+    },
   },
   {
     dataField: "orderindex",

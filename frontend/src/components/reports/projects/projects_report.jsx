@@ -37,12 +37,13 @@ function ProjectsReport() {
   const [consultants, setConsultants] = useState([]);
   const [categories, setCategories] = useState([]);
 
-  // Filters per spec: Consultant, Deadline, Status, Category
+  // Filters per spec: Consultant, Deadline, Status, Category, Active
   const [filters, setFilters] = useState({
     consultant: "",
     deadlineUntil: "",
     status: "",
     category: "",
+    active: "",
   });
 
   useEffect(() => {
@@ -100,7 +101,11 @@ function ProjectsReport() {
       return true;
     }
 
-    return (projects || []).filter(projectPasses);
+    let list = (projects || []).filter(projectPasses);
+    if (filters.active) {
+      list = list.filter((p) => String(!!p.active) === (filters.active === 'yes' ? 'true' : 'false'));
+    }
+    return list;
   }, [projects, filters]);
 
   const columns = [
@@ -163,6 +168,14 @@ function ProjectsReport() {
                         {categories.map((cat) => (
                           <option key={cat.projcate_id} value={cat.projcate_id}>{cat.title}</option>
                         ))}
+                      </select>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={labelPillStyle}>Active</span>
+                      <select value={filters.active} onChange={(e) => setF('active', e.target.value)}>
+                        <option value="">Any</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
                       </select>
                     </div>
                   </div>

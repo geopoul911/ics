@@ -69,10 +69,14 @@ class NavigationBar extends Component {
   }
 
   // Logout
-  handleLogout = ({ setUserToken }) => {
-    axios.post("/user/logout/");
-    localStorage.removeItem("userToken");
-    setUserToken(null);
+  handleLogout = (e) => {
+    try { if (e && e.preventDefault) e.preventDefault(); } catch (_e) {}
+    const token = localStorage.getItem("userToken");
+    const config = token ? { headers: { Authorization: "Token " + token } } : {};
+    axios.post(API_BASE + "/api/user/logout/", {}, config).catch(() => {}).finally(() => {
+      try { localStorage.removeItem("userToken"); } catch (_e) {}
+      window.location.href = "/";
+    });
   };
 
   componentDidMount() {
@@ -332,9 +336,6 @@ class NavigationBar extends Component {
                   <CgProfile style={iconStyle} /> {localStorage.getItem("user")}
                   <Dropdown onMouseLeave={this.meClose} onMouseOver={this.meOpen}>
                     <Dropdown.Menu show={this.state.meIsOpen} id="nav_me_dropdown">
-                      <Dropdown.Item href={"/administration/consultant/" + localStorage.getItem("consultant_id")}>
-                        <CgProfile /> My profile
-                      </Dropdown.Item>
                       <Dropdown.Item href="/help">
                         <BiHelpCircle /> Help
                       </Dropdown.Item>

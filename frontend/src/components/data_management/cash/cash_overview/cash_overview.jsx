@@ -17,9 +17,8 @@ import {
   EditCashAmountExpenseModal,
   EditCashAmountPaymentModal,
   EditCashReasonModal,
-  EditCashCurrencyModal,
 } from "../../../modals/cash_edit_modals";
-import { pageHeader } from "../../../global_vars";
+import { pageHeader, formatAmountWithCurrency } from "../../../global_vars";
 import { FaIdBadge, FaStickyNote, FaStop } from "react-icons/fa";
 
 // Modules / Functions
@@ -127,13 +126,7 @@ function CashOverview() {
                       </span>
                     </div>
 
-                    <div className={"info_descr"} style={{ marginTop: 16 }}><FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Currency</div>
-                    <div className={"info_span"} style={{ position: "relative" }}>
-                      {cash.currency || 'N/A'}
-                      <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
-                        <EditCashCurrencyModal cash={cash} update_state={setCash} />
-                      </span>
-                    </div>
+                    {/* Currency label removed; amounts now render using country.currency */}
                   </Card.Body>
                   <Card.Footer>
                     <DeleteObjectModal objectType="Cash" objectId={cash.cash_id} objectName={cash.cash_id} />
@@ -149,7 +142,7 @@ function CashOverview() {
                     <>
                       <div className={"info_descr"}><FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Amount expense</div>
                       <div className={"info_span"} style={{ position: "relative" }}>
-                        {cash.amountexp ?? 'N/A'}
+                        {formatAmountWithCurrency(cash.amountexp, cash.country?.currency) || 'N/A'}
                         <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
                           <EditCashAmountExpenseModal cash={cash} update_state={setCash} />
                         </span>
@@ -160,7 +153,7 @@ function CashOverview() {
                     <>
                       <div className={"info_descr"} style={{ marginTop: 16 }}><FaStickyNote style={{ color: "#93ab3c", marginRight: "0.5em" }} /> Amount payment</div>
                       <div className={"info_span"} style={{ position: "relative" }}>
-                        {cash.amountpay ?? 'N/A'}
+                        {formatAmountWithCurrency(cash.amountpay, cash.country?.currency) || 'N/A'}
                         <span style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
                           <EditCashAmountPaymentModal cash={cash} update_state={setCash} />
                         </span>

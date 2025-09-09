@@ -1,5 +1,5 @@
 // Built-ins
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Icons / Images
 import { FiEdit } from "react-icons/fi";
@@ -802,17 +802,34 @@ export function EditConsultantCanAssignTaskModal({ consultant, update_state }) {
 // Edit Consultant Cash Passport Modal
 export function EditConsultantCashPassportModal({ consultant, update_state }) {
   const [show, setShow] = useState(false);
-  const [cashPassport, setCashPassport] = useState("");
+  const [countries, setCountries] = useState([]);
+  const [selectedCodes, setSelectedCodes] = useState([]);
 
   const handleClose = () => setShow(false);
   const handleShow = () => {
-    setCashPassport(consultant.cashpassport || "");
+    const existing = consultant.cashpassport || "";
+    const arr = existing.split(',').map((s) => s.trim()).filter(Boolean);
+    setSelectedCodes(arr);
     setShow(true);
   };
 
-  // Regex to validate country codes: 3 capital letters separated by comma + space
-  const countryCodeRegex = /^([A-Z]{3}(,\s[A-Z]{3})*)?$/;
-  const isCashPassportValid = cashPassport === "" || (cashPassport.length <= 120 && countryCodeRegex.test(cashPassport));
+  // Load countries when modal opens
+  useEffect(() => {
+    const loadCountries = async () => {
+      try {
+        const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
+        const res = await axios.get("http://localhost:8000/api/regions/all_countries/", { headers: currentHeaders });
+        const data = res?.data?.all_countries || [];
+        setCountries(Array.isArray(data) ? data : []);
+      } catch (_e) {
+        setCountries([]);
+      }
+    };
+    if (show) loadCountries();
+  }, [show]);
+
+  const joined = selectedCodes.join(', ');
+  const isCashPassportValid = joined.length <= 120;
 
   const onSave = async () => {
     try {
@@ -823,7 +840,7 @@ export function EditConsultantCashPassportModal({ consultant, update_state }) {
 
       const res = await axios.patch(
         `${UPDATE_CONSULTANT}${consultant.consultant_id}/`,
-        { cashpassport: cashPassport || null },
+        { cashpassport: joined || null },
         { headers: currentHeaders }
       );
 
@@ -865,24 +882,46 @@ export function EditConsultantCashPassportModal({ consultant, update_state }) {
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Cash Passport Countries</Modal.Title>
+          <Modal.Title>Edit Cash of Countries</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form.Group className="mb-3">
-              <Form.Label>Countries</Form.Label>
-              <Form.Control
-                type="text"
-                value={cashPassport}
-                onChange={(e) => setCashPassport(clampLen(e.target.value, 120))}
-                placeholder="GRE, CAN, USA (optional)"
-                isInvalid={!isCashPassportValid}
-              />
+              <Form.Label id="cashpassport-countries-label">Countries</Form.Label>
+              {/* Hidden input to expose joined value for tooling/tests */}
+              <input type="hidden" name="cashpassport" value={joined} />
+              <div role="group" aria-labelledby="cashpassport-countries-label" style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {countries.map((c) => {
+                  const isSelected = selectedCodes.includes(c.country_id);
+                  return (
+                    <Button
+                      key={c.country_id}
+                      type="button"
+                      size="tiny"
+                      color={isSelected ? 'green' : 'grey'}
+                      onClick={() => {
+                        setSelectedCodes((prev) => {
+                          if (prev.includes(c.country_id)) {
+                            return prev.filter((id) => id !== c.country_id);
+                          }
+                          return [...prev, c.country_id];
+                        });
+                      }}
+                      title={`${c.country_id} - ${c.title}`}
+                    >
+                      {c.country_id}
+                    </Button>
+                  );
+                })}
+              </div>
+              {!isCashPassportValid && (
+                <div style={{ color: 'red', marginTop: 6 }}>Selection too long (max 120 characters when joined)</div>
+              )}
             </Form.Group>
         </Modal.Body>
         <Modal.Footer>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
             <small style={{ color: isCashPassportValid ? "green" : "red" }}>
-              {isCashPassportValid ? "Looks good." : "3-letter codes, comma + space (e.g., GRE, CAN, USA)."}
+              {isCashPassportValid ? "Looks good." : "Selection too long (max 120 characters when saved)."}
             </small>
             <div>
               <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>
@@ -995,7 +1034,7 @@ export function EditConsultantActiveModal({ consultant, update_state }) {
   );
 }
 
-// Edit Consultant Order Index Modal
+// Edit Consultant Order by Modal
 export function EditConsultantOrderIndexModal({ consultant, update_state }) {
   const [show, setShow] = useState(false);
   const [orderindex, setOrderindex] = useState("");
@@ -1026,13 +1065,13 @@ export function EditConsultantOrderIndexModal({ consultant, update_state }) {
       Swal.fire({
         icon: "success",
         title: "Success",
-        text: "Order Index updated successfully!",
+        text: "Order by updated successfully!",
       });
     } catch (e) {
       console.log('Error updating order index:', e);
       console.log('Error response data:', e?.response?.data);
       
-      let apiMsg = "Failed to update Order Index.";
+      let apiMsg = "Failed to update Order by.";
       
       if (e?.response?.data?.error) {
         apiMsg = e.response.data.error;

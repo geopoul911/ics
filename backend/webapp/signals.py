@@ -17,6 +17,12 @@ def purge_orphan_documents_after_client_delete(sender, instance, **kwargs):
     Document.objects.filter(client__isnull=True, project__isnull=True).delete()
 
 
+@receiver(post_delete, sender=Project)
+def purge_orphan_documents_after_project_delete(sender, instance, **kwargs):
+    # Remove docs that now have neither client nor project
+    Document.objects.filter(client__isnull=True, project__isnull=True).delete()
+
+
 # ---------------------- Notifications helpers ----------------------
 def _get_supervisors():
     try:

@@ -33,7 +33,7 @@ function PropertiesReport() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [properties, setProperties] = useState([]);
 
-  // Filters per spec: Country, Province, City, Type, Status, Market
+  // Filters per spec: Country, Province, City, Type, Status, Market, Active
   const [filters, setFilters] = useState({
     country: "",
     province: "",
@@ -41,6 +41,7 @@ function PropertiesReport() {
     type: "",
     status: "",
     market: "",
+    active: "",
   });
 
   useEffect(() => {
@@ -64,17 +65,17 @@ function PropertiesReport() {
 
   const countryOptions = useMemo(() => {
     const s = new Set();
-    (properties || []).forEach((p) => { if (p.country?.name) s.add(p.country.name); });
+    (properties || []).forEach((p) => { if (p.country?.title) s.add(p.country.title); });
     return Array.from(s);
   }, [properties]);
   const provinceOptions = useMemo(() => {
     const s = new Set();
-    (properties || []).forEach((p) => { if (p.province?.name) s.add(p.province.name); });
+    (properties || []).forEach((p) => { if (p.province?.title) s.add(p.province.title); });
     return Array.from(s);
   }, [properties]);
   const cityOptions = useMemo(() => {
     const s = new Set();
-    (properties || []).forEach((p) => { if (p.city?.name) s.add(p.city.name); });
+    (properties || []).forEach((p) => { if (p.city?.title) s.add(p.city.title); });
     return Array.from(s);
   }, [properties]);
   const typeOptions = useMemo(() => {
@@ -95,15 +96,19 @@ function PropertiesReport() {
 
   const filteredProperties = useMemo(() => {
     function propPasses(p) {
-      if (filters.country && (p.country?.name || "") !== filters.country) return false;
-      if (filters.province && (p.province?.name || "") !== filters.province) return false;
-      if (filters.city && (p.city?.name || "") !== filters.city) return false;
+      if (filters.country && (p.country?.title || "") !== filters.country) return false;
+      if (filters.province && (p.province?.title || "") !== filters.province) return false;
+      if (filters.city && (p.city?.title || "") !== filters.city) return false;
       if (filters.type && (p.type || "") !== filters.type) return false;
       if (filters.status && (p.status || "") !== filters.status) return false;
       if (filters.market && (p.market || "") !== filters.market) return false;
       return true;
     }
-    return (properties || []).filter(propPasses);
+    let list = (properties || []).filter(propPasses);
+    if (filters.active) {
+      list = list.filter((p) => String(!!p.active) === (filters.active === 'yes' ? 'true' : 'false'));
+    }
+    return list;
   }, [properties, filters]);
 
   const columns = [
@@ -118,10 +123,10 @@ function PropertiesReport() {
     { dataField: "description", text: "Description", sort: true },
     { dataField: "project.title", text: "Project", sort: true, formatter: (c, r) => r.project?.title || "" },
     { dataField: "type", text: "Type", sort: true },
-    { dataField: "country.name", text: "Country", sort: true, formatter: (c, r) => r.country?.name || "" },
-    { dataField: "province.name", text: "Province", sort: true, formatter: (c, r) => r.province?.name || "" },
-    { dataField: "city.name", text: "City", sort: true, formatter: (c, r) => r.city?.name || "" },
-    { dataField: "status", text: "Status", sort: true },
+    { dataField: "country.title", text: "Country", sort: true, formatter: (c, r) => r.country?.title || "" },
+    { dataField: "province.title", text: "Province", sort: true, formatter: (c, r) => r.province?.title || "" },
+    { dataField: "city.title", text: "City", sort: true, formatter: (c, r) => r.city?.title || "" },
+    { dataField: "status", text: "Status", sort: true, formatter: (c, r) => r.status || "" },
     { dataField: "market", text: "Market", sort: true },
     { dataField: "active", text: "Active", sort: true, formatter: (c, r) => (r.active ? "Yes" : "No") },
   ];
@@ -178,6 +183,14 @@ function PropertiesReport() {
                       <select value={filters.market} onChange={(e) => setF('market', e.target.value)}>
                         <option value="">All</option>
                         {marketOptions.map((o) => (<option key={o} value={o}>{o}</option>))}
+                      </select>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={labelPillStyle}>Active</span>
+                      <select value={filters.active} onChange={(e) => setF('active', e.target.value)}>
+                        <option value="">Any</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
                       </select>
                     </div>
                   </div>

@@ -223,7 +223,7 @@ export default function AddTaskCategoryModal({ onTaskCategoryCreated }) {
                 {!isOrderIndexValid && (
                   <li>
                     <AiOutlineWarning style={{ marginRight: 5 }} />
-                    Order index must be a valid number when provided
+                    Order by must be a valid number when provided
                   </li>
                 )}
               </ul>

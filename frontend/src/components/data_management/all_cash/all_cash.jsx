@@ -24,6 +24,7 @@ import {
   headers,
   pageHeader,
   loader,
+  formatAmountWithCurrency,
 } from "../../global_vars";
 
 // Variables
@@ -87,25 +88,18 @@ const columns = [
     formatter: (cell, row) => (row.kind === 'E' ? 'Expense' : 'Payment'),
   },
   {
-    dataField: "currency",
-    text: "Currency",
-    sort: true,
-    filter: textFilter(),
-    formatter: (cell, row) => row.currency || "",
-  },
-  {
     dataField: "amountexp",
     text: "Amount expense",
     sort: true,
     filter: textFilter(),
-    formatter: (cell, row) => row.amountexp || "",
+    formatter: (cell, row) => formatAmountWithCurrency(row.amountexp, row.country?.currency),
   },
   {
     dataField: "amountpay",
     text: "Amount payment",
     sort: true,
     filter: textFilter(),
-    formatter: (cell, row) => row.amountpay || "",
+    formatter: (cell, row) => formatAmountWithCurrency(row.amountpay, row.country?.currency),
   },
   {
     dataField: "reason",

@@ -55,7 +55,6 @@ function ClientsReport() {
     active: "",
     // projects
     consultant: "",
-    deadlineUntil: "", // yyyy-mm-dd
     status: "",
     category: "",
     taxationOnly: "", // yes/no
@@ -131,7 +130,6 @@ function ClientsReport() {
   }, [clients]);
 
   const filteredClients = useMemo(() => {
-    const deadlineUntilDate = filters.deadlineUntil ? new Date(filters.deadlineUntil) : null;
     const categoryId = filters.category || "";
     const consultantId = filters.consultant || "";
     const status = filters.status || "";
@@ -149,7 +147,7 @@ function ClientsReport() {
       if (filters.active && String(!!c.active) !== (filters.active === "yes" ? "true" : "false")) return false;
 
       const plist = projectsByClientId[c.client_id] || [];
-      if (!consultantId && !deadlineUntilDate && !status && !categoryId && !taxationOnly) {
+      if (!consultantId && !status && !categoryId && !taxationOnly) {
         return true; // no project-based criteria
       }
       // project-based filters: at least one project must match
@@ -159,12 +157,6 @@ function ClientsReport() {
           const pc = p.consultant;
           const pid = pc?.consultant_id || pc;
           if (String(pid) !== String(consultantId)) return false;
-        }
-        if (deadlineUntilDate && p.deadline) {
-          const d = new Date(p.deadline);
-          if (isFinite(d) && d > deadlineUntilDate) return false;
-        } else if (deadlineUntilDate && !p.deadline) {
-          return false;
         }
         if (status && (p.status || "") !== status) return false;
         if (categoryId) {
@@ -177,7 +169,12 @@ function ClientsReport() {
       });
     }
 
-    return (clients || []).filter(clientPasses);
+    let list = (clients || []).filter(clientPasses);
+    // Active filter for reports: show either active or non-active entries when chosen
+    if (filters.active) {
+      list = list.filter((c) => String(!!c.active) === (filters.active === 'yes' ? 'true' : 'false'));
+    }
+    return list;
   }, [clients, filters, projectsByClientId]);
 
   const columns = [
@@ -185,16 +182,55 @@ function ClientsReport() {
       dataField: "client_id",
       text: "Client ID",
       sort: true,
+      headerStyle: { width: '110px' },
       formatter: (cell, row) => (
         <a href={`/data_management/client/${row.client_id}`} id="cell_link">{row.client_id}</a>
       ),
     },
-    { dataField: "surname", text: "Surname", sort: true },
-    { dataField: "name", text: "Name", sort: true },
-    { dataField: "city.title", text: "City", sort: true, formatter: (c, r) => r.city?.title || "" },
-    { dataField: "active", text: "Active", sort: true, formatter: (c, r) => (r.active ? "Yes" : "No") },
-    { dataField: "retired", text: "Retired", sort: true, formatter: (c, r) => (r.retired ? "Yes" : "No") },
+    { dataField: "_fullname", text: "Full name", sort: true, headerStyle: { width: '25%' }, sortValue: (cell, r) => `${r.surname || ''} ${r.name || ''}`.trim(), formatter: (c, r) => `${r.surname || ''} ${r.name || ''}`.trim() },
+    { dataField: "_location", text: "Location", sort: true, headerStyle: { width: '20%' }, sortValue: (cell, r) => `${r.country?.title || ''} - ${r.province?.title || ''} - ${r.city?.title || ''}`.trim(), formatter: (c, r) => {
+        const parts = [r.country?.title, r.province?.title, r.city?.title].filter(Boolean);
+        return parts.join(' - ');
+      }
+    },
     { dataField: "deceased", text: "Deceased", sort: true, formatter: (c, r) => (r.deceased ? "Yes" : "No") },
+    { dataField: "taxmanagement", text: "Tax mgmt", sort: true, formatter: (c, r) => (r.taxmanagement ? "Yes" : "No") },
+    { dataField: "taxrepresentation", text: "Tax repr", sort: true, formatter: (c, r) => (r.taxrepresentation ? "Yes" : "No") },
+    { dataField: "retired", text: "Retired", sort: true, formatter: (c, r) => (r.retired ? "Yes" : "No") },
+    { dataField: "active", text: "Active", sort: true, formatter: (c, r) => (r.active ? "Yes" : "No") },
+    // Derived project fields matching pills
+    { dataField: "_consultants", text: "Consultant(s)", formatter: (c, r) => {
+        const plist = projectsByClientId[r.client_id] || [];
+        const names = plist.map((p) => {
+          const pc = p?.consultant;
+          if (!pc) return null;
+          return pc.fullname || `${pc.surname || ''} ${pc.name || ''}`.trim();
+        }).filter(Boolean);
+        return Array.from(new Set(names)).join(', ');
+      }
+    },
+    { dataField: "_statuses", text: "Status(es)", formatter: (c, r) => {
+        const plist = projectsByClientId[r.client_id] || [];
+        const statuses = plist.map((p) => p?.status).filter(Boolean);
+        return Array.from(new Set(statuses)).join(', ');
+      }
+    },
+    { dataField: "_categories", text: "Categories", formatter: (c, r) => {
+        const plist = projectsByClientId[r.client_id] || [];
+        const titles = [];
+        plist.forEach((p) => {
+          const cats = Array.isArray(p?.categories) ? p.categories : [];
+          cats.forEach((cat) => { const t = cat?.title; if (t) titles.push(t); });
+        });
+        return Array.from(new Set(titles)).join(', ');
+      }
+    },
+    { dataField: "_taxation", text: "Taxation", formatter: (c, r) => {
+        const plist = projectsByClientId[r.client_id] || [];
+        const anyTax = plist.some((p) => !!p?.taxation);
+        return anyTax ? 'Yes' : 'No';
+      }
+    },
   ];
 
   return (
@@ -279,10 +315,7 @@ function ClientsReport() {
                         ))}
                       </select>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={labelPillStyle}>Deadline until</span>
-                      <input type="date" value={filters.deadlineUntil} onChange={(e) => setF('deadlineUntil', e.target.value)} />
-                    </div>
+                    
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={labelPillStyle}>Status</span>
                       <select value={filters.status} onChange={(e) => setF('status', e.target.value)}>
@@ -321,7 +354,7 @@ function ClientsReport() {
                       <BootstrapTable
                         {...props.baseProps}
                         pagination={paginationFactory(paginationOptions)}
-                        defaultSorted={[{ dataField: 'surname', order: 'asc' }]}
+                        defaultSorted={[{ dataField: '_fullname', order: 'asc' }]}
                         hover
                         bordered={false}
                         striped

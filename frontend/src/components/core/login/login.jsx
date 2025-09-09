@@ -184,8 +184,7 @@ class Login extends React.Component {
                       disabled={this.state.isBlocked}
                     />
                     <Form.Text className="text-muted">
-                      If you don't have an account, contact ICS's IT
-                      Department.
+                      If you don't have an account, contact ICS's Superusers.
                     </Form.Text>
                   </Form.Group>
                   {/* Password field */}
@@ -216,8 +215,8 @@ class Login extends React.Component {
                   )}
 
                   {this.state.isBlocked ? (
-                    <p className="login-message">
-                      Please contact ICS's IT department
+                      <p className="login-message">
+                        Please contact ICS's Superusers
                       <br />
                       in order to unblock your account
                     </p>

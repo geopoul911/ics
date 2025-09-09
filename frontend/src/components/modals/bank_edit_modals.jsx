@@ -329,7 +329,7 @@ export function EditBankCountryModal({ bank, update_state }) {
   );
 }
 
-// Edit Bank Order Index Modal
+// Edit Bank Order by Modal
 export function EditBankOrderIndexModal({ bank, update_state }) {
   const [show, setShow] = useState(false);
   const [orderindex, setOrderindex] = useState("");
@@ -346,7 +346,7 @@ export function EditBankOrderIndexModal({ bank, update_state }) {
     if (!isOrderIndexValid) {
       Swal.fire({
         icon: "error",
-        title: "Invalid Order Index",
+        title: "Invalid Order by",
         text: "Please enter a valid order index",
       });
       return;
@@ -543,19 +543,19 @@ export function EditBankInstitutionNumberModal({ bank, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="tiny" basic title="Edit Institution Number">
+      <Button onClick={handleShow} size="tiny" basic title="Edit Bank Code">
         <FiEdit style={{ marginRight: 6 }} />
-        Institution Number
+        Bank Code
       </Button>
 
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Bank Institution Number</Modal.Title>
+          <Modal.Title>Edit Bank Code</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form.Group as={Row}>
               <Form.Label column sm={3}>
-                Institution Number:
+                Bank Code:
               </Form.Label>
               <Col sm={9}>
                 <Form.Control
@@ -566,7 +566,7 @@ export function EditBankInstitutionNumberModal({ bank, update_state }) {
                   isInvalid={institutionnumber !== "" && !isInstitutionNumberValid}
                 />
                 <Form.Control.Feedback type="invalid">
-                  Institution number must be exactly 3 digits
+                  Bank code must be exactly 3 digits
                 </Form.Control.Feedback>
               </Col>
             </Form.Group>
@@ -574,7 +574,7 @@ export function EditBankInstitutionNumberModal({ bank, update_state }) {
         <Modal.Footer>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
             <small style={{ color: isInstitutionNumberValid ? "green" : "red" }}>
-              {isInstitutionNumberValid ? "Looks good." : "Institution number must be exactly 3 digits."}
+              {isInstitutionNumberValid ? "Looks good." : "Bank code must be exactly 3 digits."}
             </small>
             <div>
               <Button color="red" onClick={handleClose} style={{ marginRight: "10px" }}>

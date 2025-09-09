@@ -6,13 +6,13 @@ import { MdTask } from "react-icons/md";
 
 // Modules / Functions
 import { Card } from "react-bootstrap";
-import { Grid } from "semantic-ui-react";
+import { Grid, Container } from "semantic-ui-react";
 import Swal from "sweetalert2";
 
 // Custom Made Components
 import axios from "axios";
 import AddProjectTaskModal from "../../../modals/create/add_project_task";
-import AddCashModal from "../../../modals/create/add_cash";
+import AddTaskCommentModal from "../../../modals/create/add_task_comment";
 
 // Global Variables
 import { headers, pageHeader, loader } from "../../../global_vars";
@@ -105,133 +105,115 @@ class Tasks extends React.Component {
               .pillLink:hover { color: #93ab3c; text-decoration: none; }
             `}</style>
             <Grid stackable columns={2}>
+              <Container>
               <Grid.Column>
-                <Card style={{ marginTop: 20 }}>
-                  <Card.Header>
-                    <h4><MdTask style={overviewIconStyle} /> Tasks</h4>
-                  </Card.Header>
-                  <Card.Body>
-                    {Array.isArray(this.state.tasks) && this.state.tasks.length > 0 ? (
-                      <ul className="list-unstyled" style={{ margin: 0 }}>
-                        {this.state.tasks.map((t, idx) => (
-                          <li key={t.projtask_id} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
-                              <span style={labelPillStyle}>#</span>
-                              <span style={valueTextStyle}>{idx + 1}</span>
-                              <span style={{ width: 10 }} />
-                              <span style={labelPillStyle}>ID</span>
-                              <a href={`/data_management/project_task/${t.projtask_id}`} className="pillLink" style={{ ...valueTextStyle }}>{t.projtask_id}</a>
-                              <span style={{ width: 10 }} />
-                              <span style={labelPillStyle}>Title</span>
-                              <span style={valueTextStyle}>{t.title}</span>
-                              <span style={{ width: 10 }} />
-                              <span style={labelPillStyle}>Status</span>
-                              <span style={valueTextStyle}>{t.status || 'N/A'}</span>
-                              {t.deadline ? (<>
-                                <span style={{ width: 10 }} />
-                                <span style={labelPillStyle}>Deadline</span>
-                                <span style={valueTextStyle}>{new Date(t.deadline).toLocaleDateString()}</span>
-                              </>) : null}
-                              {t.assignee?.fullname ? (<>
-                                <span style={{ width: 10 }} />
-                                <span style={labelPillStyle}>Assignee</span>
-                                <span style={valueTextStyle}>{t.assignee.fullname}</span>
-                              </>) : null}
+                {Array.isArray(this.state.tasks) && this.state.tasks.length > 0 ? (
+                  this.state.tasks.map((t) => (
+                    <Card key={t.projtask_id} style={{ marginTop: 16 }}>
+                      <Card.Header style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <h5 style={{ margin: 0 }}>
+                          <MdTask style={overviewIconStyle} /> {t.title || 'Task'}
+                        </h5>
+                        <a
+                          href={`/data_management/project_task/${t.projtask_id}`}
+                          className="btn btn-sm btn-success"
+                          style={{ padding: '2px 10px', borderRadius: 6 }}
+                        >
+                          #{t.projtask_id}
+                        </a>
+                      </Card.Header>
+                      <Card.Body>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                          <span style={labelPillStyle}>Status</span>
+                          <span style={valueTextStyle}>{t.status || 'N/A'}</span>
+                          {t.deadline ? (<>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>Deadline</span>
+                            <span style={valueTextStyle}>{new Date(t.deadline).toLocaleDateString()}</span>
+                          </>) : null}
+                          {t.taskcate ? (<>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>Category</span>
+                            <span style={valueTextStyle}>{t.taskcate?.title || t.taskcate}</span>
+                          </>) : null}
+                          {t.assignee?.consultant_id ? (<>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>Assignee</span>
+                            <a
+                              href={`/administration/consultant/${t.assignee.consultant_id}`}
+                              className="btn btn-sm btn-success"
+                              style={{ padding: '2px 10px', borderRadius: 6 }}
+                            >
+                              {t.assignee.consultant_id}
+                            </a>
+                          </>) : (t.assignee?.fullname ? (<>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>Assignee</span>
+                            <span style={valueTextStyle}>{t.assignee.fullname}</span>
+                          </>) : null)}
+                        </div>
+                        {(() => {
+                          const taskId = t.projtask_id;
+                          const comments = (this.state.taskComments || []).filter((c) => {
+                            const cid = c?.projtask?.projtask_id || c?.projtask_id;
+                            return cid === taskId;
+                          });
+                          if (!comments.length) return null;
+                          return (
+                            <div style={{ marginTop: 8 }}>
+                              <div style={{ marginBottom: 6, fontWeight: 700 }}>Comments</div>
+                              <ul className="list-unstyled" style={{ margin: 0 }}>
+                                {comments.map((cm, cidx) => (
+                                  <li key={cm.taskcomm_id || cidx} style={{ padding: '6px 0', borderBottom: '1px dashed #eee' }}>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                                      <span style={labelPillStyle}>#</span>
+                                      <span style={valueTextStyle}>{cidx + 1}</span>
+                                      {cm.commentregistration ? (<>
+                                        <span style={{ width: 10 }} />
+                                        <span style={labelPillStyle}>Time</span>
+                                        <span style={valueTextStyle}>{new Date(cm.commentregistration).toLocaleString()}</span>
+                                      </>) : null}
+                                      {cm.consultant?.consultant_id ? (<>
+                                        <span style={{ width: 10 }} />
+                                        <span style={labelPillStyle}>By</span>
+                                        <a
+                                          href={`/administration/consultant/${cm.consultant.consultant_id}`}
+                                          className="btn btn-sm btn-success"
+                                          style={{ padding: '2px 10px', borderRadius: 6 }}
+                                        >
+                                          {cm.consultant.consultant_id}
+                                        </a>
+                                      </>) : (cm.consultant ? (<>
+                                        <span style={{ width: 10 }} />
+                                        <span style={labelPillStyle}>By</span>
+                                        <span style={valueTextStyle}>{cm.consultant.fullname || `${cm.consultant.surname || ''} ${cm.consultant.name || ''}`.trim()}</span>
+                                      </>) : null)}
+                                      {cm.comment ? (<>
+                                        <span style={{ width: 10 }} />
+                                        <span style={labelPillStyle}>Comment</span>
+                                        <span style={valueTextStyle}>{cm.comment}</span>
+                                      </>) : null}
+                                    </div>
+                                  </li>
+                                ))}
+                              </ul>
                             </div>
-                            {/* Comments for this task */}
-                            {(() => {
-                              const taskId = t.projtask_id;
-                              const comments = (this.state.taskComments || []).filter((c) => {
-                                const cid = c?.projtask?.projtask_id || c?.projtask_id;
-                                return cid === taskId;
-                              });
-                              if (!comments.length) return null;
-                              return (
-                                <div style={{ marginTop: 8, paddingLeft: 12 }}>
-                                  <div style={{ marginBottom: 6, fontWeight: 700 }}>Comments</div>
-                                  <ul className="list-unstyled" style={{ margin: 0 }}>
-                                    {comments.map((cm, cidx) => (
-                                      <li key={cm.taskcomm_id || cidx} style={{ padding: '6px 0', borderBottom: '1px dashed #eee' }}>
-                                        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
-                                          <span style={labelPillStyle}>#</span>
-                                          <span style={valueTextStyle}>{cidx + 1}</span>
-                                          {cm.commentregistration ? (<>
-                                            <span style={{ width: 10 }} />
-                                            <span style={labelPillStyle}>Time</span>
-                                            <span style={valueTextStyle}>{new Date(cm.commentregistration).toLocaleString()}</span>
-                                          </>) : null}
-                                          {cm.consultant ? (<>
-                                            <span style={{ width: 10 }} />
-                                            <span style={labelPillStyle}>By</span>
-                                            <span style={valueTextStyle}>{cm.consultant.fullname || `${cm.consultant.surname || ''} ${cm.consultant.name || ''}`.trim()}</span>
-                                          </>) : null}
-                                          {cm.comment ? (<>
-                                            <span style={{ width: 10 }} />
-                                            <span style={labelPillStyle}>Comment</span>
-                                            <span style={valueTextStyle}>{cm.comment}</span>
-                                          </>) : null}
-                                        </div>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              );
-                            })()}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (<div>No tasks</div>)}
-                  </Card.Body>
-                  <Card.Footer>
-                    <AddProjectTaskModal refreshData={this.fetchData} defaultProjectId={this.state.project?.project_id} lockProject={true} />
-                  </Card.Footer>
-                </Card>
+                          );
+                        })()}
+                      </Card.Body>
+                      <Card.Footer>
+                        <AddTaskCommentModal
+                          refreshData={this.fetchData}
+                          defaultProjectTaskId={t.projtask_id}
+                          lockProjectTask={true}
+                        />
+                      </Card.Footer>
+                    </Card>
+                  ))
+                ) : (<div>No tasks</div>)}
+                <AddProjectTaskModal refreshData={this.fetchData} defaultProjectId={this.state.project?.project_id} lockProject={true} />
               </Grid.Column>
-              
-              <Grid.Column>
-                <Card style={{ marginTop: 20 }}>
-                  <Card.Header>
-                    <h4><MdTask style={overviewIconStyle} /> Cash</h4>
-                  </Card.Header>
-                  <Card.Body>
-                    {Array.isArray(this.state.cashItems) && this.state.cashItems.length > 0 ? (
-                      <ul className="list-unstyled" style={{ margin: 0 }}>
-                        {this.state.cashItems.map((c, idx) => (
-                          <li key={c.cash_id} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
-                              <span style={labelPillStyle}>#</span>
-                              <span style={valueTextStyle}>{idx + 1}</span>
-                              <span style={{ width: 10 }} />
-                              <span style={labelPillStyle}>ID</span>
-                              <a href={`/data_management/cash/${c.cash_id}`} className="pillLink" style={{ ...valueTextStyle }}>{c.cash_id}</a>
-                              {c.trandate ? (<>
-                                <span style={{ width: 10 }} />
-                                <span style={labelPillStyle}>Transaction date</span>
-                                <span style={valueTextStyle}>{new Date(c.trandate).toLocaleDateString()}</span>
-                              </>) : null}
-                              {c.kind ? (<>
-                                <span style={{ width: 10 }} />
-                                <span style={labelPillStyle}>Kind</span>
-                                <span style={{ ...valueTextStyle, color: c.kind === 'E' ? '#c0392b' : '#27ae60' }}>
-                                  {c.kind === 'E' ? 'Expense' : 'Payment'}
-                                </span>
-                              </>) : null}
-                              {(c.amountpay || c.amountexp) ? (<>
-                                <span style={{ width: 10 }} />
-                                <span style={labelPillStyle}>{c.amountpay ? 'Amount payment' : 'Amount expense'}</span>
-                                <span style={valueTextStyle}>{c.amountpay || c.amountexp}</span>
-                              </>) : null}
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (<div>No cash entries</div>)}
-                  </Card.Body>
-                  <Card.Footer>
-                    <AddCashModal refreshData={this.fetchData} defaultProjectId={this.state.project?.project_id} lockProject={true} />
-                  </Card.Footer>
-                </Card>
-              </Grid.Column>
+              </Container>
             </Grid>
           </div>
         </div>

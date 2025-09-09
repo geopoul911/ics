@@ -7,7 +7,7 @@ import Footer from "../../core/footer/footer";
 import axios from "axios";
 
 // Modules / Functions
-import filterFactory, { textFilter } from "react-bootstrap-table2-filter";
+import filterFactory, { textFilter, selectFilter } from "react-bootstrap-table2-filter";
 import ToolkitProvider from "react-bootstrap-table2-toolkit";
 import Swal from "sweetalert2";
 import BootstrapTable from "react-bootstrap-table-next";
@@ -76,6 +76,14 @@ const columns = [
     dataField: "declaredone",
     text: "Declared",
     sort: true,
+    filter: selectFilter({
+      options: { "": "All", true: "Yes", false: "No" },
+      defaultValue: "",
+      onFilter: (filterVal, data) => {
+        if (filterVal === "" || filterVal === undefined || filterVal === null) return data;
+        return data.filter((row) => String(row.declaredone) === String(filterVal));
+      },
+    }),
     formatter: (cell) => (cell ? "Yes" : "No"),
   },
   {

@@ -16,4 +16,5 @@ urlpatterns = [
     path('recent-activities/', views.recent_activities, name='recent_activities'),
     path('top-clients/', views.top_clients, name='top_clients'),
     path('overdue-items/', views.overdue_items, name='overdue_items'),
+    path('my/', views.my_dashboard, name='my_dashboard'),
 ]

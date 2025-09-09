@@ -7,7 +7,7 @@ import Footer from "../../core/footer/footer";
 import AddBankModal from "../../modals/create/add_bank";
 
 // Modules / Functions
-import filterFactory, { textFilter } from "react-bootstrap-table2-filter";
+import filterFactory, { textFilter, selectFilter } from "react-bootstrap-table2-filter";
 import ToolkitProvider from "react-bootstrap-table2-toolkit";
 import Swal from "sweetalert2";
 import BootstrapTable from "react-bootstrap-table-next";
@@ -82,7 +82,14 @@ const columns = [
     dataField: "active",
     text: "Active",
     sort: true,
-    filter: textFilter(),
+    filter: selectFilter({
+      options: { "": "All", true: "Yes", false: "No" },
+      defaultValue: "",
+      onFilter: (filterVal, data) => {
+        if (filterVal === "" || filterVal === undefined || filterVal === null) return data;
+        return data.filter((row) => String(row.active) === String(filterVal));
+      },
+    }),
     formatter: (cell, row) => (
       <span className={row.active ? "text-success" : "text-danger"}>
         {row.active ? "Yes" : "No"}

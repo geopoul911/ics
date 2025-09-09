@@ -172,7 +172,7 @@ class BankClientAccountOverview extends React.Component {
 
                     {/* Transit Number */}
                     <div className={"info_descr"} style={{ marginTop: 16 }}>
-                      <FaStickyNote style={overviewIconStyle} /> Transit Number
+                      <FaStickyNote style={overviewIconStyle} /> Branch Number
                     </div>
                     <div className={"info_span"} style={{ position: "relative" }}>
                       {bankClientAccount.transitnumber || "Not set"}

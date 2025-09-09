@@ -35,10 +35,12 @@ function ProfessionalsReport() {
   const [professionals, setProfessionals] = useState([]);
   const [professions, setProfessions] = useState([]);
 
-  // Filters per spec: City, Profession
+  // Filters per spec: City, Profession, Reliability, Active
   const [filters, setFilters] = useState({
     city: "",
     profession: "",
+    reliability: "",
+    active: "",
   });
 
   useEffect(() => {
@@ -74,13 +76,17 @@ function ProfessionalsReport() {
   const filteredProfessionals = useMemo(() => {
     const city = filters.city || "";
     const professionId = filters.profession || "";
+    const reliability = filters.reliability || "";
+    const active = filters.active || "";
 
     function profPasses(p) {
       if (city && (p.city?.title || "") !== city) return false;
       if (professionId) {
-        const id = p.profession?.prof_id || p.profession;
+        const id = p.profession?.profession_id || p.profession;
         if (String(id) !== String(professionId)) return false;
       }
+      if (reliability && (p.reliability || "") !== reliability) return false;
+      if (active && String(!!p.active) !== (active === "yes" ? "true" : "false")) return false;
       return true;
     }
 
@@ -127,8 +133,25 @@ function ProfessionalsReport() {
                       <select value={filters.profession} onChange={(e) => setF('profession', e.target.value)}>
                         <option value="">Any</option>
                         {professions.map((pr) => (
-                          <option key={pr.prof_id} value={pr.prof_id}>{pr.title}</option>
+                          <option key={pr.profession_id} value={pr.profession_id}>{pr.title}</option>
                         ))}
+                      </select>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={labelPillStyle}>Reliability</span>
+                      <select value={filters.reliability} onChange={(e) => setF('reliability', e.target.value)}>
+                        <option value="">Any</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                      </select>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={labelPillStyle}>Active</span>
+                      <select value={filters.active} onChange={(e) => setF('active', e.target.value)}>
+                        <option value="">Any</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
                       </select>
                     </div>
                   </div>

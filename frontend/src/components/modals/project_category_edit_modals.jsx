@@ -193,8 +193,8 @@ export function EditProjectCategoryOrderIndexModal({ project_category, onProject
     if (!isOrderIndexValid) {
       Swal.fire({
         icon: "error",
-        title: "Invalid Order Index",
-        text: "Order index must be a valid number.",
+        title: "Invalid Order by",
+        text: "Order by must be a valid number.",
       });
       return;
     }

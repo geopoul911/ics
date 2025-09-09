@@ -518,17 +518,17 @@ export function EditClientOnomaModal({ client, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="tiny" basic title="Edit Onoma">
+      <Button onClick={handleShow} size="tiny" basic title="Edit GrName">
         <FiEdit style={{ marginRight: 6 }} />
-        Onoma
+        GrName
       </Button>
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Onoma (Greek Name)</Modal.Title>
+          <Modal.Title>Edit GrName</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form.Group>
-            <Form.Label>Onoma (Greek Name)</Form.Label>
+            <Form.Label>GrName</Form.Label>
             <Form.Control
               type="text"
               value={onoma}
@@ -618,17 +618,17 @@ export function EditClientEponymoModal({ client, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="tiny" basic title="Edit Eponymo">
+      <Button onClick={handleShow} size="tiny" basic title="Edit GrSurname">
         <FiEdit style={{ marginRight: 6 }} />
-        Eponymo
+        GrSurname
       </Button>
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Eponymo (Greek Surname)</Modal.Title>
+          <Modal.Title>Edit GrSurname</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form.Group>
-            <Form.Label>Eponymo (Greek Surname)</Form.Label>
+            <Form.Label>GrSurname</Form.Label>
             <Form.Control
               type="text"
               value={eponymo}
@@ -1331,17 +1331,17 @@ export function EditClientPostalcodeModal({ client, update_state }) {
 
   return (
     <>
-      <Button onClick={handleShow} size="tiny" basic title="Edit Postal Code">
+      <Button onClick={handleShow} size="tiny" basic title="Edit ZIP/PC">
         <FiEdit style={{ marginRight: 6 }} />
-        Postal Code
+        ZIP/PC
       </Button>
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Postal Code</Modal.Title>
+            <Modal.Title>Edit ZIP/PC</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form.Group>
-            <Form.Label>Postal Code</Form.Label>
+            <Form.Label>ZIP/PC</Form.Label>
             <Form.Control
               type="text"
               value={postalcode}
@@ -1357,7 +1357,7 @@ export function EditClientPostalcodeModal({ client, update_state }) {
               <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
                 <li>
                   <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                  Postal code must be 1–10 characters.
+                  ZIP/PC must be 1–10 characters.
                 </li>
               </ul>
             ) : (
@@ -2271,29 +2271,29 @@ export function EditClientAfmModal({ client, update_state }) {
         text: "AFM updated successfully.",
       });
     } catch (error) {
-      console.error("Error updating AFM:", error);
+      console.error("Error updating TIN-GR:", error);
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: error.response?.data?.error || "Failed to update AFM.",
+        text: error.response?.data?.error || "Failed to update TIN-GR.",
       });
     }
   };
 
   return (
     <>
-      <Button onClick={handleShow} size="tiny" basic title="Edit AFM">
+      <Button onClick={handleShow} size="tiny" basic title="Edit TIN-GR">
         <FiEdit style={{ marginRight: 6 }} />
-        AFM
+        TIN-GR
       </Button>
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit AFM (Greek Tax Number)</Modal.Title>
+          <Modal.Title>Edit TIN-GR (Greek Tax Number)</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form.Group>
             <Form.Label>
-              AFM
+              TIN-GR
             </Form.Label>
             <Form.Control
               type="text"
@@ -2315,7 +2315,7 @@ export function EditClientAfmModal({ client, update_state }) {
               <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
                 <li>
                   <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                  AFM must be exactly 9 digits.
+                  TIN-GR must be exactly 9 digits.
                 </li>
               </ul>
             ) : (
@@ -2377,32 +2377,32 @@ export function EditClientSinModal({ client, update_state }) {
       Swal.fire({
         icon: "success",
         title: "Success!",
-        text: "SIN updated successfully.",
+        text: "TIN updated successfully.",
       });
     } catch (error) {
-      console.error("Error updating SIN:", error);
+      console.error("Error updating TIN:", error);
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: error.response?.data?.error || "Failed to update SIN.",
+        text: error.response?.data?.error || "Failed to update TIN.",
       });
     }
   };
 
   return (
     <>
-      <Button onClick={handleShow} size="tiny" basic title="Edit SIN">
+      <Button onClick={handleShow} size="tiny" basic title="Edit TIN">
         <FiEdit style={{ marginRight: 6 }} />
-        SIN
+        TIN
       </Button>
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Edit SIN (Canadian Tax Number)</Modal.Title>
+          <Modal.Title>Edit TIN (Canadian Tax Number)</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form.Group>
             <Form.Label>
-              SIN
+              TIN
               {sin && sin.length === 9 && /^\d{9}$/.test(sin) ? (
                 <AiOutlineCheckCircle style={{ color: "green", marginLeft: "0.5em" }} />
               ) : sin ? (
@@ -2425,7 +2425,7 @@ export function EditClientSinModal({ client, update_state }) {
             </Form.Text>
             {!isValid && (
               <Form.Control.Feedback type="invalid">
-                SIN must be exactly 9 digits.
+                TIN must be exactly 9 digits.
               </Form.Control.Feedback>
             )}
           </Form.Group>
@@ -2436,7 +2436,7 @@ export function EditClientSinModal({ client, update_state }) {
               <ul className="mr-auto" style={{ margin: 0, padding: 0, color: "red" }}>
                 <li>
                   <AiOutlineWarning style={{ fontSize: 18, marginRight: 6 }} />
-                  SIN is required and must be exactly 9 digits.
+                  TIN is required and must be exactly 9 digits.
                 </li>
               </ul>
             ) : (

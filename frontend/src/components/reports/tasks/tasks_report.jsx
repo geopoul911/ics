@@ -37,13 +37,14 @@ function TasksReport() {
   const [consultants, setConsultants] = useState([]);
   const [taskCategories, setTaskCategories] = useState([]);
 
-  // Filters per spec: Category, Status, Deadline, Assigner, Assignee
+  // Filters per spec: Category, Status, Deadline, Assigner, Assignee, Active
   const [filters, setFilters] = useState({
     taskCategory: "",
     status: "",
     deadlineUntil: "",
     assigner: "",
     assignee: "",
+    active: "",
   });
 
   useEffect(() => {
@@ -106,7 +107,11 @@ function TasksReport() {
       return true;
     }
 
-    return (tasks || []).filter(taskPasses);
+    let list = (tasks || []).filter(taskPasses);
+    if (filters.active) {
+      list = list.filter((t) => String(!!t.active) === (filters.active === 'yes' ? 'true' : 'false'));
+    }
+    return list;
   }, [tasks, filters]);
 
   const columns = [
@@ -180,6 +185,14 @@ function TasksReport() {
                         {consultants.map((c) => (
                           <option key={c.consultant_id} value={c.consultant_id}>{c.fullname || `${c.surname || ''} ${c.name || ''}`.trim()}</option>
                         ))}
+                      </select>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={labelPillStyle}>Active</span>
+                      <select value={filters.active} onChange={(e) => setF('active', e.target.value)}>
+                        <option value="">Any</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
                       </select>
                     </div>
                   </div>

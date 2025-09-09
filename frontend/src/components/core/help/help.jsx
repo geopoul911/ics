@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 
 // Icons / Images
 import { BsFillKeyFill } from "react-icons/bs";
-import { MdUpdate } from "react-icons/md";
+// import { MdUpdate } from "react-icons/md";
 import { FaCode } from "react-icons/fa";
 import { FaInfo } from "react-icons/fa";
 import { GoLaw } from "react-icons/go";
@@ -28,23 +28,31 @@ class Help extends React.Component {
         <NavigationBar />
         <div className="rootContainer">
           {pageHeader("help")}
-          <Menu vertical className="rootMenu">
-            <Menu.Item as={Link} to="/help/staff_dox">
-              <BsFillKeyFill style={rootIconStyle} /> Staff Documentation
-            </Menu.Item>
-            <Menu.Item as={Link} to="/help/dev_dox">
-              <FaCode style={rootIconStyle} /> Developer Documentation
-            </Menu.Item>
-            <Menu.Item as={Link} to="/help/updates">
-              <MdUpdate style={rootIconStyle} /> Updates & Fixes
-            </Menu.Item>
-            <Menu.Item as={Link} to="/about">
-              <FaInfo style={rootIconStyle} /> About
-            </Menu.Item>
-            <Menu.Item as={Link} to="/terms">
-              <GoLaw style={rootIconStyle} /> Terms
-            </Menu.Item>
-          </Menu>
+          <div className="contentContainer">
+            <div className="contentBody">
+              <div className="container" style={{ display: 'flex', justifyContent: 'center' }}>
+                <div style={{ maxWidth: 720, width: '100%' }}>
+                  <Menu vertical className="dmRootMenu">
+                    <Menu.Item as={Link} to="/help/staff_dox">
+                      <BsFillKeyFill style={rootIconStyle} /> Staff Documentation
+                    </Menu.Item>
+                    <Menu.Item as={Link} to="/help/dev_dox">
+                      <FaCode style={rootIconStyle} /> Developer Documentation
+                    </Menu.Item>
+                    {/* <Menu.Item as={Link} to="/help/updates">
+                      <MdUpdate style={rootIconStyle} /> Updates & Fixes
+                    </Menu.Item> */}
+                    <Menu.Item as={Link} to="/about">
+                      <FaInfo style={rootIconStyle} /> About
+                    </Menu.Item>
+                    <Menu.Item as={Link} to="/terms">
+                      <GoLaw style={rootIconStyle} /> Terms
+                    </Menu.Item>
+                  </Menu>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <Footer />
       </>

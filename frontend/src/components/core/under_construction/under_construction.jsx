@@ -19,11 +19,7 @@ class UnderConstruction extends React.Component {
       <>
         <NavigationBar />
         <div className="underConstructionContainer">
-          <Button
-            color="orange"
-            onClick={() => (window.location = "/")}
-            className=""
-          >
+          <Button style={{color: "#93ab3c", backgroundColor: "black", border: "1px solid #93ab3c"}} onClick={() => (window.location = "/")}>
             Back to home page
           </Button>
         </div>

@@ -35,12 +35,16 @@ function DocumentsReport() {
   const [documents, setDocuments] = useState([]);
   const [projects, setProjects] = useState([]);
 
-  // Filters per spec: doc Status, Valid until, projects Status (In Progress)
+  // Filters per spec: doc Status, Valid until, projects Status (In Progress), Project, Client (fullname contains), Original, Trafficable
   const [filters, setFilters] = useState({
     status: "",
     validUntilFrom: "",
     validUntilTo: "",
     projectStatus: "", // hint default empty; user may pick Inprogress
+    project: "",
+    client: "",
+    original: "",
+    trafficable: "",
   });
 
   useEffect(() => {
@@ -78,6 +82,8 @@ function DocumentsReport() {
     const from = filters.validUntilFrom ? new Date(filters.validUntilFrom) : null;
     const to = filters.validUntilTo ? new Date(filters.validUntilTo) : null;
     const projectStatus = filters.projectStatus || "";
+    const projectId = filters.project || "";
+    const client = (filters.client || "").toLowerCase();
 
     function docPasses(d) {
       if (status && (d.status || "") !== status) return false;
@@ -93,6 +99,22 @@ function DocumentsReport() {
         const pid = projectRef?.project_id || projectRef;
         const p = projectById[pid];
         if (!p || (p.status || "") !== projectStatus) return false;
+      }
+      if (projectId) {
+        const pid = (d.project?.project_id || d.project || "");
+        if (String(pid) !== String(projectId)) return false;
+      }
+      if (client) {
+        const full = `${d.client?.surname || ""} ${d.client?.name || ""}`.trim().toLowerCase();
+        if (!full.includes(client)) return false;
+      }
+      if (filters.original) {
+        const want = filters.original === 'yes';
+        if (!!d.original !== want) return false;
+      }
+      if (filters.trafficable) {
+        const want = filters.trafficable === 'yes';
+        if (!!d.trafficable !== want) return false;
       }
       return true;
     }
@@ -111,8 +133,7 @@ function DocumentsReport() {
     },
     { dataField: "title", text: "Title", sort: true },
     { dataField: "project.title", text: "Project", sort: true, formatter: (c, r) => r.project?.title || "" },
-    { dataField: "client.surname", text: "Client surname", sort: true, formatter: (c, r) => r.client?.surname || "" },
-    { dataField: "client.name", text: "Client name", sort: true, formatter: (c, r) => r.client?.name || "" },
+    { dataField: "_client", text: "Client", sort: true, sortValue: (c, r) => `${r.client?.surname || ''} ${r.client?.name || ''}`.trim(), formatter: (c, r) => `${r.client?.surname || ''} ${r.client?.name || ''}`.trim() },
     { dataField: "created", text: "Created", sort: true, formatter: (c, r) => (r.created ? new Date(r.created).toLocaleDateString() : "") },
     { dataField: "validuntil", text: "Valid until", sort: true, formatter: (c, r) => (r.validuntil ? new Date(r.validuntil).toLocaleDateString() : "") },
     { dataField: "status", text: "Status", sort: true },
@@ -160,6 +181,36 @@ function DocumentsReport() {
                         <option value="Completed">Completed</option>
                         <option value="Settled">Settled</option>
                         <option value="Abandoned">Abandoned</option>
+                      </select>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={labelPillStyle}>Project</span>
+                      <select value={filters.project} onChange={(e) => setF('project', e.target.value)}>
+                        <option value="">Any</option>
+                        {projects.map((p) => (
+                          <option key={p.project_id} value={p.project_id}>{p.title}</option>
+                        ))}
+                      </select>
+                    </div>
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={labelPillStyle}>Client (fullname)</span>
+                      <input type="text" value={filters.client} onChange={(e) => setF('client', e.target.value)} placeholder="contains..." />
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={labelPillStyle}>Original</span>
+                      <select value={filters.original} onChange={(e) => setF('original', e.target.value)}>
+                        <option value="">Any</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                      </select>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={labelPillStyle}>Trafficable</span>
+                      <select value={filters.trafficable} onChange={(e) => setF('trafficable', e.target.value)}>
+                        <option value="">Any</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
                       </select>
                     </div>
                   </div>

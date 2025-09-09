@@ -6,7 +6,7 @@ import { MdLink, MdFolder, MdAccountBalance } from "react-icons/md";
 
 // Modules / Functions
 import { Card } from "react-bootstrap";
-import { Grid } from "semantic-ui-react";
+import { Grid, Container } from "semantic-ui-react";
 import Swal from "sweetalert2";
 
 // Custom Made Components
@@ -16,9 +16,11 @@ import AddDocumentModal from "../../../modals/create/add_document";
 import AddClientContactModal from "../../../modals/create/add_client_contact";
 import AddPropertyModal from "../../../modals/create/add_property";
 import AddBankProjectAccountModal from "../../../modals/create/add_bank_project_account";
+import AddCashModal from "../../../modals/create/add_cash";
 
 // Global Variables
 import { headers, pageHeader, loader } from "../../../global_vars";
+import { formatAmountWithCurrency } from "../../../global_vars";
 
 const VIEW_PROJECT = "http://localhost:8000/api/data_management/project/";
 
@@ -59,6 +61,7 @@ class RelatedObjects extends React.Component {
       clientContacts: [],
       properties: [],
       bankProjectAccounts: [],
+      cashTransactions: [],
     };
   }
 
@@ -90,6 +93,7 @@ class RelatedObjects extends React.Component {
         clientContacts: p.contacts || [],
         properties: p.properties || [],
         bankProjectAccounts: p.bank_accounts || [],
+        cashTransactions: p.cash_transactions || [],
         is_loaded: true,
       });
     } catch (e) {
@@ -114,6 +118,16 @@ class RelatedObjects extends React.Component {
       );
     }
 
+    const section = (this.props.section || '').toLowerCase();
+
+    const showAssociatedClients = section === 'associated_clients' || !section;
+    const showClients = section === 'clients';
+    const showDocuments = section === 'documents';
+    const showClientContacts = section === 'client_contacts';
+    const showProperties = section === 'properties';
+    const showBankProjectAccounts = section === 'bank_project_accounts';
+    const showCash = section === 'cash';
+
     return (
       <>
         <div className="rootContainer">
@@ -124,242 +138,505 @@ class RelatedObjects extends React.Component {
               .pillLink:hover { color: #93ab3c; text-decoration: none; }
             `}</style>
             <Grid stackable columns={2}>
+              {showAssociatedClients && (
+                <Container>
               <Grid.Column>
-                <Card style={{ marginTop: 20 }}>
-                  <Card.Header>
-                    <h4><MdLink style={overviewIconStyle} /> Associated clients</h4>
-                  </Card.Header>
-                  <Card.Body>
                     {Array.isArray(this.state.associatedClients) && this.state.associatedClients.length > 0 ? (
-                      <ul className="list-unstyled" style={{ margin: 0 }}>
-                        {this.state.associatedClients.map((ac, idx) => (
-                          <li key={ac.assoclient_id} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
-                              <span style={labelPillStyle}>#</span>
-                              <span style={valueTextStyle}>{idx + 1}</span>
-                              <span style={{ width: 10 }} />
-                              <span style={labelPillStyle}>ID</span>
-                              <a href={`/data_management/associated_client/${ac.assoclient_id}`} className="pillLink" style={{ ...valueTextStyle }}>{ac.assoclient_id}</a>
-                              <span style={{ width: 10 }} />
+                      this.state.associatedClients.map((ac) => (
+                        <Card key={ac.assoclient_id} style={{ marginTop: 16 }}>
+                          <Card.Header style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <h5 style={{ margin: 0 }}>
+                              <MdLink style={overviewIconStyle} /> Associated client
+                            </h5>
+                            <a href={`/data_management/associated_client/${ac.assoclient_id}`} className="btn btn-sm btn-success" style={{ padding: '2px 10px', borderRadius: 6 }}>#{ac.assoclient_id}</a>
+                          </Card.Header>
+                          <Card.Body>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
                               <span style={labelPillStyle}>Client</span>
-                              <span style={valueTextStyle}>{ac.client ? (ac.client.fullname || `${ac.client.surname || ''} ${ac.client.name || ''}`.trim()) : 'N/A'}</span>
+                              {ac.client?.client_id ? (
+                                <a href={`/data_management/client/${ac.client.client_id}`} className="btn btn-sm btn-success" style={{ padding: '2px 10px', borderRadius: 6 }}>#{ac.client.client_id}</a>
+                              ) : null}
+                              {ac.client?.fullname ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Full name</span>
+                                <span style={valueTextStyle}>{ac.client.fullname}</span>
+                              </>) : null}
                               {ac.orderindex !== undefined ? (<>
                                 <span style={{ width: 10 }} />
                                 <span style={labelPillStyle}>Order by</span>
                                 <span style={valueTextStyle}>{ac.orderindex}</span>
                               </>) : null}
-                              {ac.notes ? (<>
+                            </div>
+                            {ac.notes ? (
+                              <div style={{ marginTop: 10 }}>
+                                <div className={"info_descr"}>Notes</div>
+                                <div className={"info_span"}>{ac.notes}</div>
+                              </div>
+                            ) : null}
+                          </Card.Body>
+                        </Card>
+                      ))
+                    ) : (<div>No associated clients</div>)}
+                  <AddAssociatedClientModal refreshData={this.fetchData} defaultProjectId={this.state.project?.project_id} lockProject={true} />
+              </Grid.Column>
+              </Container>
+              )}
+
+              {showClients && (
+                <Container>
+              <Grid.Column>
+                
+                    {Array.isArray(this.state.clients) && this.state.clients.length > 0 ? (
+                      this.state.clients.map((c, idx) => (
+                        <Card key={c.client_id || idx} style={{ marginTop: 16 }}>
+                          <Card.Header style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <h5 style={{ margin: 0 }}>
+                              <MdLink style={overviewIconStyle} /> {c.fullname || `${c.surname || ''} ${c.name || ''}`.trim()}
+                            </h5>
+                            <a href={`/data_management/client/${c.client_id}`} className="btn btn-sm btn-success" style={{ padding: '2px 10px', borderRadius: 6 }}>#{c.client_id}</a>
+                          </Card.Header>
+                          <Card.Body>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                              {c.address ? (<>
+                                <span style={labelPillStyle}>Address</span>
+                                <span style={valueTextStyle}>{c.address}</span>
+                              </>) : null}
+                              {c.country?.country_id ? (<>
                                 <span style={{ width: 10 }} />
-                                <span style={labelPillStyle}>Notes</span>
-                                <span style={valueTextStyle}>{ac.notes}</span>
+                                <span style={labelPillStyle}>Country</span>
+                                <a href={`/regions/country/${c.country.country_id}`} className="btn btn-sm btn-success" style={{ padding: '2px 10px', borderRadius: 6 }}>{c.country.title}</a>
+                              </>) : null}
+                              {c.province?.province_id ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Province</span>
+                                <a href={`/regions/province/${c.province.province_id}`} className="btn btn-sm btn-success" style={{ padding: '2px 10px', borderRadius: 6 }}>{c.province.title}</a>
+                              </>) : null}
+                              {c.city?.city_id ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>City</span>
+                                <a href={`/regions/city/${c.city.city_id}`} className="btn btn-sm btn-success" style={{ padding: '2px 10px', borderRadius: 6 }}>{c.city.title}</a>
+                              </>) : null}
+                              {c.birthdate ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Birthdate</span>
+                                <span style={valueTextStyle}>{new Date(c.birthdate).toLocaleDateString()}</span>
+                              </>) : null}
+                              <span style={{ width: 10 }} />
+                              <span style={c.deceased ? { ...labelPillStyle, background: '#ffe5e5', color: '#c00' } : labelPillStyle}>Deceased</span>
+                              <span style={c.deceased ? { ...valueTextStyle, color: '#c00' } : valueTextStyle}>{c.deceased ? 'Yes' : 'No'}</span>
+                              {c.retired !== undefined ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Retired</span>
+                                <span style={valueTextStyle}>{c.retired ? 'Yes' : 'No'}</span>
+                              </>) : null}
+                              {c.mobile1 ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Mobile</span>
+                                <span style={valueTextStyle}>{c.mobile1}</span>
+                              </>) : null}
+                              {c.email ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Email</span>
+                                <a href={`mailto:${c.email}`} className="pillLink"><span style={valueTextStyle}>{c.email}</span></a>
+                              </>) : null}
+                              {c.afm ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>TIN-GR</span>
+                                <span style={valueTextStyle}>{c.afm}</span>
+                              </>) : null}
+                              {c.sin ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>TIN</span>
+                                <span style={valueTextStyle}>{c.sin}</span>
+                              </>) : null}
+                              {c.amka ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>AMKA</span>
+                                <span style={valueTextStyle}>{c.amka}</span>
                               </>) : null}
                             </div>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (<div>No associated clients</div>)}
-                  </Card.Body>
-                  <Card.Footer>
-                    <AddAssociatedClientModal refreshData={this.fetchData} defaultProjectId={this.state.project?.project_id} lockProject={true} />
-                  </Card.Footer>
-                </Card>
-              </Grid.Column>
-
-              <Grid.Column>
-                <Card style={{ marginTop: 20 }}>
-                  <Card.Header>
-                    <h4><MdLink style={overviewIconStyle} /> Clients</h4>
-                  </Card.Header>
-                  <Card.Body>
-                    {Array.isArray(this.state.clients) && this.state.clients.length > 0 ? (
-                      <ul className="list-unstyled" style={{ margin: 0 }}>
-                        {this.state.clients.map((c, idx) => (
-                          <li key={c.client_id || idx} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
-                              <span style={labelPillStyle}>#</span>
-                              <span style={valueTextStyle}>{idx + 1}</span>
-                              <span style={{ width: 10 }} />
-                              <span style={labelPillStyle}>ID</span>
-                              <a href={`/data_management/client/${c.client_id}`} className="pillLink" style={{ ...valueTextStyle }}>{c.client_id}</a>
-                              <span style={{ width: 10 }} />
-                              <span style={labelPillStyle}>Full name</span>
-                              <span style={valueTextStyle}>{c.fullname || `${c.surname || ''} ${c.name || ''}`.trim()}</span>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
+                            {c.notes ? (
+                              <div style={{ marginTop: 10 }}>
+                                <div className={"info_descr"}>Notes</div>
+                                <div className={"info_span"}>{c.notes}</div>
+                              </div>
+                            ) : null}
+                          </Card.Body>
+                        </Card>
+                      ))
                     ) : (<div>No clients</div>)}
-                  </Card.Body>
-                </Card>
               </Grid.Column>
+              </Container>
+              )}
 
+              {showDocuments && (
+                <Container>
               <Grid.Column>
-                <Card style={{ marginTop: 20 }}>
-                  <Card.Header>
-                    <h4><MdFolder style={overviewIconStyle} /> Documents</h4>
-                  </Card.Header>
-                  <Card.Body>
                     {Array.isArray(this.state.documents) && this.state.documents.length > 0 ? (
-                      <ul className="list-unstyled" style={{ margin: 0 }}>
-                        {this.state.documents.map((doc, idx) => (
-                          <li key={doc.document_id} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
-                              <span style={labelPillStyle}>#</span>
-                              <span style={valueTextStyle}>{idx + 1}</span>
-                              <span style={{ width: 10 }} />
-                              <span style={labelPillStyle}>ID</span>
-                              <a href={`/data_management/document/${doc.document_id}`} className="pillLink" style={{ ...valueTextStyle }}>{doc.document_id}</a>
-                              <span style={{ width: 10 }} />
-                              <span style={labelPillStyle}>Title</span>
-                              <span style={valueTextStyle}>{doc.title}</span>
+                      this.state.documents.map((doc) => (
+                        <Card key={doc.document_id} style={{ marginTop: 16 }}>
+                          <Card.Header style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <h5 style={{ margin: 0 }}>
+                              <MdFolder style={overviewIconStyle} /> {doc.title || 'Document'}
+                            </h5>
+                            <a
+                              href={`/data_management/document/${doc.document_id}`}
+                              className="btn btn-sm btn-success"
+                              style={{ padding: '2px 10px', borderRadius: 6 }}
+                            >
+                              #{doc.document_id}
+                            </a>
+                          </Card.Header>
+                          <Card.Body>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                              {doc.created ? (<>
+                                <span style={labelPillStyle}>Created</span>
+                                <span style={valueTextStyle}>{new Date(doc.created).toLocaleDateString()}</span>
+                              </>) : null}
+                              {doc.project?.project_id ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Project</span>
+                                <a href={`/data_management/project/${doc.project.project_id}`} className="btn btn-sm btn-success" style={{ padding: '2px 10px', borderRadius: 6 }}>#{doc.project.project_id}</a>
+                              </>) : null}
+                              {typeof doc.original === 'boolean' ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Original</span>
+                                <span style={valueTextStyle}>{doc.original ? 'Yes' : 'No'}</span>
+                              </>) : null}
+                              {typeof doc.trafficable === 'boolean' ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Trafficable</span>
+                                <span style={valueTextStyle}>{doc.trafficable ? 'Yes' : 'No'}</span>
+                              </>) : null}
+                              {doc.validuntil ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Valid until</span>
+                                <span style={valueTextStyle}>{new Date(doc.validuntil).toLocaleDateString()}</span>
+                              </>) : null}
                               {doc.status ? (<>
                                 <span style={{ width: 10 }} />
                                 <span style={labelPillStyle}>Status</span>
                                 <span style={valueTextStyle}>{doc.status}</span>
                               </>) : null}
+                              {doc.statusdate ? (<>
+                                <span style={{ width: 10 }} />
+                                <span style={labelPillStyle}>Status date</span>
+                                <span style={valueTextStyle}>{new Date(doc.statusdate).toLocaleDateString()}</span>
+                              </>) : null}
                             </div>
-                          </li>
-                        ))}
-                      </ul>
+                            {doc.logstatus ? (
+                              <div style={{ marginTop: 10 }}>
+                                <div className={"info_descr"}>Log status</div>
+                                <div className={"info_span"}>{doc.logstatus}</div>
+                              </div>
+                            ) : null}
+                            {doc.notes ? (
+                              <div style={{ marginTop: 10 }}>
+                                <div className={"info_descr"}>Notes</div>
+                                <div className={"info_span"}>{doc.notes}</div>
+                              </div>
+                            ) : null}
+                          </Card.Body>
+                        </Card>
+                      ))
                     ) : (<div>No documents</div>)}
-                  </Card.Body>
-                  <Card.Footer>
-                    <AddDocumentModal refreshData={this.fetchData} defaultProjectId={this.state.project?.project_id} lockProject={true} />
-                  </Card.Footer>
-                </Card>
-              </Grid.Column>
+                  <AddDocumentModal refreshData={this.fetchData} defaultProjectId={this.state.project?.project_id} lockProject={true} />
+                </Grid.Column>
+              </Container>
+              )}
 
+              {showClientContacts && (
+                <Container>
               <Grid.Column>
-                <Card style={{ marginTop: 20 }}>
-                  <Card.Header>
-                    <h4><MdLink style={overviewIconStyle} /> Client contacts</h4>
-                  </Card.Header>
-                  <Card.Body>
-                    {Array.isArray(this.state.clientContacts) && this.state.clientContacts.length > 0 ? (
-                      <ul className="list-unstyled" style={{ margin: 0 }}>
-                        {this.state.clientContacts.map((cc, idx) => (
-                          <li key={cc.clientcont_id} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
-                              <span style={labelPillStyle}>#</span>
-                              <span style={valueTextStyle}>{idx + 1}</span>
-                              <span style={{ width: 10 }} />
-                              <span style={labelPillStyle}>ID</span>
-                              <a href={`/data_management/client_contact/${cc.clientcont_id}`} className="pillLink" style={{ ...valueTextStyle }}>{cc.clientcont_id}</a>
+                {Array.isArray(this.state.clientContacts) && this.state.clientContacts.length > 0 ? (
+                  this.state.clientContacts.map((cc) => (
+                    <Card key={cc.clientcont_id} style={{ marginTop: 16 }}>
+                      <Card.Header style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <h5 style={{ margin: 0 }}>
+                          <MdLink style={overviewIconStyle} /> {cc.fullname}
+                        </h5>
+                        <a
+                          href={`/data_management/client_contact/${cc.clientcont_id}`}
+                          className="btn btn-sm btn-success"
+                          style={{ padding: '2px 10px', borderRadius: 6 }}
+                        >
+                          #{cc.clientcont_id}
+                        </a>
+                      </Card.Header>
+                      <Card.Body>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                          {cc.connection ? (<>
+                            <span style={labelPillStyle}>Connection</span>
+                            <span style={valueTextStyle}>{cc.connection}</span>
+                          </>) : null}
+                          {cc.address ? (<>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>Address</span>
+                            <span style={valueTextStyle}>{cc.address}</span>
+                          </>) : null}
+                          {cc.email ? (<>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>Email</span>
+                            <a href={`mailto:${cc.email}`} className="pillLink"><span style={valueTextStyle}>{cc.email}</span></a>
+                          </>) : null}
+                          {cc.phone ? (<>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>Phone</span>
+                            <span style={valueTextStyle}>{cc.phone}</span>
+                          </>) : null}
+                          {cc.mobile ? (<>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>Mobile</span>
+                            <span style={valueTextStyle}>{cc.mobile}</span>
+                          </>) : null}
+                          {cc.profession ? (<>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>Profession</span>
+                            <span style={valueTextStyle}>{cc.profession}</span>
+                          </>) : null}
+                          {cc.reliability ? (<>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>Reliability</span>
+                            <span style={valueTextStyle}>{cc.reliability}</span>
+                          </>) : null}
+                          {cc.city ? (<>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>City</span>
+                            <span style={valueTextStyle}>{cc.city}</span>
+                          </>) : null}
+                        </div>
+                        {cc.notes ? (
+                          <div style={{ marginTop: 10 }}>
+                            <div className={"info_descr"}>Notes</div>
+                            <div className={"info_span"}>{cc.notes}</div>
+                          </div>
+                        ) : null}
+                      </Card.Body>
+                    </Card>
+                  ))
+                ) : (<div>No client contacts</div>)}
+                <AddClientContactModal refreshData={this.fetchData} defaultProjectId={this.state.project?.project_id} lockProject={true} />
+                </Grid.Column>
+              </Container>
+              )}
+
+              {showProperties && (
+                <Container>
+                <Grid.Column>
+                {Array.isArray(this.state.properties) && this.state.properties.length > 0 ? (
+                  this.state.properties.map((prop) => (
+                    <Card key={prop.property_id} style={{ marginTop: 16 }}>
+                      <Card.Header style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <h5 style={{ margin: 0 }}>
+                          <MdFolder style={overviewIconStyle} /> {prop.description || 'Property'}
+                        </h5>
+                        <a
+                          href={`/data_management/property/${prop.property_id}`}
+                          className="btn btn-sm btn-success"
+                          style={{ padding: '2px 10px', borderRadius: 6 }}
+                        >
+                          #{prop.property_id}
+                        </a>
+                      </Card.Header>
+                      <Card.Body>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                          {prop.country?.country_id ? (<>
+                            <span style={labelPillStyle}>Country</span>
+                            <a href={`/regions/country/${prop.country.country_id}`} className="btn btn-sm btn-success" style={{ padding: '2px 10px', borderRadius: 6 }}>{prop.country.title}</a>
+                          </>) : null}
+                          {prop.province?.province_id ? (<>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>Province</span>
+                            <a href={`/regions/province/${prop.province.province_id}`} className="btn btn-sm btn-success" style={{ padding: '2px 10px', borderRadius: 6 }}>{prop.province.title}</a>
+                          </>) : null}
+                          {prop.city?.city_id ? (<>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>City</span>
+                            <a href={`/regions/city/${prop.city.city_id}`} className="btn btn-sm btn-success" style={{ padding: '2px 10px', borderRadius: 6 }}>{prop.city.title}</a>
+                          </>) : null}
+                          {prop.description ? (<>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>Description</span>
+                            <span style={valueTextStyle}>{prop.description}</span>
+                          </>) : null}
+                          {prop.type ? (<>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>Type</span>
+                            <span style={valueTextStyle}>{prop.type}</span>
+                          </>) : null}
+                          {prop.constructyear ? (<>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>Construct year</span>
+                            <span style={valueTextStyle}>{prop.constructyear}</span>
+                          </>) : null}
+                          {prop.status ? (<>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>Status</span>
+                            <span style={valueTextStyle}>{prop.status}</span>
+                          </>) : null}
+                          {prop.market ? (<>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>Market</span>
+                            <span style={valueTextStyle}>{prop.market}</span>
+                          </>) : null}
+                          {prop.broker ? (<>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>Broker</span>
+                            <span style={valueTextStyle}>{prop.broker}</span>
+                          </>) : null}
+                        </div>
+                        {prop.notes ? (
+                          <div style={{ marginTop: 10 }}>
+                            <div className={"info_descr"}>Notes</div>
+                            <div className={"info_span"}>{prop.notes}</div>
+                          </div>
+                        ) : null}
+                      </Card.Body>
+                    </Card>
+                  ))
+                ) : (<div>No properties</div>)}
+                <AddPropertyModal refreshData={this.fetchData} defaultProjectId={this.state.project?.project_id} lockProject={true} />
+                </Grid.Column>
+              </Container>
+              )}
+
+              {showBankProjectAccounts && (
+                <Container>
+              <Grid.Column>
+                {Array.isArray(this.state.bankProjectAccounts) && this.state.bankProjectAccounts.length > 0 ? (
+                  this.state.bankProjectAccounts.map((bpa) => (
+                    <Card key={bpa.bankprojacco_id} style={{ marginTop: 16 }}>
+                      <Card.Header style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <h5 style={{ margin: 0 }}>
+                          <MdAccountBalance style={overviewIconStyle} />
+                        </h5>
+                        <a
+                          href={`/data_management/bank_project_account/${bpa.bankprojacco_id}`}
+                          className="btn btn-sm btn-success"
+                          style={{ padding: '2px 10px', borderRadius: 6 }}
+                        >
+                          #{bpa.bankprojacco_id}
+                        </a>
+                      </Card.Header>
+                      <Card.Body>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                          {bpa.bankclientacco?.accountnumber ? (<>
+                            <span style={labelPillStyle}>Account</span>
+                            <span style={valueTextStyle}>{bpa.bankclientacco.accountnumber}</span>
+                          </>) : null}
+                          {bpa.client ? (<>
+                            <span style={{ width: 10 }} />
+                            <span style={labelPillStyle}>Client</span>
+                            <a
+                              href={`/data_management/client/${(bpa.client && (bpa.client.client_id || bpa.client))}`}
+                              className="btn btn-sm btn-success"
+                              style={{ padding: '2px 10px', borderRadius: 6 }}
+                            >
+                              #{(bpa.client && (bpa.client.client_id || bpa.client))}
+                            </a>
+                            {bpa.client && (bpa.client.fullname || bpa.client.surname || bpa.client.name) ? (<>
                               <span style={{ width: 10 }} />
                               <span style={labelPillStyle}>Full name</span>
-                              <span style={valueTextStyle}>{cc.fullname}</span>
-                              {cc.connection ? (<>
-                                <span style={{ width: 10 }} />
-                                <span style={labelPillStyle}>Connection</span>
-                                <span style={valueTextStyle}>{cc.connection}</span>
-                              </>) : null}
-                              {cc.phone ? (<>
-                                <span style={{ width: 10 }} />
-                                <span style={labelPillStyle}>Phone</span>
-                                <span style={valueTextStyle}>{cc.phone}</span>
-                              </>) : null}
-                              {cc.mobile ? (<>
-                                <span style={{ width: 10 }} />
-                                <span style={labelPillStyle}>Mobile</span>
-                                <span style={valueTextStyle}>{cc.mobile}</span>
-                              </>) : null}
-                              {cc.notes ? (<>
-                                <span style={{ width: 10 }} />
-                                <span style={labelPillStyle}>Notes</span>
-                                <span style={valueTextStyle}>{cc.notes}</span>
-                              </>) : null}
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (<div>No client contacts</div>)}
-                  </Card.Body>
-                  <Card.Footer>
-                    <AddClientContactModal refreshData={this.fetchData} defaultProjectId={this.state.project?.project_id} lockProject={true} />
-                  </Card.Footer>
-                </Card>
-              </Grid.Column>
-
-              <Grid.Column>
-                <Card style={{ marginTop: 20 }}>
-                  <Card.Header>
-                    <h4><MdFolder style={overviewIconStyle} /> Properties</h4>
-                  </Card.Header>
-                  <Card.Body>
-                    {Array.isArray(this.state.properties) && this.state.properties.length > 0 ? (
-                      <ul className="list-unstyled" style={{ margin: 0 }}>
-                        {this.state.properties.map((prop, idx) => (
-                          <li key={prop.property_id} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
-                              <span style={labelPillStyle}>#</span>
-                              <span style={valueTextStyle}>{idx + 1}</span>
-                              <span style={{ width: 10 }} />
-                              <span style={labelPillStyle}>ID</span>
-                              <a href={`/data_management/property/${prop.property_id}`} className="pillLink" style={{ ...valueTextStyle }}>{prop.property_id}</a>
-                              <span style={{ width: 10 }} />
-                              <span style={labelPillStyle}>Description</span>
-                              <span style={valueTextStyle}>{prop.description}</span>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (<div>No properties</div>)}
-                  </Card.Body>
-                  <Card.Footer>
-                    <AddPropertyModal refreshData={this.fetchData} defaultProjectId={this.state.project?.project_id} lockProject={true} />
-                  </Card.Footer>
-                </Card>
-              </Grid.Column>
-
-              <Grid.Column>
-                <Card style={{ marginTop: 20 }}>
-                  <Card.Header>
-                    <h4><MdAccountBalance style={overviewIconStyle} /> Bank project accounts</h4>
-                  </Card.Header>
-                  <Card.Body>
-                    {Array.isArray(this.state.bankProjectAccounts) && this.state.bankProjectAccounts.length > 0 ? (
-                      <ul className="list-unstyled" style={{ margin: 0 }}>
-                        {this.state.bankProjectAccounts.map((bpa, idx) => (
-                          <li key={bpa.bankprojacco_id} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
-                              <span style={labelPillStyle}>#</span>
-                              <span style={valueTextStyle}>{idx + 1}</span>
-                              <span style={{ width: 10 }} />
-                              <span style={labelPillStyle}>ID</span>
-                              <a href={`/data_management/bank_project_account/${bpa.bankprojacco_id}`} className="pillLink" style={{ ...valueTextStyle }}>{bpa.bankprojacco_id}</a>
-                              {bpa.bankclientacco?.accountnumber ? (<>
-                                <span style={{ width: 10 }} />
-                                <span style={labelPillStyle}>Account</span>
-                                <span style={valueTextStyle}>{bpa.bankclientacco.accountnumber}</span>
-                              </>) : null}
-                              {bpa.client ? (<>
-                                <span style={{ width: 10 }} />
-                                <span style={labelPillStyle}>Client</span>
-                                <a
-                                  href={`/data_management/client/${(bpa.client && (bpa.client.client_id || bpa.client))}`}
-                                  className="pillLink"
-                                  style={{ ...valueTextStyle }}
-                                >
-                                  {(bpa.client && (bpa.client.client_id || bpa.client))}
-                                </a>
-                                {bpa.client && (bpa.client.fullname || bpa.client.surname || bpa.client.name) ? (<>
-                                  <span style={{ width: 10 }} />
-                                  <span style={labelPillStyle}>Full name</span>
-                                  <span style={valueTextStyle}>{bpa.client.fullname || `${bpa.client.surname || ''} ${bpa.client.name || ''}`.trim()}</span>
-                                </>) : null}
-                              </>) : null}
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (<div>No bank project accounts</div>)}
-                  </Card.Body>
-                  <Card.Footer>
-                    <AddBankProjectAccountModal refreshData={this.fetchData} defaultProjectId={this.state.project?.project_id} lockProject={true} />
-                  </Card.Footer>
-                </Card>
-              </Grid.Column>
+                              <span style={valueTextStyle}>{bpa.client.fullname || `${bpa.client.surname || ''} ${bpa.client.name || ''}`.trim()}</span>
+                            </>) : null}
+                          </>) : null}
+                        </div>
+                        {bpa.notes ? (
+                          <div style={{ marginTop: 10 }}>
+                            <div className={"info_descr"}>Notes</div>
+                            <div className={"info_span"}>{bpa.notes}</div>
+                          </div>
+                        ) : null}
+                      </Card.Body>
+                    </Card>
+                  ))
+                ) : (<div>No bank project accounts</div>)}
+                <AddBankProjectAccountModal refreshData={this.fetchData} defaultProjectId={this.state.project?.project_id} lockProject={true} />
+                </Grid.Column>
+                </Container>
+              )}
             </Grid>
+
+            {showCash && (
+              <Grid stackable columns={2}>
+                <Container>
+                <Grid.Column>
+                  {Array.isArray(this.state.cashTransactions) && this.state.cashTransactions.length > 0 ? (
+                    this.state.cashTransactions.map((c) => (
+                      <Card
+                        key={c.cash_id}
+                        style={{
+                          marginTop: 16,
+                          border: `2px solid ${c.kind === 'E' ? '#c0392b' : (c.kind === 'P' ? '#27ae60' : '#e5e5e5')}`,
+                        }}
+                      >
+                        <Card.Header style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <h5 style={{ margin: 0 }}>
+                            <MdAccountBalance style={overviewIconStyle} />
+                          </h5>
+                          <a
+                            href={`/data_management/cash/${c.cash_id}`}
+                            className="btn btn-sm btn-success"
+                            style={{ padding: '2px 10px', borderRadius: 6 }}
+                          >
+                            #{c.cash_id}
+                          </a>
+                        </Card.Header>
+                        <Card.Body>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                            {c.country?.title ? (<>
+                              <span style={labelPillStyle}>Country</span>
+                              <span style={valueTextStyle}>{c.country.title}</span>
+                            </>) : null}
+                            {c.trandate ? (<>
+                              <span style={{ width: 10 }} />
+                              <span style={labelPillStyle}>Transaction date</span>
+                              <span style={valueTextStyle}>{new Date(c.trandate).toLocaleDateString()}</span>
+                            </>) : null}
+                            {c.consultant ? (<>
+                              <span style={{ width: 10 }} />
+                              <span style={labelPillStyle}>Consultant</span>
+                              <a
+                                href={`/administration/consultant/${(c.consultant?.consultant_id || c.consultant)}`}
+                                className="btn btn-sm btn-success"
+                                style={{ padding: '2px 10px', borderRadius: 6 }}
+                              >
+                                {c.consultant?.consultant_id || c.consultant}
+                              </a>
+                            </>) : null}
+                            {c.kind ? (<>
+                              <span style={{ width: 10 }} />
+                              <span style={labelPillStyle}>Kind</span>
+                              <span style={valueTextStyle}>{c.kind === 'E' ? 'Expense' : 'Payment'}</span>
+                            </>) : null}
+                            {(c.amountexp || c.amountpay) ? (<>
+                              <span style={{ width: 10 }} />
+                              <span style={labelPillStyle}>Amount</span>
+                              <span style={valueTextStyle}>{formatAmountWithCurrency(c.amountexp || c.amountpay, c.country?.currency || '')}</span>
+                            </>) : null}
+                            {c.reason ? (<>
+                              <span style={{ width: 10 }} />
+                              <span style={labelPillStyle}>Reason</span>
+                              <span style={valueTextStyle}>{c.reason}</span>
+                            </>) : null}
+                          </div>
+                        </Card.Body>
+                      </Card>
+                    ))
+                  ) : (
+                    <Card style={{ marginTop: 20 }}><Card.Body><div>No cash</div></Card.Body></Card>
+                  )}
+                  <div style={{ marginTop: 12 }}>
+                    <AddCashModal
+                      refreshData={this.fetchData}
+                      defaultProjectId={this.state.project?.project_id}
+                      lockProject={true}
+                    />
+                  </div>
+                </Grid.Column>
+                </Container>
+              </Grid>
+            )}
           </div>
         </div>
       </>

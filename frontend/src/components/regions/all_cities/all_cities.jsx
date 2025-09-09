@@ -69,6 +69,11 @@ const columns = [
         </Button>
       );
     },
+    filterValue: (cell, row) => {
+      const countryData = row.country;
+      if (!countryData) return "";
+      return typeof countryData === 'object' ? (countryData.title || "") : String(countryData || "");
+    },
   },
   {
     dataField: "province",
@@ -97,6 +102,11 @@ const columns = [
           </a>
         </Button>
       );
+    },
+    filterValue: (cell, row) => {
+      const provinceData = row.province;
+      if (!provinceData) return "";
+      return typeof provinceData === 'object' ? (provinceData.title || "") : String(provinceData || "");
     },
   },
   {
