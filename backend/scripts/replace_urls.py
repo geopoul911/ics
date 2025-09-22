@@ -23,12 +23,12 @@ for subdir, dirs, files in os.walk(root_dir):
                 data = file_to_edit.read()
 
                 # # # # Uncomment for production
-                # if 'http://localhost:8000' in data:
-                #     data = data.replace('http://localhost:8000', 'https://yourdomain.gr')
+                if 'http://localhost:8000' in data:
+                    data = data.replace('http://localhost:8000', 'https://ultima.icsgr.com')
 
                 # # # # Uncomment for Development
-                if 'https://groupplan.gr' in data:
-                    data = data.replace('https://yourdomain.gr', 'http://localhost:8000')
+                # if 'https://groupplan.gr' in data:
+                    # data = data.replace('https://yourdomain.gr', 'http://localhost:8000')
                     file_to_edit.close()
                     file_to_edit = open(os.path.join(subdir, file), 'wt')
                     file_to_edit.write(data)

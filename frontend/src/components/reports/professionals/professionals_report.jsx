@@ -14,8 +14,8 @@ import Footer from "../../core/footer/footer";
 import { headers, pageHeader, loader, paginationOptions } from "../../global_vars";
 
 // API endpoints
-const ALL_PROFESSIONALS = "http://localhost:8000/api/data_management/all_professionals/";
-const ALL_PROFESSIONS = "http://localhost:8000/api/administration/all_professions/";
+const ALL_PROFESSIONALS = "https://ultima.icsgr.com/api/data_management/all_professionals/";
+const ALL_PROFESSIONS = "https://ultima.icsgr.com/api/administration/all_professions/";
 
 // Styling bits
 const labelPillStyle = {

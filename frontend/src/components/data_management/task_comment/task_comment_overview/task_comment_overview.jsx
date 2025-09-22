@@ -22,7 +22,7 @@ import {
 } from "../../../modals/task_comment_edit_modals";
 import DeleteObjectModal from "../../../modals/delete_object";
 
-const VIEW_TASK_COMMENT = "http://localhost:8000/api/data_management/task_comment/";
+const VIEW_TASK_COMMENT = "https://ultima.icsgr.com/api/data_management/task_comment/";
 
 function getTaskCommentIdFromPath() {
   const pathParts = window.location.pathname.split('/');

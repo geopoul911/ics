@@ -30,7 +30,7 @@ import {
 window.Swal = Swal;
 
 // API endpoint
-const ALL_ASSOCIATED_CLIENTS = "http://localhost:8000/api/data_management/associated_clients/";
+const ALL_ASSOCIATED_CLIENTS = "https://ultima.icsgr.com/api/data_management/associated_clients/";
 
 const columns = [
   {

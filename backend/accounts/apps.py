@@ -20,10 +20,12 @@ This file is automatically loaded by Django when the app is installed,
 and the configuration options provided by this class are used to configure the app's behavior.
 """
 
-
+import sys
 class AccountsConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "accounts"
 
     def ready(self):
+        if any(cmd in sys.argv for cmd in ("migrate", "makemigrations", "collectstatic", "test")):
+            return
         from . import signals  # noqa

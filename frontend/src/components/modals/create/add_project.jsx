@@ -19,7 +19,7 @@ import { headers } from "../../global_vars";
 window.Swal = Swal;
 
 // API endpoint
-const ADD_PROJECT = "http://localhost:8000/api/data_management/projects/";
+const ADD_PROJECT = "https://ultima.icsgr.com/api/data_management/projects/";
 
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);
@@ -80,7 +80,7 @@ function AddProjectModal({ onProjectCreated, defaultConsultantId, lockConsultant
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
       const consultantsRes = await axios.get(
-        "http://localhost:8000/api/administration/all_consultants/",
+        "https://ultima.icsgr.com/api/administration/all_consultants/",
         { headers: currentHeaders }
       );
       
@@ -99,7 +99,7 @@ function AddProjectModal({ onProjectCreated, defaultConsultantId, lockConsultant
 
       // Load project categories
       const categoriesRes = await axios.get(
-        "http://localhost:8000/api/administration/all_project_categories/",
+        "https://ultima.icsgr.com/api/administration/all_project_categories/",
         { headers: currentHeaders }
       );
       const categoriesData = categoriesRes?.data?.all_project_categories || categoriesRes?.data?.results || categoriesRes?.data?.data || [];

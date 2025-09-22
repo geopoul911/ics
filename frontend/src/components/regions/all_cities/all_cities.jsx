@@ -30,7 +30,7 @@ import {
 window.Swal = Swal;
 
 // Using regions API
-const GET_CITIES = "http://localhost:8000/api/regions/all_cities/";
+const GET_CITIES = "https://ultima.icsgr.com/api/regions/all_cities/";
 
 const columns = [
   {

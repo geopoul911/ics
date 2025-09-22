@@ -35,7 +35,7 @@ import {
 } from "../../global_vars";
 
 // API (Updated to use new data_management API)
-const VIEW_PROVINCE = "http://localhost:8000/api/regions/province/";
+const VIEW_PROVINCE = "https://ultima.icsgr.com/api/regions/province/";
 
 // Helpers to read URL like: /regions/province/<province_id>
 function getProvinceIdFromPath() {
@@ -87,7 +87,7 @@ class ProvinceOverview extends React.Component {
         if (cities.length === 0) {
           try {
             const cityRes = await axios.get(
-              "http://localhost:8000/api/regions/all_cities/",
+              "https://ultima.icsgr.com/api/regions/all_cities/",
               { headers: currentHeaders }
             );
             const allCities = cityRes?.data?.all_cities || cityRes?.data?.results || cityRes?.data?.data || cityRes?.data || [];

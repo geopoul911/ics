@@ -41,7 +41,7 @@ export function EditBankClientAccountIdModal({ bankClientAccount, refreshData, u
     try {
       const currentHeaders = { ...headers, Authorization: "Token " + localStorage.getItem("userToken") };
       const res = await axios.put(
-        `http://localhost:8000/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
+        `https://ultima.icsgr.com/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
         { bankclientacco_id: bankclientacco_id.trim() },
         { headers: currentHeaders }
       );
@@ -134,7 +134,7 @@ export function EditBankClientAccountClientModal({ bankClientAccount, refreshDat
       try {
         const currentHeaders = { ...headers, Authorization: "Token " + localStorage.getItem("userToken") };
         const response = await axios.get(
-          "http://localhost:8000/api/data_management/all_clients/",
+          "https://ultima.icsgr.com/api/data_management/all_clients/",
           { headers: currentHeaders }
         );
         setClients(response.data.all_clients || []);
@@ -157,7 +157,7 @@ export function EditBankClientAccountClientModal({ bankClientAccount, refreshDat
     try {
       const currentHeaders = { ...headers, Authorization: "Token " + localStorage.getItem("userToken") };
       const res = await axios.put(
-        `http://localhost:8000/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
+        `https://ultima.icsgr.com/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
         { client_id },
         { headers: currentHeaders }
       );
@@ -244,7 +244,7 @@ export function EditBankClientAccountBankModal({ bankClientAccount, refreshData,
       try {
         const currentHeaders = { ...headers, Authorization: "Token " + localStorage.getItem("userToken") };
         const response = await axios.get(
-          "http://localhost:8000/api/administration/all_banks/",
+          "https://ultima.icsgr.com/api/administration/all_banks/",
           { headers: currentHeaders }
         );
         setBanks(response.data.all_banks || []);
@@ -267,7 +267,7 @@ export function EditBankClientAccountBankModal({ bankClientAccount, refreshData,
     try {
       const currentHeaders = { ...headers, Authorization: "Token " + localStorage.getItem("userToken") };
       const res = await axios.put(
-        `http://localhost:8000/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
+        `https://ultima.icsgr.com/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
         { bank_id },
         { headers: currentHeaders }
       );
@@ -357,7 +357,7 @@ export function EditBankClientAccountTransitNumberModal({ bankClientAccount, ref
     try {
       const currentHeaders = { ...headers, Authorization: "Token " + localStorage.getItem("userToken") };
       const res = await axios.put(
-        `http://localhost:8000/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
+        `https://ultima.icsgr.com/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
         { transitnumber },
         { headers: currentHeaders }
       );
@@ -438,7 +438,7 @@ export function EditBankClientAccountAccountNumberModal({ bankClientAccount, ref
     try {
       const currentHeaders = { ...headers, Authorization: "Token " + localStorage.getItem("userToken") };
       const res = await axios.put(
-        `http://localhost:8000/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
+        `https://ultima.icsgr.com/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
         { accountnumber },
         { headers: currentHeaders }
       );
@@ -512,7 +512,7 @@ export function EditBankClientAccountIbanModal({ bankClientAccount, refreshData,
     try {
       const currentHeaders = { ...headers, Authorization: "Token " + localStorage.getItem("userToken") };
       const res = await axios.put(
-        `http://localhost:8000/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
+        `https://ultima.icsgr.com/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
         { iban },
         { headers: currentHeaders }
       );
@@ -586,7 +586,7 @@ export function EditBankClientAccountActiveModal({ bankClientAccount, refreshDat
     try {
       const currentHeaders = { ...headers, Authorization: "Token " + localStorage.getItem("userToken") };
       const res = await axios.put(
-        `http://localhost:8000/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
+        `https://ultima.icsgr.com/api/data_management/bank_client_account/${bankClientAccount.bankclientacco_id}/`,
         { active },
         { headers: currentHeaders }
       );

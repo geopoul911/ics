@@ -30,7 +30,7 @@ import {
 window.Swal = Swal;
 
 // API endpoint (use full list including inactive)
-const ALL_PROFESSIONALS = "http://localhost:8000/api/data_management/professionals/";
+const ALL_PROFESSIONALS = "https://ultima.icsgr.com/api/data_management/professionals/";
 
 const columns = [
   {

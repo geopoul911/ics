@@ -18,7 +18,7 @@ import { headers } from "../global_vars";
 window.Swal = Swal;
 
 // API endpoints
-const UPDATE_TASK_COMMENT = "http://localhost:8000/api/data_management/task_comment/";
+const UPDATE_TASK_COMMENT = "https://ultima.icsgr.com/api/data_management/task_comment/";
 
 // Edit Task Comment Project Task Modal
 export function EditTaskCommentProjectTaskModal({ taskComment, update_state }) {
@@ -37,7 +37,7 @@ export function EditTaskCommentProjectTaskModal({ taskComment, update_state }) {
   const loadProjectTasks = async () => {
     try {
       const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
-      const response = await axios.get("http://localhost:8000/api/data_management/project_tasks/", { headers: currentHeaders });
+      const response = await axios.get("https://ultima.icsgr.com/api/data_management/project_tasks/", { headers: currentHeaders });
       const projectTasksData = response?.data?.all_project_tasks || response?.data?.results || response?.data?.data || response?.data || [];
       setProjectTasks(Array.isArray(projectTasksData) ? projectTasksData : []);
     } catch (error) {
@@ -132,7 +132,7 @@ export function EditTaskCommentConsultantModal({ taskComment, update_state }) {
   const loadConsultants = async () => {
     try {
       const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
-      const response = await axios.get("http://localhost:8000/api/administration/all_consultants/", { headers: currentHeaders });
+      const response = await axios.get("https://ultima.icsgr.com/api/administration/all_consultants/", { headers: currentHeaders });
       const list = response?.data?.all_consultants || response?.data?.results || response?.data?.data || response?.data || [];
       setConsultants(Array.isArray(list) ? list : []);
     } catch (error) {

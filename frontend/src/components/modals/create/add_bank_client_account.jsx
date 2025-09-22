@@ -19,7 +19,7 @@ import { headers } from "../../global_vars";
 window.Swal = Swal;
 
 // API endpoint
-const ADD_BANK_CLIENT_ACCOUNT = "http://localhost:8000/api/data_management/bank_client_accounts/";
+const ADD_BANK_CLIENT_ACCOUNT = "https://ultima.icsgr.com/api/data_management/bank_client_accounts/";
 
 function AddBankClientAccountModal({ refreshData, defaultClientId, lockClient = false, defaultBankId, lockBank = false }) {
   const [show, setShow] = useState(false);
@@ -70,14 +70,14 @@ function AddBankClientAccountModal({ refreshData, defaultClientId, lockClient = 
       };
       // Fetch clients
       const clientsResponse = await axios.get(
-        "http://localhost:8000/api/data_management/all_clients/",
+        "https://ultima.icsgr.com/api/data_management/all_clients/",
         { headers: currentHeaders }
       );
       setClients(clientsResponse.data.all_clients || []);
 
       // Fetch banks
       const banksResponse = await axios.get(
-        "http://localhost:8000/api/administration/all_banks/",
+        "https://ultima.icsgr.com/api/administration/all_banks/",
         { headers: currentHeaders }
       );
       setBanks(banksResponse.data.all_banks || []);

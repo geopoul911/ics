@@ -32,7 +32,7 @@ import {
 } from "../../../global_vars";
 
 // API endpoint for task category
-const VIEW_TASK_CATEGORY = "http://localhost:8000/api/administration/task_category/";
+const VIEW_TASK_CATEGORY = "https://ultima.icsgr.com/api/administration/task_category/";
 
 // Helpers to read URL like: /administration/task_category/<taskcate_id>
 function getTaskCategoryIdFromPath() {

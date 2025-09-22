@@ -28,7 +28,7 @@ import {
 import { headers } from "../../../global_vars";
 
 // API endpoint
-const VIEW_TAXATION = "http://localhost:8000/api/data_management/taxation_project/";
+const VIEW_TAXATION = "https://ultima.icsgr.com/api/data_management/taxation_project/";
 
 function TaxationProjectOverview() {
   const { id } = useParams();

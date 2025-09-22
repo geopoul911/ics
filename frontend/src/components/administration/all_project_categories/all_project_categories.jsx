@@ -31,7 +31,7 @@ import {
 window.Swal = Swal;
 
 // API endpoint for project categories
-const ALL_PROJECT_CATEGORIES = "http://localhost:8000/api/administration/all_project_categories/";
+const ALL_PROJECT_CATEGORIES = "https://ultima.icsgr.com/api/administration/all_project_categories/";
 
 const columns = [
   {

@@ -30,7 +30,7 @@ import {
 window.Swal = Swal;
 
 // API endpoint
-const ALL_BANK_PROJECT_ACCOUNTS = "http://localhost:8000/api/data_management/bank_project_accounts/";
+const ALL_BANK_PROJECT_ACCOUNTS = "https://ultima.icsgr.com/api/data_management/bank_project_accounts/";
 
 const columns = [
   {

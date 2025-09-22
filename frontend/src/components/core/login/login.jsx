@@ -22,8 +22,8 @@ import { AiFillLock } from "react-icons/ai";
 import { BiShow, BiHide } from "react-icons/bi";
 
 // Variables
-const LOGIN = "http://localhost:8000/api/user/login/";
-const CHECK_IP = "http://localhost:8000/api/user/check_access_status/";
+const LOGIN = "https://ultima.icsgr.com/api/user/login/";
+const CHECK_IP = "https://ultima.icsgr.com/api/user/check_access_status/";
 
 // url path = '/login'
 class Login extends React.Component {

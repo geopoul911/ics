@@ -19,7 +19,7 @@ import { headers } from "../../global_vars";
 window.Swal = Swal;
 
 // API endpoint
-const ADD_CASH = "http://localhost:8000/api/data_management/cash/";
+const ADD_CASH = "https://ultima.icsgr.com/api/data_management/cash/";
 
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);
@@ -91,9 +91,9 @@ function AddCashModal({ onCashCreated, refreshData, defaultProjectId, lockProjec
 
       // Load reference data for dropdowns using axios
       const [projectsRes, countriesRes, consultantsRes] = await Promise.all([
-        axios.get("http://localhost:8000/api/data_management/all_projects/", { headers: currentHeaders }),
-        axios.get("http://localhost:8000/api/regions/all_countries/", { headers: currentHeaders }),
-        axios.get("http://localhost:8000/api/administration/all_consultants/", { headers: currentHeaders })
+        axios.get("https://ultima.icsgr.com/api/data_management/all_projects/", { headers: currentHeaders }),
+        axios.get("https://ultima.icsgr.com/api/regions/all_countries/", { headers: currentHeaders }),
+        axios.get("https://ultima.icsgr.com/api/administration/all_consultants/", { headers: currentHeaders })
       ]);
 
       console.log('Raw API responses:', {

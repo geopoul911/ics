@@ -22,7 +22,7 @@ import AddCashModal from "../../../modals/create/add_cash";
 import { headers, pageHeader, loader } from "../../../global_vars";
 import { formatAmountWithCurrency } from "../../../global_vars";
 
-const VIEW_PROJECT = "http://localhost:8000/api/data_management/project/";
+const VIEW_PROJECT = "https://ultima.icsgr.com/api/data_management/project/";
 
 function getProjectIdFromPath() {
   const parts = window.location.pathname.split("/").filter(Boolean);

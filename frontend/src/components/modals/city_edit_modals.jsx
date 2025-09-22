@@ -18,9 +18,9 @@ import { Button } from "semantic-ui-react";
 
 
 // API base
-const CITY_DETAIL = "http://localhost:8000/api/regions/city/";
-const GET_COUNTRIES = "http://localhost:8000/api/regions/all_countries/";
-const GET_PROVINCES = "http://localhost:8000/api/regions/all_provinces/";
+const CITY_DETAIL = "https://ultima.icsgr.com/api/regions/city/";
+const GET_COUNTRIES = "https://ultima.icsgr.com/api/regions/all_countries/";
+const GET_PROVINCES = "https://ultima.icsgr.com/api/regions/all_provinces/";
 
 // Helpers
 const clampLen = (v, max) => (v || "").slice(0, max);

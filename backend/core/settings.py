@@ -20,9 +20,9 @@ SECRET_KEY = 'f2h*8c#j3m@!q!z4&jv@1g4rb5o5-8ox-^d%o6=gi+e8&d=ofp'
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['*', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['www.ultima.icsgr.com', 'ultima.icsgr.com', '167.71.142.58']
 
 # Applications
 INSTALLED_APPS = [
@@ -98,8 +98,8 @@ DATABASES = {
         'NAME': 'ics',
         'USER': 'postgres',
         'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '5432'
+        'HOST': '',
+        'PORT': ''
     },
 }
 
@@ -119,10 +119,12 @@ USE_TZ = False
 
 STATIC_URL = '/dj_static/'
 # STATICFILES_DIRS = [os.path.join(BASE_DIR, 'web/static'), ]
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # Media (needed for photo uploads)
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+CSRF_TRUSTED_ORIGINS = ['ultima.icsgr.com', 'wwww.ultima.icsgr.com']
 
 # CORS is a mechanism to allow interaction with resources hosted on different domains.
 # For instance, one of the most common scenarios to apply it is with Ajax requests.
@@ -130,6 +132,8 @@ CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://ultima.icsgr.com",
+    "https://wwww.ultima.icsgr.com",
 ]
 CORS_ALLOW_CREDENTIALS = False
 

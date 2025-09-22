@@ -40,7 +40,7 @@ let iconStyle = {
 };
 
 const API_BASE = (typeof window !== 'undefined' && window.location && window.location.port === '3000')
-  ? 'http://127.0.0.1:8000'
+  ? 'https://ultima.icsgr.com'
   : '';
 
 // Navigation Bar has no url , it is included in all pages

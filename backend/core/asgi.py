@@ -6,6 +6,6 @@ ASGI (Asynchronous Server Gateway Interface) is a spiritual successor to WSGI,
 intended to provide a standard interface between async-capable Python web servers, frameworks, and applications.
 """
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Group_Plan.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
 application = get_asgi_application()

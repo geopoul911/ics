@@ -35,7 +35,7 @@ import {
 } from "../../../global_vars";
 
 // API endpoint for bank
-const VIEW_BANK = "http://localhost:8000/api/administration/bank/";
+const VIEW_BANK = "https://ultima.icsgr.com/api/administration/bank/";
 
 // Helpers to read URL like: /administration/bank/<bank_id>
 function getBankIdFromPath() {
@@ -77,7 +77,7 @@ class BankOverview extends React.Component {
         let bankClientAccounts = bank.bank_client_accounts || [];
         if (!Array.isArray(bankClientAccounts) || bankClientAccounts.length === 0) {
           try {
-            const bcaRes = await axios.get("http://localhost:8000/api/data_management/bank_client_accounts/", { headers: currentHeaders });
+            const bcaRes = await axios.get("https://ultima.icsgr.com/api/data_management/bank_client_accounts/", { headers: currentHeaders });
             const all = bcaRes?.data?.all_bank_client_accounts || bcaRes?.data?.results || bcaRes?.data?.data || bcaRes?.data || [];
             const bid = bank.bank_id;
             bankClientAccounts = (Array.isArray(all) ? all : []).filter(a => a.bank && (a.bank.bank_id === bid || a.bank === bid));

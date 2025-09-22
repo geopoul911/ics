@@ -22,7 +22,7 @@ import { headers } from "../../global_vars";
 window.Swal = Swal;
 
 // API endpoint
-const ADD_CLIENT = "http://localhost:8000/api/data_management/clients/";
+const ADD_CLIENT = "https://ultima.icsgr.com/api/data_management/clients/";
 
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);
@@ -183,8 +183,8 @@ function AddClientModal({ onClientCreated }) {
       // Load reference data for dropdowns using axios
       const authHeaders = { headers: { ...headers, Authorization: "Token " + localStorage.getItem("userToken") } };
       const [countriesRes, insuranceCarriersRes] = await Promise.all([
-        axios.get("http://localhost:8000/api/regions/all_countries/", authHeaders),
-        axios.get("http://localhost:8000/api/administration/all_insurance_carriers/", authHeaders)
+        axios.get("https://ultima.icsgr.com/api/regions/all_countries/", authHeaders),
+        axios.get("https://ultima.icsgr.com/api/administration/all_insurance_carriers/", authHeaders)
       ]);
       
       console.log('Raw API responses:', {
@@ -222,7 +222,7 @@ function AddClientModal({ onClientCreated }) {
   const loadProvinces = async (countryId) => {
     try {
       console.log('Loading provinces for country:', countryId);
-      const response = await axios.get(`http://localhost:8000/api/regions/all_provinces/?country=${countryId}`,
+      const response = await axios.get(`https://ultima.icsgr.com/api/regions/all_provinces/?country=${countryId}`,
         { headers: { ...headers, Authorization: "Token " + localStorage.getItem("userToken") } }
       );
       console.log('Raw provinces response:', response);
@@ -244,7 +244,7 @@ function AddClientModal({ onClientCreated }) {
   const loadCities = async (provinceId) => {
     try {
       console.log('Loading cities for province:', provinceId);
-      const response = await axios.get(`http://localhost:8000/api/regions/all_cities/?province=${provinceId}`,
+      const response = await axios.get(`https://ultima.icsgr.com/api/regions/all_cities/?province=${provinceId}`,
         { headers: { ...headers, Authorization: "Token " + localStorage.getItem("userToken") } }
       );
       console.log('Raw cities response:', response);

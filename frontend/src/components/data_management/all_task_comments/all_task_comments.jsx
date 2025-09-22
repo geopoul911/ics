@@ -30,7 +30,7 @@ import {
 window.Swal = Swal;
 
 // API endpoint
-const ALL_TASK_COMMENTS = "http://localhost:8000/api/data_management/task_comments/";
+const ALL_TASK_COMMENTS = "https://ultima.icsgr.com/api/data_management/task_comments/";
 
 const columns = [
   {

@@ -19,7 +19,7 @@ import { headers } from "../../global_vars";
 window.Swal = Swal;
 
 // API endpoint
-const ADD_ASSOCIATED_CLIENT = "http://localhost:8000/api/data_management/associated_clients/";
+const ADD_ASSOCIATED_CLIENT = "https://ultima.icsgr.com/api/data_management/associated_clients/";
 
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);
@@ -71,8 +71,8 @@ function AddAssociatedClientModal({ onClientCreated, refreshData, defaultProject
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
       const [projectsRes, clientsRes] = await Promise.all([
-        axios.get("http://localhost:8000/api/data_management/all_projects/", { headers: currentHeaders }),
-        axios.get("http://localhost:8000/api/data_management/all_clients/", { headers: currentHeaders })
+        axios.get("https://ultima.icsgr.com/api/data_management/all_projects/", { headers: currentHeaders }),
+        axios.get("https://ultima.icsgr.com/api/data_management/all_clients/", { headers: currentHeaders })
       ]);
       
       console.log('Raw API responses:', {

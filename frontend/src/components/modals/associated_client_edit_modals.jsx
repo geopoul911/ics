@@ -18,7 +18,7 @@ import { headers } from "../global_vars";
 window.Swal = Swal;
 
 // API endpoints
-const UPDATE_ASSOCIATED_CLIENT = "http://localhost:8000/api/data_management/associated_client/";
+const UPDATE_ASSOCIATED_CLIENT = "https://ultima.icsgr.com/api/data_management/associated_client/";
 
 // Helpers
 // const clampLen = (value, max) => value.slice(0, max);
@@ -43,7 +43,7 @@ export function EditAssociatedClientProjectModal({ associatedClient, update_stat
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-      const response = await axios.get("http://localhost:8000/api/data_management/all_projects/", { headers: currentHeaders });
+      const response = await axios.get("https://ultima.icsgr.com/api/data_management/all_projects/", { headers: currentHeaders });
       const projectsData = response?.data?.all_projects || [];
       setProjects(projectsData);
     } catch (error) {
@@ -151,7 +151,7 @@ export function EditAssociatedClientClientModal({ associatedClient, update_state
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-      const response = await axios.get("http://localhost:8000/api/data_management/all_clients/", { headers: currentHeaders });
+      const response = await axios.get("https://ultima.icsgr.com/api/data_management/all_clients/", { headers: currentHeaders });
       const clientsData = response?.data?.all_clients || [];
       setClients(clientsData);
     } catch (error) {

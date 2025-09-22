@@ -30,7 +30,7 @@ import {
 window.Swal = Swal;
 
 // API endpoint
-const ALL_CLIENT_CONTACTS = "http://localhost:8000/api/data_management/client_contacts/";
+const ALL_CLIENT_CONTACTS = "https://ultima.icsgr.com/api/data_management/client_contacts/";
 
 const columns = [
   {

@@ -15,8 +15,8 @@ import axios from "axios";
 // Global Variables
 import { headers, pageHeader, loader } from "../../../global_vars";
 
-const VIEW_CLIENT = "http://localhost:8000/api/data_management/client/";
-const VIEW_PROJECT = "http://localhost:8000/api/data_management/project/";
+const VIEW_CLIENT = "https://ultima.icsgr.com/api/data_management/client/";
+const VIEW_PROJECT = "https://ultima.icsgr.com/api/data_management/project/";
 
 function getClientIdFromPath() {
   const parts = window.location.pathname.split("/").filter(Boolean);

@@ -18,7 +18,7 @@ import { headers } from "../global_vars";
 window.Swal = Swal;
 
 // API endpoint for project category updates
-const UPDATE_PROJECT_CATEGORY = "http://localhost:8000/api/administration/project_category/";
+const UPDATE_PROJECT_CATEGORY = "https://ultima.icsgr.com/api/administration/project_category/";
 
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);

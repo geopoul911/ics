@@ -13,7 +13,7 @@ const Dashboard = () => {
   useEffect(() => {
     async function load() {
       try {
-        const res = await axios.get('http://localhost:8000/api/dashboard/my/', { headers: { ...headers, Authorization: 'Token ' + localStorage.getItem('userToken') } });
+        const res = await axios.get('https://ultima.icsgr.com/api/dashboard/my/', { headers: { ...headers, Authorization: 'Token ' + localStorage.getItem('userToken') } });
         setData(res?.data?.data || {});
       } catch (_e) {
         setData({});

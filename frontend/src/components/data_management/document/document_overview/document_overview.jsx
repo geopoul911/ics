@@ -28,7 +28,7 @@ import {
 } from "../../../modals/document_edit_modals";
 import DeleteObjectModal from "../../../modals/delete_object";
 
-const VIEW_DOCUMENT = "http://localhost:8000/api/data_management/document/";
+const VIEW_DOCUMENT = "https://ultima.icsgr.com/api/data_management/document/";
 
 function getDocumentIdFromPath() {
   const pathParts = window.location.pathname.split('/');

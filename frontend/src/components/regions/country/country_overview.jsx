@@ -34,7 +34,7 @@ import {
 } from "../../global_vars";
 
 // API (Updated to use new data_management API)
-const VIEW_COUNTRY = "http://localhost:8000/api/regions/country/";
+const VIEW_COUNTRY = "https://ultima.icsgr.com/api/regions/country/";
 
 // Helpers to read URL like: /regions/country/<country_id>
 function getCountryIdFromPath() {
@@ -87,7 +87,7 @@ class CountryOverview extends React.Component {
         if (provinces.length === 0) {
           try {
             const provRes = await axios.get(
-              "http://localhost:8000/api/regions/all_provinces/",
+              "https://ultima.icsgr.com/api/regions/all_provinces/",
               { headers: currentHeaders }
             );
             const allProvinces = provRes?.data?.all_provinces || provRes?.data?.results || provRes?.data?.data || provRes?.data || [];
@@ -106,7 +106,7 @@ class CountryOverview extends React.Component {
         // Enrich provinces with their cities
         try {
           const citiesRes = await axios.get(
-            "http://localhost:8000/api/regions/all_cities/",
+            "https://ultima.icsgr.com/api/regions/all_cities/",
             { headers: currentHeaders }
           );
           const allCities = citiesRes?.data?.all_cities || citiesRes?.data?.results || citiesRes?.data?.data || citiesRes?.data || [];

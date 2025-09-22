@@ -20,8 +20,8 @@ import Footer from "../../core/footer/footer";
 // Global Vars
 import { headers, pageHeader, loader } from "../../global_vars";
 
-const LIST_AUDIT_EVENTS = "http://localhost:8000/api/administration/audit_events/";
-const LIST_CONSULTANTS = "http://localhost:8000/api/administration/all_consultants/";
+const LIST_AUDIT_EVENTS = "https://ultima.icsgr.com/api/administration/audit_events/";
+const LIST_CONSULTANTS = "https://ultima.icsgr.com/api/administration/all_consultants/";
 
 
 

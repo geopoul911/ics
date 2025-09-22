@@ -19,7 +19,7 @@ import { headers } from "../../global_vars";
 window.Swal = Swal;
 
 // API endpoint for creating insurance carriers
-const CREATE_INSURANCE_CARRIER = "http://localhost:8000/api/administration/all_insurance_carriers/";
+const CREATE_INSURANCE_CARRIER = "https://ultima.icsgr.com/api/administration/all_insurance_carriers/";
 
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);

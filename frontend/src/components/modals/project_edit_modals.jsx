@@ -19,7 +19,7 @@ import { headers } from "../global_vars";
 window.Swal = Swal;
 
 // API endpoints
-const UPDATE_PROJECT = "http://localhost:8000/api/data_management/project/";
+const UPDATE_PROJECT = "https://ultima.icsgr.com/api/data_management/project/";
 
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);
@@ -330,7 +330,7 @@ export function EditProjectConsultantModal({ project, refreshData }) {
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-      const response = await axios.get("http://localhost:8000/api/administration/all_consultants/", { headers: currentHeaders });
+      const response = await axios.get("https://ultima.icsgr.com/api/administration/all_consultants/", { headers: currentHeaders });
       const consultantsData = response?.data?.all_consultants || [];
       setConsultants(consultantsData);
     } catch (error) {
@@ -445,7 +445,7 @@ export function EditProjectTaxationModal({ project, refreshData }) {
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-      const res = await axios.get("http://localhost:8000/api/administration/all_project_categories/", { headers: currentHeaders });
+      const res = await axios.get("https://ultima.icsgr.com/api/administration/all_project_categories/", { headers: currentHeaders });
       const data = res?.data?.all_project_categories || [];
       setAllCategories(Array.isArray(data) ? data : []);
     } catch (e) {

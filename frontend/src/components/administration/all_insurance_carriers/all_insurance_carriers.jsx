@@ -32,7 +32,7 @@ import {
 window.Swal = Swal;
 
 // API endpoint for insurance carriers
-const ALL_INSURANCE_CARRIERS = "http://localhost:8000/api/administration/all_insurance_carriers/";
+const ALL_INSURANCE_CARRIERS = "https://ultima.icsgr.com/api/administration/all_insurance_carriers/";
 
 const columns = [
   {

@@ -33,7 +33,7 @@ import {
 } from "../../global_vars";
 
 // API (Using regions API)
-const VIEW_CITY = "http://localhost:8000/api/regions/city/";
+const VIEW_CITY = "https://ultima.icsgr.com/api/regions/city/";
 
 // Helpers to read URL like: /regions/city/<city_id>
 function getCityIdFromPath() {

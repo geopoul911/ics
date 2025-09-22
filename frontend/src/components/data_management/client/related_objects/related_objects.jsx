@@ -26,7 +26,7 @@ import {
 } from "../../../global_vars";
 
 // API endpoint for client
-const VIEW_CLIENT = "http://localhost:8000/api/data_management/client/";
+const VIEW_CLIENT = "https://ultima.icsgr.com/api/data_management/client/";
 
 // Helpers to read URL like: /data_management/client/<client_id>
 function getClientIdFromPath() {
@@ -123,7 +123,7 @@ class ClientOverview extends React.Component {
         const projectIds = projects.map((p) => p.project_id);
         if (projectIds.length > 0) {
           axios
-            .get(`http://localhost:8000/api/data_management/all_properties/`, { headers: currentHeaders })
+            .get(`https://ultima.icsgr.com/api/data_management/all_properties/`, { headers: currentHeaders })
             .then((prRes) => {
               const allProps = Array.isArray(prRes?.data?.all_properties) ? prRes.data.all_properties : [];
               const projectProperties = allProps.filter((prop) => projectIds.includes(prop.project?.project_id));
@@ -133,7 +133,7 @@ class ClientOverview extends React.Component {
 
           // Fetch project details (categories, tasks, task comments, cash)
           const detailPromises = projectIds.map((pid) =>
-            axios.get(`http://localhost:8000/api/data_management/project/${pid}/`, { headers: currentHeaders })
+            axios.get(`https://ultima.icsgr.com/api/data_management/project/${pid}/`, { headers: currentHeaders })
               .then((r) => ({ pid, data: r?.data || {} }))
               .catch(() => ({ pid, data: {} }))
           );

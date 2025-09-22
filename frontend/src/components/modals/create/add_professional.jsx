@@ -21,9 +21,9 @@ import { headers } from "../../global_vars";
 window.Swal = Swal;
 
 // API endpoints
-const ADD_PROFESSIONAL = "http://localhost:8000/api/data_management/professionals/";
-const ALL_PROFESSIONS = "http://localhost:8000/api/administration/all_professions/";
-const ALL_CITIES = "http://localhost:8000/api/regions/all_cities/";
+const ADD_PROFESSIONAL = "https://ultima.icsgr.com/api/data_management/professionals/";
+const ALL_PROFESSIONS = "https://ultima.icsgr.com/api/administration/all_professions/";
+const ALL_CITIES = "https://ultima.icsgr.com/api/regions/all_cities/";
 
 function AddProfessionalModal({ onProfessionalCreated, defaultProfessionId, lockProfession = false }) {
   const [show, setShow] = useState(false);

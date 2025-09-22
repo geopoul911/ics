@@ -14,7 +14,7 @@ import Footer from "../../core/footer/footer";
 import { headers, pageHeader, loader, paginationOptions, formatAmountWithCurrency } from "../../global_vars";
 
 // API endpoints
-const ALL_CASH = "http://localhost:8000/api/data_management/cash/";
+const ALL_CASH = "https://ultima.icsgr.com/api/data_management/cash/";
 
 // Styling bits
 const labelPillStyle = {
@@ -51,8 +51,8 @@ function CashReport() {
       try {
         const [cashRes, projRes, consRes] = await Promise.all([
           axios.get(ALL_CASH, { headers: currentHeaders }),
-          axios.get('http://localhost:8000/api/data_management/projects/', { headers: currentHeaders }),
-          axios.get('http://localhost:8000/api/administration/all_consultants/', { headers: currentHeaders }),
+          axios.get('https://ultima.icsgr.com/api/data_management/projects/', { headers: currentHeaders }),
+          axios.get('https://ultima.icsgr.com/api/administration/all_consultants/', { headers: currentHeaders }),
         ]);
         const all = cashRes?.data?.all_cash || cashRes?.data?.results || cashRes?.data?.data || cashRes?.data || [];
         const normalized = (Array.isArray(all) ? all : []).map((c) => ({ ...c, trandate: c?.trandate ? new Date(c.trandate) : null }));

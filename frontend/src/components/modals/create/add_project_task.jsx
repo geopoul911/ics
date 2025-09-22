@@ -17,7 +17,7 @@ import { headers } from "../../global_vars";
 // Variables
 window.Swal = Swal;
 
-const CREATE_PROJECT_TASK = "http://localhost:8000/api/data_management/project_tasks/";
+const CREATE_PROJECT_TASK = "https://ultima.icsgr.com/api/data_management/project_tasks/";
 
 function AddProjectTaskModal({ onCreated, refreshData, defaultProjectId, lockProject = false }) {
   const [show, setShow] = useState(false);
@@ -59,7 +59,7 @@ function AddProjectTaskModal({ onCreated, refreshData, defaultProjectId, lockPro
         "Authorization": "Token " + localStorage.getItem("userToken"),
       };
       const res = await axios.get(
-        "http://localhost:8000/api/data_management/all_projects/",
+        "https://ultima.icsgr.com/api/data_management/all_projects/",
         { headers: currentHeaders }
       );
       setProjects(res.data.all_projects || []);
@@ -76,7 +76,7 @@ function AddProjectTaskModal({ onCreated, refreshData, defaultProjectId, lockPro
         "Authorization": "Token " + localStorage.getItem("userToken"),
       };
       const res = await axios.get(
-        "http://localhost:8000/api/administration/all_task_categories/",
+        "https://ultima.icsgr.com/api/administration/all_task_categories/",
         { headers: currentHeaders }
       );
       setTaskCategories(res.data.all_task_categories || []);
@@ -93,7 +93,7 @@ function AddProjectTaskModal({ onCreated, refreshData, defaultProjectId, lockPro
         "Authorization": "Token " + localStorage.getItem("userToken"),
       };
       const res = await axios.get(
-        "http://localhost:8000/api/administration/all_consultants/",
+        "https://ultima.icsgr.com/api/administration/all_consultants/",
         { headers: currentHeaders }
       );
       setConsultants(res.data.all_consultants || []);

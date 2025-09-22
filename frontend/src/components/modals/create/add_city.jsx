@@ -18,9 +18,9 @@ import { headers } from "../../global_vars";
 window.Swal = Swal;
 
 // API endpoints - Using regions API
-const ADD_CITY = "http://localhost:8000/api/regions/all_cities/";
-const GET_COUNTRIES = "http://localhost:8000/api/regions/all_countries/";
-const GET_PROVINCES = "http://localhost:8000/api/regions/all_provinces/";
+const ADD_CITY = "https://ultima.icsgr.com/api/regions/all_cities/";
+const GET_COUNTRIES = "https://ultima.icsgr.com/api/regions/all_countries/";
+const GET_PROVINCES = "https://ultima.icsgr.com/api/regions/all_provinces/";
 
 // Helpers
 const onlyUpperLetters = (value) => value.replace(/[^a-zA-Z]/g, "").toUpperCase();

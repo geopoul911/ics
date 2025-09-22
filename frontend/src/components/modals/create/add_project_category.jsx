@@ -19,7 +19,7 @@ import { headers } from "../../global_vars";
 window.Swal = Swal;
 
 // API endpoint for creating project categories
-const CREATE_PROJECT_CATEGORY = "http://localhost:8000/api/administration/all_project_categories/";
+const CREATE_PROJECT_CATEGORY = "https://ultima.icsgr.com/api/administration/all_project_categories/";
 
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);

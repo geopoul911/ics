@@ -13,7 +13,7 @@ import { Button } from "semantic-ui-react";
 // Globals
 import { headers } from "../global_vars";
 
-const UPDATE = "http://localhost:8000/api/data_management/bank_project_account/";
+const UPDATE = "https://ultima.icsgr.com/api/data_management/bank_project_account/";
 
 export function EditBPAProjectModal({ bpa, update_state }) {
   const [show, setShow] = useState(false);
@@ -26,7 +26,7 @@ export function EditBPAProjectModal({ bpa, update_state }) {
   const loadProjects = async () => {
     try {
       const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
-      const res = await axios.get("http://localhost:8000/api/data_management/all_projects/", { headers: currentHeaders });
+      const res = await axios.get("https://ultima.icsgr.com/api/data_management/all_projects/", { headers: currentHeaders });
       setProjects(res?.data?.all_projects || []);
     } catch (e) { setProjects([]); }
   };
@@ -83,7 +83,7 @@ export function EditBPAClientModal({ bpa, update_state }) {
   const loadClients = async () => {
     try {
       const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
-      const res = await axios.get("http://localhost:8000/api/data_management/all_clients/", { headers: currentHeaders });
+      const res = await axios.get("https://ultima.icsgr.com/api/data_management/all_clients/", { headers: currentHeaders });
       setClients(res?.data?.all_clients || []);
     } catch (e) { setClients([]); }
   };
@@ -140,7 +140,7 @@ export function EditBPABankClientAccountModal({ bpa, update_state }) {
   const loadAccounts = async () => {
     try {
       const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
-      const res = await axios.get("http://localhost:8000/api/data_management/all_bank_client_accounts/", { headers: currentHeaders });
+      const res = await axios.get("https://ultima.icsgr.com/api/data_management/all_bank_client_accounts/", { headers: currentHeaders });
       setAccounts(res?.data?.all_bank_client_accounts || []);
     } catch (e) { setAccounts([]); }
   };

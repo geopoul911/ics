@@ -14,7 +14,7 @@ import Footer from "../../core/footer/footer";
 import { headers, pageHeader, loader, paginationOptions } from "../../global_vars";
 
 // API endpoints
-const ALL_PROPERTIES = "http://localhost:8000/api/data_management/all_properties/";
+const ALL_PROPERTIES = "https://ultima.icsgr.com/api/data_management/all_properties/";
 
 // Styling bits
 const labelPillStyle = {

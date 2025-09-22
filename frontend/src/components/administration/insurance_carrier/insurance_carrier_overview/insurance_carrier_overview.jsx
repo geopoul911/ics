@@ -31,7 +31,7 @@ import {
 } from "../../../global_vars";
 
 // API endpoint for insurance carrier
-const VIEW_INSURANCE_CARRIER = "http://localhost:8000/api/administration/insurance_carrier/";
+const VIEW_INSURANCE_CARRIER = "https://ultima.icsgr.com/api/administration/insurance_carrier/";
 
 // Helpers to read URL like: /administration/insurance_carrier/<insucarrier_id>
 function getInsuranceCarrierIdFromPath() {
@@ -72,7 +72,7 @@ class InsuranceCarrierOverview extends React.Component {
         let clients = insurance_carrier.clients || [];
         try {
           const icid = insurance_carrier.insucarrier_id;
-          const clientsRes = await axios.get(`http://localhost:8000/api/data_management/clients/?insucarrier=${encodeURIComponent(icid)}`, { headers: currentHeaders });
+          const clientsRes = await axios.get(`https://ultima.icsgr.com/api/data_management/clients/?insucarrier=${encodeURIComponent(icid)}`, { headers: currentHeaders });
           clients = clientsRes?.data?.all_clients || [];
         } catch (_e) { clients = []; }
         this.setState({ insurance_carrier, clients, is_loaded: true });

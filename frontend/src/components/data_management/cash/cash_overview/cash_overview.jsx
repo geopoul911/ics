@@ -28,7 +28,7 @@ import Swal from "sweetalert2";
 import { headers } from "../../../global_vars";
 
 // API endpoint
-const VIEW_CASH = "http://localhost:8000/api/data_management/cash/";
+const VIEW_CASH = "https://ultima.icsgr.com/api/data_management/cash/";
 
 function CashOverview() {
   const { id } = useParams();

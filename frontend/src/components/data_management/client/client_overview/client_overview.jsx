@@ -51,7 +51,7 @@ import {
 } from "../../../global_vars";
 
 // API endpoint for client
-const VIEW_CLIENT = "http://localhost:8000/api/data_management/client/";
+const VIEW_CLIENT = "https://ultima.icsgr.com/api/data_management/client/";
 
 // Helpers to read URL like: /data_management/client/<client_id>
 function getClientIdFromPath() {

@@ -30,7 +30,7 @@ import {
 } from "../../../modals/project_edit_modals";
 import DeleteObjectModal from "../../../modals/delete_object";
 
-const VIEW_PROJECT = "http://localhost:8000/api/data_management/project/";
+const VIEW_PROJECT = "https://ultima.icsgr.com/api/data_management/project/";
 
 function getProjectIdFromPath() {
   const pathParts = window.location.pathname.split('/');

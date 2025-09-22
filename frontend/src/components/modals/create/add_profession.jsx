@@ -19,7 +19,7 @@ import { headers } from "../../global_vars";
 window.Swal = Swal;
 
 // API endpoint for creating professions
-const CREATE_PROFESSION = "http://localhost:8000/api/administration/all_professions/";
+const CREATE_PROFESSION = "https://ultima.icsgr.com/api/administration/all_professions/";
 
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);

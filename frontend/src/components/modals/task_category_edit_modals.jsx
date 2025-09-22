@@ -18,7 +18,7 @@ import { headers } from "../global_vars";
 window.Swal = Swal;
 
 // API endpoint for updating task categories
-const UPDATE_TASK_CATEGORY = "http://localhost:8000/api/administration/task_category/";
+const UPDATE_TASK_CATEGORY = "https://ultima.icsgr.com/api/administration/task_category/";
 
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);

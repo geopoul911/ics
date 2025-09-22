@@ -32,7 +32,7 @@ import {
 import { headers } from "../../../global_vars";
 
 // API endpoint
-const VIEW_PROFESSIONAL = "http://localhost:8000/api/data_management/professional/";
+const VIEW_PROFESSIONAL = "https://ultima.icsgr.com/api/data_management/professional/";
 
 function ProfessionalOverview() {
   const { id } = useParams();

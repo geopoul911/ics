@@ -27,7 +27,7 @@ import {
 } from "../../../modals/bank_client_account_edit_modals";
 import DeleteObjectModal from "../../../modals/delete_object";
 
-const VIEW_BANK_CLIENT_ACCOUNT = "http://localhost:8000/api/data_management/bank_client_account/";
+const VIEW_BANK_CLIENT_ACCOUNT = "https://ultima.icsgr.com/api/data_management/bank_client_account/";
 
 function getBankClientAccountIdFromPath() {
   const pathParts = window.location.pathname.split('/');

@@ -16,7 +16,7 @@ import { Button } from "semantic-ui-react";
 // Globals
 
 // API base
-const COUNTRY_DETAIL = "http://localhost:8000/api/regions/country/";
+const COUNTRY_DETAIL = "https://ultima.icsgr.com/api/regions/country/";
 
 // Helpers
 const clampLen = (v, max) => (v || "").slice(0, max);

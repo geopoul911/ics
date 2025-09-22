@@ -18,7 +18,7 @@ import { headers } from "../global_vars";
 window.Swal = Swal;
 
 // API endpoints
-const UPDATE_DOCUMENT = "http://localhost:8000/api/data_management/document/";
+const UPDATE_DOCUMENT = "https://ultima.icsgr.com/api/data_management/document/";
 
 // Edit Document ID Modal
 export function EditDocumentIdModal({ document, update_state }) {
@@ -189,7 +189,7 @@ export function EditDocumentProjectModal({ document, update_state }) {
   const loadProjects = async () => {
     try {
       const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
-      const response = await axios.get("http://localhost:8000/api/data_management/all_projects/", { headers: currentHeaders });
+      const response = await axios.get("https://ultima.icsgr.com/api/data_management/all_projects/", { headers: currentHeaders });
       const projectsData = response?.data?.all_projects || response?.data?.results || response?.data?.data || response?.data || [];
       setProjects(Array.isArray(projectsData) ? projectsData : []);
     } catch (error) {
@@ -279,7 +279,7 @@ export function EditDocumentClientModal({ document, update_state }) {
   const loadClients = async () => {
     try {
       const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
-      const response = await axios.get("http://localhost:8000/api/data_management/all_clients/", { headers: currentHeaders });
+      const response = await axios.get("https://ultima.icsgr.com/api/data_management/all_clients/", { headers: currentHeaders });
       const clientsData = response?.data?.all_clients || response?.data?.results || response?.data?.data || response?.data || [];
       setClients(Array.isArray(clientsData) ? clientsData : []);
     } catch (error) {

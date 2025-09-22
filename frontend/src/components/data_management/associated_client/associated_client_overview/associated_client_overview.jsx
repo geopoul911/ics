@@ -30,7 +30,7 @@ import {
 } from "../../../global_vars";
 
 // API endpoint for associated client
-const VIEW_ASSOCIATED_CLIENT = "http://localhost:8000/api/data_management/associated_client/";
+const VIEW_ASSOCIATED_CLIENT = "https://ultima.icsgr.com/api/data_management/associated_client/";
 
 // Helpers to read URL like: /data_management/associated_client/<assoclient_id>
 function getAssociatedClientIdFromPath() {

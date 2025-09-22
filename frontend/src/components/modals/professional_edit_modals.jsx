@@ -15,7 +15,7 @@ import 'react-phone-input-2/lib/bootstrap.css';
 // Globals
 import { headers } from "../global_vars";
 
-const UPDATE_PRO = "http://localhost:8000/api/data_management/professional/";
+const UPDATE_PRO = "https://ultima.icsgr.com/api/data_management/professional/";
 
 function getAuthHeaders() {
   return { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
@@ -72,7 +72,7 @@ export function EditProfessionalProfessionModal({ professional, update_state }) 
   useEffect(() => { if (show) { setProfession(professional.profession?.profession_id || ""); load(); } }, [show, professional]);
   const load = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/api/administration/all_professions/", { headers: getAuthHeaders() });
+      const res = await axios.get("https://ultima.icsgr.com/api/administration/all_professions/", { headers: getAuthHeaders() });
       setProfessions(res?.data?.all_professions || []);
     } catch { setProfessions([]); }
   };
@@ -126,7 +126,7 @@ export function EditProfessionalCityModal({ professional, update_state }) {
   useEffect(() => { if (show) { setCity(professional.city?.city_id || ""); load(); } }, [show, professional]);
   const load = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/api/regions/all_cities/", { headers: getAuthHeaders() });
+      const res = await axios.get("https://ultima.icsgr.com/api/regions/all_cities/", { headers: getAuthHeaders() });
       setCities(res?.data?.all_cities || []);
     } catch { setCities([]); }
   };

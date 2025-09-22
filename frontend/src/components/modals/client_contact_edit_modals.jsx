@@ -20,7 +20,7 @@ import { headers } from "../global_vars";
 window.Swal = Swal;
 
 // API endpoints
-const UPDATE_CLIENT_CONTACT = "http://localhost:8000/api/data_management/client_contact/";
+const UPDATE_CLIENT_CONTACT = "https://ultima.icsgr.com/api/data_management/client_contact/";
 
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);

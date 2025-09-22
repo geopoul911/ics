@@ -22,7 +22,7 @@ import { headers } from "../../global_vars";
 window.Swal = Swal;
 
 // API endpoint - Using administration API
-const ADD_CONSULTANT = "http://localhost:8000/api/administration/all_consultants/";
+const ADD_CONSULTANT = "https://ultima.icsgr.com/api/administration/all_consultants/";
 
 // Helpers
 // eslint-disable-next-line no-useless-escape
@@ -144,7 +144,7 @@ function AddConsultantModal() {
     const loadCountries = async () => {
       try {
         const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
-        const res = await axios.get("http://localhost:8000/api/regions/all_countries/", { headers: currentHeaders });
+        const res = await axios.get("https://ultima.icsgr.com/api/regions/all_countries/", { headers: currentHeaders });
         const data = res?.data?.all_countries || [];
         setCountries(Array.isArray(data) ? data : []);
       } catch (_e) {

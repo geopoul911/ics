@@ -29,7 +29,7 @@ import {
 window.Swal = Swal;
 
 // API endpoint for consultants
-const GET_CONSULTANTS = "http://localhost:8000/api/administration/all_consultants/";
+const GET_CONSULTANTS = "https://ultima.icsgr.com/api/administration/all_consultants/";
 
 const columns = [
   {

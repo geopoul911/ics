@@ -22,7 +22,7 @@ import axios from "axios";
 window.Swal = Swal;
 
 // API endpoint for consultant
-const UPDATE_CONSULTANT = "http://localhost:8000/api/administration/consultant/";
+const UPDATE_CONSULTANT = "https://ultima.icsgr.com/api/administration/consultant/";
 
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);
@@ -818,7 +818,7 @@ export function EditConsultantCashPassportModal({ consultant, update_state }) {
     const loadCountries = async () => {
       try {
         const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
-        const res = await axios.get("http://localhost:8000/api/regions/all_countries/", { headers: currentHeaders });
+        const res = await axios.get("https://ultima.icsgr.com/api/regions/all_countries/", { headers: currentHeaders });
         const data = res?.data?.all_countries || [];
         setCountries(Array.isArray(data) ? data : []);
       } catch (_e) {

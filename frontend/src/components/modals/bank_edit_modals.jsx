@@ -18,7 +18,7 @@ import { headers } from "../global_vars";
 window.Swal = Swal;
 
 // API endpoint for bank updates
-const UPDATE_BANK = "http://localhost:8000/api/administration/bank/";
+const UPDATE_BANK = "https://ultima.icsgr.com/api/administration/bank/";
 
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);
@@ -182,7 +182,7 @@ export function EditBankCountryModal({ bank, update_state }) {
           "Authorization": "Token " + localStorage.getItem("userToken")
         };
 
-        const response = await axios.get("http://localhost:8000/api/regions/all_countries/", { headers: currentHeaders });
+        const response = await axios.get("https://ultima.icsgr.com/api/regions/all_countries/", { headers: currentHeaders });
         if (response.data && response.data.all_countries) {
           setCountries(response.data.all_countries);
         }

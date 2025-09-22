@@ -20,7 +20,7 @@ import { EditBPAProjectModal, EditBPAClientModal, EditBPABankClientAccountModal,
 import { headers } from "../../global_vars";
 
 // API endpoint
-const VIEW_BANK_PROJECT_ACCOUNT = "http://localhost:8000/api/data_management/bank_project_account/";
+const VIEW_BANK_PROJECT_ACCOUNT = "https://ultima.icsgr.com/api/data_management/bank_project_account/";
 
 function BankProjectAccountOverview() {
   const { id } = useParams();

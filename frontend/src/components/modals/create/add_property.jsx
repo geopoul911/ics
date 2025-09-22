@@ -19,7 +19,7 @@ import { headers } from "../../global_vars";
 window.Swal = Swal;
 
 // API endpoints
-const ADD_PROPERTY = "http://localhost:8000/api/data_management/all_properties/";
+const ADD_PROPERTY = "https://ultima.icsgr.com/api/data_management/all_properties/";
 
 // Helpers
 const onlyAlphanumeric = (value) => value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
@@ -107,8 +107,8 @@ function AddPropertyModal({ onPropertyCreated, refreshData, defaultProjectId, lo
       };
       // Load reference data for dropdowns using axios with auth
       const [projectsRes, countriesRes] = await Promise.all([
-        axios.get("http://localhost:8000/api/data_management/all_projects/", { headers: currentHeaders }),
-        axios.get("http://localhost:8000/api/regions/all_countries/", { headers: currentHeaders })
+        axios.get("https://ultima.icsgr.com/api/data_management/all_projects/", { headers: currentHeaders }),
+        axios.get("https://ultima.icsgr.com/api/regions/all_countries/", { headers: currentHeaders })
       ]);
       
       console.log('Raw API responses:', {
@@ -150,7 +150,7 @@ function AddPropertyModal({ onPropertyCreated, refreshData, defaultProjectId, lo
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-      const response = await axios.get(`http://localhost:8000/api/regions/all_provinces/?country=${countryId}`,{ headers: currentHeaders });
+      const response = await axios.get(`https://ultima.icsgr.com/api/regions/all_provinces/?country=${countryId}`,{ headers: currentHeaders });
       console.log('Raw provinces response:', response);
       // Provinces API returns {"all_provinces": [...]}
       const provincesData = response?.data?.all_provinces || [];
@@ -174,7 +174,7 @@ function AddPropertyModal({ onPropertyCreated, refreshData, defaultProjectId, lo
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-      const response = await axios.get(`http://localhost:8000/api/regions/all_cities/?province=${provinceId}`, { headers: currentHeaders });
+      const response = await axios.get(`https://ultima.icsgr.com/api/regions/all_cities/?province=${provinceId}`, { headers: currentHeaders });
       console.log('Raw cities response:', response);
       // Cities API returns {"all_cities": [...]}
       const citiesData = response?.data?.all_cities || [];

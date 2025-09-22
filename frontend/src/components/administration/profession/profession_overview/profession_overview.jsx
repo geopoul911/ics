@@ -30,8 +30,8 @@ import {
 } from "../../../global_vars";
 
 // API endpoints
-const VIEW_PROFESSION = "http://localhost:8000/api/administration/profession/";
-const ALL_PROFESSIONALS = "http://localhost:8000/api/data_management/all_professionals/";
+const VIEW_PROFESSION = "https://ultima.icsgr.com/api/administration/profession/";
+const ALL_PROFESSIONALS = "https://ultima.icsgr.com/api/data_management/all_professionals/";
 
 // Helpers to read URL like: /administration/profession/<profession_id>
 function getProfessionIdFromPath() {

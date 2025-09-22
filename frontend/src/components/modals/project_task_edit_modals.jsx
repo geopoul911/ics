@@ -14,7 +14,7 @@ import { Button } from "semantic-ui-react";
 // Global Vars
 import { headers } from "../global_vars";
 
-const UPDATE_TASK = "http://localhost:8000/api/data_management/project_task/";
+const UPDATE_TASK = "https://ultima.icsgr.com/api/data_management/project_task/";
 
 const withAuthHeaders = () => ({
   ...headers,
@@ -371,7 +371,7 @@ export function EditTaskAssigneeModal({ task, update_state }) {
       setAssignee(task.assignee?.consultant_id || "");
       (async () => {
         try {
-          const res = await axios.get("http://localhost:8000/api/administration/all_consultants/", { headers: withAuthHeaders() });
+          const res = await axios.get("https://ultima.icsgr.com/api/administration/all_consultants/", { headers: withAuthHeaders() });
           setConsultants(res?.data?.all_consultants || []);
         } catch (e) { setConsultants([]); }
       })();
@@ -435,7 +435,7 @@ export function EditTaskCategoryModal({ task, update_state }) {
       setCategory(task.taskcate?.taskcate_id || "");
       (async () => {
         try {
-          const res = await axios.get("http://localhost:8000/api/administration/all_task_categories/", { headers: withAuthHeaders() });
+          const res = await axios.get("https://ultima.icsgr.com/api/administration/all_task_categories/", { headers: withAuthHeaders() });
           setCategories(res?.data?.all_task_categories || []);
         } catch (e) { setCategories([]); }
       })();

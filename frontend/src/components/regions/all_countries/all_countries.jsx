@@ -30,7 +30,7 @@ import {
 window.Swal = Swal;
 
 // Updated to use new data_management API
-const GET_COUNTRIES = "http://localhost:8000/api/regions/all_countries/";
+const GET_COUNTRIES = "https://ultima.icsgr.com/api/regions/all_countries/";
 
 const columns = [
   {

@@ -15,11 +15,11 @@ import Footer from "../../core/footer/footer";
 import { headers, pageHeader, loader, paginationOptions } from "../../global_vars";
 
 // API endpoints
-const ALL_CLIENTS = "http://localhost:8000/api/data_management/clients/";
-const ALL_PROJECTS = "http://localhost:8000/api/data_management/projects/";
-const ALL_ASSOCIATED = "http://localhost:8000/api/data_management/associated_clients/";
-const ALL_CONSULTANTS = "http://localhost:8000/api/administration/all_consultants/";
-const ALL_CATEGORIES = "http://localhost:8000/api/administration/all_project_categories/";
+const ALL_CLIENTS = "https://ultima.icsgr.com/api/data_management/clients/";
+const ALL_PROJECTS = "https://ultima.icsgr.com/api/data_management/projects/";
+const ALL_ASSOCIATED = "https://ultima.icsgr.com/api/data_management/associated_clients/";
+const ALL_CONSULTANTS = "https://ultima.icsgr.com/api/administration/all_consultants/";
+const ALL_CATEGORIES = "https://ultima.icsgr.com/api/administration/all_project_categories/";
 
 // Styling bits
 const labelPillStyle = {

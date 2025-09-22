@@ -21,7 +21,7 @@ import { headers } from "../../global_vars";
 window.Swal = Swal;
 
 // API endpoint
-const ADD_CLIENT_CONTACT = "http://localhost:8000/api/data_management/client_contacts/";
+const ADD_CLIENT_CONTACT = "https://ultima.icsgr.com/api/data_management/client_contacts/";
 
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);
@@ -97,7 +97,7 @@ function AddClientContactModal({ refreshData, defaultProjectId, lockProject = fa
       };
       // Load projects
       const projectsResponse = await axios.get(
-        "http://localhost:8000/api/data_management/all_projects/",
+        "https://ultima.icsgr.com/api/data_management/all_projects/",
         { headers: currentHeaders }
       );
       const projectsData = projectsResponse?.data?.all_projects || [];
@@ -105,7 +105,7 @@ function AddClientContactModal({ refreshData, defaultProjectId, lockProject = fa
 
       // Load professionals
       const professionalsResponse = await axios.get(
-        "http://localhost:8000/api/data_management/all_professionals/",
+        "https://ultima.icsgr.com/api/data_management/all_professionals/",
         { headers: currentHeaders }
       );
       const professionalsData = professionalsResponse?.data?.all_professionals || [];

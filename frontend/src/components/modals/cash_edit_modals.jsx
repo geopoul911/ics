@@ -14,7 +14,7 @@ import { Button } from "semantic-ui-react";
 import { headers } from "../global_vars";
 
 // API
-const UPDATE_CASH = "http://localhost:8000/api/data_management/cash/";
+const UPDATE_CASH = "https://ultima.icsgr.com/api/data_management/cash/";
 
 // Country
 export function EditCashCountryModal({ cash, update_state }) {
@@ -33,7 +33,7 @@ export function EditCashCountryModal({ cash, update_state }) {
   const loadCountries = async () => {
     try {
       const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
-      const res = await axios.get("http://localhost:8000/api/regions/all_countries/", { headers: currentHeaders });
+      const res = await axios.get("https://ultima.icsgr.com/api/regions/all_countries/", { headers: currentHeaders });
       setCountries(res?.data?.all_countries || []);
     } catch (e) {
       setCountries([]);
@@ -146,7 +146,7 @@ export function EditCashConsultantModal({ cash, update_state }) {
   const loadConsultants = async () => {
     try {
       const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
-      const res = await axios.get("http://localhost:8000/api/administration/all_consultants/", { headers: currentHeaders });
+      const res = await axios.get("https://ultima.icsgr.com/api/administration/all_consultants/", { headers: currentHeaders });
       setConsultants(res?.data?.all_consultants || []);
     } catch (e) { setConsultants([]); }
   };

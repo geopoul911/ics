@@ -19,9 +19,9 @@ import { headers } from "../../global_vars";
 window.Swal = Swal;
 
 // API endpoints
-const ADD_DOCUMENT = "http://localhost:8000/api/data_management/all_documents/";
-const GET_PROJECTS = "http://localhost:8000/api/data_management/all_projects/";
-const GET_CLIENTS = "http://localhost:8000/api/data_management/all_clients/";
+const ADD_DOCUMENT = "https://ultima.icsgr.com/api/data_management/all_documents/";
+const GET_PROJECTS = "https://ultima.icsgr.com/api/data_management/all_projects/";
+const GET_CLIENTS = "https://ultima.icsgr.com/api/data_management/all_clients/";
 
 // Helpers
 const onlyAlphanumeric = (value) => value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();

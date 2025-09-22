@@ -30,7 +30,7 @@ import AddProjectTaskModal from "../../modals/create/add_project_task";
 window.Swal = Swal;
 
 // API endpoint
-const ALL_PROJECT_TASKS = "http://localhost:8000/api/data_management/project_tasks/";
+const ALL_PROJECT_TASKS = "https://ultima.icsgr.com/api/data_management/project_tasks/";
 
 const columns = [
   {

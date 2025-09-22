@@ -15,7 +15,7 @@ import { Button } from "semantic-ui-react";
 import { headers } from "../../global_vars";
 
 // API endpoint
-const ADD_TAXATION_PROJECT = "http://localhost:8000/api/data_management/taxation_projects/";
+const ADD_TAXATION_PROJECT = "https://ultima.icsgr.com/api/data_management/taxation_projects/";
 
 function AddTaxationProjectModal({ refreshData, defaultConsultantId, lockConsultant = false }) {
   const [show, setShow] = useState(false);
@@ -60,8 +60,8 @@ function AddTaxationProjectModal({ refreshData, defaultConsultantId, lockConsult
     try {
       const currentHeaders = { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
       const [clientsRes, consultantsRes] = await Promise.all([
-        axios.get("http://localhost:8000/api/data_management/all_clients/", { headers: currentHeaders }),
-        axios.get("http://localhost:8000/api/administration/all_consultants/", { headers: currentHeaders }),
+        axios.get("https://ultima.icsgr.com/api/data_management/all_clients/", { headers: currentHeaders }),
+        axios.get("https://ultima.icsgr.com/api/administration/all_consultants/", { headers: currentHeaders }),
       ]);
       setClients(clientsRes?.data?.all_clients || []);
       setConsultants(consultantsRes?.data?.all_consultants || []);

@@ -19,8 +19,8 @@ import { headers } from "../../global_vars";
 window.Swal = Swal;
 
 // API endpoints
-const ADD_BANK = "http://localhost:8000/api/administration/all_banks/";
-const GET_COUNTRIES = "http://localhost:8000/api/regions/all_countries/";
+const ADD_BANK = "https://ultima.icsgr.com/api/administration/all_banks/";
+const GET_COUNTRIES = "https://ultima.icsgr.com/api/regions/all_countries/";
 
 // Helpers
 const onlyAlphanumeric = (value) => value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();

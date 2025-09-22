@@ -33,7 +33,7 @@ import {
 // Edit Modals (to be implemented similarly later or reuse existing)
 // Edit modals can be added here later when implemented
 
-const VIEW_TASK = "http://localhost:8000/api/data_management/project_task/";
+const VIEW_TASK = "https://ultima.icsgr.com/api/data_management/project_task/";
 
 function getTaskIdFromPath() {
   const parts = window.location.pathname.split("/").filter(Boolean);

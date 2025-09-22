@@ -14,8 +14,8 @@ import Footer from "../../core/footer/footer";
 import { headers, pageHeader, loader, paginationOptions } from "../../global_vars";
 
 // API endpoints
-const ALL_DOCUMENTS = "http://localhost:8000/api/data_management/all_documents/";
-const ALL_PROJECTS = "http://localhost:8000/api/data_management/projects/";
+const ALL_DOCUMENTS = "https://ultima.icsgr.com/api/data_management/all_documents/";
+const ALL_PROJECTS = "https://ultima.icsgr.com/api/data_management/projects/";
 
 // Styling bits
 const labelPillStyle = {

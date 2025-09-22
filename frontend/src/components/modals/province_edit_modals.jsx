@@ -15,8 +15,8 @@ import { Modal, Form } from "react-bootstrap";
 import { Button } from "semantic-ui-react";
 
 // API base
-const PROVINCE_DETAIL = "http://localhost:8000/api/regions/province/";
-const GET_COUNTRIES = "http://localhost:8000/api/regions/all_countries/";
+const PROVINCE_DETAIL = "https://ultima.icsgr.com/api/regions/province/";
+const GET_COUNTRIES = "https://ultima.icsgr.com/api/regions/all_countries/";
 
 // Helpers
 const clampLen = (v, max) => (v || "").slice(0, max);

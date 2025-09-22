@@ -32,8 +32,8 @@ import {
 } from "../../../global_vars";
 
 // API endpoint for project category
-const VIEW_PROJECT_CATEGORY = "http://localhost:8000/api/administration/project_category/";
-const ALL_PROJECTS = "http://localhost:8000/api/data_management/projects/";
+const VIEW_PROJECT_CATEGORY = "https://ultima.icsgr.com/api/administration/project_category/";
+const ALL_PROJECTS = "https://ultima.icsgr.com/api/data_management/projects/";
 
 // Helpers to read URL like: /administration/project_category/<projcate_id>
 function getProjectCategoryIdFromPath() {

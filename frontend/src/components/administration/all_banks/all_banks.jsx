@@ -31,7 +31,7 @@ import {
 window.Swal = Swal;
 
 // API endpoint for banks
-const ALL_BANKS = "http://localhost:8000/api/administration/all_banks/";
+const ALL_BANKS = "https://ultima.icsgr.com/api/administration/all_banks/";
 
 const columns = [
   {

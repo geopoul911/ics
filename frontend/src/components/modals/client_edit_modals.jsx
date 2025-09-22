@@ -21,7 +21,7 @@ import { headers } from "../global_vars";
 window.Swal = Swal;
 
 // API endpoints
-const UPDATE_CLIENT = "http://localhost:8000/api/data_management/client/";
+const UPDATE_CLIENT = "https://ultima.icsgr.com/api/data_management/client/";
 
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);
@@ -69,7 +69,7 @@ export function EditClientLocationModal({ client, update_state }) {
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-              const response = await axios.get("http://localhost:8000/api/regions/all_countries/", {
+              const response = await axios.get("https://ultima.icsgr.com/api/regions/all_countries/", {
         headers: currentHeaders
       });
       const countriesData = response?.data?.all_countries || [];
@@ -86,7 +86,7 @@ export function EditClientLocationModal({ client, update_state }) {
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-      const response = await axios.get(`http://localhost:8000/api/regions/all_provinces/?country=${countryId}`, { headers: currentHeaders });
+      const response = await axios.get(`https://ultima.icsgr.com/api/regions/all_provinces/?country=${countryId}`, { headers: currentHeaders });
       const provincesData = response?.data?.all_provinces || [];
       setProvinces(provincesData);
     } catch (error) {
@@ -101,7 +101,7 @@ export function EditClientLocationModal({ client, update_state }) {
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-      const response = await axios.get(`http://localhost:8000/api/regions/all_cities/?province=${provinceId}`, { headers: currentHeaders });
+      const response = await axios.get(`https://ultima.icsgr.com/api/regions/all_cities/?province=${provinceId}`, { headers: currentHeaders });
       const citiesData = response?.data?.all_cities || [];
       setCities(citiesData);
     } catch (error) {
@@ -2599,7 +2599,7 @@ export function EditClientPassportcountryModal({ client, update_state }) {
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-      const response = await axios.get("http://localhost:8000/api/regions/all_countries/", {
+      const response = await axios.get("https://ultima.icsgr.com/api/regions/all_countries/", {
         headers: currentHeaders
       });
       const countriesData = response?.data?.all_countries || [];
@@ -3362,7 +3362,7 @@ export function EditClientPensioncountry1Modal({ client, update_state }) {
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-      const response = await axios.get("http://localhost:8000/api/regions/all_countries/", {
+      const response = await axios.get("https://ultima.icsgr.com/api/regions/all_countries/", {
         headers: currentHeaders
       });
       const countriesData = response?.data?.all_countries || [];
@@ -3467,7 +3467,7 @@ export function EditClientInsucarrier1Modal({ client, update_state }) {
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-      const response = await axios.get("http://localhost:8000/api/administration/all_insurance_carriers/", {
+      const response = await axios.get("https://ultima.icsgr.com/api/administration/all_insurance_carriers/", {
         headers: currentHeaders
       });
       const carriersData = response?.data?.all_insurance_carriers || [];
@@ -3653,7 +3653,7 @@ export function EditClientPensioncountry2Modal({ client, update_state }) {
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-      const response = await axios.get("http://localhost:8000/api/regions/all_countries/", {
+      const response = await axios.get("https://ultima.icsgr.com/api/regions/all_countries/", {
         headers: currentHeaders
       });
       const countriesData = response?.data?.all_countries || [];
@@ -3758,7 +3758,7 @@ export function EditClientInsucarrier2Modal({ client, update_state }) {
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-      const response = await axios.get("http://localhost:8000/api/administration/all_insurance_carriers/", {
+      const response = await axios.get("https://ultima.icsgr.com/api/administration/all_insurance_carriers/", {
         headers: currentHeaders
       });
       const carriersData = response?.data?.all_insurance_carriers || [];

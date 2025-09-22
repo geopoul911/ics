@@ -31,7 +31,7 @@ import {
 window.Swal = Swal;
 
 // API endpoint for task categories
-const ALL_TASK_CATEGORIES = "http://localhost:8000/api/administration/all_task_categories/";
+const ALL_TASK_CATEGORIES = "https://ultima.icsgr.com/api/administration/all_task_categories/";
 
 const columns = [
   {

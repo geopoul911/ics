@@ -19,10 +19,10 @@ import { headers } from "../../global_vars";
 window.Swal = Swal;
 
 // API endpoint
-const ADD_BANK_PROJECT_ACCOUNT = "http://localhost:8000/api/data_management/bank_project_accounts/";
-const GET_PROJECTS = "http://localhost:8000/api/data_management/all_projects/";
-const GET_CLIENTS = "http://localhost:8000/api/data_management/all_clients/";
-const GET_BANK_CLIENT_ACCOUNTS = "http://localhost:8000/api/data_management/all_bank_client_accounts/";
+const ADD_BANK_PROJECT_ACCOUNT = "https://ultima.icsgr.com/api/data_management/bank_project_accounts/";
+const GET_PROJECTS = "https://ultima.icsgr.com/api/data_management/all_projects/";
+const GET_CLIENTS = "https://ultima.icsgr.com/api/data_management/all_clients/";
+const GET_BANK_CLIENT_ACCOUNTS = "https://ultima.icsgr.com/api/data_management/all_bank_client_accounts/";
 
 // Helpers
 const onlyAlphanumeric = (value) => value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();

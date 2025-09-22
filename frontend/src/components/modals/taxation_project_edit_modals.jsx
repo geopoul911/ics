@@ -13,7 +13,7 @@ import { Button } from "semantic-ui-react";
 // Globals
 import { headers } from "../global_vars";
 
-const UPDATE_URL = "http://localhost:8000/api/data_management/taxation_project/";
+const UPDATE_URL = "https://ultima.icsgr.com/api/data_management/taxation_project/";
 
 function getAuthHeaders() {
   return { ...headers, "Authorization": "Token " + localStorage.getItem("userToken") };
@@ -27,7 +27,7 @@ export function EditTaxProjClientModal({ item, update_state }) {
   useEffect(() => { if (show) { setClient(item.client?.client_id || ""); load(); } }, [show, item]);
   async function load() {
     try {
-      const res = await axios.get("http://localhost:8000/api/data_management/all_clients/", { headers: getAuthHeaders() });
+      const res = await axios.get("https://ultima.icsgr.com/api/data_management/all_clients/", { headers: getAuthHeaders() });
       setClients(res?.data?.all_clients || []);
     } catch { setClients([]); }
   }
@@ -78,7 +78,7 @@ export function EditTaxProjConsultantModal({ item, update_state }) {
   useEffect(() => { if (show) { setConsultant(item.consultant?.consultant_id || ""); load(); } }, [show, item]);
   async function load() {
     try {
-      const res = await axios.get("http://localhost:8000/api/administration/all_consultants/", { headers: getAuthHeaders() });
+      const res = await axios.get("https://ultima.icsgr.com/api/administration/all_consultants/", { headers: getAuthHeaders() });
       setConsultants(res?.data?.all_consultants || []);
     } catch { setConsultants([]); }
   }

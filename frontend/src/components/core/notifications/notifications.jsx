@@ -8,7 +8,7 @@ import Footer from "../footer/footer";
 import { pageHeader, headers, loader } from "../../global_vars";
 
 const API_BASE = (typeof window !== 'undefined' && window.location && window.location.port === '3000')
-  ? 'http://127.0.0.1:8000'
+  ? 'https://ultima.icsgr.com'
   : '';
 
 const LIST_URL = API_BASE + "/api/view/notifications/?all=1";

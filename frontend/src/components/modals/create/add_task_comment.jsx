@@ -17,7 +17,7 @@ import { headers } from "../../global_vars";
 // Variables
 window.Swal = Swal;
 
-const CREATE_TASK_COMMENT = "http://localhost:8000/api/data_management/task_comments/";
+const CREATE_TASK_COMMENT = "https://ultima.icsgr.com/api/data_management/task_comments/";
 
 // Helpers
 const clampLen = (value, max) => value.slice(0, max);
@@ -49,7 +49,7 @@ function AddTaskCommentModal({ onTaskCommentCreated, refreshData, defaultProject
         "Authorization": "Token " + localStorage.getItem("userToken"),
       };
       const res = await axios.get(
-        "http://localhost:8000/api/data_management/project_tasks/",
+        "https://ultima.icsgr.com/api/data_management/project_tasks/",
         { headers: currentHeaders }
       );
       let tasks = [];
@@ -71,7 +71,7 @@ function AddTaskCommentModal({ onTaskCommentCreated, refreshData, defaultProject
         "Authorization": "Token " + localStorage.getItem("userToken"),
       };
       const res = await axios.get(
-        "http://localhost:8000/api/administration/all_consultants/",
+        "https://ultima.icsgr.com/api/administration/all_consultants/",
         { headers: currentHeaders }
       );
       let list = [];

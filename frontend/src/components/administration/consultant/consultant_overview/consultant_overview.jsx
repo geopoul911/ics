@@ -45,7 +45,7 @@ import {
 } from "../../../global_vars";
 
 // API endpoint for consultant
-const VIEW_CONSULTANT = "http://localhost:8000/api/administration/consultant/";
+const VIEW_CONSULTANT = "https://ultima.icsgr.com/api/administration/consultant/";
 
 // Helpers to read URL like: /administration/consultant/<consultant_id>
 function getConsultantIdFromPath() {
@@ -91,7 +91,7 @@ class ConsultantOverview extends React.Component {
         let projects = consultant.projects || [];
         if (!Array.isArray(projects) || projects.length === 0) {
           try {
-            const projRes = await axios.get("http://localhost:8000/api/data_management/projects/", { headers: currentHeaders });
+            const projRes = await axios.get("https://ultima.icsgr.com/api/data_management/projects/", { headers: currentHeaders });
             const allProjects = projRes?.data?.all_projects || projRes?.data?.results || projRes?.data?.data || projRes?.data || [];
             const cidStr = String(consultant.consultant_id || "");
             projects = (Array.isArray(allProjects) ? allProjects : []).filter((p) => {
@@ -107,7 +107,7 @@ class ConsultantOverview extends React.Component {
         let cashItems = consultant.cash || [];
         if (!Array.isArray(cashItems) || cashItems.length === 0) {
           try {
-            const cashRes = await axios.get("http://localhost:8000/api/data_management/cash/", { headers: currentHeaders });
+            const cashRes = await axios.get("https://ultima.icsgr.com/api/data_management/cash/", { headers: currentHeaders });
             const allCash = cashRes?.data?.all_cash || cashRes?.data?.results || cashRes?.data?.data || cashRes?.data || [];
             const cidStr = String(consultant.consultant_id ?? "");
             cashItems = (Array.isArray(allCash) ? allCash : []).filter((c) => {
@@ -125,7 +125,7 @@ class ConsultantOverview extends React.Component {
         let aggregatedCash = [];
         try {
           const detailPromises = (projects || []).map((p) =>
-            axios.get(`http://localhost:8000/api/data_management/project/${p.project_id}/`, { headers: currentHeaders })
+            axios.get(`https://ultima.icsgr.com/api/data_management/project/${p.project_id}/`, { headers: currentHeaders })
           );
           const details = await Promise.all(detailPromises.map((pr) => pr.catch((e) => ({ error: e }))));
           details.forEach((dr, idx) => {

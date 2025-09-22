@@ -17,7 +17,7 @@ import { headers } from "../global_vars";
 window.Swal = Swal;
 
 // API endpoints
-const UPDATE_PROPERTY = "http://localhost:8000/api/data_management/property/";
+const UPDATE_PROPERTY = "https://ultima.icsgr.com/api/data_management/property/";
 
 // Edit Property ID Modal
 export function EditPropertyIdModal({ property, update_state }) {
@@ -191,7 +191,7 @@ export function EditPropertyProjectModal({ property, update_state }) {
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-      const response = await axios.get("http://localhost:8000/api/data_management/all_projects/", {
+      const response = await axios.get("https://ultima.icsgr.com/api/data_management/all_projects/", {
         headers: currentHeaders
       });
       const projectsData = response?.data?.all_projects || [];
@@ -291,7 +291,7 @@ export function EditPropertyCountryModal({ property, update_state }) {
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-              const response = await axios.get("http://localhost:8000/api/regions/all_countries/", {
+              const response = await axios.get("https://ultima.icsgr.com/api/regions/all_countries/", {
         headers: currentHeaders
       });
       const countriesData = response?.data?.all_countries || [];
@@ -391,7 +391,7 @@ export function EditPropertyProvinceModal({ property, update_state }) {
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-              const response = await axios.get("http://localhost:8000/api/regions/all_provinces/", {
+              const response = await axios.get("https://ultima.icsgr.com/api/regions/all_provinces/", {
         headers: currentHeaders
       });
       const provincesData = response?.data?.all_provinces || [];
@@ -491,7 +491,7 @@ export function EditPropertyCityModal({ property, update_state }) {
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-              const response = await axios.get("http://localhost:8000/api/regions/all_cities/", {
+              const response = await axios.get("https://ultima.icsgr.com/api/regions/all_cities/", {
         headers: currentHeaders
       });
       const citiesData = response?.data?.all_cities || [];
@@ -621,7 +621,7 @@ export function EditPropertyGeoLocationModal({ property, update_state }) {
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-      const response = await axios.get("http://localhost:8000/api/regions/all_countries/", { headers: currentHeaders });
+      const response = await axios.get("https://ultima.icsgr.com/api/regions/all_countries/", { headers: currentHeaders });
       const countriesData = response?.data?.all_countries || [];
       setCountries(countriesData);
     } catch (error) {
@@ -636,7 +636,7 @@ export function EditPropertyGeoLocationModal({ property, update_state }) {
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-      const response = await axios.get(`http://localhost:8000/api/regions/all_provinces/?country=${countryId}`, { headers: currentHeaders });
+      const response = await axios.get(`https://ultima.icsgr.com/api/regions/all_provinces/?country=${countryId}`, { headers: currentHeaders });
       const provincesData = response?.data?.all_provinces || [];
       setProvinces(provincesData);
     } catch (error) {
@@ -651,7 +651,7 @@ export function EditPropertyGeoLocationModal({ property, update_state }) {
         ...headers,
         "Authorization": "Token " + localStorage.getItem("userToken")
       };
-      const response = await axios.get(`http://localhost:8000/api/regions/all_cities/?province=${provinceId}`, { headers: currentHeaders });
+      const response = await axios.get(`https://ultima.icsgr.com/api/regions/all_cities/?province=${provinceId}`, { headers: currentHeaders });
       const citiesData = response?.data?.all_cities || [];
       setCities(citiesData);
     } catch (error) {
