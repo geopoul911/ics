@@ -33,12 +33,12 @@ class Help extends React.Component {
               <div className="container" style={{ display: 'flex', justifyContent: 'center' }}>
                 <div style={{ maxWidth: 720, width: '100%' }}>
                   <Menu vertical className="dmRootMenu">
-                    <Menu.Item as={Link} to="/help/staff_dox">
+                    {/* <Menu.Item as={Link} to="/help/staff_dox">
                       <BsFillKeyFill style={rootIconStyle} /> Staff Documentation
                     </Menu.Item>
                     <Menu.Item as={Link} to="/help/dev_dox">
                       <FaCode style={rootIconStyle} /> Developer Documentation
-                    </Menu.Item>
+                    </Menu.Item> */}
                     {/* <Menu.Item as={Link} to="/help/updates">
                       <MdUpdate style={rootIconStyle} /> Updates & Fixes
                     </Menu.Item> */}
